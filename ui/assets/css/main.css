@@ -1,0 +1,66 @@
+/* Import Circular Labs brand fonts */
+@import url('https://fonts.googleapis.com/css2?family=Michroma:wght@400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-figma-base text-white font-sans;
+  }
+}
+
+@layer components {
+  .font-michroma {
+    font-family: 'Michroma', sans-serif;
+  }
+
+  .token-selector-wrapper {
+    right: 0 !important;
+    left: auto !important;
+  }
+
+  .token-dropdown {
+    right: 0 !important;
+    left: auto !important;
+    transform: translateX(0) !important;
+  }
+
+  /* Ensure perfect right edge alignment for all token elements */
+  .token-selector,
+  .token-display-right {
+    width: 110px !important;
+    min-width: 110px !important;
+    max-width: 110px !important;
+    padding: 8px 12px !important;
+    gap: 6px !important;
+  }
+
+  .token-dropdown-container {
+    width: 110px !important;
+    min-width: 110px !important;
+    max-width: 110px !important;
+  }
+
+  /* Tighter typography for token elements */
+  .token-selector span,
+  .token-display-right span {
+    font-size: 0.8rem !important;
+    font-weight: 600 !important;
+    letter-spacing: -0.01em !important;
+  }
+
+  /* Smaller token icons for better balance */
+  .token-selector img,
+  .token-display-right img {
+    width: 16px !important;
+    height: 16px !important;
+  }
+
+  /* Tighter dropdown arrow */
+  .token-selector svg {
+    width: 12px !important;
+    height: 12px !important;
+  }
+}

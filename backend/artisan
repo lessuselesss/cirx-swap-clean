@@ -1,0 +1,224 @@
+#!/usr/bin/env php
+<?php
+
+require_once 'vendor/autoload.php';
+
+use Database\Migrator;
+use Illuminate\Database\Capsule\Manager as Capsule;
+use Dotenv\Dotenv;
+
+/**
+ * CIRX OTC Backend CLI Tool
+ * 
+ * Provides migration commands and other utilities for the CIRX OTC backend
+ */
+
+echo "🔧 CIRX OTC Backend CLI Tool\n";
+echo "============================\n";
+
+// Load environment variables
+$dotenv = Dotenv::createImmutable(__DIR__);
+try {
+    $dotenv->load();
+} catch (Exception $e) {
+    echo "⚠️  Could not load .env file: " . $e->getMessage() . "\n";
+    echo "Using default SQLite configuration\n\n";
+}
+
+// Set up database connection
+$capsule = new Capsule();
+
+$dbConnection = $_ENV['DB_CONNECTION'] ?? 'sqlite';
+$dbDatabase = $_ENV['DB_DATABASE'] ?? __DIR__ . '/storage/database.sqlite';
+
+if ($dbConnection === 'sqlite') {
+    $capsule->addConnection([
+        'driver' => 'sqlite',
+        'database' => $dbDatabase,
+        'prefix' => '',
+    ]);
+} else {
+    $capsule->addConnection([
+        'driver' => $dbConnection,
+        'host' => $_ENV['DB_HOST'] ?? 'localhost',
+        'port' => $_ENV['DB_PORT'] ?? 3306,
+        'database' => $dbDatabase,
+        'username' => $_ENV['DB_USERNAME'] ?? 'root',
+        'password' => $_ENV['DB_PASSWORD'] ?? '',
+        'charset' => 'utf8',
+        'collation' => 'utf8_unicode_ci',
+        'prefix' => '',
+    ]);
+}
+
+$capsule->setAsGlobal();
+$capsule->bootEloquent();
+
+// Initialize migrator
+$migrator = new Migrator($capsule);
+
+// Parse command line arguments
+$command = $argv[1] ?? 'help';
+$args = array_slice($argv, 2);
+
+try {
+    switch ($command) {
+        case 'migrate':
+            echo "🚀 Running database migrations...\n\n";
+            $results = $migrator->migrate();
+            
+            if (!empty($results['migrations_run'])) {
+                echo "\n✅ Successfully ran " . count($results['migrations_run']) . " migrations:\n";
+                foreach ($results['migrations_run'] as $migration) {
+                    echo "   - {$migration}\n";
+                }
+            }
+            
+            if (!empty($results['errors'])) {
+                echo "\n❌ Errors occurred:\n";
+                foreach ($results['errors'] as $error) {
+                    echo "   - {$error}\n";
+                }
+                exit(1);
+            }
+            
+            echo "\n🎉 Database migration completed successfully!\n";
+            break;
+
+        case 'migrate:rollback':
+            $steps = isset($args[0]) ? (int)$args[0] : 1;
+            echo "🔄 Rolling back {$steps} batch(es) of migrations...\n\n";
+            
+            $results = $migrator->rollback($steps);
+            
+            if (!empty($results['migrations_rolled_back'])) {
+                echo "\n✅ Successfully rolled back " . count($results['migrations_rolled_back']) . " migrations:\n";
+                foreach ($results['migrations_rolled_back'] as $migration) {
+                    echo "   - {$migration}\n";
+                }
+            }
+            
+            if (!empty($results['errors'])) {
+                echo "\n❌ Errors occurred:\n";
+                foreach ($results['errors'] as $error) {
+                    echo "   - {$error}\n";
+                }
+                exit(1);
+            }
+            
+            echo "\n🎉 Rollback completed successfully!\n";
+            break;
+
+        case 'migrate:reset':
+            echo "🔄 Resetting database (rolling back all migrations)...\n\n";
+            
+            $results = $migrator->reset();
+            
+            if (!empty($results['migrations_rolled_back'])) {
+                echo "\n✅ Successfully reset " . count($results['migrations_rolled_back']) . " migrations\n";
+            }
+            
+            if (!empty($results['errors'])) {
+                echo "\n❌ Errors occurred:\n";
+                foreach ($results['errors'] as $error) {
+                    echo "   - {$error}\n";
+                }
+                exit(1);
+            }
+            
+            echo "\n🎉 Database reset completed successfully!\n";
+            break;
+
+        case 'migrate:fresh':
+            echo "🔄 Fresh migration (reset + migrate)...\n\n";
+            
+            $results = $migrator->fresh();
+            
+            $totalRolledBack = count($results['migrations_rolled_back'] ?? []);
+            $totalMigrated = count($results['migrations_run'] ?? []);
+            
+            if ($totalRolledBack > 0) {
+                echo "\n✅ Reset {$totalRolledBack} migrations\n";
+            }
+            
+            if ($totalMigrated > 0) {
+                echo "✅ Ran {$totalMigrated} migrations\n";
+            }
+            
+            if (!empty($results['errors'])) {
+                echo "\n❌ Errors occurred:\n";
+                foreach ($results['errors'] as $error) {
+                    echo "   - {$error}\n";
+                }
+                exit(1);
+            }
+            
+            echo "\n🎉 Fresh migration completed successfully!\n";
+            break;
+
+        case 'migrate:status':
+            echo "📊 Migration status:\n\n";
+            
+            $status = $migrator->status();
+            
+            if (empty($status)) {
+                echo "No migrations found.\n";
+                break;
+            }
+            
+            echo sprintf("%-5s %-40s %-10s\n", "Batch", "Migration", "Status");
+            echo str_repeat("-", 60) . "\n";
+            
+            foreach ($status as $migration) {
+                $batch = $migration['batch'] ?? 'N/A';
+                echo sprintf("%-5s %-40s %-10s\n", 
+                    $batch, 
+                    $migration['migration'], 
+                    $migration['status']
+                );
+            }
+            echo "\n";
+            break;
+
+        case 'worker':
+            $workerType = $args[0] ?? 'both';
+            echo "🔄 Starting CIRX OTC workers...\n\n";
+            
+            // Execute the existing worker script
+            passthru("php worker.php {$workerType}");
+            break;
+
+        case 'worker:stats':
+            echo "📊 Worker statistics...\n\n";
+            passthru("php worker.php stats");
+            break;
+
+        case 'help':
+        case '--help':
+        case '-h':
+        default:
+            echo "CIRX OTC Backend CLI Tool\n\n";
+            echo "MIGRATION COMMANDS:\n";
+            echo "  migrate              Run pending database migrations\n";
+            echo "  migrate:rollback [n] Rollback the last n batches of migrations (default: 1)\n";
+            echo "  migrate:reset        Rollback all migrations\n";
+            echo "  migrate:fresh        Reset and re-run all migrations\n";
+            echo "  migrate:status       Show migration status\n\n";
+            echo "WORKER COMMANDS:\n";
+            echo "  worker [type]        Run background workers (payment-verification|cirx-transfer|both)\n";
+            echo "  worker:stats         Show worker statistics\n\n";
+            echo "OTHER COMMANDS:\n";
+            echo "  help                 Show this help message\n\n";
+            echo "EXAMPLES:\n";
+            echo "  php artisan migrate\n";
+            echo "  php artisan migrate:rollback 2\n";
+            echo "  php artisan worker both\n";
+            echo "  php artisan migrate:status\n\n";
+            break;
+    }
+
+} catch (Exception $e) {
+    echo "❌ Command failed: " . $e->getMessage() . "\n";
+    echo "Stack trace:\n" . $e->getTraceAsString() . "\n";
+    exit(1);
+}

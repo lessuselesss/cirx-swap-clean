@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "index": "/index.html",
+  "include": [
+    "/",
+    "/swap",
+    "/pool"
+  ],
+  "exclude": []
+}

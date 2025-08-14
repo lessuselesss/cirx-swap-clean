@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.0/phpunit.xsd"
+         bootstrap="tests/bootstrap.php"
+         cacheDirectory=".phpunit.cache"
+         executionOrder="depends,defects"
+         requireCoverageMetadata="true"
+         beStrictAboutCoverageMetadata="true"
+         beStrictAboutOutputDuringTests="true"
+         failOnRisky="true"
+         failOnWarning="true">
+    
+    <testsuites>
+        <testsuite name="Unit">
+            <directory suffix="Test.php">tests/Unit</directory>
+        </testsuite>
+        <testsuite name="Integration">
+            <directory suffix="Test.php">tests/Integration</directory>
+        </testsuite>
+        <testsuite name="E2E">
+            <directory suffix="Test.php">tests/E2E</directory>
+        </testsuite>
+    </testsuites>
+    
+    <groups>
+        <include>
+            <group>unit</group>
+            <group>integration</group>
+            <group>e2e</group>
+        </include>
+    </groups>
+
+    <source>
+        <include>
+            <directory suffix=".php">src</directory>
+        </include>
+        <exclude>
+            <directory>src/Database/migrations</directory>
+        </exclude>
+    </source>
+
+    <coverage>
+        <report>
+            <html outputDirectory="coverage"/>
+            <text outputFile="coverage.txt"/>
+        </report>
+    </coverage>
+
+    <php>
+        <env name="APP_ENV" value="testing"/>
+        <env name="DB_CONNECTION" value="sqlite"/>
+        <env name="DB_DATABASE" value=":memory:"/>
+        
+        <!-- E2E Testing Configuration -->
+        <env name="E2E_TESTING_ENABLED" value="false"/>
+        <env name="TESTNET_MODE" value="false"/>
+        <env name="APP_DEBUG" value="true"/>
+        
+        <!-- Timeouts for E2E tests -->
+        <env name="TRANSACTION_TIMEOUT_SECONDS" value="300"/>
+        <env name="MAX_GAS_PRICE_GWEI" value="20"/>
+        <env name="TEST_WALLET_FUNDING_THRESHOLD" value="0.01"/>
+    </php>
+</phpunit>

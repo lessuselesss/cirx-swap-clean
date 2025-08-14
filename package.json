@@ -1,0 +1,19 @@
+{
+  "name": "circular-cirx-otc-platform",
+  "version": "1.0.0",
+  "description": "Circular CIRX OTC Trading Platform",
+  "private": true,
+  "scripts": {
+    "install": "cd ui && npm install",
+    "build": "cd ui && npm run generate",
+    "dev": "cd ui && npm run dev",
+    "preview": "cd ui && npm run preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lessuselesss/circular-otc-platform.git"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

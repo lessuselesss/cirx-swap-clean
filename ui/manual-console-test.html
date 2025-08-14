@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Console Testing Helper</title>
+    <link rel="stylesheet" href="assets/css/main.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; }
+        h2 { color: #555; margin-top: 30px; }
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        .button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        .button:hover { background: #0056b3; }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .warning { color: #fd7e14; }
+        .info { color: #17a2b8; }
+        .highlight { background: #fff3cd; padding: 10px; border-left: 4px solid #ffc107; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Console Testing Helper</h1>
+        
+        <div class="highlight">
+            <strong>Instructions:</strong> Open this page alongside your main app at <code>http://localhost:3000</code>. 
+            Use the buttons below to test console functionality.
+        </div>
+
+        <h2>🎯 Quick Console Tests</h2>
+        
+        <button class="button" onclick="testBasicConsole()">Test Basic Console</button>
+        <button class="button" onclick="testAppConnection()">Test App Connection</button>
+        <button class="button" onclick="runDebugCommands()">Run Debug Commands</button>
+        <button class="button" onclick="checkCommonErrors()">Check Common Errors</button>
+        
+        <h2>📋 Console Commands to Try</h2>
+        <p>Copy and paste these commands into your browser console (F12 → Console tab):</p>
+        
+        <h3>1. Basic App State Check</h3>
+        <div class="code-block">
+// Check if Nuxt app is loaded
+console.log('Nuxt app:', window.$nuxt || window.__NUXT__ || 'Not found');
+
+// Check Vue components
+console.log('Vue app:', document.querySelector('#__nuxt')?._vnode || 'Not found');
+        </div>
+
+        <h3>2. Debug Commands (if available)</h3>
+        <div class="code-block">
+// Check if debug commands are loaded
+console.log('OTC Debug available:', typeof otcDebug !== 'undefined');
+
+// Run diagnostics
+if (typeof otcDebug !== 'undefined') {
+    otcDebug.diagnose();
+    otcDebug.checkOtcDropdown();
+    otcDebug.checkConsoleErrors();
+} else {
+    console.log('Debug commands not loaded yet');
+}
+        </div>
+
+        <h3>3. Wallet State Check</h3>
+        <div class="code-block">
+// Check wallet store state
+try {
+    const walletState = window.$nuxt?.$store?.state?.wallet || 'Store not found';
+    console.log('Wallet state:', walletState);
+} catch (e) {
+    console.log('Wallet state check failed:', e.message);
+}
+        </div>
+
+        <h3>4. Component Error Detection</h3>
+        <div class="code-block">
+// Look for Vue errors in recent console history
+console.log('=== Checking for Vue errors ===');
+
+// Check for common error patterns
+const errorPatterns = [
+    'Cannot read properties',
+    'useAccount',
+    'useBalance', 
+    'useConnect',
+    'connectors',
+    'hydration'
+];
+
+console.log('Look above for any messages containing:', errorPatterns);
+        </div>
+
+        <h2>🔍 What to Look For</h2>
+        
+        <h3 class="success">✅ Good Signs:</h3>
+        <ul>
+            <li><code>✅ MetaMask connected successfully</code></li>
+            <li><code>✅ WalletStore initialized in SwapForm</code></li>
+            <li><code>✅ Contracts initialized in SwapForm</code></li>
+            <li><code>✅ SwapLogic initialized in SwapForm</code></li>
+            <li><code>Chart initialized - ResizeObserver will handle responsive width</code></li>
+        </ul>
+
+        <h3 class="error">❌ Error Signs:</h3>
+        <ul>
+            <li><code>❌ Failed to initialize walletStore in SwapForm:</code></li>
+            <li><code>🚨 GLOBAL ERROR TRIGGERED:</code></li>
+            <li><code>🔴 VUE ERROR CAPTURED:</code></li>
+            <li><code>Cannot read properties of undefined (reading 'some')</code></li>
+            <li><code>ChunkLoadError</code> or <code>Loading chunk</code> errors</li>
+        </ul>
+
+        <h3 class="warning">⚠️ Warning Signs:</h3>
+        <ul>
+            <li><code>⚠️ Non-critical Vue error - showing toast</code></li>
+            <li><code>Failed to fetch OTC config, using defaults</code></li>
+            <li><code>Wallet connection for ethereum on solana is not supported</code></li>
+        </ul>
+
+        <h2>🛠 Network Tab Checks</h2>
+        <ol>
+            <li>Open DevTools → Network tab</li>
+            <li>Refresh the page</li>
+            <li>Look for <span class="error">red entries</span> (failed requests)</li>
+            <li>Check for 404s on: <code>debug-console-commands.js</code>, SVG assets, API calls</li>
+        </ol>
+
+        <div id="results" style="margin-top: 30px;"></div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const colors = {
+                info: '#17a2b8',
+                success: '#28a745', 
+                error: '#dc3545',
+                warning: '#fd7e14'
+            };
+            
+            results.innerHTML += `<div style="color: ${colors[type]}; margin: 5px 0;">${message}</div>`;
+            console.log(message);
+        }
+
+        function testBasicConsole() {
+            log('🔍 Testing basic console functionality...', 'info');
+            console.log('✅ Console.log working');
+            console.error('❌ Console.error working');
+            console.warn('⚠️ Console.warn working');
+            console.info('ℹ️ Console.info working');
+            log('✅ Basic console test completed - check console tab', 'success');
+        }
+
+        function testAppConnection() {
+            log('🔍 Testing connection to main app...', 'info');
+            
+            fetch('http://localhost:3000')
+                .then(response => {
+                    if (response.ok) {
+                        log('✅ Main app is responding', 'success');
+                        return response.text();
+                    }
+                    throw new Error(`HTTP ${response.status}`);
+                })
+                .then(html => {
+                    if (html.includes('Circular CIRX OTC Platform')) {
+                        log('✅ Main app content loaded correctly', 'success');
+                    } else {
+                        log('⚠️ Main app content may be incomplete', 'warning');
+                    }
+                })
+                .catch(error => {
+                    log(`❌ Failed to connect to main app: ${error.message}`, 'error');
+                });
+        }
+
+        function runDebugCommands() {
+            log('🔍 Attempting to run debug commands on main app...', 'info');
+            
+            // Try to access debug commands from main app
+            try {
+                // This won't work cross-origin, but demonstrates the approach
+                log('ℹ️ Debug commands must be run directly in main app console', 'info');
+                log('📋 Open http://localhost:3000 and run: otcDebug.diagnose()', 'info');
+            } catch (error) {
+                log(`❌ Cannot access cross-origin: ${error.message}`, 'error');
+            }
+        }
+
+        function checkCommonErrors() {
+            log('🔍 Instructions for checking common errors...', 'info');
+            log('📖 1. Open http://localhost:3000', 'info');
+            log('📖 2. Press F12 → Console tab', 'info');
+            log('📖 3. Look for red error messages', 'error');
+            log('📖 4. Look for warning messages in yellow', 'warning');
+            log('📖 5. Try clicking "Connect Wallet" button', 'info');
+            log('📖 6. Try switching between Instant/OTC tabs', 'info');
+            log('✅ Error checking guide displayed', 'success');
+        }
+
+        // Auto-run basic test on load
+        setTimeout(() => {
+            log('🚀 Console testing helper loaded', 'success');
+            testAppConnection();
+        }, 1000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,3 @@
+fix: Correctly parse XT.COM WebSocket K-line messages
+
+Updates the `CirxPriceChart.vue` component to correctly parse incoming K-line data from the XT.COM WebSocket API by checking the `topic` field instead of the `channel` field. This ensures that live price data is properly utilized and integrated into the TradingView chart.

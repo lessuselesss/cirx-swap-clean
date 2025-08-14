@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.0/phpunit.xsd"
+         bootstrap="tests/bootstrap.php"
+         cacheDirectory=".phpunit.cache"
+         executionOrder="depends,defects"
+         beStrictAboutOutputDuringTests="false"
+         failOnRisky="true"
+         failOnWarning="true"
+         timeoutForSmallTests="60"
+         timeoutForMediumTests="300"
+         timeoutForLargeTests="600">
+    
+    <testsuites>
+        <testsuite name="E2E">
+            <directory suffix="Test.php">tests/E2E</directory>
+        </testsuite>
+    </testsuites>
+    
+    <groups>
+        <include>
+            <group>e2e</group>
+        </include>
+    </groups>
+
+    <source>
+        <include>
+            <directory suffix=".php">src</directory>
+        </include>
+        <exclude>
+            <directory>src/Database/migrations</directory>
+        </exclude>
+    </source>
+
+    <coverage>
+        <report>
+            <html outputDirectory="coverage/e2e"/>
+            <text outputFile="coverage/e2e.txt"/>
+        </report>
+    </coverage>
+
+    <php>
+        <!-- Testing Environment -->
+        <env name="APP_ENV" value="testing"/>
+        <env name="APP_DEBUG" value="true"/>
+        
+        <!-- Database Configuration for E2E -->
+        <env name="DB_CONNECTION" value="sqlite"/>
+        <env name="DB_DATABASE" value="storage/testing.e2e.sqlite"/>
+        
+        <!-- E2E Testing Configuration -->
+        <env name="E2E_TESTING_ENABLED" value="true"/>
+        <env name="TESTNET_MODE" value="true"/>
+        
+        <!-- Blockchain Configuration -->
+        <env name="SEPOLIA_CHAIN_ID" value="11155111"/>
+        
+        <!-- E2E Test Timeouts and Limits -->
+        <env name="TRANSACTION_TIMEOUT_SECONDS" value="300"/>
+        <env name="MAX_GAS_PRICE_GWEI" value="20"/>
+        <env name="TEST_WALLET_FUNDING_THRESHOLD" value="0.01"/>
+        <env name="GAS_LIMIT" value="21000"/>
+        
+        <!-- Test Token Contracts (Sepolia) -->
+        <env name="SEPOLIA_USDC_CONTRACT" value="0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238"/>
+        <env name="SEPOLIA_USDT_CONTRACT" value="0x7169D38820dfd117C3FA1f22a697dBA58d90BA06"/>
+        <env name="SEPOLIA_ETH_ADDRESS" value="0x0000000000000000000000000000000000000000"/>
+        
+        <!-- Security (Development Only) -->
+        <env name="API_KEY" value="e2e-test-api-key"/>
+        <env name="JWT_SECRET" value="e2e-test-jwt-secret"/>
+        
+        <!-- Performance Testing Thresholds -->
+        <env name="MAX_API_RESPONSE_TIME" value="2.0"/>
+        <env name="MAX_PAYMENT_VERIFICATION_TIME" value="30.0"/>
+        <env name="MAX_CIRX_TRANSFER_TIME" value="60.0"/>
+        <env name="MAX_END_TO_END_TIME" value="120.0"/>
+        
+        <!-- Logging Configuration -->
+        <env name="LOG_LEVEL" value="debug"/>
+        <env name="LOG_CHANNEL" value="testing"/>
+    </php>
+    
+    <!-- Test execution order and filtering -->
+    <extensions>
+        <!-- Add any PHPUnit extensions here if needed -->
+    </extensions>
+    
+    <!-- Logging configuration for E2E tests -->
+    <logging>
+        <junit outputFile="reports/e2e-junit.xml"/>
+        <teamcity outputFile="reports/e2e-teamcity.txt"/>
+        <testdoxHtml outputFile="reports/e2e-testdox.html"/>
+        <testdoxText outputFile="reports/e2e-testdox.txt"/>
+    </logging>
+</phpunit>
