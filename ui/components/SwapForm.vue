@@ -123,6 +123,7 @@
 
 <script setup>
 import { ref, computed, watch, inject, onBeforeUnmount } from 'vue'
+import { validateWalletAddress } from '../utils/validation.js'
 
 // Composables and stores with defensive initialization
 let walletStore, contracts, swapLogic, errorHandler
@@ -340,9 +341,11 @@ const validateRecipientAddress = (address) => {
     return true
   }
 
-  // Validate Ethereum address
-  if (!/^0x[a-fA-F0-9]{40}$/.test(address)) {
-    recipientAddressError.value = 'Invalid Ethereum address format'
+  // Use our comprehensive validation utility
+  const result = validateWalletAddress(address, 'auto')
+  
+  if (!result.isValid) {
+    recipientAddressError.value = result.errors[0] || 'Invalid address format'
     return false
   }
 
