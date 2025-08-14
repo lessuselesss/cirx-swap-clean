@@ -3,7 +3,7 @@
  * Consolidates duplicate validation logic across the codebase
  */
 
-import { isValidEthereumAddress, isValidSolanaAddress } from './addressFormatting'
+import { isValidEthereumAddress, isValidSolanaAddress, isValidCircularAddress } from './addressFormatting.js'
 
 /**
  * Validate token amount
@@ -75,7 +75,7 @@ export function validateTokenAmount(amount, options = {}) {
 /**
  * Validate wallet address based on type
  * @param {string} address - Address to validate
- * @param {string} type - 'ethereum', 'solana', or 'auto'
+ * @param {string} type - 'ethereum', 'solana', 'circular', or 'auto'
  * @returns {object} Validation result
  */
 export function validateWalletAddress(address, type = 'auto') {
@@ -92,6 +92,13 @@ export function validateWalletAddress(address, type = 'auto') {
   }
 
   const cleanAddress = address.trim()
+
+  if (type === 'circular' || type === 'auto') {
+    if (isValidCircularAddress(cleanAddress)) {
+      result.detectedType = 'circular'
+      return result
+    }
+  }
 
   if (type === 'ethereum' || type === 'auto') {
     if (isValidEthereumAddress(cleanAddress)) {

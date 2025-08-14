@@ -46,11 +46,22 @@ export function isValidSolanaAddress(address) {
 }
 
 /**
+ * Validate Circular chain address format
+ * @param {string} address - Address to validate
+ * @returns {boolean} Is valid Circular address
+ */
+export function isValidCircularAddress(address) {
+  if (!address) return false
+  return /^0x[a-fA-F0-9]{64}$/.test(address)
+}
+
+/**
  * Get address type based on format
  * @param {string} address - Address to check
- * @returns {string|null} 'ethereum', 'solana', or null
+ * @returns {string|null} 'ethereum', 'solana', 'circular', or null
  */
 export function getAddressType(address) {
+  if (isValidCircularAddress(address)) return 'circular'
   if (isValidEthereumAddress(address)) return 'ethereum'
   if (isValidSolanaAddress(address)) return 'solana'
   return null

@@ -11,7 +11,7 @@
         @input="handleInput"
         @blur="handleValidation"
         type="text"
-        placeholder="0x1234...abcd or circular.eth"
+        placeholder="0x1234...abcd (ETH/CIRX) or name.eth"
         :class="[
           'w-full px-4 py-3 text-sm bg-transparent border rounded-xl text-white placeholder-gray-500 transition-all duration-300',
           error 
@@ -25,9 +25,13 @@
       <div v-if="addressType && !error" class="absolute inset-y-0 right-0 flex items-center pr-3">
         <span :class="[
           'px-2 py-1 text-xs rounded-full',
-          addressType === 'ethereum' ? 'bg-blue-500/20 text-blue-400' : 'bg-purple-500/20 text-purple-400'
+          addressType === 'ethereum' ? 'bg-blue-500/20 text-blue-400' : 
+          addressType === 'circular' ? 'bg-green-500/20 text-green-400' : 
+          'bg-purple-500/20 text-purple-400'
         ]">
-          {{ addressType === 'ethereum' ? 'ETH' : 'ENS' }}
+          {{ addressType === 'ethereum' ? 'ETH' : 
+             addressType === 'circular' ? 'CIRX' : 
+             'ENS' }}
         </span>
       </div>
       
@@ -48,13 +52,14 @@
     
     <!-- Help text -->
     <div v-else class="mt-2 text-xs text-gray-500">
-      Enter an Ethereum address (0x...) or ENS name (name.eth)
+      Enter a Circular (0x...64 chars), Ethereum (0x...40 chars), or ENS name (name.eth)
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { getAddressType } from '../utils/addressFormatting.js'
 
 const props = defineProps({
   modelValue: {
@@ -80,10 +85,11 @@ const handleInput = (event) => {
   // Clear previous validation
   addressType.value = ''
   
-  // Determine address type
+  // Determine address type using our utility
   if (value) {
-    if (value.match(/^0x[a-fA-F0-9]{40}$/)) {
-      addressType.value = 'ethereum'
+    const detectedType = getAddressType(value)
+    if (detectedType) {
+      addressType.value = detectedType
     } else if (value.endsWith('.eth')) {
       addressType.value = 'ens'
     }
