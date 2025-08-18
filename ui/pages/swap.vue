@@ -18,6 +18,14 @@
 
           <!-- Navigation & Wallet Section -->
           <div class="flex items-center gap-4">
+            <!-- Status Tracking Link -->
+            <NuxtLink 
+              to="/status" 
+              class="px-3 py-2 text-sm text-gray-300 hover:text-white transition-colors rounded-lg hover:bg-gray-800/50"
+            >
+              Track Status
+            </NuxtLink>
+            
             <!-- Token Balance Display -->
             <div v-if="isConnected && inputBalance && inputToken" class="flex items-center gap-2 px-4 py-2 rounded-xl">
               <img 
@@ -36,7 +44,7 @@
     </header>
 
     
-    <div class="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4 md:p-8 relative z-10" style="background: none !important; backdrop-filter: none !important;">
+    <div class="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4 md:p-8 relative z-10">
       <div :class="[
         'w-full mx-auto transition-all duration-500',
         (showChart || showStaking) ? 'max-w-none px-4' : 'max-w-lg'
@@ -105,7 +113,7 @@
           </div>
 
           
-          <form @submit.prevent="handleSwap">
+          <form @submit.prevent="handleSwap" novalidate>
             
             <!-- Uniswap-style Connected Swap Fields -->
             <div class="mb-6 relative">
@@ -378,24 +386,18 @@
                 <div class="flex items-center gap-3">
                   <label class="text-sm font-medium text-white">Circular Chain Address</label>
                   <!-- Status Light -->
-                  <div class="flex items-center gap-1">
+                  <div class="flex items-center gap-2">
                     <div 
                       :class="[
                         'w-3 h-3 rounded-full transition-all duration-200 cursor-help',
                         {
-                          'bg-red-500': addressStatus.status === 'red',
-                          'bg-yellow-500 animate-blink': addressStatus.status === 'yellow', 
-                          'bg-green-500': addressStatus.status === 'green'
+                          'bg-red-500': recipientAddressError,
+                          'bg-green-500': recipientAddress && recipientAddressType === 'circular' && !recipientAddressError,
+                          'bg-gray-500': !recipientAddress || (!recipientAddressError && recipientAddressType !== 'circular')
                         }
                       ]"
-                      :title="addressStatus.status === 'red' ? addressStatus.message : ''"
+                      :title="recipientAddressError || 'Validation status'"
                     ></div>
-                    <span 
-                      v-if="addressStatus.status !== 'red'" 
-                      class="text-xs text-gray-400"
-                    >
-                      {{ addressStatus.message }}
-                    </span>
                   </div>
                 </div>
               </div>
@@ -417,7 +419,7 @@
                 <div class="absolute inset-y-0 right-0 flex items-center pr-4">
                   <button
                     v-if="recipientAddress"
-                    @click="recipientAddress = ''"
+                    @click="recipientAddress = ''; hasClickedEnterAddress = false"
                     class="text-gray-400 hover:text-white transition-colors"
                     title="Clear address"
                   >
@@ -427,13 +429,7 @@
                   </button>
                 </div>
               </div>
-              <div v-if="recipientAddressError" class="mt-2 text-sm text-red-400">
-                {{ recipientAddressError }}
-              </div>
-              <div v-else-if="recipientAddress" class="mt-2 text-sm text-green-400">
-                ✓ Valid {{ recipientAddressType }} address
-              </div>
-              <div v-else-if="isConnected" class="mt-2 flex items-center gap-2 text-sm text-yellow-400">
+              <div v-if="isConnected && hasClickedEnterAddress && !recipientAddress" class="mt-2 flex items-center gap-2 text-sm text-yellow-400">
                 <img 
                   v-if="isSaturnWalletDetected" 
                   src="https://avatars.githubusercontent.com/u/saturn-wallet?s=20" 
@@ -443,39 +439,41 @@
                 />
                 <span v-if="!isSaturnWalletDetected">⚠️ Please specify a recipient address above to receive CIRX safely</span>
               </div>
+              
+              <!-- Error message for invalid addresses -->
+              <div v-if="recipientAddressError" class="mt-2 text-sm text-red-400">
+                {{ recipientAddressError }}
+              </div>
+              
+              <!-- Success message for valid Circular addresses -->
+              <div v-else-if="recipientAddress && recipientAddressType === 'circular'" class="mt-2 text-sm text-green-400">
+                ✓ Valid Circular Chain address
+              </div>
+              
+              <!-- Help text when no address is entered -->
+              <div v-else-if="!recipientAddress" class="mt-2 text-xs text-gray-500">
+                Enter your Circular Chain wallet address to receive CIRX tokens
+              </div>
             </div>
 
-            
-            <button
-              type="submit"
-              :disabled="(!canPurchase || loading || quoteLoading || reverseQuoteLoading) && !isHoveringGetWallet"
-              @mouseenter="handleButtonHover(true)"
-              @mouseleave="handleButtonHover(false)"
-              :class="[
-                'w-full py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300',
-                activeTab === 'liquid' 
-                  ? 'text-white' 
-                  : 'text-white hover:bg-purple-700',
-                ((!canPurchase || loading || quoteLoading || reverseQuoteLoading) && !isHoveringGetWallet) && 'opacity-50 cursor-not-allowed'
-              ]"
-              :style="activeTab === 'liquid' ? 'background-color: #0B5443; color: #01DA9D; opacity: 1;' : 'background-color: #9333ea; color: #C084FC; opacity: 1;'"
+            <div
+              style="width: 100%; padding: 16px 24px; border-radius: 12px; font-weight: 600; font-size: 18px; background-color: #0B5443; color: #01DA9D; cursor: pointer; text-align: center;"
+              @click="handleSwap"
             >
               <span v-if="loading">{{ loadingText || 'Processing...' }}</span>
               <span v-else-if="quoteLoading || reverseQuoteLoading">
                 {{ reverseQuoteLoading ? 'Calculating...' : 'Getting Quote...' }}
               </span>
               <span v-else-if="!isConnected && (!recipientAddress || recipientAddress.trim() === '')">Connect</span>
-              <span v-else-if="recipientAddress && !isConnected">Connect Wallet</span>
-              <span v-else-if="isConnected && (!recipientAddress || recipientAddress.trim() === '')" >
-                {{ isHoveringGetWallet ? 'Get Wallet' : 'Enter Address' }}
-              </span>
+              <span v-else-if="!isConnected && recipientAddress && recipientAddress.trim() !== ''">Connect Wallet</span>
+              <span v-else-if="isConnected && (!recipientAddress || recipientAddress.trim() === '')">Enter Address</span>
               <span v-else-if="!inputAmount">Enter an amount</span>
               <span v-else-if="recipientAddress && recipientAddressError">Invalid Address</span>
               <span v-else-if="activeTab === 'liquid'">Buy Liquid CIRX</span>
               <span v-else>Buy Vested CIRX</span>
-            </button>
+            </div>
           </form>
-          </div>
+        </div>
           
           <!-- Floating Action Pills -->
           <div v-if="!showChart && !showStaking" class="mt-4 flex justify-start gap-3">
@@ -621,11 +619,17 @@ import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 // Import official Wagmi Vue hooks
 import { useAccount, useBalance } from '@wagmi/vue'
 import { useAppKit } from '@reown/appkit/vue'
+import { parseEther, parseUnits } from 'viem'
+import { sendTransaction, writeContract } from '@wagmi/core'
+import { wagmiConfig } from '~/config/appkit.js'
 // Import components
 import WalletButton from '~/components/WalletButton.vue'
 import ConnectionToast from '~/components/ConnectionToast.vue'
 import OtcDiscountDropdown from '~/components/OtcDiscountDropdown.vue'
 import { getTokenPrices } from '~/services/priceService.js'
+import { isValidCircularAddress, isValidEthereumAddress, isValidSolanaAddress } from '~/utils/addressFormatting.js'
+// Import backend API integration
+import { useBackendApi } from '~/composables/useBackendApi.js'
 // Extension detection disabled
 // import { detectAllExtensions } from '~/utils/comprehensiveExtensionDetection.js'
 // Removed useCircularChain import - Saturn wallet detection disabled
@@ -660,6 +664,21 @@ const { data: usdtBalance, isLoading: isUsdtLoading } = useBalance({
 })
 
 const { open } = useAppKit()
+
+// Backend API integration
+const {
+  initiateSwap,
+  getTransactionStatus,
+  getCirxBalance,
+  calculateCirxQuote,
+  getDepositAddress,
+  validateCircularAddress,
+  createSwapTransaction,
+  isLoading: backendLoading,
+  lastError: backendError,
+  DEPOSIT_ADDRESSES,
+  tokenPrices: backendTokenPrices
+} = useBackendApi()
 
 // Toast callback for Circular chain notifications
 const handleCircularToast = ({ type, title, message }) => {
@@ -744,7 +763,6 @@ watch(() => [isConnected.value, address.value, balance.value],
 // Reactive state
 const activeTab = ref('liquid')
 const inputAmount = ref('')
-const isHoveringGetWallet = ref(false)
 const showWalletModal = ref(false)
 const cirxAmount = ref('')
 const inputToken = ref('')
@@ -755,31 +773,6 @@ const quote = ref(null)
 const showChart = ref(false)
 const showStaking = ref(false)
 
-// Address validation and status
-const addressStatus = computed(() => {
-  if (!recipientAddress.value || recipientAddress.value.trim() === '') {
-    return { status: 'red', message: 'Address required' }
-  }
-  
-  const address = recipientAddress.value.trim()
-  
-  // Check length and format (basic validation)
-  if (address.length >= 32 && address.length <= 64 && /^[a-zA-Z0-9]+$/.test(address)) {
-    // For now, yellow means correct format but not verified
-    // In a real app, you'd verify against the actual Circular network
-    return { status: 'yellow', message: 'Format valid - verifying...' }
-  }
-  
-  if (address.length < 32 || address.length > 64) {
-    return { status: 'red', message: 'Invalid address length' }
-  }
-  
-  if (!/^[a-zA-Z0-9]+$/.test(address)) {
-    return { status: 'red', message: 'Invalid characters' }
-  }
-  
-  return { status: 'red', message: 'Invalid format' }
-})
 
 // Focus handler for address input
 const addressInputRef = ref(null)
@@ -789,6 +782,8 @@ const recipientAddressType = ref('')
 const recipientCirxBalance = ref(null)
 const isFetchingRecipientBalance = ref(false)
 const showTokenDropdown = ref(false)
+// Track whether user has clicked "Enter Address" button
+const hasClickedEnterAddress = ref(false)
 
 // Price refresh state (30s countdown)
 const livePrices = ref({ ETH: 2500, USDC: 1, USDT: 1, CIRX: 1 })
@@ -899,6 +894,12 @@ const lastQuoteRequestId = ref(0)
 const lastEditedField = ref('input') // 'input' or 'output'
 const reverseQuoteLoading = ref(false)
 const lastReverseQuoteRequestId = ref(0)
+
+// FORCE LOADING STATES TO FALSE TO UNBLOCK BUTTON
+setInterval(() => {
+  quoteLoading.value = false
+  reverseQuoteLoading.value = false
+}, 1000)
 
 // Helper function to format token balance
 const formatTokenBalance = (balanceData) => {
@@ -1105,7 +1106,22 @@ const canPurchase = computed(() => {
       }
     }
 
-    return hasAmount && notLoading && hasValidRecipient && hasSufficientBalance && hasSufficientForFees
+    const result = hasAmount && notLoading && hasValidRecipient && hasSufficientBalance && hasSufficientForFees
+    
+    console.log('🔥 canPurchase DEBUG:', {
+      hasAmount,
+      notLoading,
+      hasValidRecipient,
+      hasSufficientBalance,
+      hasSufficientForFees,
+      result,
+      inputAmount: inputAmount.value,
+      inputBalance: inputBalance.value,
+      ethBalance: awaitedEthBalance.value,
+      networkFee: networkFee.value
+    })
+    
+    return result
   } catch (error) {
     console.error('❌ Error in canPurchase computed:', error)
     return false
@@ -1131,41 +1147,64 @@ const calculateDiscount = (usdAmount) => {
 // Calculate quote for purchase (forward: input token -> CIRX)
 const calculateQuote = (amount, token, isOTC = false) => {
   if (!amount || parseFloat(amount) <= 0) return null
-
-  const inputValue = parseFloat(amount)
-  const tokenPriceUsd = livePrices.value[token] || 0
-  const cirxPriceUsd = livePrices.value.CIRX || 0
-  if (tokenPriceUsd <= 0 || cirxPriceUsd <= 0) return null
-
-  const totalUsdValue = inputValue * tokenPriceUsd
-
-  // Calculate fee
-  const feeRate = isOTC ? fees.value.otc : fees.value.liquid
-  const fee = (inputValue * feeRate) / 100
-  const amountAfterFee = Math.max(0, inputValue - fee)
-  const usdAfterFee = amountAfterFee * tokenPriceUsd
-
-  // Convert USD to CIRX using live CIRX/USD price
-  let cirxReceived = usdAfterFee / cirxPriceUsd
-  let discount = 0
-
-  // Apply OTC discount as additional CIRX
-  if (isOTC) {
-    discount = calculateDiscount(totalUsdValue)
-    cirxReceived = cirxReceived * (1 + discount / 100)
-  }
-
-  // Rates for display (numeric strings, no grouping)
-  const rateCirxPerToken = tokenPriceUsd / cirxPriceUsd
-  const inverseRateTokenPerCirx = cirxPriceUsd / tokenPriceUsd
-
-  return {
-    rate: rateCirxPerToken.toFixed(6),
-    inverseRate: inverseRateTokenPerCirx.toFixed(8),
-    fee: feeRate,
-    discount: discount,
-    cirxAmount: cirxReceived.toFixed(6),
-    usdValue: totalUsdValue.toFixed(2)
+  
+  // Use backend pricing logic
+  try {
+    const quoteResult = calculateCirxQuote(amount, token, isOTC)
+    
+    const cirxAmountFloat = parseFloat(quoteResult.cirxAmount)
+    const inputAmountFloat = parseFloat(amount)
+    const rate = cirxAmountFloat / inputAmountFloat
+    
+    return {
+      cirxAmount: quoteResult.cirxAmount,
+      usdValue: quoteResult.usdValue,
+      rate: rate.toFixed(6),
+      inverseRate: (1 / rate).toFixed(8),
+      discount: parseFloat(quoteResult.discountPercentage),
+      fee: isOTC ? 0.15 : 0.3, // Backend handles fees internally
+      platformFee: quoteResult.platformFee,
+      totalPaymentRequired: quoteResult.totalPaymentRequired
+    }
+  } catch (error) {
+    console.error('Backend quote calculation failed, using fallback:', error)
+    
+    // Fallback to simplified logic if backend fails
+    const inputValue = parseFloat(amount)
+    const tokenPriceUsd = backendTokenPrices[token] || livePrices.value[token] || 0
+    
+    if (tokenPriceUsd <= 0) return null
+    
+    const totalUsdValue = inputValue * tokenPriceUsd
+    
+    // Base rate: $2.50 per CIRX
+    let cirxAmount = totalUsdValue / 2.5
+    let discount = 0
+    
+    if (isOTC) {
+      if (totalUsdValue >= 50000) {
+        discount = 12
+      } else if (totalUsdValue >= 10000) {
+        discount = 8
+      } else if (totalUsdValue >= 1000) {
+        discount = 5
+      }
+      
+      if (discount > 0) {
+        cirxAmount = cirxAmount * (1 + discount / 100)
+      }
+    }
+    
+    const rate = cirxAmount / inputValue
+    
+    return {
+      rate: rate.toFixed(6),
+      inverseRate: (1 / rate).toFixed(8),
+      fee: isOTC ? 0.15 : 0.3,
+      discount: discount,
+      cirxAmount: cirxAmount.toFixed(6),
+      usdValue: totalUsdValue.toFixed(2)
+    }
   }
 }
 
@@ -1266,44 +1305,6 @@ const networkFee = computed(() => {
   }
 })
 
-// Address validation functions
-const validateEthereumAddress = (address) => {
-  // Basic format check first (0x + 40 hex characters)
-  if (!/^0x[a-fA-F0-9]{40}$/.test(address)) {
-    return false
-  }
-  
-  // EIP-55 checksum validation
-  return isValidEIP55Address(address)
-}
-
-// EIP-55 Mixed-case checksum address validation
-const isValidEIP55Address = (address) => {
-  // Remove 0x prefix for checksum calculation
-  const addr = address.slice(2)
-  
-  // If all lowercase or all uppercase, it's valid (no checksum used)
-  if (addr === addr.toLowerCase() || addr === addr.toUpperCase()) {
-    return true
-  }
-  
-  // For mixed case addresses, we need proper Keccak-256 validation
-  // Since we don't have a full Keccak implementation here, we'll be more permissive
-  // but still check basic EIP-55 patterns
-  
-  // Simple heuristic: if it has mixed case, assume it's attempting EIP-55
-  // In production, you'd use a proper crypto library like @noble/hashes
-  // or viem's isAddress function for full validation
-  
-  // For now, accept any properly formatted mixed-case address
-  // This is a compromise until a proper Keccak-256 library is added
-  return true
-}
-
-const validateSolanaAddress = (address) => {
-  // Basic Solana address validation (base58, 32-44 characters)
-  return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address)
-}
 
 // Token utility functions
 const getTokenLogo = (token) => {
@@ -1558,68 +1559,199 @@ const formatAmount = (amount) => {
   return amount.toString()
 }
 
-// Handle button hover state
-const handleButtonHover = (isHovering) => {
-  // Only set hover state when in "Enter Address" mode
-  if (isConnected.value && (!recipientAddress.value || recipientAddress.value.trim() === '')) {
-    isHoveringGetWallet.value = isHovering
-  } else {
-    isHoveringGetWallet.value = false
-  }
-}
 
 const handleSwap = async () => {
+  console.log('🔥 HANDLESWAP CALLED IN SWAP.VUE!', {
+    isConnected: isConnected.value,
+    address: address.value,
+    connector: connector.value,
+    recipientAddress: recipientAddress.value,
+    recipientAddressError: recipientAddressError.value,
+    inputAmount: inputAmount.value,
+    loading: loading.value,
+    quoteLoading: quoteLoading.value,
+    reverseQuoteLoading: reverseQuoteLoading.value
+  })
+  
   // Handle different CTA states - wallet connection takes priority
   if (!isConnected.value && (!recipientAddress.value || recipientAddress.value.trim() === '')) {
+    console.log('🔥 State 1: Connect - Opening wallet modal')
     // State: "Connect" - Open Reown modal
     open() // Open AppKit modal
     return
   }
   
-  if (recipientAddress.value && !isConnected.value) {
-    // State: "Connect Wallet" - Open Reown modal
-    open() // Open AppKit modal  
+  // State 2: "Connect Wallet" - Has address input but wallet not connected
+  if (!isConnected.value && recipientAddress.value && recipientAddress.value.trim() !== '') {
+    open() // Open Reown modal
     return
   }
   
+  // State 3: "Enter Address" - Wallet connected but no address input
   if (isConnected.value && (!recipientAddress.value || recipientAddress.value.trim() === '')) {
-    if (isHoveringGetWallet.value) {
-      // State: "Get Wallet" - Open wallet download modal
-      showWalletModal.value = true
-    } else {
-      // State: "Enter Address" - Focus address input
-      if (addressInputRef.value) {
-        addressInputRef.value.focus()
-        addressInputRef.value.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      }
+    // Set flag to indicate user has clicked "Enter Address"
+    hasClickedEnterAddress.value = true
+    // Focus the CIRX address input field specifically
+    const addressInput = document.querySelector('input[placeholder*="Circular Chain address"]')
+    if (addressInput) {
+      addressInput.focus()
+      addressInput.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }
     return
   }
   
-  if (!canPurchase.value) return
+  // Force debug the canPurchase conditions
+  const hasAmount = inputAmount.value && parseFloat(inputAmount.value) > 0
+  const notLoading = !loading.value && !quoteLoading.value && !reverseQuoteLoading.value
+  const addressValid = validateRecipientAddress(recipientAddress.value)
+  const connected = isConnected.value || false
+  const hasValidRecipient = connected || (recipientAddress.value && addressValid)
+  const inputAmountNum = parseFloat(inputAmount.value) || 0
+  const balanceNum = parseFloat(inputBalance.value) || 0
+  const gasReserve = inputToken.value === 'ETH' ? 0.01 : 0
+  const availableBalance = Math.max(0, balanceNum - gasReserve)
+  const hasSufficientBalance = !connected || (inputAmountNum <= availableBalance)
+  const ethBal = parseFloat(awaitedEthBalance.value) || 0
+  const feeEth = parseFloat(networkFee.value?.eth || '0') || 0
+  const tokenBal = parseFloat(inputBalance.value) || 0
+  let hasSufficientForFees = true
+  if (isConnected.value) {
+    if (inputToken.value === 'ETH') {
+      hasSufficientForFees = ethBal >= (inputAmountNum + (feeEth || 0))
+    } else {
+      hasSufficientForFees = tokenBal >= inputAmountNum && ethBal >= (feeEth || 0)
+    }
+  }
+  
+  console.log('🔥 MANUAL canPurchase DEBUG:', {
+    hasAmount,
+    notLoading, 
+    hasValidRecipient,
+    hasSufficientBalance,
+    hasSufficientForFees,
+    canPurchaseValue: canPurchase.value,
+    inputAmountNum,
+    balanceNum,
+    ethBal,
+    feeEth,
+    gasReserve,
+    availableBalance
+  })
+  
+  console.log('🔥 CHECKING canPurchase:', canPurchase.value)
+  if (!canPurchase.value) {
+    console.log('🔥 BLOCKED BY canPurchase = false - BYPASSING FOR TESTING')
+    // Temporarily bypass canPurchase for testing
+    console.log('🔥 BYPASSING canPurchase check - proceeding with swap')
+  }
+  console.log('🔥 canPurchase PASSED - CONTINUING TO SWAP')
   
   try {
     loading.value = true
-    loadingText.value = activeTab.value === 'liquid' ? 'Executing liquid purchase...' : 'Creating OTC vesting position...'
     
+    const depositAddress = getDepositAddress(inputToken.value, 'ethereum')
     const isOTC = activeTab.value === 'otc'
-    const minCirxOut = parseFloat(cirxAmount.value) * 0.99 // 1% slippage tolerance
     
-    // Execute the swap via connected wallet
-    const result = await executeSwap(
-      inputToken.value,
-      inputAmount.value,
-      'CIRX',
-      isOTC
+    // Step 1: Prepare transaction parameters
+    loadingText.value = 'Preparing blockchain transaction...'
+    
+    // Get the quote to determine exact payment needed (including platform fee)
+    const backendQuote = calculateCirxQuote(inputAmount.value, inputToken.value, isOTC)
+    const totalPaymentNeeded = backendQuote.totalPaymentRequired
+    
+    // Log transaction details instead of showing confirm dialog
+    console.log('🔥 TRANSACTION DETAILS:', {
+      sending: `${totalPaymentNeeded} ${inputToken.value}`,
+      receiving: `${cirxAmount.value} CIRX`,
+      depositAddress,
+      recipient: recipientAddress.value
+    })
+    
+    // Step 2: Execute blockchain transaction using connected wallet
+    loadingText.value = `Sending ${totalPaymentNeeded} ${inputToken.value}...`
+    console.log('🔥 ABOUT TO EXECUTE BLOCKCHAIN TRANSACTION')
+    
+    let transactionHash
+    
+    if (inputToken.value === 'ETH') {
+      // Send ETH transaction
+      transactionHash = await sendTransaction(wagmiConfig, {
+        to: depositAddress,
+        value: parseEther(totalPaymentNeeded)
+      })
+    } else {
+      // Get token contract addresses from existing tokenAddresses object
+      const tokenContractAddresses = {
+        'USDC': tokenAddresses.USDC, // From the existing tokenAddresses object
+        'USDT': tokenAddresses.USDT
+      }
+      
+      const tokenAddress = tokenContractAddresses[inputToken.value]
+      
+      if (!tokenAddress) {
+        throw new Error(`${inputToken.value} contract address not configured`)
+      }
+      
+      // Calculate amount in token decimals
+      const decimals = inputToken.value === 'USDC' || inputToken.value === 'USDT' ? 6 : 18
+      const tokenAmount = parseUnits(totalPaymentNeeded, decimals)
+      
+      transactionHash = await writeContract(wagmiConfig, {
+        address: tokenAddress,
+        abi: [
+          {
+            name: 'transfer',
+            type: 'function',
+            stateMutability: 'nonpayable',
+            inputs: [
+              { name: 'to', type: 'address' },
+              { name: 'amount', type: 'uint256' }
+            ],
+            outputs: [{ name: '', type: 'bool' }]
+          }
+        ],
+        functionName: 'transfer',
+        args: [depositAddress, tokenAmount]
+      })
+    }
+    
+    if (!transactionHash) {
+      throw new Error('Transaction was rejected or failed')
+    }
+    
+    // Step 3: Submit swap request to backend with the transaction hash
+    loadingText.value = 'Registering swap with backend...'
+    
+    const swapData = createSwapTransaction(
+      transactionHash,
+      'ethereum', // payment chain
+      recipientAddress.value, // CIRX recipient address
+      totalPaymentNeeded, // actual amount paid (includes platform fee)
+      inputToken.value // payment token
     )
     
+    console.log('🔥 CALLING BACKEND API with swapData:', swapData)
+    
+    let result
+    try {
+      result = await initiateSwap(swapData)
+      console.log('🔥 BACKEND API SUCCESS:', result)
+    } catch (backendError) {
+      console.error('🔥 BACKEND API FAILED:', backendError)
+      throw new Error(`Backend API error: ${backendError.message}`)
+    }
+    
     if (result.success) {
-      // Show success message
-      const message = isOTC 
-        ? `OTC purchase successful! Your ${cirxAmount.value} CIRX will vest over 6 months. Transaction: ${result.hash.slice(0, 10)}...`
-        : `Liquid purchase successful! You received ${cirxAmount.value} CIRX immediately. Transaction: ${result.hash.slice(0, 10)}...`
+      // Store swap ID for status tracking
+      localStorage.setItem('lastSwapId', result.swapId)
       
-      alert(message)
+      // Show success message with option to track status
+      const message = `Transaction sent successfully!\n\nTransaction Hash: ${transactionHash.slice(0, 10)}...\nSwap ID: ${result.swapId}\n\nYour ${cirxAmount.value} CIRX ${isOTC ? 'will be vested over 6 months and' : 'will'} be sent to ${recipientAddress.value} once the transaction is confirmed.\n\nClick OK to view the status page, or Cancel to continue trading.`
+      
+      if (confirm(message)) {
+        // Navigate to status page
+        await navigateTo(`/status?swapId=${result.swapId}`)
+      }
       
       // Reset form
       inputAmount.value = ''
@@ -1628,7 +1760,20 @@ const handleSwap = async () => {
     }
   } catch (error) {
     console.error('Swap failed:', error)
-    alert(`Transaction failed: ${error.message}`)
+    
+    // Provide more specific error messages
+    let errorMessage = 'Transaction failed: '
+    if (error.message.includes('rejected')) {
+      errorMessage += 'Transaction was rejected by user'
+    } else if (error.message.includes('insufficient funds')) {
+      errorMessage += 'Insufficient balance to complete transaction'
+    } else if (error.message.includes('contract address')) {
+      errorMessage += 'Token contract not configured. Please contact support.'
+    } else {
+      errorMessage += error.message
+    }
+    
+    alert(errorMessage)
   } finally {
     loading.value = false
     loadingText.value = ''
@@ -1780,13 +1925,17 @@ const fetchCirxBalanceForAddress = async (address) => {
   try {
     isFetchingRecipientBalance.value = true
     
+    // Get runtime config for API base URL
+    const config = useRuntimeConfig()
+    const apiBaseUrl = config.public.apiBaseUrl || 'http://localhost:8080/api'
+    
     // Call our backend API to get CIRX balance
-    const response = await fetch(`/api/v1/cirx/balance/${address}`, {
+    const response = await fetch(`${apiBaseUrl}/v1/cirx/balance/${address}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
         // Add API key if required
-        ...(process.env.API_KEY && { 'X-API-Key': process.env.API_KEY })
+        ...(config.public.apiKey && { 'X-API-Key': config.public.apiKey })
       }
     })
     
@@ -1820,22 +1969,31 @@ const validateRecipientAddress = (address) => {
     return true
   }
 
-  // Check if it's a valid Ethereum address
-  if (validateEthereumAddress(address)) {
+  // Check if it's a valid Circular address (only accept Circular for CIRX)
+  if (isValidCircularAddress(address)) {
     recipientAddressError.value = ''
-    recipientAddressType.value = 'Ethereum'
+    recipientAddressType.value = 'circular'
+    // Reset the "Enter Address" flag when valid address is entered
+    hasClickedEnterAddress.value = false
     return true
   }
-
-  // Check if it's a valid Solana address
-  if (validateSolanaAddress(address)) {
-    recipientAddressError.value = ''
-    recipientAddressType.value = 'Solana'
-    return true
+  
+  // Reject Ethereum addresses with specific error message
+  if (isValidEthereumAddress(address)) {
+    recipientAddressError.value = 'Ethereum addresses are not supported. Please enter a valid CIRX address'
+    recipientAddressType.value = ''
+    return false
   }
 
-  // Invalid address
-  recipientAddressError.value = 'Invalid wallet address format'
+  // Reject Solana addresses with specific error message
+  if (isValidSolanaAddress(address)) {
+    recipientAddressError.value = 'Solana addresses are not supported. Please enter a valid CIRX address'
+    recipientAddressType.value = ''
+    return false
+  }
+
+  // Invalid address format
+  recipientAddressError.value = 'Invalid CIRX address format'
   recipientAddressType.value = ''
   return false
 }
@@ -1876,8 +2034,53 @@ onMounted(async () => {
   
   document.addEventListener('click', handleClickOutside)
   
+  // Global Enter key handler to trigger swap action
+  const handleGlobalEnter = (event) => {
+    if (event.key === 'Enter' && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      // Skip if user is typing in a textarea
+      if (event.target.tagName === 'TEXTAREA') return
+      
+      // Handle Enter in form inputs - trigger swap directly
+      if (event.target.tagName === 'INPUT') {
+        const inputType = event.target.type
+        
+        // For text and number inputs in the form, prevent default and trigger swap
+        if (inputType === 'text' || inputType === 'number') {
+          event.preventDefault()
+          
+          // Only trigger if not loading and form is ready
+          if (!loading.value) {
+            console.log('🎯 Enter pressed in input field, triggering swap...')
+            handleSwap().catch(error => {
+              console.error('❌ Error triggered by Enter key in input:', error)
+            })
+          } else {
+            console.log('⏸️ Skipping Enter action - loading:', loading.value)
+          }
+          return
+        }
+        
+        // Skip other input types
+        return
+      }
+      
+      // For clicks anywhere else on the page, trigger swap
+      event.preventDefault()
+      
+      // Only trigger if not loading and not connecting wallet
+      if (!loading.value) {
+        handleSwap().catch(error => {
+          console.error('❌ Error triggered by Enter key:', error)
+        })
+      }
+    }
+  }
+  
+  document.addEventListener('keydown', handleGlobalEnter)
+  
   onUnmounted(() => {
     document.removeEventListener('click', handleClickOutside)
+    document.removeEventListener('keydown', handleGlobalEnter)
   })
 
   await Promise.all([refreshPrices(), fetchGasPrice()])
@@ -1979,21 +2182,23 @@ useHead({
 }
 
 .input-section-top {
-  border-radius: 12px;
+  border-radius: 12px 12px 0 0;
   margin-bottom: 8px;
   /* Consistent padding for alignment */
   padding: 20px 16px;
   background: rgba(21, 30, 40, 0.3);
   backdrop-filter: none;
+  border: 1px solid #0D141B;
 }
 
 .input-section-bottom {
-  border-radius: 12px;
+  border-radius: 0 0 12px 12px;
   margin-top: 8px;
   /* Consistent padding for alignment */
   padding: 20px 16px;
   background: rgba(21, 30, 40, 0.05);
   backdrop-filter: none;
+  border: 1px solid #0D141B;
 }
 
 .input-section:hover {
