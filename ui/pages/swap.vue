@@ -483,6 +483,8 @@
               <span v-else-if="!isConnected && recipientAddress && recipientAddress.trim() !== ''">Connect Wallet</span>
               <span v-else-if="isConnected && (!recipientAddress || recipientAddress.trim() === '')">Enter Address</span>
               <span v-else-if="addressValidationState === 'validating'">...</span>
+              <span v-else-if="recipientAddress && (recipientAddress === '0' || (recipientAddress.startsWith('0x') && recipientAddress.length < 66))">...</span>
+              <span v-else-if="recipientAddress && recipientAddress.length === 66 && recipientAddress.startsWith('0x') && addressValidationState === 'idle'">...</span>
               <span v-else-if="!inputAmount">Enter an amount</span>
               <span v-else-if="recipientAddress && recipientAddressError">Get CIRX Wallet</span>
               <span v-else-if="activeTab === 'liquid'">Buy Liquid CIRX</span>
