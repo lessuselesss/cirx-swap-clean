@@ -136,6 +136,7 @@
                 :type="showPrivateKey ? 'text' : 'password'"
                 placeholder="Enter Circular chain private key (hex format)"
                 class="flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+                @input="addLog('debug', `Private key input changed, length: ${privateKey.length}`)"
               />
               <button 
                 @click="showPrivateKey = !showPrivateKey"
@@ -147,6 +148,7 @@
             </div>
             <div class="text-xs text-gray-400 mt-1">
               This will be used to derive the public key and address for testing
+              <span v-if="privateKey" class="text-amber-300">(Current length: {{ privateKey.length }})</span>
             </div>
           </div>
 
@@ -172,10 +174,23 @@
               type="text"
               placeholder="Enter Circular chain address corresponding to the private key"
               class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+              @input="addLog('debug', `Hot wallet address changed, length: ${hotWalletAddress.length}`)"
             />
             <div class="text-xs text-gray-400 mt-1">
               This should be the address that corresponds to the private key above
+              <span v-if="hotWalletAddress" class="text-amber-300">(Current length: {{ hotWalletAddress.length }})</span>
             </div>
+          </div>
+
+          <!-- Debug Button States -->
+          <div class="mb-3 text-xs text-gray-400">
+            <div>Button States Debug:</div>
+            <div>• Private Key: {{ privateKey ? `${privateKey.length} chars` : 'empty' }}</div>
+            <div>• Public Key: {{ publicKey ? `${publicKey.length} chars` : 'empty' }}</div>
+            <div>• Hot Wallet Address: {{ hotWalletAddress ? `${hotWalletAddress.length} chars` : 'empty' }}</div>
+            <div>• Setting Keys: {{ settingKeys }}</div>
+            <div>• Validate Button Enabled: {{ !(!privateKey || !publicKey || !hotWalletAddress) }}</div>
+            <div>• Set Wallet Button Enabled: {{ !(!privateKey || !hotWalletAddress || settingKeys) }}</div>
           </div>
 
           <!-- Action Buttons -->
