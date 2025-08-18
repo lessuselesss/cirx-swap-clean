@@ -490,20 +490,22 @@ curl -X POST "https://nag.circularlabs.io/NAG.php?cep=Circular_GetBlockchains_" 
   -d '{}'
 
 # Get wallet balance (requires full blockchain address)
+# Development/Testing - Sandbox blockchain
 curl -X POST "https://nag.circularlabs.io/NAG.php?cep=Circular_GetWalletBalance_" \
   -H "Content-Type: application/json" \
   -d '{
-    "Blockchain": "714d2ac07a826b66ac56752eebd7c77b58d2ee842e523d913fd0ef06e6bdfcae",
+    "Blockchain": "8a20baa40c45dc5055aeb26197c203e576ef389d9acb171bd62da11dc5ad72b2",
     "Address": "your_wallet_address",
     "Asset": "CIRX",
     "Version": "1.0.8"
   }'
 
 # Send transaction (requires full blockchain address)
+# Development/Testing - Sandbox blockchain
 curl -X POST "https://nag.circularlabs.io/NAG.php?cep=Circular_SendTransaction_" \
   -H "Content-Type: application/json" \
   -d '{
-    "Blockchain": "714d2ac07a826b66ac56752eebd7c77b58d2ee842e523d913fd0ef06e6bdfcae",
+    "Blockchain": "8a20baa40c45dc5055aeb26197c203e576ef389d9acb171bd62da11dc5ad72b2",
     "fromAddress": "sender_address",
     "recipientAddress": "recipient_address",
     "amount": "100.0",
@@ -517,12 +519,43 @@ curl -X POST "https://nag.circularlabs.io/NAG.php?cep=Circular_SendTransaction_"
 
 The NAG API requires full blockchain addresses, not short names:
 
-| Network | Blockchain Address |
-|---------|-------------------|
-| **Circular Main Public** | `714d2ac07a826b66ac56752eebd7c77b58d2ee842e523d913fd0ef06e6bdfcae` |
-| **Circular Secondary Public** | `acb8a9b79f3c663aa01be852cd42725f9e0e497fd849b436df51c5e074ebeb28` |
-| **Circular Documark Public** | `e087257c48a949710b48bc725b8d90066871fa08f7bbe75d6b140d50119c481f` |
-| **Circular SandBox** | `8a20baa40c45dc5055aeb26197c203e576ef389d9acb171bd62da11dc5ad72b2` |
+| Network | Blockchain Address | Usage |
+|---------|-------------------|-------|
+| **Circular Main Public** | `714d2ac07a826b66ac56752eebd7c77b58d2ee842e523d913fd0ef06e6bdfcae` | Production mainnet |
+| **Circular Secondary Public** | `acb8a9b79f3c663aa01be852cd42725f9e0e497fd849b436df51c5e074ebeb28` | Secondary production network |
+| **Circular Documark Public** | `e087257c48a949710b48bc725b8d90066871fa08f7bbe75d6b140d50119c481f` | Document verification network |
+| **Circular SandBox** | `8a20baa40c45dc5055aeb26197c203e576ef389d9acb171bd62da11dc5ad72b2` | **Development/Testing** ⭐ |
+
+**Important**: For development and testing, use the **Sandbox** blockchain (`8a20baa...`). Test wallets and funded addresses are typically created on this network.
+
+### Environment-Based Blockchain Selection
+
+The backend automatically selects the appropriate blockchain based on environment:
+
+```php
+// Environment-based blockchain selection
+function getBlockchainAddress($environment = null) {
+    $env = $environment ?: ($_ENV['APP_ENV'] ?? 'development');
+    
+    switch ($env) {
+        case 'production':
+            return '714d2ac07a826b66ac56752eebd7c77b58d2ee842e523d913fd0ef06e6bdfcae'; // Main Public
+        case 'staging':
+            return 'acb8a9b79f3c663aa01be852cd42725f9e0e497fd849b436df51c5e074ebeb28'; // Secondary Public
+        case 'development':
+        case 'testing':
+        default:
+            return '8a20baa40c45dc5055aeb26197c203e576ef389d9acb171bd62da11dc5ad72b2'; // Sandbox
+    }
+}
+```
+
+**Configuration Examples:**
+
+- **Development**: `APP_ENV=development` → Sandbox blockchain
+- **Testing**: `APP_ENV=testing` → Sandbox blockchain  
+- **Staging**: `APP_ENV=staging` → Secondary Public blockchain
+- **Production**: `APP_ENV=production` → Main Public blockchain
 
 ### Common CEP Commands
 
@@ -582,11 +615,11 @@ All NAG API responses follow this structure:
 
 2. **Verify wallet balance format:**
    ```bash
-   # Use full blockchain address from GetBlockchains response
+   # Use Sandbox blockchain for development/testing
    curl -X POST "https://nag.circularlabs.io/NAG.php?cep=Circular_GetWalletBalance_" \
      -H "Content-Type: application/json" \
      -d '{
-       "Blockchain": "714d2ac07a826b66ac56752eebd7c77b58d2ee842e523d913fd0ef06e6bdfcae",
+       "Blockchain": "8a20baa40c45dc5055aeb26197c203e576ef389d9acb171bd62da11dc5ad72b2",
        "Address": "test_address",
        "Asset": "CIRX",
        "Version": "1.0.8"

@@ -1,5 +1,6 @@
 <template>
   <div>
+    <div class="bg-blue-500 p-4 text-white font-bold text-2xl mb-4">🚨 BUY FIELD COMPONENT IS HERE 🚨</div>
     <div class="flex justify-between items-center mb-3">
       <label class="text-sm font-medium text-white">Receive</label>
     </div>
@@ -18,16 +19,15 @@
         pattern="[0-9,]*\.?[0-9]*"
         placeholder="0.0"
         :class="[
-          'w-full pl-4 pr-20 py-4 text-xl font-semibold bg-transparent border rounded-xl text-white placeholder-gray-500 transition-all duration-300',
-          'border-gray-600/50 focus:border-circular-primary/50 focus:outline-none',
+          'w-full pl-4 pr-20 py-4 text-xl font-semibold bg-transparent border-4 border-green-400 rounded-xl rounded-tl-none rounded-tr-none text-white placeholder-gray-500 transition-all duration-300 shadow-lg shadow-green-400/50 ring-2 ring-green-300',
+          'hover:bg-circular-primary/5 focus:bg-circular-primary/5 focus:ring-2 focus:ring-circular-primary/50 focus:outline-none',
           loading && 'opacity-50'
         ]"
       />
       <div 
         v-else
         :class="[
-          'w-full pl-4 pr-20 py-4 text-xl font-semibold bg-transparent border rounded-xl text-white transition-all duration-300',
-          'border-gray-600/50'
+          'w-full pl-4 pr-20 py-4 text-xl font-semibold bg-transparent border-4 border-green-400 rounded-xl rounded-tl-none rounded-tr-none text-white transition-all duration-300 shadow-lg shadow-green-400/50 ring-2 ring-green-300'
         ]"
       >
         <span :class="[

@@ -18,10 +18,10 @@
       />
 
       <!-- Swap Form -->
-      <form @submit.prevent="handleSwap">
+      <div>
         
         <!-- Sell Field Section -->
-        <div class="rounded-xl p-4 mb-6 bg-red-900/20 border border-red-600/30">
+        <div class="mb-6">
           <SwapSellField
             v-model:amount="inputAmount"
             v-model:token="inputToken"
@@ -43,7 +43,7 @@
         </div>
 
         <!-- Buy Field Section -->
-        <div class="bg-blue-900/20 rounded-xl p-4 mb-6 border border-blue-600/30">
+        <div class="mb-6">
           <SwapBuyField
             v-model:cirx-amount="cirxAmount"
             :quote="quote"
@@ -57,9 +57,9 @@
           />
         </div>
 
-        <!-- Recipient Address (for non-connected users) -->
+        <!-- Recipient Address (always shown now per new workflow) -->
         <RecipientAddressInput
-          v-if="!walletStore.isConnected"
+          ref="recipientAddressInputRef"
           v-model="recipientAddress"
           :error="recipientAddressError"
           @validate="validateRecipientAddress"
@@ -87,10 +87,16 @@
           :input-token="inputToken"
           :eth-balance="awaitedEthBalance"
           :network-fee-eth="networkFee.eth"
+          :recipient-address="recipientAddress"
+          :recipient-address-error="recipientAddressError"
           @connect-wallet="handleConnectWallet"
+          @enter-address="handleEnterAddress"
+          @enter-valid-address="handleEnterValidAddress"
+          @enter-amount="handleEnterAmount"
+          @click="handleSwap"
         />
 
-      </form>
+      </div>
 
       <!-- Footer Actions -->
       <div class="flex justify-center gap-4 mt-6 pt-6 border-t border-gray-700/50">
@@ -118,11 +124,34 @@
         </button>
       </div>
     </div>
+
+    <!-- Transaction Progress Modal -->
+    <UModal v-model="showTransactionProgress" :ui="{ width: 'sm:max-w-2xl' }">
+      <div class="p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-semibold text-white">Transaction Progress</h3>
+          <UButton
+            color="gray"
+            variant="ghost"
+            size="sm"
+            icon="i-heroicons-x-mark-20-solid"
+            @click="showTransactionProgress = false"
+          />
+        </div>
+        
+        <TransactionProgress
+          v-if="currentTransaction"
+          :transaction="currentTransaction"
+          :phase-config="transactionPhases[currentTransaction.phase]"
+          @close="showTransactionProgress = false"
+        />
+      </div>
+    </UModal>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch, inject, onBeforeUnmount } from 'vue'
+import { ref, computed, watch, inject, onBeforeUnmount, nextTick } from 'vue'
 import { validateWalletAddress } from '../utils/validation.js'
 
 // Composables and stores with defensive initialization
@@ -145,14 +174,14 @@ try {
 }
 
 try {
-  contracts = useContracts()
-  console.log('✅ Contracts initialized in SwapForm')
+  contracts = useBackendApi()
+  console.log('✅ Backend API initialized in SwapForm')
 } catch (error) {
-  console.error('❌ Failed to initialize contracts in SwapForm:', error)
+  console.error('❌ Failed to initialize backend API in SwapForm:', error)
   contracts = {
-    getTokenBalance: () => '0.0',
-    executeOTCSwap: () => Promise.reject(new Error('Contracts not available')),
-    executeLiquidSwap: () => Promise.reject(new Error('Contracts not available'))
+    calculateCirxQuote: () => ({ cirxAmount: '0', platformFee: { token: '0' } }),
+    initiateSwap: () => Promise.reject(new Error('Backend API not available')),
+    isLoading: ref(false)
   }
 }
 
@@ -182,6 +211,11 @@ try {
 // Toast notifications
 const toast = inject('toast')
 
+// Transaction status tracking
+const { trackTransaction, transactionPhases, getTransaction } = useTransactionStatus()
+const currentTransaction = ref(null)
+const showTransactionProgress = ref(false)
+
 // Props and emits
 defineEmits(['show-chart', 'show-staking'])
 
@@ -196,6 +230,7 @@ const loading = ref(false)
 const loadingText = ref('')
 const error = ref(null)
 const selectedTier = ref(null)
+const recipientAddressInputRef = ref(null)
 
 // Track which field was last updated to prevent circular updates
 const lastUpdatedField = ref('input') // 'input' or 'cirx'
@@ -227,11 +262,10 @@ const quote = computed(() => {
     // Forward calculation: input amount -> CIRX amount
     if (!inputAmount.value || parseFloat(inputAmount.value) <= 0) return null
     
-    return swapLogic.calculateQuote(
+    return contracts.calculateCirxQuote(
       inputAmount.value,
       inputToken.value,
-      activeTab.value === 'otc',
-      selectedTier.value
+      activeTab.value === 'otc'
     )
     
   } else if (lastUpdatedField.value === 'cirx') {
@@ -306,8 +340,8 @@ watch(() => [cirxAmount.value, lastUpdatedField.value], ([newCirxAmount, field])
 const canPurchase = computed(() => {
   const hasAmount = inputAmount.value && parseFloat(inputAmount.value) > 0
   const notLoading = !loading.value
-  const hasValidRecipient = walletStore.isConnected || 
-    (recipientAddress.value && !recipientAddressError.value)
+  const hasWallet = walletStore.isConnected
+  const hasValidRecipient = recipientAddress.value && !recipientAddressError.value
   
   // Balance validation - only check if wallet is connected
   const hasSufficientBalance = !walletStore.isConnected || (() => {
@@ -321,7 +355,8 @@ const canPurchase = computed(() => {
     return inputAmountNum <= availableBalance
   })()
   
-  return hasAmount && notLoading && hasValidRecipient && hasSufficientBalance
+  // All conditions must be met: amount + no loading + wallet connected + valid recipient + sufficient balance
+  return hasAmount && notLoading && hasWallet && hasValidRecipient && hasSufficientBalance
 })
 
 // Methods
@@ -341,11 +376,16 @@ const validateRecipientAddress = (address) => {
     return true
   }
 
-  // Use our comprehensive validation utility
-  const result = validateWalletAddress(address, 'auto')
+  // Use circular-specific validation that only accepts Circular addresses
+  const result = validateWalletAddress(address, 'circular')
   
   if (!result.isValid) {
-    recipientAddressError.value = result.errors[0] || 'Invalid address format'
+    // Custom error message for rejected Ethereum addresses
+    if (address.length === 42 && address.startsWith('0x')) {
+      recipientAddressError.value = 'Ethereum addresses are not supported. Please enter a valid CIRX address'
+    } else {
+      recipientAddressError.value = result.errors[0] || 'Invalid CIRX address format'
+    }
     return false
   }
 
@@ -373,7 +413,79 @@ const handleConnectWallet = async () => {
   }
 }
 
+const handleEnterAddress = () => {
+  console.log('🎯 handleEnterAddress called - focusing recipient address input')
+  setTimeout(() => {
+    if (recipientAddressInputRef.value) {
+      console.log('🎯 Calling focusInput on recipient address (from button click)')
+      recipientAddressInputRef.value.focusInput()
+    } else {
+      console.log('❌ recipientAddressInputRef is not available in handleEnterAddress')
+    }
+  }, 50)
+}
+
+const handleEnterValidAddress = () => {
+  console.log('🎯 handleEnterValidAddress called - clearing and focusing recipient address input')
+  setTimeout(() => {
+    if (recipientAddressInputRef.value) {
+      recipientAddressInputRef.value.clearAndFocusInput()
+    }
+  }, 50)
+}
+
+const handleEnterAmount = () => {
+  console.log('🎯 handleEnterAmount called - focusing amount input')
+  // Focus the amount input field (sell field)
+  // This one should go to the sell field, which is the expected behavior
+}
+
 const handleSwap = async () => {
+  console.log('🔥 handleSwap called!', {
+    walletConnected: walletStore.isConnected,
+    recipientAddress: recipientAddress.value,
+    recipientAddressError: recipientAddressError.value,
+    canPurchase: canPurchase.value,
+    loading: loading.value
+  })
+  
+  // Handle the four CTA states based on wallet connection and address input
+  if (!walletStore.isConnected && !recipientAddress.value) {
+    // State 1: "Connect" - No wallet + no address
+    return handleConnectWallet()
+  }
+  
+  if (!walletStore.isConnected && recipientAddress.value) {
+    // State 2: "Connect Wallet" - Has address but no wallet
+    return handleConnectWallet()
+  }
+  
+  if (walletStore.isConnected && !recipientAddress.value) {
+    // State 3: "Enter Address" - Has wallet but no address
+    console.log('🎯 Enter Address clicked - attempting to focus CIRX address input')
+    await nextTick()
+    // Use setTimeout to delay focus and avoid interference from other event handlers
+    setTimeout(() => {
+      if (recipientAddressInputRef.value) {
+        console.log('🎯 Calling focusInput on recipient address (delayed)')
+        recipientAddressInputRef.value.focusInput()
+        console.log('🎯 Focus called - checking if focus was applied')
+      } else {
+        console.log('❌ recipientAddressInputRef is not available')
+      }
+    }, 50)
+    return
+  }
+  
+  if (walletStore.isConnected && recipientAddress.value && recipientAddressError.value) {
+    // State 4: "Enter a Valid Address" - Has wallet + invalid address
+    await nextTick()
+    if (recipientAddressInputRef.value) {
+      recipientAddressInputRef.value.clearAndFocusInput()
+    }
+    return
+  }
+  
   if (!canPurchase.value) return
 
   try {
@@ -403,40 +515,91 @@ const handleSwap = async () => {
       throw new Error('Unable to calculate quote')
     }
 
-    loadingText.value = 'Executing swap...'
+    loadingText.value = 'Confirm transaction in wallet...'
 
-    // Execute the appropriate swap type with error context
-    let result
-    if (activeTab.value === 'otc') {
-      result = await contracts.executeOTCSwap(
-        inputToken.value,
-        inputAmount.value,
-        quote.value.cirxAmount,
-        0.5 // 0.5% slippage tolerance
+    // Step 1: Get the deposit address for the payment
+    const depositAddress = contracts.getDepositAddress(inputToken.value, 'ethereum')
+    
+    // Step 2: Create transaction data for MetaMask
+    const totalAmount = quote.value.totalPaymentRequired || inputAmount.value
+    
+    // Step 3: Execute MetaMask transaction
+    let txHash
+    if (!walletStore.isConnected) {
+      throw new Error('Wallet not connected. Please connect your wallet first.')
+    }
+
+    try {
+      // Prepare transaction for MetaMask
+      const txParams = {
+        to: depositAddress,
+        value: inputToken.value === 'ETH' ? 
+          '0x' + Math.floor(parseFloat(totalAmount) * 1e18).toString(16) : '0x0',
+        data: '0x', // Simple transfer, no data needed
+      }
+
+      // Request transaction through wallet
+      txHash = await walletStore.ethereumWallet?.walletClient?.sendTransaction(txParams)
+      
+      if (!txHash) {
+        throw new Error('Transaction was rejected or failed')
+      }
+
+      loadingText.value = 'Processing swap on backend...'
+
+      // Step 4: Call backend API with transaction details
+      const swapData = contracts.createSwapTransaction(
+        txHash,
+        'ethereum',
+        recipient,
+        totalAmount,
+        inputToken.value
       )
-    } else {
-      result = await contracts.executeLiquidSwap(
-        inputToken.value,
-        inputAmount.value,
-        quote.value.cirxAmount,
-        0.5 // 0.5% slippage tolerance
-      )
+
+      const result = await contracts.initiateSwap(swapData)
+      
+    } catch (walletError) {
+      if (walletError.code === 4001) {
+        throw new Error('Transaction was rejected by user')
+      }
+      throw new Error(`Wallet transaction failed: ${walletError.message}`)
     }
 
     if (result.success) {
-      // Clear form
-      inputAmount.value = ''
-      recipientAddress.value = ''
+      // Start tracking the transaction with real-time updates
+      currentTransaction.value = trackTransaction(result.transaction_id, {
+        showToasts: true,
+        onStatusChange: (statusData, previousPhase) => {
+          console.log(`Transaction ${result.transaction_id} moved from ${previousPhase} to ${statusData.phase}`)
+        },
+        onComplete: (statusData) => {
+          // Clear form only when truly complete
+          inputAmount.value = ''
+          recipientAddress.value = ''
+          
+          // Show final success notification
+          toast?.success('CIRX tokens successfully transferred to your address!', {
+            title: 'Swap Complete',
+            autoTimeoutMs: 10000,
+            actions: [{
+              label: 'View Transaction',
+              handler: () => window.open(`https://etherscan.io/tx/${txHash}`, '_blank'),
+              primary: false
+            }]
+          })
+        },
+        onError: (error) => {
+          console.error('Transaction tracking error:', error)
+        }
+      })
       
-      // Show success notification
-      toast?.success(`Successfully purchased ${quote.value.cirxAmount} CIRX!`, {
-        title: 'Swap Complete',
-        autoTimeoutMs: 8000,
-        actions: [{
-          label: 'View Transaction',
-          handler: () => window.open(`https://etherscan.io/tx/${result.hash}`, '_blank'),
-          primary: false
-        }]
+      // Show transaction progress modal
+      showTransactionProgress.value = true
+      
+      // Show initial success notification for payment submission
+      toast?.success('Payment submitted successfully! Tracking transaction progress...', {
+        title: 'Payment Sent',
+        autoTimeoutMs: 5000
       })
 
       // Optionally redirect to transaction page

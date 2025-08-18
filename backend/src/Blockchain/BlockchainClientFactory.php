@@ -83,7 +83,6 @@ class BlockchainClientFactory
             chainId: $config['chain_id'],
             networkName: $network,
             backupRpcUrl: $config['backup_rpc_url'] ?? null,
-            privateKey: $config['private_key'] ?? null,
             tokenContracts: $config['token_contracts'] ?? [],
             logger: $this->logger
         );
@@ -99,12 +98,10 @@ class BlockchainClientFactory
         return new CirxBlockchainClient(
             rpcUrl: $config['rpc_url'],
             cirxWalletAddress: $config['wallet_address'],
-            cirxContractAddress: $config['contract_address'],
             cirxPrivateKey: $config['private_key'] ?? null,
             cirxDecimals: $config['decimals'] ?? 18,
             backupRpcUrl: $config['backup_rpc_url'] ?? null,
-            logger: $this->logger,
-            apiKey: $config['api_key'] ?? null
+            logger: $this->logger
         );
     }
 
@@ -128,7 +125,7 @@ class BlockchainClientFactory
             'rpc_url' => $_ENV["{$envPrefix}_RPC_URL"] ?? $this->getDefaultRpcUrl($network),
             'backup_rpc_url' => $_ENV["{$envPrefix}_RPC_URL_BACKUP"] ?? null,
             'chain_id' => (int)($_ENV["{$envPrefix}_CHAIN_ID"] ?? $this->getDefaultChainId($network)),
-            'private_key' => $_ENV["{$envPrefix}_PRIVATE_KEY"] ?? null,
+            // Private key configuration removed - read-only client for payment verification
         ];
 
         // Add token contracts for Ethereum networks
@@ -158,9 +155,7 @@ class BlockchainClientFactory
             'backup_rpc_url' => $_ENV['CIRX_RPC_URL_BACKUP'] ?? null,
             'wallet_address' => $_ENV['CIRX_WALLET_ADDRESS'] ?? '',
             'private_key' => $_ENV['CIRX_WALLET_PRIVATE_KEY'] ?? null,
-            'contract_address' => $_ENV['CIRX_CONTRACT_ADDRESS'] ?? '',
             'decimals' => (int)($_ENV['CIRX_DECIMALS'] ?? 18),
-            'api_key' => $_ENV['CIRX_API_KEY'] ?? null,
         ];
     }
 

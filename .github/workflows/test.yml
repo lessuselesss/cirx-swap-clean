@@ -1,40 +1,89 @@
-name: CI
+name: CI/CD Test Execution
 
 on:
   push:
+    branches: [ main, develop ]
   pull_request:
+    branches: [ main, develop ]
   workflow_dispatch:
 
-env:
-  FOUNDRY_PROFILE: ci
-
 jobs:
-  check:
-    name: Foundry project
+  frontend-tests:
+    name: Frontend Tests (Nuxt.js + Playwright)
     runs-on: ubuntu-latest
+    
     steps:
       - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          submodules: recursive
-
-      - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
-
-      - name: Show Forge version
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: ui/package-lock.json
+          
+      - name: Install frontend dependencies
+        working-directory: ./ui
+        run: npm ci
+        
+      - name: Install Playwright browsers
+        working-directory: ./ui
+        run: npx playwright install --with-deps
+        
+      - name: Run frontend tests
+        working-directory: ./ui
+        run: npm run test
+        
+      - name: Upload frontend test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: frontend-test-results
+          path: |
+            ui/test-results/
+            ui/playwright-report/
+            
+  backend-tests:
+    name: Backend Tests (PHP + PHPUnit)
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, xml, pdo, sqlite, pdo_sqlite, bcmath, json
+          coverage: xdebug
+          
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: backend/vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('backend/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+            
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: composer install --prefer-dist --no-progress --no-interaction
+        
+      - name: Create test database
+        working-directory: ./backend
         run: |
-          forge --version
-
-      - name: Run Forge fmt
-        run: |
-          forge fmt --check
-        id: fmt
-
-      - name: Run Forge build
-        run: |
-          forge build --sizes
-        id: build
-
-      - name: Run Forge tests
-        run: |
-          forge test -vvv
-        id: test
+          mkdir -p storage
+          touch storage/database.sqlite
+          
+      - name: Run backend tests
+        working-directory: ./backend
+        run: php vendor/bin/phpunit --log-junit test-results.xml
+        
+      - name: Upload backend test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-test-results
+          path: |
+            backend/test-results.xml
+            backend/coverage/

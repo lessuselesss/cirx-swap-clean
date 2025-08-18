@@ -4,6 +4,10 @@ use Slim\Factory\AppFactory;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
 use App\Controllers\TransactionController;
+use App\Controllers\TransactionStatusController;
+use App\Controllers\TransactionTestController;
+use App\Controllers\DebugController;
+use App\Controllers\ConfigController;
 use App\Middleware\ApiKeyAuthMiddleware;
 use App\Middleware\RateLimitMiddleware;
 use App\Middleware\CorsMiddleware;
@@ -20,7 +24,9 @@ require __DIR__ . '/../vendor/autoload.php';
 $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
 try {
     $dotenv->load();
+    error_log("✅ Environment loaded successfully");
 } catch (Exception $e) {
+    error_log("❌ Environment loading failed: " . $e->getMessage());
     // Environment file might not exist in some deployments
 }
 
@@ -95,6 +101,23 @@ $errorMiddleware->setDefaultErrorHandler(function (
     return $response->withStatus(500)->withHeader('Content-Type', 'application/json');
 });
 
+// Root route
+$app->get('/', function (Request $request, Response $response) {
+    $data = [
+        'service' => 'CIRX OTC Backend API',
+        'version' => '1.0.0',
+        'status' => 'running',
+        'endpoints' => [
+            'health' => '/api/v1/health',
+            'transactions' => '/api/v1/transactions/*',
+            'debug' => '/api/v1/debug/*'
+        ],
+        'timestamp' => date('c')
+    ];
+    $response->getBody()->write(json_encode($data, JSON_PRETTY_PRINT));
+    return $response->withHeader('Content-Type', 'application/json');
+});
+
 // Routes
 $app->group('/api/v1', function ($group) {
     // Quick health check
@@ -157,16 +180,61 @@ $app->group('/api/v1', function ($group) {
         return $controller->initiateSwap($request, $response);
     });
 
-    $group->get('/transactions/{swapId}/status', function (Request $request, Response $response, array $args) {
-        $controller = new TransactionController();
-        return $controller->getTransactionStatus($request, $response, $args);
+    $group->get('/transactions/{id}/status', function (Request $request, Response $response, array $args) {
+        $controller = new TransactionStatusController();
+        return $controller->getStatus($request, $response, $args);
     });
 
     // CIRX balance endpoint
     $group->get('/cirx/balance/{address}', function (Request $request, Response $response, array $args) {
         $controller = new TransactionController();
-        return $controller->getCirxBalance($request, $response);
+        return $controller->getCirxBalance($request, $response, $args);
     });
+
+    // Configuration endpoint (frontend/backend synchronization)
+    $group->get('/config/circular-network', function (Request $request, Response $response) {
+        $controller = new ConfigController();
+        return $controller->getCircularNetworkConfig($request, $response);
+    });
+
+    // Debug endpoints (always available)
+    $group->post('/debug/nag-balance', function (Request $request, Response $response) {
+        $controller = new DebugController();
+        return $controller->testNagBalance($request, $response);
+    });
+
+    $group->get('/debug/nag-config', function (Request $request, Response $response) {
+        $controller = new DebugController();
+        return $controller->getNagConfig($request, $response);
+    });
+
+    $group->post('/debug/send-transaction', function (Request $request, Response $response) {
+        $controller = new DebugController();
+        return $controller->sendTransaction($request, $response);
+    });
+
+    $group->get('/debug/health', function (Request $request, Response $response) {
+        $controller = new DebugController();
+        return $controller->health($request, $response);
+    });
+
+    $group->get('/debug/env', function (Request $request, Response $response) {
+        $controller = new DebugController();
+        return $controller->debugEnv($request, $response);
+    });
+
+    // Demo/Testing endpoints (only in development)
+    if (($_ENV['APP_ENV'] ?? 'production') === 'development') {
+        $group->post('/test/transactions/demo', function (Request $request, Response $response) {
+            $controller = new TransactionTestController();
+            return $controller->createDemoTransaction($request, $response);
+        });
+
+        $group->post('/test/transactions/{id}/advance', function (Request $request, Response $response, array $args) {
+            $controller = new TransactionTestController();
+            return $controller->updateDemoTransaction($request, $response, $args);
+        });
+    }
 });
 
 // Handle preflight OPTIONS requests

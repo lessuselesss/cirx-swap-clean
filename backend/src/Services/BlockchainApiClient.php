@@ -26,17 +26,34 @@ class BlockchainApiClient
             'ethereum' => [
                 'rpc_url' => $_ENV['ETHEREUM_RPC_URL'] ?? 'https://mainnet.infura.io/v3/your-project-id',
                 'etherscan_api' => $_ENV['ETHERSCAN_API_KEY'] ?? null,
-                'explorer_url' => 'https://api.etherscan.io/api',
+                'explorer_url' => $this->getEtherscanUrl($_ENV['ETHEREUM_NETWORK'] ?? 'mainnet'),
+                'network' => $_ENV['ETHEREUM_NETWORK'] ?? 'mainnet',
                 'required_confirmations' => 12,
+            ],
+            'sepolia' => [
+                'rpc_url' => $_ENV['SEPOLIA_RPC_URL'] ?? $_ENV['ETHEREUM_RPC_URL'] ?? 'https://sepolia.infura.io/v3/your-project-id',
+                'etherscan_api' => $_ENV['ETHERSCAN_API_KEY'] ?? null,
+                'explorer_url' => $this->getEtherscanUrl('sepolia'),
+                'network' => 'sepolia',
+                'required_confirmations' => 3,
+            ],
+            'goerli' => [
+                'rpc_url' => $_ENV['GOERLI_RPC_URL'] ?? 'https://goerli.infura.io/v3/your-project-id',
+                'etherscan_api' => $_ENV['ETHERSCAN_API_KEY'] ?? null,
+                'explorer_url' => $this->getEtherscanUrl('goerli'),
+                'network' => 'goerli',
+                'required_confirmations' => 3,
             ],
             'polygon' => [
                 'rpc_url' => $_ENV['POLYGON_RPC_URL'] ?? 'https://polygon-mainnet.infura.io/v3/your-project-id',
                 'etherscan_api' => $_ENV['POLYGONSCAN_API_KEY'] ?? null,
                 'explorer_url' => 'https://api.polygonscan.com/api',
+                'network' => 'polygon',
                 'required_confirmations' => 20,
             ],
             'solana' => [
                 'rpc_url' => $_ENV['SOLANA_RPC_URL'] ?? 'https://api.mainnet-beta.solana.com',
+                'network' => 'solana',
                 'required_confirmations' => 30,
             ],
         ], $config);
@@ -286,5 +303,22 @@ class BlockchainApiClient
     public function getRequiredConfirmations(string $chain): int
     {
         return $this->config[strtolower($chain)]['required_confirmations'] ?? 12;
+    }
+
+    /**
+     * Get Etherscan API URL for the specified network
+     * Based on official Etherscan documentation: https://docs.etherscan.io/
+     */
+    private function getEtherscanUrl(string $network = 'mainnet'): string
+    {
+        $urls = [
+            'mainnet' => 'https://api.etherscan.io/api',
+            'sepolia' => 'https://api-sepolia.etherscan.io/api',
+            'goerli' => 'https://api-goerli.etherscan.io/api',
+            'holesky' => 'https://api-holesky.etherscan.io/api',
+            'hoodi' => 'https://api-hoodi.etherscan.io/api',
+        ];
+
+        return $urls[strtolower($network)] ?? $urls['mainnet'];
     }
 }

@@ -1,3 +1,5 @@
+//~~~ Marked for Refactor/Migration 2025-08-16 ~~~~
+
 import http from 'http';
 
 console.log('🔍 Starting console check...');

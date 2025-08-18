@@ -22,13 +22,14 @@
         </testsuite>
     </testsuites>
     
-    <groups>
+    <!-- Groups filtering disabled to run all tests -->
+    <!-- <groups>
         <include>
             <group>unit</group>
             <group>integration</group>
             <group>e2e</group>
         </include>
-    </groups>
+    </groups> -->
 
     <source>
         <include>

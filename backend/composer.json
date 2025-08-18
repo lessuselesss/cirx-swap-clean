@@ -5,6 +5,7 @@
     "require": {
         "php": "^8.2",
         "circular-protocol/circular-protocol-api": "^1.0",
+        "simplito/elliptic-php": "^1.0.12",
         "firebase/php-jwt": "^6.0",
         "guzzlehttp/guzzle": "^7.0",
         "illuminate/database": "^10.0",

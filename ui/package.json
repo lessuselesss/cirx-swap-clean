@@ -9,6 +9,10 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:report": "playwright show-report",
     "clean": "node scripts/cleanup.js",
     "clean:all": "node scripts/cleanup.js --npm-cache",
     "fresh": "npm run clean:all && npm install"
@@ -37,7 +41,11 @@
   "devDependencies": {
     "@nuxt/devtools": "latest",
     "@nuxtjs/tailwindcss": "^6.13.2",
+    "@testing-library/vue": "^8.1.0",
+    "@vue/test-utils": "^2.4.6",
+    "happy-dom": "^18.0.1",
     "tailwindcss": "^3.4.0",
+    "vitest": "^3.2.4",
     "wrangler": "^4.27.0"
   }
 }

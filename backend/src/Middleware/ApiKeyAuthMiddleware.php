@@ -29,7 +29,9 @@ class ApiKeyAuthMiddleware implements MiddlewareInterface
         
         // Exempt paths that don't require API key authentication
         $this->exemptPaths = [
+            '/',                // Root route
             '/api/v1/health',
+            '/api/v1/debug',  // Allow all debug endpoints
             '/favicon.ico'
         ];
     }

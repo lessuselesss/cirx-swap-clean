@@ -1,5 +1,6 @@
-#\!/usr/bin/env node
+#!/usr/bin/env node
 
+// ~~~ File Marked for Refactor/Migration 2025-08-16 ~~~~
 const http = require('http');
 
 console.log('🔍 Starting console check...');

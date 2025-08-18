@@ -1,7 +1,0 @@
-feat: Integrate XT.COM WebSocket for real-time CIRX price feed
-
-Integrates the XT.COM WebSocket API into `CirxPriceChart.vue` to provide real-time price updates for CIRX/USDT.
-
-- Replaced simulated price updates with live data from XT.COM.
-- Added `pako` dependency for GZIP decompression of WebSocket messages.
-- Implemented WebSocket connection, subscription, and message handling.

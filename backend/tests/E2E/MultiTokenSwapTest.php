@@ -191,7 +191,7 @@ class MultiTokenSwapTest extends E2ETestCase
         $swapIds = [];
         
         foreach ($payments as $index => $payment) {
-            $this->logTestInfo("Processing payment {$index + 1}/4", $payment);
+            $this->logTestInfo("Processing payment " . ($index + 1) . "/4", $payment);
             
             // Send payment
             $txHash = $this->sendSepoliaPayment(

@@ -1,0 +1,57 @@
+FROM php:8.2-cli
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    zip \
+    unzip \
+    libpq-dev \
+    libzip-dev \
+    && docker-php-ext-install pdo_pgsql mbstring exif pcntl bcmath gd zip
+
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Install Node.js and npm for any frontend build needs
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs
+
+# Set working directory
+WORKDIR /app
+
+# Copy composer files
+COPY composer.json composer.lock ./
+
+# Install PHP dependencies
+RUN composer install --no-dev --optimize-autoloader --no-interaction
+
+# Copy application code
+COPY . .
+
+# Create storage directories
+RUN mkdir -p storage/logs storage/testing \
+    && chmod -R 775 storage \
+    && chown -R www-data:www-data storage
+
+# Copy E2E environment file
+COPY .env.e2e .env
+
+# Generate application key if needed
+RUN php artisan key:generate --force
+
+# Run database migrations
+RUN php artisan migrate --force --env=e2e_testing
+
+# Expose port
+EXPOSE 8080
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:8080/api/v1/health || exit 1
+
+# Start the application
+CMD ["php", "-S", "0.0.0.0:8080", "public/index.php"]

@@ -1,15 +1,25 @@
 <template>
   <div class="mb-6">
     <label class="block text-sm font-medium text-white mb-2">
-      Recipient Address
+      <span class="flex items-center">
+        Recipient Address
+        <span 
+          :class="[
+            'w-2 h-2 rounded-full ml-2',
+            hasFormatError ? 'bg-red-400' : 'bg-gray-400'
+          ]"
+        ></span>
+      </span>
       <span class="text-gray-400 text-xs ml-1">(Where should we send the CIRX?)</span>
     </label>
     
     <div class="relative">
       <input
+        ref="addressInput"
         :value="modelValue"
         @input="handleInput"
         @blur="handleValidation"
+        @focus="() => console.log('🎯 CIRX Address input received focus!')"
         type="text"
         placeholder="0x1234...abcd (ETH/CIRX) or name.eth"
         :class="[
@@ -21,17 +31,10 @@
         ]"
       />
       
-      <!-- Address type indicator -->
-      <div v-if="addressType && !error" class="absolute inset-y-0 right-0 flex items-center pr-3">
-        <span :class="[
-          'px-2 py-1 text-xs rounded-full',
-          addressType === 'ethereum' ? 'bg-blue-500/20 text-blue-400' : 
-          addressType === 'circular' ? 'bg-green-500/20 text-green-400' : 
-          'bg-purple-500/20 text-purple-400'
-        ]">
-          {{ addressType === 'ethereum' ? 'ETH' : 
-             addressType === 'circular' ? 'CIRX' : 
-             'ENS' }}
+      <!-- Address type indicator (only for valid Circular addresses) -->
+      <div v-if="addressType === 'circular' && !error" class="absolute inset-y-0 right-0 flex items-center pr-3">
+        <span class="px-2 py-1 text-xs rounded-full bg-green-500/20 text-green-400">
+          CIRX
         </span>
       </div>
       
@@ -51,8 +54,8 @@
     </div>
     
     <!-- Help text -->
-    <div v-else class="mt-2 text-xs text-gray-500">
-      Enter a Circular (0x...64 chars), Ethereum (0x...40 chars), or ENS name (name.eth)
+    <div v-else-if="modelValue && !modelValue.startsWith('0x')" class="mt-2 text-xs text-red-400">
+      Incorrect address format. Please enter your Circular Protocol Address (0x...)
     </div>
   </div>
 </template>
@@ -75,7 +78,13 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'validate'])
 
 // Local state
+const addressInput = ref(null)
 const addressType = ref('')
+
+// Computed properties
+const hasFormatError = computed(() => {
+  return props.modelValue && !props.modelValue.startsWith('0x')
+})
 
 // Handle input changes
 const handleInput = (event) => {
@@ -85,14 +94,15 @@ const handleInput = (event) => {
   // Clear previous validation
   addressType.value = ''
   
-  // Determine address type using our utility
+  // Only show type indicator for valid Circular addresses
+  // Don't show indicators for Ethereum/Solana addresses as they're not supported
   if (value) {
     const detectedType = getAddressType(value)
-    if (detectedType) {
-      addressType.value = detectedType
-    } else if (value.endsWith('.eth')) {
-      addressType.value = 'ens'
+    // Only set addressType for Circular addresses (which are valid for CIRX)
+    if (detectedType === 'circular') {
+      addressType.value = 'circular'
     }
+    // Don't set addressType for ethereum/solana/ens as they should show error state
   }
 }
 
@@ -100,4 +110,31 @@ const handleInput = (event) => {
 const handleValidation = () => {
   emit('validate', props.modelValue)
 }
+
+// Focus the input field
+const focusInput = () => {
+  console.log('🎯 RecipientAddressInput: focusInput called')
+  if (addressInput.value) {
+    console.log('🎯 RecipientAddressInput: calling focus() on input element')
+    addressInput.value.focus()
+    console.log('🎯 RecipientAddressInput: focus() called, active element:', document.activeElement)
+  } else {
+    console.log('❌ RecipientAddressInput: addressInput ref is null')
+  }
+}
+
+// Clear and focus the input field
+const clearAndFocusInput = () => {
+  emit('update:modelValue', '')
+  if (addressInput.value) {
+    addressInput.value.focus()
+  }
+}
+
+// Expose methods to parent components
+defineExpose({
+  focusInput,
+  clearAndFocusInput
+})
+
 </script>

@@ -296,6 +296,163 @@
         </div>
       </div>
 
+      <!-- CIRX Transaction Testing -->
+      <div class="bg-gray-800 rounded-lg p-6 mb-8">
+        <h2 class="text-2xl font-semibold text-white mb-4">💸 CIRX Transaction Testing</h2>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Send Transaction Form -->
+          <div>
+            <h3 class="text-lg font-medium text-red-400 mb-3">Send CIRX Transaction</h3>
+            
+            <!-- Sender Info -->
+            <div class="bg-gray-900 rounded-lg p-4 mb-4">
+              <h4 class="text-sm font-medium text-gray-300 mb-2">Sender Information</h4>
+              <div class="text-sm space-y-1">
+                <div>
+                  <span class="text-gray-400">From:</span>
+                  <span class="ml-2 text-red-300 font-mono text-xs">{{ config?.public?.cirxWalletAddress || 'Not configured' }}</span>
+                </div>
+                <div>
+                  <span class="text-gray-400">Balance:</span>
+                  <span class="ml-2 text-green-300">{{ senderBalance || cirxBalance || 'Unknown' }} CIRX</span>
+                </div>
+                <div>
+                  <span class="text-gray-400">Private Key:</span>
+                  <span class="ml-2 text-amber-300">{{ config?.public?.cirxWalletPrivateKey ? 'Configured ✓' : 'Not configured ❌' }}</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Transaction Form -->
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm text-gray-400 mb-2">Recipient Address:</label>
+                <input 
+                  v-model="txRecipientAddress"
+                  type="text"
+                  placeholder="Enter recipient Circular address (e.g., 0x5e9784e9...)"
+                  class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-red-500"
+                />
+                <div class="text-xs text-gray-400 mt-1">
+                  Enter a valid Circular Protocol address to send CIRX tokens to
+                </div>
+              </div>
+              
+              <div>
+                <label class="block text-sm text-gray-400 mb-2">Amount (CIRX):</label>
+                <input 
+                  v-model="txAmount"
+                  type="number"
+                  step="0.000001"
+                  min="0"
+                  placeholder="Enter amount to send (e.g., 1.5)"
+                  class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-red-500"
+                />
+                <div class="text-xs text-gray-400 mt-1">
+                  Amount must be positive and less than your balance
+                </div>
+              </div>
+              
+              <!-- Transaction Actions -->
+              <div class="flex gap-3">
+                <button 
+                  @click="sendTransaction"
+                  :disabled="!txRecipientAddress || !txAmount || sendingTransaction || !isValidTransaction"
+                  class="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 text-white rounded-lg transition-colors"
+                >
+                  {{ sendingTransaction ? 'Sending...' : 'Send Transaction' }}
+                </button>
+                
+                <button 
+                  @click="clearTransactionForm"
+                  class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
+                >
+                  Clear Form
+                </button>
+              </div>
+              
+              <!-- Transaction Validation Status -->
+              <div v-if="txRecipientAddress || txAmount" class="text-xs">
+                <div class="space-y-1">
+                  <div>
+                    <span class="text-gray-400">Recipient Valid:</span>
+                    <span :class="isValidAddress ? 'text-green-400' : 'text-red-400'">
+                      {{ isValidAddress ? '✓' : '✗' }}
+                    </span>
+                  </div>
+                  <div>
+                    <span class="text-gray-400">Amount Valid:</span>
+                    <span :class="isValidAmount ? 'text-green-400' : 'text-red-400'">
+                      {{ isValidAmount ? '✓' : '✗' }}
+                    </span>
+                  </div>
+                  <div>
+                    <span class="text-gray-400">Ready to Send:</span>
+                    <span :class="isValidTransaction ? 'text-green-400' : 'text-red-400'">
+                      {{ isValidTransaction ? '✓' : '✗' }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Security Warning -->
+              <div class="bg-red-900/20 border border-red-700 rounded p-3">
+                <div class="text-red-400 text-xs">
+                  ⚠️ <strong>Warning:</strong> This will send real CIRX tokens on the Sandbox blockchain. Use small amounts for testing only.
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Transaction Results -->
+          <div>
+            <h3 class="text-lg font-medium text-orange-400 mb-3">Transaction Results</h3>
+            <div class="bg-gray-900 rounded-lg p-4 max-h-80 overflow-y-auto">
+              <div v-if="transactionResults.length === 0" class="text-gray-500 text-center py-8">
+                No transactions sent yet
+              </div>
+              <div 
+                v-for="(result, index) in transactionResults" 
+                :key="index"
+                class="mb-4 p-3 bg-gray-800 rounded-lg"
+              >
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-sm font-medium" :class="result.success ? 'text-green-400' : 'text-red-400'">
+                    {{ result.success ? '✅ Success' : '❌ Failed' }}
+                  </span>
+                  <span class="text-xs text-gray-500">{{ result.timestamp }}</span>
+                </div>
+                
+                <div v-if="result.success" class="text-xs space-y-1">
+                  <div>
+                    <span class="text-gray-400">TX Hash:</span>
+                    <span class="ml-2 text-blue-300 font-mono">{{ result.txHash }}</span>
+                  </div>
+                  <div>
+                    <span class="text-gray-400">To:</span>
+                    <span class="ml-2 text-purple-300 font-mono">{{ result.to }}</span>
+                  </div>
+                  <div>
+                    <span class="text-gray-400">Amount:</span>
+                    <span class="ml-2 text-green-300">{{ result.amount }} CIRX</span>
+                  </div>
+                  <div>
+                    <span class="text-gray-400">Sender Balance Before:</span>
+                    <span class="ml-2 text-yellow-300">{{ result.senderBalanceBefore }} CIRX</span>
+                  </div>
+                </div>
+                
+                <div v-else class="text-xs">
+                  <div class="text-red-300">{{ result.error }}</div>
+                  <div v-if="result.errorType" class="text-gray-400 mt-1">Type: {{ result.errorType }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- CIRX Balance Testing -->
       <div class="bg-gray-800 rounded-lg p-6 mb-8">
         <h2 class="text-2xl font-semibent text-white mb-4">💰 CIRX Balance Testing</h2>
@@ -441,6 +598,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useCircularChain } from '~/composables/useCircularChain'
+import { validateWalletAddress } from '~/utils/validation.js'
 
 // Page metadata
 definePageMeta({
@@ -501,6 +659,13 @@ const settingKeys = ref(false)
 const balanceTestResults = ref([])
 const debugLogs = ref([])
 
+// Transaction sending state
+const txRecipientAddress = ref('')
+const txAmount = ref('')
+const sendingTransaction = ref(false)
+const transactionResults = ref([])
+const senderBalance = ref('')
+
 // Chain configurations with correct NAG URLs
 const CHAIN_CONFIGS = {
   testnet: {
@@ -560,6 +725,25 @@ const currentChainConfig = computed(() => {
 
 const apiBaseUrl = computed(() => {
   return config.value?.public?.apiBaseUrl || 'http://localhost:8080'
+})
+
+// Transaction validation computed properties
+const isValidAddress = computed(() => {
+  if (!txRecipientAddress.value) return false
+  
+  // Use proper validation utility for Circular addresses
+  const validation = validateWalletAddress(txRecipientAddress.value, 'circular')
+  return validation.isValid
+})
+
+const isValidAmount = computed(() => {
+  if (!txAmount.value) return false
+  const amount = parseFloat(txAmount.value)
+  return !isNaN(amount) && amount > 0
+})
+
+const isValidTransaction = computed(() => {
+  return isValidAddress.value && isValidAmount.value
 })
 
 const getStatusColor = (status) => {
@@ -627,6 +811,120 @@ const addBalanceTestResult = (method, success, result) => {
   }
 }
 
+
+// Transaction sending functions
+const sendTransaction = async () => {
+  if (!isValidTransaction.value) {
+    addLog('error', 'Transaction validation failed')
+    return
+  }
+  
+  sendingTransaction.value = true
+  addLog('info', `Attempting to send ${txAmount.value} CIRX to ${txRecipientAddress.value}`)
+  
+  try {
+    const requestBody = {
+      recipientAddress: txRecipientAddress.value,
+      amount: txAmount.value
+    }
+    
+    addLog('info', `Sending request to backend: ${JSON.stringify(requestBody)}`)
+    
+    const response = await fetch(`${apiBaseUrl.value}/api/v1/debug/send-transaction`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(requestBody)
+    })
+    
+    const result = await response.json()
+    addLog('info', `Backend response: ${JSON.stringify(result)}`)
+    
+    if (response.ok && result.success) {
+      // Success
+      const txResult = {
+        success: true,
+        txHash: result.transaction.hash,
+        to: result.transaction.to,
+        amount: result.transaction.amount,
+        senderBalanceBefore: result.sender_balance_before,
+        timestamp: new Date().toLocaleTimeString()
+      }
+      
+      transactionResults.value.unshift(txResult)
+      addLog('success', `Transaction sent successfully! TX Hash: ${result.transaction.hash}`)
+      
+      // Clear form after success
+      clearTransactionForm()
+      
+      // Refresh sender balance
+      await fetchSenderBalance()
+      
+    } else {
+      // Error
+      const errorResult = {
+        success: false,
+        error: result.error || 'Unknown error',
+        errorType: result.error_type || 'unknown',
+        timestamp: new Date().toLocaleTimeString()
+      }
+      
+      transactionResults.value.unshift(errorResult)
+      addLog('error', `Transaction failed: ${result.error}`)
+    }
+    
+  } catch (error) {
+    const errorResult = {
+      success: false,
+      error: `Network error: ${error.message}`,
+      errorType: 'network_error',
+      timestamp: new Date().toLocaleTimeString()
+    }
+    
+    transactionResults.value.unshift(errorResult)
+    addLog('error', `Transaction request failed: ${error.message}`)
+    
+  } finally {
+    sendingTransaction.value = false
+  }
+}
+
+const clearTransactionForm = () => {
+  txRecipientAddress.value = ''
+  txAmount.value = ''
+  addLog('info', 'Transaction form cleared')
+}
+
+const fetchSenderBalance = async () => {
+  try {
+    const walletAddress = config.value?.public?.cirxWalletAddress
+    if (walletAddress) {
+      // Use the existing balance fetching logic
+      const response = await fetch(`${apiBaseUrl.value}/api/v1/debug/nag-balance`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          nagUrl: 'https://nag.circularlabs.io/NAG.php?cep=',
+          endpoint: 'GetWalletBalance_',
+          address: walletAddress
+        })
+      })
+      
+      const result = await response.json()
+      if (result.success && result.nag_response?.body?.Result === 200) {
+        senderBalance.value = result.nag_response.body.Response.Balance.toString()
+      } else {
+        senderBalance.value = 'Error fetching balance'
+      }
+    }
+  } catch (error) {
+    addLog('error', `Error fetching sender balance: ${error.message}`)
+    senderBalance.value = 'Error'
+  }
+}
 
 // Balance testing functions
 const testBalanceFetching = async () => {
@@ -929,7 +1227,7 @@ const switchChain = () => {
 }
 
 // Initialize
-onMounted(() => {
+onMounted(async () => {
   addLog('info', 'Circular chain wallet debug page initialized')
   
   // Set initial chain from environment variable
@@ -941,6 +1239,15 @@ onMounted(() => {
     }
   }
   
+  // Fetch sender balance for transaction sending functionality
+  await fetchSenderBalance()
+  
+  // Auto-load default address if configured and no address is set
+  if (!cirxAddress.value && config.value?.public?.defaultCircularAddress) {
+    addLog('info', 'Auto-loading default Circular address from environment')
+    await useDefaultAddress()
+  }
+  
   // Saturn wallet detection removed
   
   // Log initial state
@@ -949,6 +1256,7 @@ onMounted(() => {
     addLog('info', `Initial address: ${cirxAddress.value || 'None'}`)
     addLog('info', `Initial balance: ${cirxBalance.value} CIRX`)
     addLog('info', `Active chain: ${selectedChain.value} (${currentChainConfig.value.chainName})`)
+    addLog('info', `Sender balance for transactions: ${senderBalance.value || 'Unknown'} CIRX`)
   }, 1000)
 })
 

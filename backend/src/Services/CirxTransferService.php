@@ -89,12 +89,16 @@ class CirxTransferService
                 );
             }
 
-            // Calculate CIRX amount to transfer (this excludes the platform fee)
-            $cirxAmount = $this->calculateCirxAmount(
+            // Calculate gross CIRX amount from payment
+            $grossCirxAmount = $this->calculateCirxAmount(
                 $transaction->amount_paid,
                 $transaction->payment_token,
                 $this->determineSwapType($transaction)
             );
+            
+            // Subtract 4 CIRX platform fee from the transfer amount
+            $cirxAmount = max(0, $grossCirxAmount - 4.0);
+            $cirxAmount = number_format($cirxAmount, 1, '.', '');
 
             // Execute the blockchain transfer
             $transferResult = $this->executeBlockchainTransfer(
@@ -238,8 +242,9 @@ class CirxTransferService
     }
 
     /**
-     * Calculate total payment amount including platform fee
-     * User pays: (CIRX amount * $2.50 / token price) + platform fee in token
+     * Calculate base payment amount (NO platform fee added)
+     * User pays exactly: (CIRX amount * $2.50 / token price) - NO additional fees
+     * Platform fee is handled by subtracting 4 CIRX from transfer amount
      */
     public function calculateTotalPaymentWithFee(string $cirxAmount, string $paymentToken): string
     {
@@ -253,15 +258,11 @@ class CirxTransferService
             throw new \InvalidArgumentException("Unsupported token: {$paymentToken}");
         }
         
-        // Base payment amount in token
+        // User pays exactly the base amount - NO platform fee added to payment
         $basePaymentAmount = $cirxValueUSD / $tokenPrice;
         
-        // Add platform fee
-        $platformFee = floatval($this->calculatePlatformFeeInPaymentToken($paymentToken));
-        $totalPaymentAmount = $basePaymentAmount + $platformFee;
-        
         // Format to match test expectations - preserve at least 1 decimal place  
-        $formatted = number_format($totalPaymentAmount, 7, '.', '');
+        $formatted = number_format($basePaymentAmount, 7, '.', '');
         $trimmed = rtrim($formatted, '0');
         // Ensure we always have at least one decimal place for whole numbers
         if (substr($trimmed, -1) === '.') {
@@ -279,12 +280,19 @@ class CirxTransferService
     }
 
     /**
-     * Validate that the payment amount covers both CIRX and platform fee
-     * This ensures the user paid the correct total amount
+     * Validate that the payment amount is reasonable for CIRX conversion
+     * No platform fee validation needed since fee is deducted from CIRX transfer
      */
     public function validatePaymentAmount(Transaction $transaction): bool
     {
-        // Calculate expected CIRX amount based on payment
+        // Simply validate the payment is positive and reasonable
+        $actualPayment = floatval($transaction->amount_paid);
+        
+        if ($actualPayment <= 0) {
+            return false;
+        }
+        
+        // Calculate expected CIRX amount based on payment (before platform fee deduction)
         $swapType = $this->determineSwapType($transaction);
         $expectedCirxAmount = $this->calculateCirxAmount(
             $transaction->amount_paid,
@@ -292,18 +300,8 @@ class CirxTransferService
             $swapType
         );
         
-        // Calculate what the total payment should have been
-        $expectedTotalPayment = $this->calculateTotalPaymentWithFee(
-            $expectedCirxAmount,
-            $transaction->payment_token
-        );
-        
-        // Allow for small rounding differences (0.1% tolerance)
-        $actualPayment = floatval($transaction->amount_paid);
-        $expectedPayment = floatval($expectedTotalPayment);
-        $tolerance = $expectedPayment * 0.001; // 0.1% tolerance
-        
-        return abs($actualPayment - $expectedPayment) <= $tolerance;
+        // Ensure we can still transfer CIRX after 4 CIRX platform fee deduction
+        return floatval($expectedCirxAmount) > 4.0;
     }
 
     /**

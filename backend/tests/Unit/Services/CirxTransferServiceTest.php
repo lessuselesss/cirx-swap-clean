@@ -290,7 +290,7 @@ class CirxTransferServiceTest extends TestCase
     }
 
     /**
-     * Test platform fee calculation (4 CIRX fee)
+     * Test platform fee calculation (4 CIRX fee) - still used for internal calculations
      */
     public function test_calculates_platform_fee_in_payment_token()
     {
@@ -312,43 +312,68 @@ class CirxTransferServiceTest extends TestCase
     }
 
     /**
-     * Test total payment amount calculation including platform fee
+     * Test base payment amount calculation (NO platform fee added to payment)
      */
     public function test_calculates_total_payment_amount_with_platform_fee()
     {
         $testCases = [
-            // [cirxAmount, paymentToken, expectedTotalPaymentAmount]
-            ['400.0', 'USDC', '1010.0'],     // 400 CIRX = $1000 + $10 fee = $1010 = 1010 USDC
-            ['1080.0', 'ETH', '1.0037037'],  // 1080 CIRX = $2700, fee = 0.0037037 ETH, total = 1.0037037 ETH
-            ['20.0', 'SOL', '0.6'],          // 20 CIRX = $50, fee = 0.1 SOL, total = 0.6 SOL ($50 + $10 = $60)
+            // [cirxAmount, paymentToken, expectedBasePaymentAmount] - NO platform fee added
+            ['400.0', 'USDC', '1000.0'],     // 400 CIRX = $1000, user pays exactly $1000 in USDC
+            ['1080.0', 'ETH', '1.0'],        // 1080 CIRX = $2700, user pays exactly 1.0 ETH ($2700)
+            ['20.0', 'SOL', '0.5'],          // 20 CIRX = $50, user pays exactly 0.5 SOL ($50)
         ];
 
-        foreach ($testCases as [$cirxAmount, $paymentToken, $expectedTotal]) {
+        foreach ($testCases as [$cirxAmount, $paymentToken, $expectedBasePayment]) {
             $result = $this->service->calculateTotalPaymentWithFee($cirxAmount, $paymentToken);
-            $this->assertEquals($expectedTotal, $result,
-                "Failed for {$cirxAmount} CIRX in {$paymentToken}: expected {$expectedTotal}, got {$result}");
+            $this->assertEquals($expectedBasePayment, $result,
+                "Failed for {$cirxAmount} CIRX in {$paymentToken}: expected {$expectedBasePayment}, got {$result}");
         }
     }
 
     /**
-     * Test that CIRX amount calculations remain unchanged (fee is separate)
+     * Test that CIRX amount calculations work correctly and platform fee gets subtracted
      */
     public function test_cirx_amount_calculation_unchanged_by_platform_fee()
     {
-        // Platform fee should not affect the CIRX amount the user receives
-        // The fee is added to the payment amount they need to send
+        // These tests verify the gross CIRX calculation (before 4 CIRX platform fee deduction)
         
         $testCases = [
-            // [paymentAmount, paymentToken, swapType, expectedCirxAmount (unchanged)]
-            ['1.0', 'ETH', 'liquid', '1080.0'],        // Still 1080 CIRX for 1 ETH
-            ['100.0', 'USDC', 'liquid', '40.0'],       // Still 40 CIRX for 100 USDC
-            ['1000.0', 'USDT', 'otc', '420.0'],        // Still 420 CIRX for 1000 USDT (with discount)
+            // [paymentAmount, paymentToken, swapType, expectedGrossCirxAmount]
+            ['1.0', 'ETH', 'liquid', '1080.0'],        // 1 ETH = $2700 = 1080 CIRX (gross)
+            ['100.0', 'USDC', 'liquid', '40.0'],       // 100 USDC = $100 = 40 CIRX (gross)
+            ['1000.0', 'USDT', 'otc', '420.0'],        // 1000 USDT = $1000 = 400 CIRX + 5% OTC discount = 420 CIRX (gross)
         ];
 
-        foreach ($testCases as [$paymentAmount, $paymentToken, $swapType, $expectedCirxAmount]) {
+        foreach ($testCases as [$paymentAmount, $paymentToken, $swapType, $expectedGrossCirxAmount]) {
             $result = $this->service->calculateCirxAmount($paymentAmount, $paymentToken, $swapType);
-            $this->assertEquals($expectedCirxAmount, $result,
-                "CIRX calculation should be unchanged: {$paymentAmount} {$paymentToken} ({$swapType})");
+            $this->assertEquals($expectedGrossCirxAmount, $result,
+                "Gross CIRX calculation: {$paymentAmount} {$paymentToken} ({$swapType})");
         }
+        
+        // Additional test: Verify that small payments are properly validated
+        // (payments that would result in less than 4 CIRX should be rejected)
+        $this->assertTrue(
+            $this->service->validatePaymentAmount(
+                $this->createMockTransaction('100.0', 'USDC') // 40 CIRX > 4 CIRX fee - valid
+            ),
+            'Payments resulting in more than 4 CIRX should be valid'
+        );
+        
+        $this->assertFalse(
+            $this->service->validatePaymentAmount(
+                $this->createMockTransaction('5.0', 'USDC') // 2 CIRX < 4 CIRX fee - invalid
+            ),
+            'Payments resulting in less than 4 CIRX should be rejected'
+        );
+    }
+    
+    private function createMockTransaction($amountPaid, $paymentToken)
+    {
+        $mock = $this->createMock(Transaction::class);
+        $mock->amount_paid = $amountPaid;
+        $mock->payment_token = $paymentToken;
+        $mock->cirx_recipient_address = '0x1234567890123456789012345678901234567890123456789012345678901234';
+        $mock->swap_status = Transaction::STATUS_PAYMENT_VERIFIED;
+        return $mock;
     }
 }

@@ -8,13 +8,15 @@ use Psr\Log\LoggerInterface;
 /**
  * Ethereum Blockchain Client
  * 
- * Handles interactions with Ethereum and EVM-compatible blockchains
+ * READ-ONLY client for Ethereum and EVM-compatible blockchains.
+ * Handles payment verification, balance checking, and transaction reading.
+ * Transaction sending capabilities removed - backend only monitors client-side chains.
  */
 class EthereumBlockchainClient extends AbstractBlockchainClient
 {
     private int $chainId;
     private string $networkName;
-    private ?string $privateKey;
+    // Private key removed - read-only client for payment verification only
     private array $tokenContracts;
 
     public function __construct(
@@ -22,7 +24,6 @@ class EthereumBlockchainClient extends AbstractBlockchainClient
         int $chainId = 1,
         string $networkName = 'ethereum',
         ?string $backupRpcUrl = null,
-        ?string $privateKey = null,
         array $tokenContracts = [],
         ?LoggerInterface $logger = null
     ) {
@@ -30,7 +31,6 @@ class EthereumBlockchainClient extends AbstractBlockchainClient
         
         $this->chainId = $chainId;
         $this->networkName = $networkName;
-        $this->privateKey = $privateKey;
         $this->tokenContracts = $tokenContracts;
     }
 
@@ -120,52 +120,8 @@ class EthereumBlockchainClient extends AbstractBlockchainClient
         return $this->weiToEther($balanceWei);
     }
 
-    /**
-     * Send a transaction
-     */
-    public function sendTransaction(array $transactionData): string
-    {
-        if (!$this->privateKey) {
-            throw new BlockchainException(
-                "Private key not configured for {$this->networkName} blockchain",
-                500,
-                null,
-                $this->networkName,
-                'send_transaction'
-            );
-        }
-
-        // For now, return a mock transaction hash
-        // In production, this would sign and broadcast the transaction
-        $mockTxHash = '0x' . bin2hex(random_bytes(32));
-        
-        $this->logger->info("Mock transaction sent", [
-            'tx_hash' => $mockTxHash,
-            'to' => $transactionData['to'] ?? null,
-            'value' => $transactionData['value'] ?? null,
-            'network' => $this->networkName
-        ]);
-
-        return $mockTxHash;
-    }
-
-    /**
-     * Estimate gas for a transaction
-     */
-    public function estimateGas(array $transactionData): int
-    {
-        $response = $this->rpcCall('eth_estimateGas', [$transactionData]);
-        return (int)$this->hexToDec($response['result']);
-    }
-
-    /**
-     * Get gas price
-     */
-    public function getGasPrice(): string
-    {
-        $response = $this->rpcCall('eth_gasPrice');
-        return $this->hexToDec($response['result']);
-    }
+    // Transaction sending methods removed - read-only client for payment verification only
+    // Gas estimation and pricing not needed for read-only operations
 
     /**
      * Get the chain ID
@@ -298,47 +254,5 @@ class EthereumBlockchainClient extends AbstractBlockchainClient
         return false;
     }
 
-    /**
-     * Send ERC-20 token transfer
-     */
-    public function sendTokenTransfer(
-        string $tokenAddress,
-        string $toAddress,
-        string $amount,
-        int $gasLimit = 100000
-    ): string {
-        if (!$this->privateKey) {
-            throw new BlockchainException(
-                "Private key not configured for token transfer",
-                500,
-                null,
-                $this->networkName,
-                'send_token_transfer'
-            );
-        }
-
-        $decimals = $this->getTokenDecimals($tokenAddress);
-        $formattedAmount = $this->formatTokenAmount($amount, $decimals);
-
-        // ERC-20 transfer function signature: 0xa9059cbb
-        $functionSignature = '0xa9059cbb';
-        $paddedToAddress = str_pad(substr($toAddress, 2), 64, '0', STR_PAD_LEFT);
-        $paddedAmount = str_pad(dechex((int)$formattedAmount), 64, '0', STR_PAD_LEFT);
-        
-        $data = $functionSignature . $paddedToAddress . $paddedAmount;
-
-        // For now, return mock transaction hash
-        // In production, this would create, sign and send the transaction
-        $mockTxHash = '0x' . bin2hex(random_bytes(32));
-        
-        $this->logger->info("Mock token transfer sent", [
-            'tx_hash' => $mockTxHash,
-            'token_address' => $tokenAddress,
-            'to' => $toAddress,
-            'amount' => $amount,
-            'network' => $this->networkName
-        ]);
-
-        return $mockTxHash;
-    }
+    // ERC-20 token transfer method removed - read-only client for payment verification only
 }

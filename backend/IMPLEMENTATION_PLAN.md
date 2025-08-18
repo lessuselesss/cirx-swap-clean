@@ -303,8 +303,8 @@ public function test_verifies_ethereum_payment_successfully()
 public function test_transfers_cirx_tokens_successfully()
 {
     $mockClient = Mockery::mock(CirxBlockchainClient::class);
-    $mockClient->shouldReceive('sendTransaction')
-        ->andReturn(['txId' => '0xabc...', 'status' => 'pending']);
+    $mockClient->shouldReceive('sendCirxTransfer')
+        ->andReturn('0xabc...');
 
     $service = new CirxTransferService($mockClient);
     $result = $service->transferCirx('0xrecipient...', '100.0');

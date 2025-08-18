@@ -133,7 +133,7 @@ class CirxBlockchainClient extends AbstractBlockchainClient
             
             // Manual NAG call with correct capitalization
             $data = [
-                'Blockchain' => '714d2ac07a826b66ac56752eebd7c77b58d2ee842e523d913fd0ef06e6bdfcae', // Circular Main Public
+                'Blockchain' => $this->getEnvironmentBlockchain(),
                 'Address' => $walletAddress,
                 'Asset' => 'CIRX', // Correct capitalization
                 'Version' => '1.0.8'
@@ -194,33 +194,324 @@ class CirxBlockchainClient extends AbstractBlockchainClient
                 );
             }
 
-            // For now, generate transaction parameters manually
-            // TODO: Implement proper transaction construction
-            $txId = '0x' . bin2hex(random_bytes(32));
-            $timestamp = $this->cirxApi->getFormattedTimestamp();
-            $nonce = $this->cirxApi->getWalletNonce('circular', $this->cirxWalletAddress);
-            $payload = json_encode([
-                'action' => 'transfer',
-                'amount' => $amount,
-                'asset' => 'CIRX'
+            // Get transaction parameters first
+            $blockchainId = $this->getEnvironmentBlockchain();
+            $timestampResponse = $this->cirxApi->getFormattedTimestamp();
+            
+            // Use the blockchain ID instead of 'circular' string
+            $blockchainId = $this->getEnvironmentBlockchain();
+            $nonceResponse = $this->cirxApi->getWalletNonce($blockchainId, $this->cirxWalletAddress);
+            
+            // Extract string values from SDK responses (they may return objects)
+            $this->logger->info("SDK Response Types", [
+                'timestamp_type' => gettype($timestampResponse),
+                'timestamp_value' => var_export($timestampResponse, true),
+                'nonce_type' => gettype($nonceResponse),
+                'nonce_value' => var_export($nonceResponse, true)
             ]);
             
-            // Sign the transaction
-            $message = $txId . $this->cirxWalletAddress . $recipientAddress . $timestamp . $payload . $nonce;
-            $signature = $this->cirxApi->signMessage($message, $this->cirxPrivateKey);
+            // Handle timestamp conversion
+            if (is_object($timestampResponse)) {
+                if (isset($timestampResponse->timestamp)) {
+                    $timestamp = (string)$timestampResponse->timestamp;
+                } elseif (method_exists($timestampResponse, '__toString')) {
+                    $timestamp = $timestampResponse->__toString();
+                } else {
+                    $timestamp = json_encode($timestampResponse);
+                }
+            } else {
+                $timestamp = (string)$timestampResponse;
+            }
             
-            // Send transaction
-            $txHash = $this->cirxApi->sendTransaction(
-                $txId,
-                $this->cirxWalletAddress,
-                $recipientAddress,
-                $timestamp,
-                'transfer',
-                $payload,
-                $nonce,
-                $signature,
-                'circular'
-            );
+            // Handle nonce conversion - extract the actual nonce value
+            if (is_object($nonceResponse)) {
+                if (isset($nonceResponse->Result) && $nonceResponse->Result === 200) {
+                    if (isset($nonceResponse->Response->Nonce)) {
+                        $nonce = (string)$nonceResponse->Response->Nonce;
+                    } else {
+                        $nonce = '0'; // Default nonce
+                    }
+                } else {
+                    throw new BlockchainException(
+                        "Failed to get wallet nonce: " . ($nonceResponse->Response ?? 'Unknown error'),
+                        $nonceResponse->Result ?? 500,
+                        null,
+                        'cirx',
+                        'get_nonce'
+                    );
+                }
+            } else {
+                $nonce = (string)$nonceResponse;
+            }
+            
+            // Try hexadecimal payload format for amount
+            // Convert amount to wei (18 decimals) and then to hex
+            $amountWei = bcmul($amount, bcpow('10', $this->cirxDecimals));
+            $payload = '0x' . dechex($amountWei);
+            
+            // Calculate TxID as sha256 hash - try different approaches based on SDK patterns
+            $fromClean = str_replace('0x', '', $this->cirxWalletAddress);
+            $toClean = str_replace('0x', '', $recipientAddress);
+            $payloadClean = str_replace('0x', '', $payload);
+            
+            // Strategy 1: Try using random transaction ID (maybe the API doesn't validate it strictly)
+            $randomTxId = '0x' . hash('sha256', uniqid() . microtime() . $fromClean . $toClean);
+            
+            // Strategy 2: Try the SDK registerWallet pattern: blockchain + from + to + payload + nonce + timestamp
+            $sdkPattern = $blockchainId . $fromClean . $toClean . $payloadClean . $nonce . $timestamp;
+            $sdkTxId = '0x' . hash('sha256', $sdkPattern);
+            
+            // Strategy 3: Original pattern but include blockchain ID
+            $withBlockchain = $blockchainId . $fromClean . $toClean . $payloadClean . $timestamp;
+            $blockchainTxId = '0x' . hash('sha256', $withBlockchain);
+            
+            // Strategy 4: Try without the 0x prefix in the final result
+            $noPrefixTxId = hash('sha256', $fromClean . $toClean . $payloadClean . $timestamp);
+            
+            // Strategy 5: Try plain string payload instead of hex (like registerWallet does)
+            $plainAmount = (string)$amount; // Just "0.1" instead of hex
+            $plainPayloadPattern = $blockchainId . $fromClean . $toClean . $plainAmount . $nonce . $timestamp;
+            $plainPayloadTxId = '0x' . hash('sha256', $plainPayloadPattern);
+            
+            // Strategy 6: Try amount in different format (wei as string)
+            $weiStringPattern = $blockchainId . $fromClean . $toClean . $amountWei . $nonce . $timestamp;
+            $weiStringTxId = '0x' . hash('sha256', $weiStringPattern);
+            
+            // Strategy 7: Simple incremental ID (maybe they just want unique IDs)
+            $simpleId = '0x' . str_pad(dechex(time() + rand(1, 1000)), 64, '0', STR_PAD_LEFT);
+            
+            // Strategy 8: Try double SHA256 (like Bitcoin)
+            $doubleSha = hash('sha256', $fromClean . $toClean . $payloadClean . $timestamp);
+            $doubleShaId = '0x' . hash('sha256', $doubleSha);
+            
+            // Strategy 9: Include nonce in different position
+            $nonceFirstPattern = $nonce . $blockchainId . $fromClean . $toClean . $payloadClean . $timestamp;
+            $nonceFirstId = '0x' . hash('sha256', $nonceFirstPattern);
+            
+            // Strategy 10: Try keccak256 instead of SHA256 (Ethereum style)
+            if (function_exists('hash') && in_array('sha3-256', hash_algos())) {
+                $keccakId = '0x' . hash('sha3-256', $fromClean . $toClean . $payloadClean . $timestamp);
+            } else {
+                // Fallback to regular SHA256 if keccak not available
+                $keccakId = '0x' . hash('sha256', 'keccak:' . $fromClean . $toClean . $payloadClean . $timestamp);
+            }
+            
+            // Strategy 11: Message digest format (like in signing)
+            $messageDigest = $this->cirxWalletAddress . $recipientAddress . $timestamp . $payload . $nonce;
+            $messageDigestId = '0x' . hash('sha256', $messageDigest);
+            
+            // Strategy 12: Try with the actual hex fix function from SDK
+            $hexFixedFrom = $this->cirxApi->hexFix($this->cirxWalletAddress);
+            $hexFixedTo = $this->cirxApi->hexFix($recipientAddress);
+            $hexFixedPayload = $this->cirxApi->hexFix($payload);
+            $hexFixedPattern = $blockchainId . $hexFixedFrom . $hexFixedTo . $hexFixedPayload . $nonce . $timestamp;
+            $hexFixedId = '0x' . hash('sha256', $hexFixedPattern);
+            
+            // SOLVED: Simple signature method works! Now testing nonce handling
+            // The simple message (signing only TxID) passes signature verification
+            // Issue: nonce needs proper handling for transaction submission
+            
+            $strategies = [
+                'working_simple_nonce_plus1' => [
+                    'type' => 'C_TYPE_COIN',
+                    'signature_method' => 'simple',
+                    'nonce_method' => 'plus1',
+                    'payload_obj' => [
+                        "Action" => "CP_SEND",
+                        "Amount" => $amount,
+                        "To" => $recipientAddress,
+                        "Asset" => "CIRX",
+                        "Memo" => ""
+                    ]
+                ],
+                'working_simple_string_nonce' => [
+                    'type' => 'C_TYPE_COIN',
+                    'signature_method' => 'simple',
+                    'nonce_method' => 'string',
+                    'payload_obj' => [
+                        "Action" => "CP_SEND",
+                        "Amount" => $amount,
+                        "To" => $recipientAddress,
+                        "Asset" => "CIRX",
+                        "Memo" => ""
+                    ]
+                ],
+                'working_simple_original' => [
+                    'type' => 'C_TYPE_COIN',
+                    'signature_method' => 'simple',
+                    'nonce_method' => 'original',
+                    'payload_obj' => [
+                        "Action" => "CP_SEND",
+                        "Amount" => $amount,
+                        "To" => $recipientAddress,
+                        "Asset" => "CIRX",
+                        "Memo" => ""
+                    ]
+                ]
+            ];
+            
+            $this->logger->info("Fixed TxID/payload calculation using exact SDK pattern", [
+                'original_amount' => $amount,
+                'amount_wei' => $amountWei,
+                'note' => 'Now calculating TxID with same payload that gets sent'
+            ]);
+            
+            $lastException = null;
+            $txResponse = null;
+            
+            foreach ($strategies as $strategyName => $strategy) {
+                try {
+                    $txType = $strategy['type'];
+                    $payloadObj = $strategy['payload_obj'];
+                    $signatureMethod = $strategy['signature_method'];
+                    $nonceMethod = $strategy['nonce_method'] ?? 'original';
+                    
+                    // Handle different nonce approaches
+                    $currentNonce = $nonce; // Default from API
+                    switch ($nonceMethod) {
+                        case 'plus1':
+                            $currentNonce = (string)((int)$nonce + 1);
+                            break;
+                        case 'string':
+                            $currentNonce = "nonce_" . $nonce;
+                            break;
+                        case 'original':
+                        default:
+                            $currentNonce = $nonce;
+                            break;
+                    }
+                    
+                    // Follow SDK pattern exactly: JSON → hex → TxID calculation → sendTransaction
+                    $jsonStr = json_encode($payloadObj);
+                    $currentPayload = $this->cirxApi->stringToHex($jsonStr); // Use SDK's stringToHex method
+                    
+                    // Calculate TxID using the SAME payload that will be sent (SDK pattern)
+                    $fromClean = $this->cirxApi->hexFix($this->cirxWalletAddress);
+                    $toClean = $this->cirxApi->hexFix($recipientAddress);
+                    $payloadClean = $this->cirxApi->hexFix($currentPayload);
+                    
+                    // Use exact SDK pattern: hash('sha256', $blockchain . $from . $to . $payload . $nonce . $timestamp)
+                    $txIdString = $blockchainId . $fromClean . $toClean . $payloadClean . $currentNonce . $timestamp;
+                    $txId = hash('sha256', $txIdString);
+                    
+                    $this->logger->info("Trying strategy: {$strategyName}", [
+                        'txId' => $txId,
+                        'txId_source' => $txIdString,
+                        'from' => $this->cirxWalletAddress,
+                        'to' => $recipientAddress,
+                        'timestamp' => $timestamp,
+                        'tx_type' => $txType,
+                        'payload' => $currentPayload,
+                        'payload_decoded' => $jsonStr,
+                        'nonce_original' => $nonce,
+                        'nonce_current' => $currentNonce,
+                        'nonce_method' => $nonceMethod,
+                        'blockchain' => $blockchainId,
+                        'signature_method' => $signatureMethod
+                    ]);
+                    
+                    // Handle different signature methods
+                    $signature = '';
+                    switch ($signatureMethod) {
+                        case 'empty':
+                            // Like registerWallet - no signature required
+                            $signature = '';
+                            $this->logger->info("Using empty signature for {$strategyName}");
+                            break;
+                            
+                        case 'simple':
+                            // Try just signing the TxID (simpler message)
+                            $message = $txId;
+                            $signature = $this->cirxApi->signMessage($message, $this->cirxPrivateKey);
+                            $this->logger->info("Using simple signature for {$strategyName}", [
+                                'message' => $message,
+                                'signature' => $signature
+                            ]);
+                            break;
+                            
+                        case 'normal':
+                        default:
+                            // Original complex message format
+                            $message = $txId . $this->cirxWalletAddress . $recipientAddress . $timestamp . $currentPayload . $nonce;
+                            $signature = $this->cirxApi->signMessage($message, $this->cirxPrivateKey);
+                            $this->logger->info("Using normal signature for {$strategyName}", [
+                                'message' => $message,
+                                'message_length' => strlen($message),
+                                'signature' => $signature
+                            ]);
+                            break;
+                    }
+                    
+                    // Send transaction with all required parameters (9 total)
+                    // Parameters: id, from, to, timestamp, type, payload, nonce, signature, blockchain
+                    $txResponse = $this->cirxApi->sendTransaction(
+                        $txId,
+                        $this->cirxWalletAddress,
+                        $recipientAddress,
+                        $timestamp,
+                        $txType,
+                        $currentPayload, // Same payload used in TxID calculation
+                        $currentNonce,   // Use the modified nonce for both TxID and transaction
+                        $signature,
+                        $blockchainId
+                    );
+                    
+                    // Check if the response indicates success
+                    if (is_object($txResponse)) {
+                        if (isset($txResponse->Result) && $txResponse->Result !== 200) {
+                            // This strategy failed, try next one
+                            $this->logger->info("Strategy {$strategyName} failed", [
+                                'error' => $txResponse->Response ?? 'Unknown error',
+                                'error_code' => $txResponse->Result ?? 'unknown'
+                            ]);
+                            $lastException = new \Exception(
+                                "Transaction failed: " . ($txResponse->Response ?? 'Unknown error'),
+                                $txResponse->Result ?? 500
+                            );
+                            continue;
+                        }
+                    }
+                    
+                    // If we get here, the strategy worked
+                    $this->logger->info("Strategy {$strategyName} succeeded!", [
+                        'response' => $txResponse
+                    ]);
+                    break;
+                    
+                } catch (\Exception $e) {
+                    $this->logger->info("Strategy {$strategyName} failed", [
+                        'error' => $e->getMessage(),
+                        'error_code' => $e->getCode()
+                    ]);
+                    $lastException = $e;
+                    continue;
+                }
+            }
+            
+            // If all strategies failed, throw the last exception
+            if ($txResponse === null && $lastException) {
+                throw $lastException;
+            }
+            
+            // Handle SDK response - it may return an object instead of string
+            if (is_object($txResponse)) {
+                if (isset($txResponse->Result) && $txResponse->Result !== 200) {
+                    throw new BlockchainException(
+                        "Transaction failed: " . ($txResponse->Response ?? 'Unknown error'),
+                        $txResponse->Result ?? 500,
+                        null,
+                        'cirx',
+                        'send_transfer'
+                    );
+                }
+                
+                // Extract transaction hash from response object
+                $txHash = isset($txResponse->Hash) ? $txResponse->Hash : 
+                         (isset($txResponse->TransactionHash) ? $txResponse->TransactionHash :
+                         (isset($txResponse->TxHash) ? $txResponse->TxHash : $txId));
+            } else {
+                $txHash = (string)$txResponse;
+            }
 
             $this->logger->info("CIRX transfer completed", [
                 'tx_hash' => $txHash,
@@ -229,7 +520,7 @@ class CirxBlockchainClient extends AbstractBlockchainClient
                 'amount' => $amount
             ]);
 
-            return $txHash;
+            return (string)$txHash;
 
         } catch (\Exception $e) {
             throw new BlockchainException(
@@ -365,5 +656,25 @@ class CirxBlockchainClient extends AbstractBlockchainClient
     public function getSDKVersion(): string
     {
         return $this->cirxApi->getVersion();
+    }
+    
+    /**
+     * Get blockchain address based on environment
+     * @return string Blockchain address for current environment
+     */
+    private function getEnvironmentBlockchain(): string
+    {
+        $environment = $_ENV['APP_ENV'] ?? 'development';
+        
+        switch ($environment) {
+            case 'production':
+                return '714d2ac07a826b66ac56752eebd7c77b58d2ee842e523d913fd0ef06e6bdfcae'; // Circular Main Public
+            case 'staging':
+                return 'acb8a9b79f3c663aa01be852cd42725f9e0e497fd849b436df51c5e074ebeb28'; // Circular Secondary Public
+            case 'development':
+            case 'testing':
+            default:
+                return '8a20baa40c45dc5055aeb26197c203e576ef389d9acb171bd62da11dc5ad72b2'; // Circular SandBox
+        }
     }
 }

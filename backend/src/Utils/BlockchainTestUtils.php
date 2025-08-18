@@ -31,10 +31,10 @@ class BlockchainTestUtils
     {
         try {
             if ($token === 'ETH') {
-                $balance = $this->client->getBalance($walletAddress);
+                $balance = $this->client->getNativeBalance($walletAddress);
                 return bccomp($balance, $amount, 18) >= 0;
             } else {
-                $tokenBalance = $this->client->getTokenBalance($walletAddress, $this->getTokenContract($token));
+                $tokenBalance = $this->client->getTokenBalance($this->getTokenContract($token), $walletAddress);
                 return bccomp($tokenBalance, $amount, 18) >= 0;
             }
         } catch (\Exception $e) {
@@ -42,36 +42,8 @@ class BlockchainTestUtils
         }
     }
     
-    /**
-     * Estimate gas cost for transaction
-     */
-    public function estimateTransactionCost(string $to, string $amount, string $token = 'ETH'): array
-    {
-        try {
-            $gasPrice = $this->client->getGasPrice();
-            $gasPriceGwei = bcdiv($gasPrice, '1000000000', 9);
-            
-            // Use higher gas limit for token transfers
-            $estimatedGas = $token === 'ETH' ? 21000 : 65000;
-            
-            $gasCostWei = bcmul($gasPrice, (string)$estimatedGas, 0);
-            $gasCostEth = bcdiv($gasCostWei, '1000000000000000000', 18);
-            
-            return [
-                'gas_price_wei' => $gasPrice,
-                'gas_price_gwei' => $gasPriceGwei,
-                'estimated_gas' => $estimatedGas,
-                'gas_cost_wei' => $gasCostWei,
-                'gas_cost_eth' => $gasCostEth,
-                'is_affordable' => bccomp($gasPriceGwei, (string)$this->maxGasPrice, 9) <= 0
-            ];
-        } catch (\Exception $e) {
-            return [
-                'error' => $e->getMessage(),
-                'is_affordable' => false
-            ];
-        }
-    }
+    // Gas estimation methods removed - backend is read-only for client-side chains
+    // Transaction cost estimation not needed for payment verification
     
     /**
      * Get current network status
@@ -80,14 +52,11 @@ class BlockchainTestUtils
     {
         try {
             $blockNumber = $this->client->getBlockNumber();
-            $gasPrice = $this->client->getGasPrice();
             $chainId = $this->client->getChainId();
             
             return [
                 'chain_id' => $chainId,
                 'block_number' => $blockNumber,
-                'gas_price_wei' => $gasPrice,
-                'gas_price_gwei' => bcdiv($gasPrice, '1000000000', 9),
                 'network_healthy' => true,
                 'timestamp' => time()
             ];
@@ -294,7 +263,7 @@ class BlockchainTestUtils
         foreach ($wallets as $index => $wallet) {
             $balance = '0';
             try {
-                $balance = $this->client->getBalance($wallet->getAddress());
+                $balance = $this->client->getNativeBalance($wallet->getAddress());
             } catch (\Exception $e) {
                 // Ignore balance check errors
             }
@@ -328,54 +297,6 @@ class BlockchainTestUtils
         };
     }
     
-    /**
-     * Calculate transaction fees for budget planning
-     */
-    public function calculateTestingBudget(int $numberOfTransactions = 10): array
-    {
-        try {
-            $gasPrice = $this->client->getGasPrice();
-            $gasPriceGwei = bcdiv($gasPrice, '1000000000', 9);
-            
-            // Estimate costs for different transaction types
-            $ethTransferGas = 21000;
-            $tokenTransferGas = 65000;
-            
-            $ethTxCost = bcmul($gasPrice, (string)$ethTransferGas, 0);
-            $tokenTxCost = bcmul($gasPrice, (string)$tokenTransferGas, 0);
-            
-            $ethTxCostEth = $this->weiToEth($ethTxCost);
-            $tokenTxCostEth = $this->weiToEth($tokenTxCost);
-            
-            // Budget for mixed transaction types
-            $totalEthTxs = intval($numberOfTransactions * 0.6); // 60% ETH
-            $totalTokenTxs = $numberOfTransactions - $totalEthTxs;
-            
-            $totalCostWei = bcadd(
-                bcmul($ethTxCost, (string)$totalEthTxs, 0),
-                bcmul($tokenTxCost, (string)$totalTokenTxs, 0),
-                0
-            );
-            
-            $totalCostEth = $this->weiToEth($totalCostWei);
-            $recommendedBudget = bcmul($totalCostEth, '2', 18); // 2x buffer
-            
-            return [
-                'current_gas_price_gwei' => $this->formatAmount($gasPriceGwei, 2),
-                'eth_transfer_cost' => $this->formatAmount($ethTxCostEth, 6) . ' ETH',
-                'token_transfer_cost' => $this->formatAmount($tokenTxCostEth, 6) . ' ETH',
-                'total_transactions' => $numberOfTransactions,
-                'eth_transactions' => $totalEthTxs,
-                'token_transactions' => $totalTokenTxs,
-                'estimated_total_cost' => $this->formatAmount($totalCostEth, 6) . ' ETH',
-                'recommended_budget' => $this->formatAmount($recommendedBudget, 6) . ' ETH',
-                'note' => 'Recommended budget includes 2x safety buffer'
-            ];
-        } catch (\Exception $e) {
-            return [
-                'error' => 'Failed to calculate budget: ' . $e->getMessage(),
-                'recommended_budget' => '0.5 ETH (default estimate)'
-            ];
-        }
-    }
+    // Gas calculation methods removed - backend is read-only for client-side chains
+    // Budget planning not needed for payment verification operations
 }

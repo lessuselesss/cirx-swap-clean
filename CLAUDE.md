@@ -4,12 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a **Circular CIRX OTC Trading Platform** built on **UniswapV4** infrastructure:
-- **Smart contracts** using UniswapV4 core and custom hooks for OTC trading
+This is a **Circular CIRX OTC Trading Platform** with API-first architecture:
+- **Backend API** integrating with Circular Protocol for blockchain operations
 - **Nuxt.js frontend** with dual-tab interface (liquid/vested purchases)
-- **Phase 1**: Simple OTC purchase form with wallet integration and vesting logic
+- **Phase 1**: Complete OTC purchase platform with wallet integration and transaction tracking
 
-**Current Status**: UniswapV4 integrated, building Phase 1 OTC functionality per PRP requirements.
+**Current Status**: Production-ready platform with comprehensive E2E testing framework.
 
 ## ✅ RECENT PROGRESS SUMMARY (2025-08-04)
 
@@ -72,34 +72,30 @@ This is a **Circular CIRX OTC Trading Platform** built on **UniswapV4** infrastr
 
 ## Technology Stack
 
-- **Smart Contracts**: Solidity ^0.8.26, UniswapV4 core, Foundry framework
-- **UniswapV4**: Production-ready (launched Jan 2025), 30% gas savings, hook system
+- **Backend**: PHP 8.2 with Laravel-style architecture
 - **Frontend**: Nuxt.js 3, Vue.js, Nuxt UI (Tailwind CSS)  
 - **Web3 Integration**: Viem + Wagmi (Ethereum), Solana Wallet Adapter
+- **Blockchain Integration**: Circular Protocol APIs for all blockchain operations
+- **Database**: PostgreSQL (production), SQLite (testing)
 - **Version Control**: Jujutsu (jj) in colocated mode with Git compatibility
-- **Deployment**: Cloudflare Pages with edge computing
-- **Testing**: Forge (smart contracts), Vitest (frontend)
-- **Local Development**: Anvil (local Ethereum node)
+- **Deployment**: Cloudflare Pages (frontend), Docker (backend)
+- **Testing**: Playwright (E2E), PHPUnit (backend), comprehensive test suite
 
 ## Development Commands
 
-### Smart Contract Development
+### Backend Development
 
 ```bash
-# From project root (/uniswapv3clone/)
-forge build                    # Compile contracts
-forge test                     # Run all tests
-forge test --match-contract CounterTest  # Run specific test contract
-forge test --match-test test_Increment   # Run specific test
-forge fmt                      # Format Solidity code
-forge snapshot                 # Generate gas usage snapshots
-anvil                         # Start local Ethereum node (port 8545)
+# From backend directory
+composer install               # Install PHP dependencies
+php -S localhost:8080 public/index.php  # Start development server
+php vendor/bin/phpunit        # Run all tests
+php vendor/bin/phpunit --group=integration  # Run integration tests
+php vendor/bin/phpunit --configuration=phpunit.e2e.xml  # Run E2E tests
 
-# Deployment (replace placeholders)
-forge script script/Counter.s.sol:CounterScript --rpc-url <rpc_url> --private-key <private_key>
-
-# Blockchain interactions
-cast <subcommand>             # Various blockchain utilities
+# Database operations
+php migrate.php               # Run database migrations
+php artisan migrate:fresh --seed  # Fresh database with seed data
 ```
 
 ### Frontend Development
@@ -117,15 +113,15 @@ wrangler pages deploy .output/public  # Deploy to Cloudflare Pages
 
 ## Architecture
 
-### Smart Contract Layer (`/src/`)
-- **Foundation**: UniswapV4 core contracts (installed in `/lib/v4-core/`)
-- **Phase 1 OTC Contracts**:
-  - `CIRXToken.sol` - ERC20 token contract for CIRX
-  - `SimpleOTCSwap.sol` - Basic swap logic using V4 infrastructure
-  - `VestingContract.sol` - 6-month linear vesting for OTC purchases
-  - `PriceOracle.sol` - Simple price feeds for discount calculations
-- **UniswapV4 Integration**: Direct pool interaction, 30% gas savings, flash accounting
-- **Future**: Custom hooks for access control, advanced pricing, bulk trading
+### Backend API Layer (`/backend/src/`)
+- **Controllers**: API endpoint handlers for swap transactions
+- **Services**: 
+  - `CirxTransferService.php` - Handles CIRX token transfers via Circular Protocol
+  - `PaymentVerificationService.php` - Verifies blockchain payments
+  - `BlockchainApiClient.php` - Circular Protocol integration
+- **Models**: Database models for transactions and tracking
+- **Workers**: Background processing for payment verification and transfers
+- **Blockchain Integration**: Via Circular Protocol APIs, not direct smart contracts
 
 ### Frontend Layer (`/ui/`)
 - **Framework**: Nuxt.js 3 with Vue.js components
@@ -140,8 +136,8 @@ wrangler pages deploy .output/public  # Deploy to Cloudflare Pages
 - **Deployment**: Configured for Cloudflare Pages with edge computing
 
 ### Testing Structure
-- **Smart Contracts**: `/test/` - Uses Forge testing framework with fuzz testing support
-- **Frontend**: Nuxt.js built-in testing with Vitest support
+- **Backend**: `/tests/` - PHPUnit with Unit, Integration, and E2E test suites
+- **Frontend**: Playwright E2E testing with comprehensive browser coverage
 
 ## Critical Development Principles
 
@@ -152,8 +148,8 @@ wrangler pages deploy .output/public  # Deploy to Cloudflare Pages
 1. **Process Discovery**:
    ```bash
    # Check for running processes before starting new ones
-   ps aux | grep -E "(npm|node|nuxt|forge|anvil)" 
-   netstat -tlnp | grep -E ":(3000|3001|3002|8545)" # Check occupied ports
+   ps aux | grep -E "(npm|node|nuxt|php)" 
+   netstat -tlnp | grep -E ":(3000|3001|8080|5432)" # Check occupied ports
    ```
 
 2. **File System Analysis**:
@@ -181,7 +177,7 @@ wrangler pages deploy .output/public  # Deploy to Cloudflare Pages
    ```bash
    # Verify what's already running
    curl -s http://localhost:3000 > /dev/null && echo "Port 3000 occupied"
-   curl -s http://localhost:8545 > /dev/null && echo "Anvil running"
+   curl -s http://localhost:8080/api/v1/health > /dev/null && echo "Backend running"
    ```
 
 **Pre-Action Checklist**:
@@ -245,22 +241,22 @@ jj edit -r feature-name                   # Switch to bookmark
 jj edit -r main                           # Switch to main
 ```
 
-#### Smart Contract Development Workflow
+#### Backend Development Workflow
 ```bash
-# Start new contract feature
+# Start new API feature
 jj new -r main
-jj describe -m "Add DEX pool contract"
-# Edit contracts in src/
-forge build && forge test                 # Build and test
+jj describe -m "Add transaction status endpoint"
+# Edit backend in backend/src/
+cd backend && php vendor/bin/phpunit     # Run tests
 
 # Move to frontend work
 jj new
-jj describe -m "Add swap interface"  
+jj describe -m "Add status tracking UI"  
 # Edit frontend in ui/
 cd ui && npm run dev                      # Test frontend
 
 # Create feature bookmark when ready
-jj bookmark create dex-swap-feature -r @-
+jj bookmark create transaction-status -r @-
 jj git push --allow-new
 ```
 
@@ -286,36 +282,36 @@ jj git push --allow-new
 
 ### Local Development Setup
 1. **Initialize jj**: `jj git init --colocate` (if not already done)
-2. **Start Anvil**: `anvil` (provides local blockchain at localhost:8545)  
-3. **Deploy Contracts**: Use forge script commands
+2. **Start Backend**: `cd backend && php -S localhost:8080 public/index.php`
+3. **Configure Database**: Set up PostgreSQL and run migrations
 4. **Start Frontend**: `cd ui && npm run dev`
-5. **Run Tests**: `forge test` for contracts, `npm run test` for frontend
+5. **Run Tests**: `php vendor/bin/phpunit` for backend, `npx playwright test` for E2E
 
 ### Testing Strategy
-- **Smart Contracts**: Use `forge test` with both unit tests and fuzz testing
-- **Gas Optimization**: Use `forge snapshot` to track gas usage changes  
+- **Backend API**: Use PHPUnit for unit, integration, and E2E testing
+- **Performance**: Monitor API response times and database query optimization  
 - **Frontend**: Vitest for unit tests, Playwright for E2E tests
 - **Change Isolation**: Each jj change represents a testable unit of work
 
 ### Code Organization Conventions  
-- **Solidity**: Follow Foundry project structure (src/, test/, script/)
+- **PHP Backend**: Follow PSR standards and Laravel-style architecture
 - **Nuxt.js**: File-based routing, component structure, and composables pattern
-- **Testing**: Mirror source structure in test directories
+- **Testing**: Comprehensive E2E testing with Playwright and PHPUnit
 - **Changes**: One logical feature/fix per jj change for clean history
 
 ### Deployment Strategy
-- **Smart Contracts**: Deploy to testnets/mainnet using Foundry scripts
+- **Backend**: Deploy via Docker containers to production infrastructure
 - **Frontend**: Automatic deployment to Cloudflare Pages via jj bookmark integration
 - **Environment**: Separate staging and production environments
-- **CI/CD**: Use `jj git push` for pipeline compatibility
+- **CI/CD**: Use `jj git push` for pipeline compatibility with E2E testing
 
 ## Key Implementation Notes
 
-### Smart Contract Development
-- Uses Solidity ^0.8.26 for UniswapV4 compatibility
-- UniswapV4 provides 30% gas savings and 99% cheaper pool creation
-- Foundry provides advanced testing capabilities including fuzz testing
-- V4 core contracts installed, building OTC-specific functionality on top
+### Backend API Development
+- Uses PHP 8.2 with modern features and strict typing
+- Circular Protocol integration provides reliable blockchain operations
+- Comprehensive testing with PHPUnit including E2E blockchain testing
+- Production-ready with proper error handling and monitoring
 
 ### Frontend Development
 - **Nuxt.js 3**: Modern Vue.js framework with SSR/SSG capabilities
@@ -325,14 +321,14 @@ jj git push --allow-new
 - **Performance**: Optimized for Core Web Vitals and SEO
 
 ### Development Status (Phase 1 OTC Platform)
-- ✅ UniswapV4 core contracts integrated
-- ✅ Foundry configured for V4 (Solidity 0.8.26, Cancun EVM)
-- ✅ Development environment ready
-- ✅ Phase 1 PRP completed
-- ⏳ CIRX token contract implementation
-- ⏳ Simple OTC swap logic using V4
-- ⏳ Dual-tab interface (liquid/vested)
-- ⏳ Vesting contract with 6-month linear unlock
+- ✅ Backend API with Circular Protocol integration
+- ✅ Comprehensive E2E testing framework implemented
+- ✅ Production-ready deployment configuration
+- ✅ Phase 1 OTC platform completed
+- ✅ Dual-tab interface (liquid/vested) implemented
+- ✅ Complete wallet integration (MetaMask, Phantom)
+- ✅ Transaction tracking and status monitoring
+- ✅ Real blockchain integration via Circular Protocol
 
 ## Circular CIRX OTC Platform Specifications
 
@@ -345,10 +341,10 @@ jj git push --allow-new
 - **UI Design**: Matcha/Jupiter inspired (form + chart layout)
 
 ### Technical Implementation
-- **UniswapV4 Foundation**: Direct pool interaction, flash accounting
-- **Smart Contracts**: `/src/tokens/`, `/src/swap/`, `/src/vesting/`
+- **API Integration**: Circular Protocol for all blockchain operations
+- **Backend Services**: Transaction processing, payment verification, CIRX transfers
 - **Frontend**: Dual-tab interface in `/ui/pages/swap.vue`
-- **Vesting Logic**: Linear 6-month unlock, claimable anytime
+- **Transaction Tracking**: Real-time status updates via polling
 - **Discount Tiers**: $1K-$10K (5%), $10K-$50K (8%), $50K+ (12%)
 
 ### Key Features
@@ -359,10 +355,10 @@ jj git push --allow-new
 - **Mobile Responsive**: Optimized for all device sizes
 
 ### Development Workflow
-1. **Week 1-2**: CIRX token + basic V4 swap integration
-2. **Week 3-4**: Vesting contract + OTC discount logic
-3. **Week 5-6**: Dual-tab frontend + wallet integration
-4. **Week 7-8**: Testing, error handling, deployment
+1. **Week 1-2**: ✅ Backend API + Circular Protocol integration
+2. **Week 3-4**: ✅ Frontend dual-tab interface + wallet integration  
+3. **Week 5-6**: ✅ E2E testing framework + comprehensive test coverage
+4. **Week 7-8**: ✅ Production deployment + monitoring setup
 
 ## Jujutsu Configuration
 
@@ -385,11 +381,11 @@ diff.tool = ["code", "--wait", "--diff", "$left", "$right"]
 "tests" = "file_type:test.js | file_type:test.ts | file_type:t.sol"
 
 [aliases]
-# Smart contract development aliases
-"build" = ["!forge", "build"]
-"test-contracts" = ["!forge", "test"]
-"test-gas" = ["!forge", "snapshot"]
-"anvil-start" = ["!anvil"]
+# Backend development aliases
+"backend-test" = ["!cd", "backend", "&&", "php", "vendor/bin/phpunit"]
+"backend-serve" = ["!cd", "backend", "&&", "php", "-S", "localhost:8080", "public/index.php"]
+"e2e-test" = ["!./scripts/run-e2e-tests.sh"]
+"migrate" = ["!cd", "backend", "&&", "php", "migrate.php"]
 
 # Frontend development aliases  
 "dev-ui" = ["!cd", "ui", "&&", "npm", "run", "dev"]
@@ -446,11 +442,12 @@ if(description, description.first_line()) ++
 ## External Resources
 
 - **Jujutsu Documentation**: https://jj-vcs.github.io/jj/latest/
-- **Foundry Documentation**: https://book.getfoundry.sh/
+- **PHP Documentation**: https://www.php.net/docs.php
 - **Nuxt.js Documentation**: https://nuxt.com/docs
 - **Nuxt UI Documentation**: https://ui.nuxt.com/
+- **Playwright Testing**: https://playwright.dev/
+- **Circular Protocol**: https://circular-protocol.gitbook.io/
 - **Cloudflare Pages**: https://pages.cloudflare.com/
-- **Wrangler CLI**: https://developers.cloudflare.com/workers/wrangler/
 ## PRP Framework Integration
 
 This project now includes the PRP (Product Requirements and Planning) framework for enhanced AI-assisted development.
@@ -460,7 +457,7 @@ This project now includes the PRP (Product Requirements and Planning) framework 
 The project is configured with Auto Plan Mode for safe development:
 - **Planning First**: Claude creates detailed plans before implementation
 - **Incremental Changes**: Small, testable changes with validation
-- **Smart Contract Safety**: Automatic testing and gas monitoring
+- **API Safety**: Comprehensive testing and error handling
 - **User Approval**: Major changes require explicit approval
 
 ### PRP Directory Structure

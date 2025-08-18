@@ -41,20 +41,8 @@ interface BlockchainClientInterface
      */
     public function getNativeBalance(string $walletAddress): string;
 
-    /**
-     * Send a transaction
-     */
-    public function sendTransaction(array $transactionData): string;
-
-    /**
-     * Estimate gas for a transaction
-     */
-    public function estimateGas(array $transactionData): int;
-
-    /**
-     * Get gas price
-     */
-    public function getGasPrice(): string;
+    // Transaction sending methods removed - backend is read-only for client-side chains
+    // Only CIRX transfers are supported server-side
 
     /**
      * Check if the blockchain client is healthy

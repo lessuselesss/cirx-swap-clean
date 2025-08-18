@@ -1,5 +1,6 @@
 <template>
   <div>
+    <div class="bg-red-500 p-4 text-white font-bold text-2xl mb-4">🚨 SELL FIELD COMPONENT IS HERE 🚨</div>
     <div class="flex justify-between items-center mb-3">
       <label class="text-sm font-medium text-white">Sell</label>
       <span 
@@ -15,7 +16,7 @@
       <input
         :value="displayValue"
         @input="handleAmountInput($event.target.value)"
-        @focus="handleFocus"
+        @focus="(e) => { console.log('🚨 SELL field received focus!'); handleFocus(e); }"
         @blur="handleBlur"
         @paste="handlePaste"
         type="text"
@@ -23,10 +24,10 @@
         pattern="[0-9,]*\.?[0-9]*"
         placeholder="0.0"
         :class="[
-          'w-full pl-4 pr-32 py-4 text-xl font-semibold bg-transparent border rounded-xl text-white placeholder-gray-500 transition-all duration-300',
+          'w-full pl-4 pr-32 py-4 text-xl font-semibold bg-transparent border-4 border-green-400 rounded-xl rounded-bl-none rounded-br-none text-white placeholder-gray-500 transition-all duration-300 shadow-lg shadow-green-400/50 ring-2 ring-green-300',
           activeTab === 'liquid' 
-            ? 'border-gray-600/50 hover:border-circular-primary focus:border-circular-primary focus:ring-2 focus:ring-circular-primary/50 focus:outline-none' 
-            : 'border-gray-600/50 hover:border-circular-purple focus:border-circular-purple focus:ring-2 focus:ring-circular-purple/50 focus:outline-none'
+            ? 'hover:bg-circular-primary/5 focus:bg-circular-primary/5 focus:ring-2 focus:ring-circular-primary/50 focus:outline-none' 
+            : 'hover:bg-circular-purple/5 focus:bg-circular-purple/5 focus:ring-2 focus:ring-circular-purple/50 focus:outline-none'
         ]"
         :disabled="loading"
         @keypress="handleKeypress"
