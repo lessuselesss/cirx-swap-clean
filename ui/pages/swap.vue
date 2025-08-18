@@ -392,7 +392,19 @@
                         'w-3 h-3 rounded-full transition-all duration-200 cursor-help',
                         {
                           'bg-red-500': recipientAddressError,
-                          'bg-green-500': recipientAddress && recipientAddressType === 'circular' && !recipientAddressError && addressValidationState === 'valid' && recipientCirxBalance !== null && parseFloat(recipientCirxBalance) >= 0.0,
+                          'bg-green-500': (() => {
+                            const greenCondition = recipientAddress && recipientAddressType === 'circular' && !recipientAddressError && addressValidationState === 'valid' && recipientCirxBalance !== null && parseFloat(recipientCirxBalance) >= 0.0;
+                            console.log('🟢 Green light condition check:', {
+                              recipientAddress: recipientAddress,
+                              recipientAddressType: recipientAddressType,
+                              recipientAddressError: recipientAddressError,
+                              addressValidationState: addressValidationState,
+                              recipientCirxBalance: recipientCirxBalance,
+                              balanceFloat: parseFloat(recipientCirxBalance),
+                              greenCondition: greenCondition
+                            });
+                            return greenCondition;
+                          })(),
                           'bg-yellow-500 animate-flash': addressValidationState === 'validating',
                           'bg-yellow-500': recipientAddress && recipientAddress.length === 66 && recipientAddress.startsWith('0x') && addressValidationState === 'idle' && !recipientAddressError,
                           'bg-yellow-500': recipientAddress && (recipientAddress === '0' || (recipientAddress.startsWith('0x') && recipientAddress.length < 66)) && !recipientAddressError,
@@ -2091,7 +2103,11 @@ const fetchCirxBalanceForAddress = async (address) => {
     console.log(`📊 Fetched CIRX balance for ${address}: ${recipientCirxBalance.value}`)
   } catch (error) {
     console.error('Failed to fetch CIRX balance:', error)
-    recipientCirxBalance.value = null
+    // Don't reset balance to null if we already have a valid balance from address validation
+    if (recipientCirxBalance.value === null) {
+      recipientCirxBalance.value = null
+    }
+    // Keep existing balance if we have one
   } finally {
     isFetchingRecipientBalance.value = false
   }
