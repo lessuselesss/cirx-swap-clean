@@ -147,11 +147,11 @@ class TransactionController
     /**
      * Get CIRX balance for a given address
      */
-    public function getCirxBalance(Request $request, Response $response): Response
+    public function getCirxBalance(Request $request, Response $response, array $args): Response
     {
         try {
-            // Get address from URL path
-            $address = $request->getAttribute('address');
+            // Get address from route parameters
+            $address = $args['address'] ?? null;
             
             if (!$address) {
                 return $this->errorResponse($response, 400, 'Address parameter is required.');
@@ -164,7 +164,7 @@ class TransactionController
 
             // Get CIRX blockchain client
             $clientFactory = new BlockchainClientFactory();
-            $cirxClient = $clientFactory->createCirxClient();
+            $cirxClient = $clientFactory->getCirxClient();
             
             // Fetch balance using Circular Protocol API
             $balance = $cirxClient->getCirxBalance($address);

@@ -4,46 +4,46 @@ namespace App\Blockchain;
 
 use App\Blockchain\Exceptions\BlockchainException;
 use Psr\Log\LoggerInterface;
-use CircularProtocol\API\CircularProtocolAPI;
-use CircularProtocol\API\Exceptions\CircularProtocolException;
+use CircularProtocol\Api\CircularProtocolAPI;
 
 /**
  * CIRX Blockchain Client
  * 
- * Handles interactions with the Circular Protocol blockchain for CIRX token operations
- * Note: This is a specialized client that might use different protocols than standard EVM
+ * Handles interactions with the Circular Protocol blockchain for CIRX token operations.
+ * This client supports BOTH read operations (monitoring) AND write operations (CIRX transfers)
+ * since CIRX transfers are server-side operations managed by this backend.
+ * Generic EVM transaction methods removed - use sendCirxTransfer for CIRX operations.
  */
 class CirxBlockchainClient extends AbstractBlockchainClient
 {
     private string $cirxWalletAddress;
     private ?string $cirxPrivateKey;
-    private string $cirxContractAddress;
     private int $cirxDecimals;
     private CircularProtocolAPI $cirxApi;
 
     public function __construct(
         string $rpcUrl,
         string $cirxWalletAddress,
-        string $cirxContractAddress,
         ?string $cirxPrivateKey = null,
         int $cirxDecimals = 18,
         ?string $backupRpcUrl = null,
         ?LoggerInterface $logger = null,
-        ?string $apiKey = null
     ) {
         parent::__construct($rpcUrl, $backupRpcUrl, $logger);
         
         $this->cirxWalletAddress = $cirxWalletAddress;
         $this->cirxPrivateKey = $cirxPrivateKey;
-        $this->cirxContractAddress = $cirxContractAddress;
         $this->cirxDecimals = $cirxDecimals;
         
         // Initialize Circular Protocol API
-        $this->cirxApi = new CircularProtocolAPI([
-            'api_key' => $apiKey,
-            'base_url' => $rpcUrl,
-            'timeout' => 30
-        ]);
+        $this->cirxApi = new CircularProtocolAPI();
+        
+        // Set NAG URL based on environment (no key required)
+        if ($rpcUrl && str_contains($rpcUrl, 'mainnet')) {
+            $this->cirxApi->setNAGURL('https://nag.circularlabs.io/NAG_Mainnet.php?cep=');
+        } else {
+            $this->cirxApi->setNAGURL('https://nag.circularlabs.io/NAG.php?cep=');
+        }
     }
 
     /**
@@ -52,9 +52,11 @@ class CirxBlockchainClient extends AbstractBlockchainClient
     public function getTransaction(string $txHash): ?array
     {
         try {
-            $response = $this->cirxApi->getTransaction($txHash);
+            // Use the SDK's transaction retrieval method
+            // Parameters: blockchain, txID, start, end (start/end can be 0 for single tx)
+            $response = $this->cirxApi->getTransactionByID('circular', $txHash, 0, 0);
             return $response;
-        } catch (CircularProtocolException $e) {
+        } catch (\Exception $e) {
             if (str_contains($e->getMessage(), 'not found') || $e->getCode() === 404) {
                 return null;
             }
@@ -126,9 +128,25 @@ class CirxBlockchainClient extends AbstractBlockchainClient
     public function getCirxBalance(string $walletAddress): string
     {
         try {
-            $balance = $this->cirxApi->getBalance($walletAddress);
-            return (string)$balance;
-        } catch (CircularProtocolException $e) {
+            // NOTE: The SDK's getWalletBalance method has a bug - it uses lowercase "asset" 
+            // but NAG API expects "Asset" with capital A. We'll call NAG directly for now.
+            
+            // Manual NAG call with correct capitalization
+            $data = [
+                'Blockchain' => '714d2ac07a826b66ac56752eebd7c77b58d2ee842e523d913fd0ef06e6bdfcae', // Circular Main Public
+                'Address' => $walletAddress,
+                'Asset' => 'CIRX', // Correct capitalization
+                'Version' => '1.0.8'
+            ];
+            
+            $response = $this->cirxApi->fetch($this->cirxApi->getNAGURL() . 'Circular_GetWalletBalance_', $data);
+            
+            if (isset($response->Result) && $response->Result === 200 && isset($response->Response->Balance)) {
+                return (string)$response->Response->Balance;
+            } else {
+                throw new \Exception('NAG API returned error: ' . ($response->ERROR ?? json_encode($response)));
+            }
+        } catch (\Exception $e) {
             throw new BlockchainException(
                 "Failed to get CIRX balance: " . $e->getMessage(),
                 $e->getCode(),
@@ -139,61 +157,9 @@ class CirxBlockchainClient extends AbstractBlockchainClient
         }
     }
 
-    /**
-     * Get ERC-20 style CIRX balance
-     */
-    private function getErc20Balance(string $walletAddress): string
-    {
-        // ERC-20 balanceOf function signature: 0x70a08231
-        $functionSignature = '0x70a08231';
-        $paddedAddress = str_pad(substr($walletAddress, 2), 64, '0', STR_PAD_LEFT);
-        $data = $functionSignature . $paddedAddress;
+    // ERC-20 style balance method removed - CIRX is native token, use getCirxBalance() instead
 
-        $response = $this->rpcCall('eth_call', [
-            [
-                'to' => $this->cirxContractAddress,
-                'data' => $data
-            ],
-            'latest'
-        ]);
-
-        $balance = $this->hexToDec($response['result']);
-        return $this->parseTokenAmount($balance, $this->cirxDecimals);
-    }
-
-    /**
-     * Send a CIRX transfer transaction
-     */
-    public function sendTransaction(array $transactionData): string
-    {
-        if (!$this->cirxPrivateKey) {
-            throw new BlockchainException(
-                "CIRX private key not configured for transaction signing",
-                500,
-                null,
-                'cirx',
-                'send_transaction'
-            );
-        }
-
-        // For now, return a mock transaction hash
-        // In production, this would:
-        // 1. Create the transaction with proper nonce, gas, etc.
-        // 2. Sign it with the private key
-        // 3. Broadcast it to the CIRX network
-        // 4. Return the actual transaction hash
-        
-        $mockTxHash = '0x' . bin2hex(random_bytes(32));
-        
-        $this->logger->info("Mock CIRX transaction sent", [
-            'tx_hash' => $mockTxHash,
-            'to' => $transactionData['to'] ?? null,
-            'value' => $transactionData['value'] ?? null,
-            'from' => $this->cirxWalletAddress
-        ]);
-
-        return $mockTxHash;
-    }
+    // Generic sendTransaction method removed - use sendCirxTransfer for CIRX operations
 
     /**
      * Send CIRX tokens to a recipient
@@ -228,13 +194,33 @@ class CirxBlockchainClient extends AbstractBlockchainClient
                 );
             }
 
-            // Use Circular Protocol API to send transfer
-            $txHash = $this->cirxApi->sendTransaction([
-                'from' => $this->cirxWalletAddress,
-                'to' => $recipientAddress,
+            // For now, generate transaction parameters manually
+            // TODO: Implement proper transaction construction
+            $txId = '0x' . bin2hex(random_bytes(32));
+            $timestamp = $this->cirxApi->getFormattedTimestamp();
+            $nonce = $this->cirxApi->getWalletNonce('circular', $this->cirxWalletAddress);
+            $payload = json_encode([
+                'action' => 'transfer',
                 'amount' => $amount,
-                'private_key' => $this->cirxPrivateKey
+                'asset' => 'CIRX'
             ]);
+            
+            // Sign the transaction
+            $message = $txId . $this->cirxWalletAddress . $recipientAddress . $timestamp . $payload . $nonce;
+            $signature = $this->cirxApi->signMessage($message, $this->cirxPrivateKey);
+            
+            // Send transaction
+            $txHash = $this->cirxApi->sendTransaction(
+                $txId,
+                $this->cirxWalletAddress,
+                $recipientAddress,
+                $timestamp,
+                'transfer',
+                $payload,
+                $nonce,
+                $signature,
+                'circular'
+            );
 
             $this->logger->info("CIRX transfer completed", [
                 'tx_hash' => $txHash,
@@ -245,7 +231,7 @@ class CirxBlockchainClient extends AbstractBlockchainClient
 
             return $txHash;
 
-        } catch (CircularProtocolException $e) {
+        } catch (\Exception $e) {
             throw new BlockchainException(
                 "Failed to send CIRX transfer: " . $e->getMessage(),
                 $e->getCode(),
@@ -256,85 +242,9 @@ class CirxBlockchainClient extends AbstractBlockchainClient
         }
     }
 
-    /**
-     * Send ERC-20 style CIRX transfer
-     */
-    private function sendErc20Transfer(string $recipientAddress, string $amount): string
-    {
-        $formattedAmount = $this->formatTokenAmount($amount, $this->cirxDecimals);
+    // ERC-20 and native transfer helper methods removed - use sendCirxTransfer directly
 
-        // ERC-20 transfer function signature: 0xa9059cbb
-        $functionSignature = '0xa9059cbb';
-        $paddedToAddress = str_pad(substr($recipientAddress, 2), 64, '0', STR_PAD_LEFT);
-        $paddedAmount = str_pad(dechex((int)$formattedAmount), 64, '0', STR_PAD_LEFT);
-        
-        $data = $functionSignature . $paddedToAddress . $paddedAmount;
-
-        $transactionData = [
-            'from' => $this->cirxWalletAddress,
-            'to' => $this->cirxContractAddress,
-            'data' => $data,
-            'gas' => $this->decToHex('100000'), // 100k gas limit
-        ];
-
-        return $this->sendTransaction($transactionData);
-    }
-
-    /**
-     * Send native CIRX transfer
-     */
-    private function sendNativeTransfer(string $recipientAddress, string $amount): string
-    {
-        $weiAmount = $this->formatTokenAmount($amount, $this->cirxDecimals);
-
-        $transactionData = [
-            'from' => $this->cirxWalletAddress,
-            'to' => $recipientAddress,
-            'value' => $this->decToHex($weiAmount),
-            'gas' => $this->decToHex('21000'), // Standard transfer gas
-        ];
-
-        return $this->sendTransaction($transactionData);
-    }
-
-    /**
-     * Estimate gas for a CIRX transaction
-     */
-    public function estimateGas(array $transactionData): int
-    {
-        try {
-            $response = $this->rpcCall('eth_estimateGas', [$transactionData]);
-            return (int)$this->hexToDec($response['result']);
-        } catch (BlockchainException $e) {
-            // If gas estimation fails, return conservative defaults
-            $this->logger->warning("Gas estimation failed, using default", [
-                'error' => $e->getMessage(),
-                'transaction' => $transactionData
-            ]);
-            
-            if (isset($transactionData['data'])) {
-                return 100000; // ERC-20 transfer
-            } else {
-                return 21000; // Native transfer
-            }
-        }
-    }
-
-    /**
-     * Get gas price for CIRX network
-     */
-    public function getGasPrice(): string
-    {
-        try {
-            $response = $this->rpcCall('eth_gasPrice');
-            return $this->hexToDec($response['result']);
-        } catch (BlockchainException $e) {
-            $this->logger->warning("Failed to get gas price, using default", [
-                'error' => $e->getMessage()
-            ]);
-            return '20000000000'; // 20 Gwei default
-        }
-    }
+    // Gas estimation and pricing methods removed - CIRX transfers handle gas internally
 
     /**
      * Get the chain ID (CIRX network specific)
@@ -384,54 +294,20 @@ class CirxBlockchainClient extends AbstractBlockchainClient
             return false;
         }
 
-        // Check amount
-        if ($this->cirxContractAddress && $this->cirxContractAddress !== '0x0000000000000000000000000000000000000000') {
-            // ERC-20 style transfer - check logs
-            return $this->verifyErc20TransferAmount($receipt, $expectedAmount);
-        } else {
-            // Native transfer - check value
-            $transferredAmount = $this->parseTokenAmount(
-                $this->hexToDec($transaction['value']), 
-                $this->cirxDecimals
-            );
-            
-            $expectedFloat = (float)$expectedAmount;
-            $actualFloat = (float)$transferredAmount;
-            $tolerance = $expectedFloat * 0.001; // 0.1% tolerance
+        // CIRX is native token - verify amount from transaction value
+        $transferredAmount = $this->parseTokenAmount(
+            $this->hexToDec($transaction['value']), 
+            $this->cirxDecimals
+        );
+        
+        $expectedFloat = (float)$expectedAmount;
+        $actualFloat = (float)$transferredAmount;
+        $tolerance = $expectedFloat * 0.001; // 0.1% tolerance
 
-            return abs($expectedFloat - $actualFloat) <= $tolerance;
-        }
+        return abs($expectedFloat - $actualFloat) <= $tolerance;
     }
 
-    /**
-     * Verify ERC-20 transfer amount from logs
-     */
-    private function verifyErc20TransferAmount(array $receipt, string $expectedAmount): bool
-    {
-        // Transfer event signature: 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef
-        $transferEventSignature = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
-
-        foreach ($receipt['logs'] as $log) {
-            if (
-                strtolower($log['address']) === strtolower($this->cirxContractAddress) &&
-                isset($log['topics'][0]) &&
-                $log['topics'][0] === $transferEventSignature
-            ) {
-                $transferredAmount = $this->parseTokenAmount(
-                    $this->hexToDec($log['data']), 
-                    $this->cirxDecimals
-                );
-
-                $expectedFloat = (float)$expectedAmount;
-                $actualFloat = (float)$transferredAmount;
-                $tolerance = $expectedFloat * 0.001; // 0.1% tolerance
-
-                return abs($expectedFloat - $actualFloat) <= $tolerance;
-            }
-        }
-
-        return false;
-    }
+    // ERC-20 transfer verification removed - CIRX is native token
 
     /**
      * Get transaction confirmation count
@@ -457,13 +333,7 @@ class CirxBlockchainClient extends AbstractBlockchainClient
         return $this->cirxWalletAddress;
     }
 
-    /**
-     * Get CIRX contract address
-     */
-    public function getCirxContractAddress(): string
-    {
-        return $this->cirxContractAddress;
-    }
+    // Contract address method removed - CIRX is native token, no contract address needed
 
     /**
      * Check if private key is configured
@@ -471,5 +341,29 @@ class CirxBlockchainClient extends AbstractBlockchainClient
     public function hasPrivateKey(): bool
     {
         return !empty($this->cirxPrivateKey);
+    }
+
+    /**
+     * Check if NAG URL is configured
+     */
+    public function hasNAGURL(): bool
+    {
+        return !empty($this->cirxApi->getNAGURL());
+    }
+
+    /**
+     * Get NAG URL being used
+     */
+    public function getNAGURL(): string
+    {
+        return $this->cirxApi->getNAGURL();
+    }
+
+    /**
+     * Get SDK version
+     */
+    public function getSDKVersion(): string
+    {
+        return $this->cirxApi->getVersion();
     }
 }

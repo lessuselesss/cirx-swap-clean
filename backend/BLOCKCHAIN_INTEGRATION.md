@@ -120,7 +120,8 @@ POLYGON_RPC_URL_BACKUP=https://polygon-rpc.com
 POLYGON_CHAIN_ID=137
 
 # CIRX Blockchain Configuration
-CIRX_RPC_URL=https://rpc.circular.protocol
+CIRX_RPC_URL=https://nag.circularlabs.io/NAG_Mainnet.php?cep=
+CIRX_RPC_URL_BACKUP=https://nag.circularlabs.io/NAG.php?cep=
 CIRX_WALLET_ADDRESS=0x1234567890123456789012345678901234567890
 CIRX_WALLET_PRIVATE_KEY=your_cirx_wallet_private_key_here
 CIRX_CONTRACT_ADDRESS=0x1234567890123456789012345678901234567890
@@ -143,6 +144,13 @@ USDT_CONTRACT_ADDRESS=0xdAC17F958D2ee523a2206206994597C13D831ec7
 - Configure backup RPC URLs for redundancy
 - Monitor API usage and rate limits
 - Implement proper error handling for endpoint failures
+
+**Circular Protocol NAG Endpoints**:
+- **Production**: `https://nag.circularlabs.io/NAG_Mainnet.php?cep=`
+- **Development/Testing**: `https://nag.circularlabs.io/NAG.php?cep=`
+- No API keys required for NAG endpoints
+- CEP commands are appended to base URL (e.g., `Circular_GetBlockchains_`)
+- All requests use POST with JSON payload
 
 ## Integration Points
 
@@ -468,6 +476,134 @@ The blockchain integration maintains full backward compatibility:
 - **Connection pooling enhancements**
 - **Caching layer expansion**
 - **Asynchronous processing**
+
+## NAG API Usage Examples
+
+### Available CEP Commands
+
+The Circular Protocol NAG API uses CEP (Circular Endpoint Protocol) commands:
+
+```bash
+# Get available blockchains (no parameters needed)
+curl -X POST "https://nag.circularlabs.io/NAG.php?cep=Circular_GetBlockchains_" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+
+# Get wallet balance (requires full blockchain address)
+curl -X POST "https://nag.circularlabs.io/NAG.php?cep=Circular_GetWalletBalance_" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "Blockchain": "714d2ac07a826b66ac56752eebd7c77b58d2ee842e523d913fd0ef06e6bdfcae",
+    "Address": "your_wallet_address",
+    "Asset": "CIRX",
+    "Version": "1.0.8"
+  }'
+
+# Send transaction (requires full blockchain address)
+curl -X POST "https://nag.circularlabs.io/NAG.php?cep=Circular_SendTransaction_" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "Blockchain": "714d2ac07a826b66ac56752eebd7c77b58d2ee842e523d913fd0ef06e6bdfcae",
+    "fromAddress": "sender_address",
+    "recipientAddress": "recipient_address",
+    "amount": "100.0",
+    "asset": "CIRX",
+    "nonce": 123,
+    "Version": "1.0.8"
+  }'
+```
+
+### Blockchain Address Mapping
+
+The NAG API requires full blockchain addresses, not short names:
+
+| Network | Blockchain Address |
+|---------|-------------------|
+| **Circular Main Public** | `714d2ac07a826b66ac56752eebd7c77b58d2ee842e523d913fd0ef06e6bdfcae` |
+| **Circular Secondary Public** | `acb8a9b79f3c663aa01be852cd42725f9e0e497fd849b436df51c5e074ebeb28` |
+| **Circular Documark Public** | `e087257c48a949710b48bc725b8d90066871fa08f7bbe75d6b140d50119c481f` |
+| **Circular SandBox** | `8a20baa40c45dc5055aeb26197c203e576ef389d9acb171bd62da11dc5ad72b2` |
+
+### Common CEP Commands
+
+| Command | Description | Required Parameters |
+|---------|-------------|-------------------|
+| `Circular_GetBlockchains_` | List available blockchains | None |
+| `Circular_GetWalletBalance_` | Get wallet balance | `Blockchain`, `Address`, `asset`, `Version` |
+| `Circular_GetWallet_` | Get wallet information | `Blockchain`, `Address`, `Version` |
+| `Circular_SendTransaction_` | Send transaction | `Blockchain`, `fromAddress`, `recipientAddress`, `amount`, `asset`, `nonce`, `Version` |
+| `Circular_GetWalletNonce_` | Get wallet nonce | `Blockchain`, `Address`, `Version` |
+
+### Environment-Based Endpoint Selection
+
+The backend automatically selects NAG endpoints based on environment:
+
+```php
+// Production environment
+if (str_contains($rpcUrl, 'mainnet')) {
+    $nagUrl = 'https://nag.circularlabs.io/NAG_Mainnet.php?cep=';
+} else {
+    // Development/Testing environment  
+    $nagUrl = 'https://nag.circularlabs.io/NAG.php?cep=';
+}
+```
+
+### Response Format
+
+All NAG API responses follow this structure:
+
+```json
+{
+  "Result": 200,
+  "Response": {
+    // Command-specific response data
+  },
+  "Node": "node_identifier"
+}
+```
+
+### Troubleshooting NAG API Issues
+
+**Common Error Codes and Solutions:**
+
+| Error Code | Error Message | Solution |
+|------------|---------------|----------|
+| `119` | "Wrong Endpoint" | Use correct CEP command (e.g., `Circular_GetWalletBalance_`) |
+| `111` | "Missing or invalid Blockchain" | Use full blockchain address, not short name |
+| `126` | "Missing or Invalid Asset" | Use `"Asset": "CIRX"` (capital A), not `"asset": "CIRX"` |
+
+**Debug Steps:**
+
+1. **Test blockchain connectivity:**
+   ```bash
+   curl -X POST "https://nag.circularlabs.io/NAG.php?cep=Circular_GetBlockchains_" \
+     -H "Content-Type: application/json" -d '{}'
+   ```
+
+2. **Verify wallet balance format:**
+   ```bash
+   # Use full blockchain address from GetBlockchains response
+   curl -X POST "https://nag.circularlabs.io/NAG.php?cep=Circular_GetWalletBalance_" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "Blockchain": "714d2ac07a826b66ac56752eebd7c77b58d2ee842e523d913fd0ef06e6bdfcae",
+       "Address": "test_address",
+       "Asset": "CIRX",
+       "Version": "1.0.8"
+     }'
+   ```
+
+3. **Check backend debug endpoint:**
+   - Visit: `http://localhost:8080/api/v1/debug/nag-config`
+   - Test via: `http://localhost:3000/debug/circular-wallet`
+
+**Important Notes:**
+
+- Always use full blockchain addresses (64-character hex strings)
+- Include `Version: "1.0.8"` in all requests
+- Asset names are case-sensitive (use "CIRX", not "cirx")
+- CEP commands must end with underscore (`_`)
+- **SDK Bug Warning**: The official Circular Protocol PHP SDK v1.0.8 has a bug where `getWalletBalance()` uses lowercase `"asset"` parameter, but NAG API expects uppercase `"Asset"`. Use direct NAG calls with correct capitalization.
 
 ---
 
