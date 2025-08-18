@@ -5,6 +5,12 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
   
+  // Development server configuration
+  devServer: {
+    host: '127.0.0.1',
+    port: 3000
+  },
+  
   // Configure for static generation
   nitro: {
     preset: 'static'
@@ -36,6 +42,7 @@ export default defineNuxtConfig({
 
   // App configuration
   app: {
+    buildAssetsDir: '/_nuxt/',
     head: {
       title: 'Circular CIRX OTC Platform',
       meta: [
@@ -66,6 +73,9 @@ export default defineNuxtConfig({
       appName: 'Circular CIRX OTC Platform',
       appDescription: 'Circular CIRX OTC Trading Platform - Buy CIRX tokens with instant delivery or OTC discounts up to 12%',
       appUrl: process.env.APP_URL || 'https://circular.io',
+      // Backend API configuration
+      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'http://localhost:8081/api',
+      apiKey: process.env.NUXT_PUBLIC_API_KEY || '',
     }
   },
 
