@@ -23,7 +23,7 @@
               to="/status" 
               class="px-3 py-2 text-sm text-gray-300 hover:text-white transition-colors rounded-lg hover:bg-gray-800/50"
             >
-              Track Status
+              Transactions
             </NuxtLink>
             
             <!-- Token Balance Display -->
@@ -392,8 +392,11 @@
                         'w-3 h-3 rounded-full transition-all duration-200 cursor-help',
                         {
                           'bg-red-500': recipientAddressError,
-                          'bg-green-500': recipientAddress && recipientAddressType === 'circular' && !recipientAddressError,
-                          'bg-gray-500': !recipientAddress || (!recipientAddressError && recipientAddressType !== 'circular')
+                          'bg-green-500': recipientAddress && recipientAddressType === 'circular' && !recipientAddressError && addressValidationState === 'valid' && recipientCirxBalance !== null && parseFloat(recipientCirxBalance) >= 0.0,
+                          'bg-yellow-500 animate-flash': addressValidationState === 'validating',
+                          'bg-yellow-500': recipientAddress && recipientAddress.length === 66 && recipientAddress.startsWith('0x') && addressValidationState === 'idle' && !recipientAddressError,
+                          'bg-yellow-500': recipientAddress && (recipientAddress === '0' || (recipientAddress.startsWith('0x') && recipientAddress.length < 66)) && !recipientAddressError,
+                          'bg-gray-500': !recipientAddress
                         }
                       ]"
                       :title="recipientAddressError || 'Validation status'"
@@ -407,7 +410,8 @@
                   v-model="recipientAddress"
                   type="text"
                   :readonly="false"
-                  placeholder="Enter Circular Chain address to receive CIRX"
+                  :placeholder="dynamicPlaceholder"
+                  @input="sanitizeAddressInput"
                   :class="[
                     'w-full pl-4 pr-12 py-3 text-sm bg-transparent border rounded-xl text-white placeholder-gray-400 transition-all duration-300',
                     activeTab === 'liquid' 
@@ -452,7 +456,6 @@
               
               <!-- Help text when no address is entered -->
               <div v-else-if="!recipientAddress" class="mt-2 text-xs text-gray-500">
-                Enter your Circular Chain wallet address to receive CIRX tokens
               </div>
             </div>
 
@@ -467,8 +470,9 @@
               <span v-else-if="!isConnected && (!recipientAddress || recipientAddress.trim() === '')">Connect</span>
               <span v-else-if="!isConnected && recipientAddress && recipientAddress.trim() !== ''">Connect Wallet</span>
               <span v-else-if="isConnected && (!recipientAddress || recipientAddress.trim() === '')">Enter Address</span>
+              <span v-else-if="addressValidationState === 'validating'">...</span>
               <span v-else-if="!inputAmount">Enter an amount</span>
-              <span v-else-if="recipientAddress && recipientAddressError">Invalid Address</span>
+              <span v-else-if="recipientAddress && recipientAddressError">Get CIRX Wallet</span>
               <span v-else-if="activeTab === 'liquid'">Buy Liquid CIRX</span>
               <span v-else>Buy Vested CIRX</span>
             </div>
@@ -610,12 +614,64 @@
         </div>
       </div>
     </div>
+
+    <!-- State 6 Confirmation Modal -->
+    <div v-if="showConfirmationModal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+      <div class="bg-gray-900 rounded-2xl p-3 sm:p-5 md:p-6 w-full max-w-64 sm:max-w-80 md:max-w-md lg:max-w-lg mx-4 shadow-2xl shadow-cyan-500/10 relative gradient-border-animated">
+        <!-- Close Button -->
+        <button 
+          @click="showConfirmationModal = false"
+          class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+        >
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+        
+        <h2 class="text-2xl font-bold text-white mb-8 text-center">Wallets</h2>
+        
+        <!-- Wallet Tiles -->
+        <div class="flex flex-col gap-4 mb-8">
+          <a
+            href="https://www.saturnwallet.app"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex flex-col items-center gap-3 p-6 hover:bg-gray-800 rounded-xl transition-colors group"
+          >
+            <div class="w-48 h-48 rounded-2xl overflow-hidden bg-gray-800 flex items-center justify-center flex-shrink-0">
+              <img 
+                src="/saturnicon.svg" 
+                alt="Saturn Wallet"
+                class="w-36 h-36 object-contain"
+              />
+            </div>
+            <span class="text-white font-semibold group-hover:text-cyan-400 transition-colors text-lg">Saturn</span>
+          </a>
+
+          <a
+            href="https://www.circularlabs.io/nero"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex flex-col items-center gap-3 p-6 hover:bg-gray-800 rounded-xl transition-colors group"
+          >
+            <div class="w-48 h-48 rounded-2xl overflow-hidden bg-gray-800 flex items-center justify-center flex-shrink-0">
+              <img 
+                src="/neroicon.svg" 
+                alt="Nero Wallet"
+                class="w-36 h-36 object-contain"
+              />
+            </div>
+            <span class="text-white font-semibold group-hover:text-cyan-400 transition-colors text-lg">Nero</span>
+          </a>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 // Import Vue composables
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 // Import official Wagmi Vue hooks
 import { useAccount, useBalance } from '@wagmi/vue'
 import { useAppKit } from '@reown/appkit/vue'
@@ -630,6 +686,8 @@ import { getTokenPrices } from '~/services/priceService.js'
 import { isValidCircularAddress, isValidEthereumAddress, isValidSolanaAddress } from '~/utils/addressFormatting.js'
 // Import backend API integration
 import { useBackendApi } from '~/composables/useBackendApi.js'
+// Import Circular address validation
+import { useCircularAddressValidation } from '~/composables/useCircularAddressValidation.js'
 // Extension detection disabled
 // import { detectAllExtensions } from '~/utils/comprehensiveExtensionDetection.js'
 // Removed useCircularChain import - Saturn wallet detection disabled
@@ -679,6 +737,48 @@ const {
   DEPOSIT_ADDRESSES,
   tokenPrices: backendTokenPrices
 } = useBackendApi()
+
+// Circular address validation
+const { checkAddressExists, isValidCircularAddressFormat, isAddressPending } = useCircularAddressValidation()
+
+// Network configuration for dynamic placeholder
+const networkConfig = ref({
+  network: 'testnet',
+  chain_name: 'Circular SandBox',
+  environment: 'development'
+})
+const dynamicPlaceholder = computed(() => {
+  const network = networkConfig.value?.network || 'testnet'
+  const chainName = networkConfig.value?.chain_name || 'Circular SandBox'
+  
+  // Capitalize network names: mainnet -> Mainnet, testnet -> Testnet, devnet -> Devnet
+  const capitalizedNetwork = network.charAt(0).toUpperCase() + network.slice(1).toLowerCase()
+  
+  return `Enter a ${capitalizedNetwork} (${chainName}) Wallet Address`
+})
+
+// Fetch network configuration from backend
+const fetchNetworkConfig = async () => {
+  try {
+    const config = useRuntimeConfig()
+    const apiBaseUrl = config.public.apiBaseUrl || 'http://localhost:8080/api'
+    
+    const response = await fetch(`${apiBaseUrl}/v1/config/circular-network`)
+    if (response.ok) {
+      const data = await response.json()
+      networkConfig.value = data
+      console.log('🔗 Network config loaded for placeholder:', {
+        network: data.network,
+        chain: data.chain_name
+      })
+    } else {
+      console.warn('Failed to fetch network config, using fallback placeholder')
+    }
+  } catch (error) {
+    console.warn('Network config fetch error:', error.message)
+    // networkConfig.value remains null, so fallback placeholder will be used
+  }
+}
 
 // Toast callback for Circular chain notifications
 const handleCircularToast = ({ type, title, message }) => {
@@ -784,6 +884,10 @@ const isFetchingRecipientBalance = ref(false)
 const showTokenDropdown = ref(false)
 // Track whether user has clicked "Enter Address" button
 const hasClickedEnterAddress = ref(false)
+// Track address validation state
+const addressValidationState = ref('idle') // 'idle', 'validating', 'valid', 'invalid'
+// Modal state for State 6
+const showConfirmationModal = ref(false)
 
 // Price refresh state (30s countdown)
 const livePrices = ref({ ETH: 2500, USDC: 1, USDT: 1, CIRX: 1 })
@@ -1592,11 +1696,39 @@ const handleSwap = async () => {
     // Set flag to indicate user has clicked "Enter Address"
     hasClickedEnterAddress.value = true
     // Focus the CIRX address input field specifically
-    const addressInput = document.querySelector('input[placeholder*="Circular Chain address"]')
+    const addressInput = document.querySelector('input[placeholder*="Circular Protocol"]')
     if (addressInput) {
       addressInput.focus()
       addressInput.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }
+    return
+  }
+  
+  // State 7: "..." - Address is being validated (yellow flashing)
+  if (addressValidationState.value === 'validating') {
+    // Don't do anything, just show the "..." text and wait for validation to complete
+    return
+  }
+
+  // State 6: "Modal" - Connected + amount + address populated but not confirmed (not green)
+  if (isConnected.value && inputAmount.value && parseFloat(inputAmount.value) > 0 && recipientAddress.value && recipientAddress.value.trim() !== '') {
+    // Check if address is not confirmed (not green light state)
+    const isAddressConfirmed = recipientAddressType.value === 'circular' && 
+                              !recipientAddressError.value && 
+                              addressValidationState.value === 'valid' && 
+                              recipientCirxBalance.value !== null && 
+                              parseFloat(recipientCirxBalance.value) >= 0.0
+    
+    if (!isAddressConfirmed) {
+      // Show modal
+      showConfirmationModal.value = true
+      return
+    }
+  }
+
+  // State 5: "Get CIRX Wallet" - Invalid address, show wallet modal
+  if (recipientAddress.value && recipientAddressError.value) {
+    showConfirmationModal.value = true
     return
   }
   
@@ -1892,9 +2024,9 @@ watch([cirxAmount, inputToken, activeTab], async () => {
 })
 
 watch(recipientAddress, async (newAddress) => {
-  validateRecipientAddress(newAddress)
+  await validateRecipientAddress(newAddress)
   // Fetch CIRX balance for the new address if it's valid
-  if (newAddress && !recipientAddressError.value) {
+  if (newAddress && !recipientAddressError.value && addressValidationState.value === 'valid') {
     await fetchCirxBalanceForAddress(newAddress)
   }
 })
@@ -1961,40 +2093,132 @@ const fetchCirxBalanceForAddress = async (address) => {
   }
 }
 
-const validateRecipientAddress = (address) => {
+// Sanitize address input to remove spaces
+const sanitizeAddressInput = (event) => {
+  const input = event.target
+  const value = input.value
+  
+  // Remove all spaces from the input
+  const sanitized = value.replace(/\s/g, '')
+  
+  // If the value changed, update it
+  if (sanitized !== value) {
+    recipientAddress.value = sanitized
+    // Set cursor position to the end
+    nextTick(() => {
+      input.setSelectionRange(sanitized.length, sanitized.length)
+    })
+  }
+}
+
+const validateRecipientAddress = async (address) => {
   if (!address) {
     recipientAddressError.value = ''
     recipientAddressType.value = ''
     recipientCirxBalance.value = null
+    addressValidationState.value = 'idle'
     return true
   }
 
-  // Check if it's a valid Circular address (only accept Circular for CIRX)
-  if (isValidCircularAddress(address)) {
+  // Handle partial addresses that are still being typed (don't show errors)
+  if (address === '0') {
+    // Just "0" - user starting to type, no error
+    addressValidationState.value = 'idle'
     recipientAddressError.value = ''
-    recipientAddressType.value = 'circular'
-    // Reset the "Enter Address" flag when valid address is entered
-    hasClickedEnterAddress.value = false
-    return true
+    recipientAddressType.value = ''
+    return false
   }
-  
+
+  // Check for valid partial 0x format
+  if (address.startsWith('0x') && address.length < 66) {
+    // User is typing valid 0x format, don't show errors yet
+    addressValidationState.value = 'idle'
+    recipientAddressError.value = ''
+    recipientAddressType.value = ''
+    return false
+  }
+
+  // Check for invalid formats (starts with 0 but not 0x, or other invalid patterns)
+  if (address.startsWith('0') && !address.startsWith('0x')) {
+    recipientAddressError.value = 'Invalid address format. Circular addresses must start with "0x"'
+    recipientAddressType.value = ''
+    addressValidationState.value = 'invalid'
+    return false
+  }
+
+  // Note: isAddressPending only checks format, let validation continue for 66-char addresses
+
   // Reject Ethereum addresses with specific error message
   if (isValidEthereumAddress(address)) {
     recipientAddressError.value = 'Ethereum addresses are not supported. Please enter a valid CIRX address'
     recipientAddressType.value = ''
+    addressValidationState.value = 'invalid'
     return false
   }
 
-  // Reject Solana addresses with specific error message
+  // Reject Solana addresses with specific error message  
   if (isValidSolanaAddress(address)) {
     recipientAddressError.value = 'Solana addresses are not supported. Please enter a valid CIRX address'
     recipientAddressType.value = ''
+    addressValidationState.value = 'invalid'
     return false
   }
 
+  // Check if it looks like a Circular address format
+  if (isValidCircularAddressFormat(address)) {
+    // Start async validation
+    addressValidationState.value = 'validating'
+    recipientAddressError.value = ''
+    recipientAddressType.value = ''
+
+    try {
+      // Perform async validation with balance checking (delimiter-based requirement)
+      const validation = await checkAddressExists(address)
+      
+      if (validation.isValid && validation.exists) {
+        // Address exists on network, now check balance for green light
+        recipientAddressError.value = ''
+        recipientAddressType.value = 'circular'
+        
+        // Store balance from validation (green light only if balance >= 0.0)
+        if (validation.hasBalance && validation.balance !== undefined) {
+          recipientCirxBalance.value = validation.balance
+        } else {
+          recipientCirxBalance.value = '0'
+        }
+        
+        addressValidationState.value = 'valid'
+        hasClickedEnterAddress.value = false
+        return true
+      } else if (validation.isValid && !validation.exists) {
+        // Valid format but doesn't exist on network yet (could be new address)
+        recipientAddressError.value = 'Address not found on Circular network. Please verify the address.'
+        recipientAddressType.value = ''
+        addressValidationState.value = 'invalid'
+        recipientCirxBalance.value = null
+        return false
+      } else {
+        // Invalid format or API error
+        recipientAddressError.value = validation.error || 'Invalid CIRX address'
+        recipientAddressType.value = ''
+        addressValidationState.value = 'invalid'
+        recipientCirxBalance.value = null
+        return false
+      }
+    } catch (error) {
+      console.error('Address validation error:', error)
+      recipientAddressError.value = 'Unable to validate address. Please try again.'
+      recipientAddressType.value = ''
+      addressValidationState.value = 'invalid'
+      recipientCirxBalance.value = null
+      return false
+    }
+  }
+
   // Invalid address format
-  recipientAddressError.value = 'Invalid CIRX address format'
+  recipientAddressError.value = 'Invalid Circular Protocol Address'
   recipientAddressType.value = ''
+  addressValidationState.value = 'invalid'
   return false
 }
 
@@ -2025,6 +2249,9 @@ const handleChainAdded = () => {
 onMounted(async () => {
   // Fetch OTC configuration on component mount
   await fetchOtcConfig()
+  
+  // Fetch network configuration for dynamic placeholder
+  await fetchNetworkConfig()
   
   const handleClickOutside = (event) => {
     if (showTokenDropdown.value && !event.target.closest('.token-dropdown-container')) {
@@ -2147,6 +2374,15 @@ useHead({
 
 .gradient-border:hover {
   border: 1px solid #ef4444;
+  animation: border-color-cycle 75s ease infinite;
+}
+
+/* Gradient border that's always animated (for modal) */
+.gradient-border-animated {
+  position: relative;
+  border: 1px solid #ef4444;
+  border-radius: 1rem;
+  transition: all 0.3s ease;
   animation: border-color-cycle 75s ease infinite;
 }
 
@@ -2447,8 +2683,19 @@ input[type="number"] {
   }
 }
 
-.animate-blink {
-  animation: blink 1.5s ease-in-out infinite;
+.animate-flash {
+  animation: flash 1s ease-in-out infinite;
+}
+
+@keyframes flash {
+  0%, 100% { 
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  50% { 
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 </style>
