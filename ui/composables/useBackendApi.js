@@ -110,12 +110,18 @@ export function useBackendApi() {
       
       const result = await handleApiResponse(response)
       
+      // Backend returns data nested in 'data' property
+      const data = result.data || result
+      
       return {
         success: true,
-        status: result.status,
-        message: result.message,
-        txId: result.txId,
-        cirxTransferTxId: result.cirxTransferTxId || null
+        status: data.status,
+        message: data.message,
+        txId: data.payment_info?.payment_tx_id || data.txId,
+        cirxTransferTxId: data.recipient_info?.cirx_transfer_tx_id || data.cirxTransferTxId || null,
+        phase: data.phase,
+        progress: data.progress,
+        transactionId: data.transaction_id
       }
       
     } catch (error) {
