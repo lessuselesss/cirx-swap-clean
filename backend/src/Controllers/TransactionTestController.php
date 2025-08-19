@@ -43,6 +43,7 @@ class TransactionTestController
                 'payment_token' => 'USDC',
                 'swap_status' => $this->getStatusFromPhase($phase),
                 'retry_count' => 0,
+                'is_test_transaction' => true,
             ]);
 
             $this->logger->info('Demo transaction created', [

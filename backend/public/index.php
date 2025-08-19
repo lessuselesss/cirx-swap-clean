@@ -6,6 +6,7 @@ use Slim\Psr7\Response;
 use App\Controllers\TransactionController;
 use App\Controllers\TransactionStatusController;
 use App\Controllers\TransactionTestController;
+use App\Controllers\TelegramTestController;
 use App\Controllers\DebugController;
 use App\Controllers\ConfigController;
 use App\Controllers\WorkerController;
@@ -72,6 +73,7 @@ $errorMiddleware->setDefaultErrorHandler(function (
     $requestId = $request->getAttribute('request_id', 'unknown');
     
     LoggerService::getLogger('error')->error('Unhandled API error', [
+        'error_type' => 'unhandled_api_error',  // Add for Telegram notifications
         'request_id' => $requestId,
         'exception_class' => get_class($exception),
         'message' => $exception->getMessage(),
@@ -272,6 +274,29 @@ $app->group('/api/v1', function ($group) {
         $group->post('/test/transactions/{id}/advance', function (Request $request, Response $response, array $args) {
             $controller = new TransactionTestController();
             return $controller->updateDemoTransaction($request, $response, $args);
+        });
+    }
+
+    // Telegram notification testing endpoints (only in non-production)
+    if (($_ENV['APP_ENV'] ?? 'production') !== 'production') {
+        $group->get('/telegram/test/connection', function (Request $request, Response $response) {
+            $controller = new TelegramTestController();
+            return $controller->testConnection($request, $response);
+        });
+
+        $group->post('/telegram/test/error', function (Request $request, Response $response) {
+            $controller = new TelegramTestController();
+            return $controller->triggerTestError($request, $response);
+        });
+
+        $group->post('/telegram/test/multiple', function (Request $request, Response $response) {
+            $controller = new TelegramTestController();
+            return $controller->triggerMultipleErrors($request, $response);
+        });
+
+        $group->get('/telegram/status', function (Request $request, Response $response) {
+            $controller = new TelegramTestController();
+            return $controller->getStatus($request, $response);
         });
     }
 });

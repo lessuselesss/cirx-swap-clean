@@ -4,17 +4,17 @@
  */
 
 export const useTradingViewDatafeed = () => {
-  // Configuration for supported symbols
+  // Configuration for supported symbols (using correct USDT/CIRX format)
   const SUPPORTED_SYMBOLS = {
-    'CIRX/USD': {
-      name: 'CIRX/USD',
-      full_name: 'Circular Protocol/US Dollar',
-      description: 'CIRX to USD',
+    'USDT/CIRX': {
+      name: 'USDT/CIRX',
+      full_name: 'Tether USD/Circular Protocol',
+      description: 'USDT to CIRX exchange rate',
       type: 'crypto',
       session: '24x7',
       timezone: 'Etc/UTC',
-      ticker: 'CIRX/USD',
-      exchange: 'Circular DEX',
+      ticker: 'USDT/CIRX',
+      exchange: 'Exchange',
       minmov: 1,
       pricescale: 10000, // 4 decimal places
       has_intraday: true,
@@ -24,17 +24,17 @@ export const useTradingViewDatafeed = () => {
       volume_precision: 2,
       data_status: 'streaming'
     },
-    'CIRX/ETH': {
-      name: 'CIRX/ETH',
-      full_name: 'Circular Protocol/Ethereum',
-      description: 'CIRX to ETH',
+    'ETH/CIRX': {
+      name: 'ETH/CIRX',
+      full_name: 'Ethereum/Circular Protocol',
+      description: 'ETH to CIRX exchange rate',
       type: 'crypto',
       session: '24x7',
       timezone: 'Etc/UTC',
-      ticker: 'CIRX/ETH',
-      exchange: 'Circular DEX',
+      ticker: 'ETH/CIRX',
+      exchange: 'Exchange',
       minmov: 1,
-      pricescale: 100000000, // 8 decimal places for ETH pairs
+      pricescale: 100, // 2 decimal places for ETH pairs (since 1 ETH = many CIRX)
       has_intraday: true,
       has_no_volume: false,
       has_weekly_and_monthly: true,
@@ -42,15 +42,15 @@ export const useTradingViewDatafeed = () => {
       volume_precision: 2,
       data_status: 'streaming'
     },
-    'CIRX/USDC': {
-      name: 'CIRX/USDC',
-      full_name: 'Circular Protocol/USD Coin',
-      description: 'CIRX to USDC',
+    'USDC/CIRX': {
+      name: 'USDC/CIRX',
+      full_name: 'USD Coin/Circular Protocol',
+      description: 'USDC to CIRX exchange rate',
       type: 'crypto',
       session: '24x7',
       timezone: 'Etc/UTC',
-      ticker: 'CIRX/USDC',
-      exchange: 'Circular DEX',
+      ticker: 'USDC/CIRX',
+      exchange: 'Exchange',
       minmov: 1,
       pricescale: 10000, // 4 decimal places
       has_intraday: true,
@@ -321,9 +321,9 @@ export const useTradingViewDatafeed = () => {
 
   const getBasePriceForSymbol = (symbol) => {
     const basePrices = {
-      'CIRX/USD': 1.25,
-      'CIRX/ETH': 0.0003,
-      'CIRX/USDC': 1.24
+      'USDT/CIRX': 1.25, // 1 USDT = 1.25 CIRX
+      'ETH/CIRX': 3333.33, // 1 ETH = ~3333 CIRX (assuming ETH ~$4166, CIRX ~$1.25)
+      'USDC/CIRX': 1.24 // 1 USDC = 1.24 CIRX
     }
     return basePrices[symbol] || 1.0
   }
