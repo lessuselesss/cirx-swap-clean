@@ -1,5 +1,5 @@
 {
-  "indexed_at": "2025-08-19T15:50:03.410568",
+  "indexed_at": "2025-08-19T17:24:31.652459",
   "root": ".",
   "project_structure": {
     "type": "tree",
@@ -7,7 +7,7 @@
     "tree": [
       ".",
       "\u251c\u2500\u2500 _archive/",
-      "\u251c\u2500\u2500 backend/ (4803 files)",
+      "\u251c\u2500\u2500 backend/ (4805 files)",
       "\u2502   \u251c\u2500\u2500 bin/ (2 files)",
       "\u2502   \u251c\u2500\u2500 database/ (6 files)",
       "\u2502   \u2502   \u2514\u2500\u2500 migrations/ (4 files)",
@@ -15,11 +15,11 @@
       "\u2502   \u251c\u2500\u2500 public/ (2 files)",
       "\u2502   \u2502   \u2514\u2500\u2500 storage/",
       "\u2502   \u2502       \u2514\u2500\u2500 logs/",
-      "\u2502   \u251c\u2500\u2500 src/ (37 files)",
+      "\u2502   \u251c\u2500\u2500 src/ (38 files)",
       "\u2502   \u2502   \u251c\u2500\u2500 Blockchain/ (6 files)",
       "\u2502   \u2502   \u2502   \u2514\u2500\u2500 Exceptions/ (1 files)",
       "\u2502   \u2502   \u251c\u2500\u2500 Commands/ (1 files)",
-      "\u2502   \u2502   \u251c\u2500\u2500 Controllers/ (7 files)",
+      "\u2502   \u2502   \u251c\u2500\u2500 Controllers/ (8 files)",
       "\u2502   \u2502   \u251c\u2500\u2500 Exceptions/ (2 files)",
       "\u2502   \u2502   \u251c\u2500\u2500 Middleware/ (4 files)",
       "\u2502   \u2502   \u251c\u2500\u2500 Models/ (1 files)",
@@ -534,7 +534,7 @@
       "\u2502   \u2514\u2500\u2500 README.md",
       "\u251c\u2500\u2500 scripts/ (1 files)",
       "\u251c\u2500\u2500 test/ (3 files)",
-      "\u251c\u2500\u2500 ui/ (81722 files)",
+      "\u251c\u2500\u2500 ui/ (81721 files)",
       "\u2502   \u251c\u2500\u2500 2/ (104 files)",
       "\u2502   \u251c\u2500\u2500 assets/ (1 files)",
       "\u2502   \u2502   \u2514\u2500\u2500 css/ (1 files)",
@@ -544,9 +544,9 @@
       "\u2502   \u251c\u2500\u2500 config/ (4 files)",
       "\u2502   \u251c\u2500\u2500 e2e/ (6 files)",
       "\u2502   \u251c\u2500\u2500 layouts/ (1 files)",
-      "\u2502   \u251c\u2500\u2500 pages/ (21 files)",
-      "\u2502   \u2502   \u2514\u2500\u2500 debug/ (15 files)",
-      "\u2502   \u2502       \u2514\u2500\u2500 scripts/ (3 files)",
+      "\u2502   \u251c\u2500\u2500 pages/ (20 files)",
+      "\u2502   \u2502   \u2514\u2500\u2500 debug/ (14 files)",
+      "\u2502   \u2502       \u2514\u2500\u2500 scripts/ (2 files)",
       "\u2502   \u251c\u2500\u2500 playwright-report/ (14 files)",
       "\u2502   \u2502   \u251c\u2500\u2500 data/",
       "\u2502   \u2502   \u2514\u2500\u2500 trace/ (13 files)",
@@ -791,6 +791,21 @@
       ],
       "architecture_hints": []
     },
+    "backend/LAUNCH_GUIDE.md": {
+      "sections": [
+        "\ud83d\ude80 CIRX Backend Launch Guide - Complete Deployment",
+        "\ud83d\udccb Pre-Launch Checklist",
+        "\u2705 Core System Status",
+        "\ud83d\udd27 Quick Launch (5 Minutes)",
+        "1. **Environment Setup**",
+        "Clone and enter project",
+        "Enter Nix development environment",
+        "Install dependencies (if needed)",
+        "Setup environment",
+        "2. **Configure Environment** "
+      ],
+      "architecture_hints": []
+    },
     "backend/MONITORING.md": {
       "sections": [
         "CIRX Transaction Monitoring",
@@ -835,6 +850,21 @@
         "Test CIRX Transfer (\ud83c\udfaf WORKING!)",
         "\ud83c\udfc6 Breakthrough Technical Solution",
         "Working Transaction Parameters"
+      ],
+      "architecture_hints": []
+    },
+    "backend/TELEGRAM_SETUP.md": {
+      "sections": [
+        "Telegram Error Notifications Setup Guide",
+        "Overview",
+        "Quick Setup (5 minutes)",
+        "1. Create Telegram Bot",
+        "2. Get Chat ID",
+        "3. Configure Environment Variables",
+        "Telegram Bot Configuration for Error Notifications",
+        "4. Test the Setup",
+        "Error Priority Levels",
+        "\ud83d\udd25 Critical Errors (Always sent, never silent)"
       ],
       "architecture_hints": []
     },
@@ -1169,10 +1199,10 @@
     "backend/tests/Unit/Workers": "Test files and test utilities"
   },
   "stats": {
-    "total_files": 226,
+    "total_files": 227,
     "total_directories": 1024,
     "fully_parsed": {
-      "javascript": 63,
+      "javascript": 62,
       "typescript": 10,
       "shell": 2
     },
@@ -1180,12 +1210,12 @@
       "json": 10,
       "shell": 1,
       "sql": 3,
-      "php": 80,
+      "php": 82,
       "html": 8,
       "vue": 43,
       "css": 6
     },
-    "markdown_files": 32
+    "markdown_files": 34
   },
   "files": {
     "package.json": {
@@ -1211,6 +1241,11 @@
     "backend/monitoring-check.php": {
       "language": "php",
       "parsed": false
+    },
+    "backend/test_telegram.php": {
+      "language": "php",
+      "parsed": false,
+      "purpose": "Test file"
     },
     "backend/add_retry_columns.sql": {
       "language": "sql",
@@ -1373,38 +1408,38 @@
               ],
               "signature": "()",
               "called_by": [
-                "CE",
-                "po"
+                "po",
+                "CE"
               ]
             },
             "validateConfig": {
               "signature": "()",
               "called_by": [
-                "EventListener.__init__",
-                "updateConfig",
+                "fetchConfig",
                 "EventListener.constructor",
-                "fetchConfig"
+                "EventListener.__init__",
+                "updateConfig"
               ]
             },
             "initializeDatabaseSafely": {
               "signature": "()",
               "called_by": [
-                "EventListener.__init__",
-                "EventListener.constructor"
+                "EventListener.constructor",
+                "EventListener.__init__"
               ]
             },
             "prepareDatabaseStatements": {
               "signature": "()",
               "called_by": [
-                "EventListener.__init__",
-                "EventListener.constructor"
+                "EventListener.constructor",
+                "EventListener.__init__"
               ]
             },
             "getLastProcessedBlock": {
               "signature": "()",
               "called_by": [
-                "EventListener.__init__",
-                "EventListener.constructor"
+                "EventListener.constructor",
+                "EventListener.__init__"
               ]
             },
             "start": {
@@ -1755,8 +1790,8 @@
             "constructor": {
               "signature": "(message, code = 'INDEXER_ERROR', details = {})",
               "called_by": [
-                "CE",
-                "po"
+                "po",
+                "CE"
               ]
             },
             "__init__": "(message, code = 'INDEXER_ERROR', details = {})"
@@ -1769,8 +1804,8 @@
             "constructor": {
               "signature": "(message, details = {})",
               "called_by": [
-                "CE",
-                "po"
+                "po",
+                "CE"
               ]
             },
             "__init__": "(message, details = {})"
@@ -1783,8 +1818,8 @@
             "constructor": {
               "signature": "(message, details = {})",
               "called_by": [
-                "CE",
-                "po"
+                "po",
+                "CE"
               ]
             },
             "__init__": "(message, details = {})"
@@ -1797,8 +1832,8 @@
             "constructor": {
               "signature": "(message, details = {})",
               "called_by": [
-                "CE",
-                "po"
+                "po",
+                "CE"
               ]
             },
             "__init__": "(message, details = {})"
@@ -1811,8 +1846,8 @@
             "constructor": {
               "signature": "(message, details = {})",
               "called_by": [
-                "CE",
-                "po"
+                "po",
+                "CE"
               ]
             },
             "__init__": "(message, details = {})"
@@ -1825,8 +1860,8 @@
             "constructor": {
               "signature": "(message, details = {})",
               "called_by": [
-                "CE",
-                "po"
+                "po",
+                "CE"
               ]
             },
             "__init__": "(message, details = {})"
@@ -1839,8 +1874,8 @@
             "constructor": {
               "signature": "(threshold = 5, timeout = 60000, monitorWindow = 300000)",
               "called_by": [
-                "CE",
-                "po"
+                "po",
+                "CE"
               ]
             },
             "execute": "async (operation, context = {})",
@@ -1888,8 +1923,8 @@
             "constructor": {
               "signature": "(options = {})",
               "called_by": [
-                "CE",
-                "po"
+                "po",
+                "CE"
               ]
             },
             "debug": "(message, data = {})",
@@ -1900,11 +1935,11 @@
             "log": {
               "signature": "(level, message, data = {})",
               "called_by": [
+                "cleanGlobPattern",
                 "showHelp",
                 "removeTarget",
-                "log",
-                "cleanGlobPattern",
-                "cleanup"
+                "cleanup",
+                "log"
               ]
             },
             "logToConsole": "(level, entry)",
@@ -1918,8 +1953,8 @@
             "constructor": {
               "signature": "(parentLogger, context)",
               "called_by": [
-                "CE",
-                "po"
+                "po",
+                "CE"
               ]
             },
             "debug": "(message, data = {})",
@@ -1936,8 +1971,8 @@
             "constructor": {
               "signature": "(logger, operation)",
               "called_by": [
-                "CE",
-                "po"
+                "po",
+                "CE"
               ]
             },
             "checkpoint": "(name)",
@@ -1950,8 +1985,8 @@
             "constructor": {
               "signature": "()",
               "called_by": [
-                "CE",
-                "po"
+                "po",
+                "CE"
               ]
             },
             "recordError": "(error, context = {})",
@@ -3079,8 +3114,8 @@
             "constructor": {
               "signature": "(message, status, code, requestId, endpoint, originalError)",
               "called_by": [
-                "CE",
-                "po"
+                "po",
+                "CE"
               ]
             },
             "__init__": "(message, status, code, requestId, endpoint, originalError)"
@@ -3091,8 +3126,8 @@
             "constructor": {
               "signature": "(message, status, code, requestId, endpoint, originalError)",
               "called_by": [
-                "CE",
-                "po"
+                "po",
+                "CE"
               ]
             },
             "__init__": "(message, status, code, requestId, endpoint, originalError)"
@@ -5214,10 +5249,6 @@
         "balanceInSol"
       ],
       "call_graph": {}
-    },
-    "ui/pages/debug/scripts/debug-otc-dropdown.js": {
-      "language": "javascript",
-      "parsed": false
     },
     "ui/pages/debug/scripts/debug-console-commands.js": {
       "language": "javascript",
@@ -23619,6 +23650,11 @@
       "language": "php",
       "parsed": false
     },
+    "backend/src/Controllers/TelegramTestController.php": {
+      "language": "php",
+      "parsed": false,
+      "purpose": "Test file"
+    },
     "backend/src/Controllers/TransactionStatusController.php": {
       "language": "php",
       "parsed": false
@@ -23969,5 +24005,5 @@
       "vue"
     ]
   },
-  "staleness_check": 1755035410.849936
+  "staleness_check": 1755041078.084637
 }
