@@ -12,6 +12,7 @@ use Monolog\Processor\UidProcessor;
 use Monolog\Processor\ProcessIdProcessor;
 use Monolog\Processor\MemoryUsageProcessor;
 use Monolog\Processor\IntrospectionProcessor;
+use GuzzleHttp\Client;
 use Exception;
 
 /**
@@ -96,6 +97,9 @@ class LoggerService
                 error_log("Failed to create error logger: " . $e->getMessage());
             }
         }
+
+        // Add Telegram notification handler for errors and critical logs
+        self::addTelegramHandler($logger, $logLevel);
     }
 
     /**
@@ -130,6 +134,60 @@ class LoggerService
             } catch (Exception $e) {
                 error_log("Failed to create development file logger: " . $e->getMessage());
             }
+        }
+    }
+
+    /**
+     * Add Telegram notification handler for errors and critical logs
+     */
+    private static function addTelegramHandler(Logger $logger, int $logLevel): void
+    {
+        // Only add Telegram handler for error level and above
+        if ($logLevel > Logger::ERROR) {
+            return;
+        }
+
+        // Check if Telegram is configured
+        $botToken = $_ENV['TELEGRAM_BOT_TOKEN'] ?? null;
+        $chatId = $_ENV['TELEGRAM_CHAT_ID'] ?? null;
+
+        if (empty($botToken) || empty($chatId)) {
+            return;
+        }
+
+        try {
+            // Create HTTP client with proper timeout settings
+            $httpClient = new Client([
+                'timeout' => 10,
+                'connect_timeout' => 5,
+                'http_errors' => false
+            ]);
+
+            // Create TelegramNotificationService
+            $telegramService = new TelegramNotificationService(
+                $httpClient,
+                $logger,
+                $botToken,
+                $chatId
+            );
+
+            // Create and configure Telegram handler
+            $telegramHandler = new TelegramHandler(
+                $telegramService,
+                Logger::ERROR,  // Only handle ERROR level and above
+                true  // Bubble to other handlers
+            );
+
+            // Configure rate limiting if specified
+            $maxMessages = (int) ($_ENV['TELEGRAM_RATE_LIMIT_MESSAGES'] ?? 3);
+            $windowSeconds = (int) ($_ENV['TELEGRAM_RATE_LIMIT_WINDOW'] ?? 300);
+            $telegramHandler->setRateLimit($maxMessages, $windowSeconds);
+
+            $logger->pushHandler($telegramHandler);
+
+        } catch (Exception $e) {
+            // Log the error but don't break the entire logging system
+            error_log("Failed to initialize Telegram handler: " . $e->getMessage());
         }
     }
 
@@ -373,5 +431,95 @@ class LoggerService
         }
 
         return $results;
+    }
+
+    /**
+     * Test Telegram notification functionality
+     */
+    public static function testTelegramNotifications(): array
+    {
+        $results = [
+            'success' => true,
+            'tests' => [],
+            'errors' => []
+        ];
+
+        try {
+            // Check if Telegram is configured
+            $botToken = $_ENV['TELEGRAM_BOT_TOKEN'] ?? null;
+            $chatId = $_ENV['TELEGRAM_CHAT_ID'] ?? null;
+
+            if (empty($botToken) || empty($chatId)) {
+                $results['success'] = false;
+                $results['errors'][] = 'Telegram not configured - missing TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID';
+                return $results;
+            }
+
+            // Create TelegramNotificationService for testing
+            $httpClient = new Client([
+                'timeout' => 10,
+                'connect_timeout' => 5,
+                'http_errors' => false
+            ]);
+
+            $telegramService = new TelegramNotificationService(
+                $httpClient,
+                self::getLogger('telegram-test'),
+                $botToken,
+                $chatId
+            );
+
+            // Test bot connectivity
+            $connectionTest = $telegramService->testConnection();
+            if ($connectionTest['success']) {
+                $results['tests'][] = "✅ Telegram bot connection successful - @{$connectionTest['bot_username']}";
+            } else {
+                $results['success'] = false;
+                $results['errors'][] = "Bot connection failed: " . $connectionTest['error'];
+                return $results;
+            }
+
+            // Test sending a notification
+            if ($telegramService->sendTestNotification()) {
+                $results['tests'][] = "✅ Test notification sent successfully";
+            } else {
+                $results['success'] = false;
+                $results['errors'][] = "Failed to send test notification";
+            }
+
+            // Test error notification
+            if ($telegramService->sendErrorNotification(
+                'test_error',
+                'This is a test error notification from CIRX Backend',
+                ['test' => true, 'timestamp' => date('c')]
+            )) {
+                $results['tests'][] = "✅ Error notification test successful";
+            } else {
+                $results['success'] = false;
+                $results['errors'][] = "Failed to send error notification";
+            }
+
+        } catch (Exception $e) {
+            $results['success'] = false;
+            $results['errors'][] = $e->getMessage();
+        }
+
+        return $results;
+    }
+
+    /**
+     * Send a test error via the logging system (will trigger Telegram if configured)
+     */
+    public static function triggerTestError(): void
+    {
+        $logger = self::getLogger('test');
+        
+        $logger->error('Test error for Telegram notifications', [
+            'error_type' => 'test_error',
+            'test' => true,
+            'timestamp' => date('c'),
+            'server' => gethostname(),
+            'environment' => $_ENV['APP_ENV'] ?? 'unknown'
+        ]);
     }
 }

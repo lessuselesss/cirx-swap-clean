@@ -24,11 +24,13 @@ class Transaction extends Model
         'failure_reason',
         'retry_count',
         'last_retry_at',
+        'is_test_transaction',
     ];
 
     protected $casts = [
         'amount_paid' => 'decimal:18',
         'retry_count' => 'integer',
+        'is_test_transaction' => 'boolean',
         'last_retry_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',

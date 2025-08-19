@@ -9,7 +9,7 @@
         <h2 class="text-xl font-semibold text-white mb-4">Basic TradingView Chart</h2>
         <div class="h-96">
           <TradingViewChart
-            symbol="CIRX/USD"
+            symbol="USDT/CIRX"
             interval="1D"
             theme="dark"
             :use-custom-datafeed="true"
@@ -31,10 +31,10 @@
       <!-- Multiple Charts Test -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <div class="bg-gray-800 rounded-lg p-6">
-          <h3 class="text-lg font-semibold text-white mb-4">CIRX/USD Chart</h3>
+          <h3 class="text-lg font-semibold text-white mb-4">USDT/CIRX Chart</h3>
           <div class="h-80">
             <TradingViewChart
-              symbol="CIRX/USD"
+              symbol="USDT/CIRX"
               interval="1h"
               theme="dark"
               :use-custom-datafeed="true"
@@ -44,10 +44,10 @@
         </div>
         
         <div class="bg-gray-800 rounded-lg p-6">
-          <h3 class="text-lg font-semibold text-white mb-4">CIRX/ETH Chart</h3>
+          <h3 class="text-lg font-semibold text-white mb-4">ETH/CIRX Chart</h3>
           <div class="h-80">
             <TradingViewChart
-              symbol="CIRX/ETH"
+              symbol="ETH/CIRX"
               interval="4h"
               theme="dark"
               :use-custom-datafeed="true"
@@ -67,9 +67,9 @@
               v-model="testSymbol" 
               class="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-circular-primary"
             >
-              <option value="CIRX/USD">CIRX/USD</option>
-              <option value="CIRX/ETH">CIRX/ETH</option>
-              <option value="CIRX/USDC">CIRX/USDC</option>
+              <option value="USDT/CIRX">USDT/CIRX</option>
+              <option value="ETH/CIRX">ETH/CIRX</option>
+              <option value="USDC/CIRX">USDC/CIRX</option>
             </select>
           </div>
           <div>
@@ -196,6 +196,8 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import TradingViewChart from '~/components/TradingViewChart.vue'
+import CirxPriceChart from '~/components/CirxPriceChart.vue'
 
 // Page metadata
 definePageMeta({
@@ -205,7 +207,7 @@ definePageMeta({
 })
 
 // Test controls
-const testSymbol = ref('CIRX/USD')
+const testSymbol = ref('USDT/CIRX')
 const testInterval = ref('1D')
 const testTheme = ref('dark')
 const chartKey = ref(0)

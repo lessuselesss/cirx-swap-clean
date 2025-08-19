@@ -65,7 +65,7 @@ import { createCIRXDatafeed } from '~/composables/useTradingViewDatafeed'
 const props = defineProps({
   symbol: {
     type: String,
-    default: 'CIRX/USD' // Default to CIRX trading pair
+    default: 'USDT/CIRX' // Default to USDT/CIRX trading pair
   },
   interval: {
     type: String,

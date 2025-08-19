@@ -264,6 +264,7 @@ class TransactionStatusController
             'created_at' => $transaction->created_at?->toISOString(),
             'status' => $transaction->swap_status,
             'status_display' => $this->getStatusDisplayName($transaction->swap_status),
+            'is_test_transaction' => $transaction->is_test_transaction ?? false,
             'payment' => [
                 'tx_hash' => $transaction->payment_tx_id,
                 'chain' => $transaction->payment_chain,

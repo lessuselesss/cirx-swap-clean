@@ -6,61 +6,91 @@
       <div 
         v-for="tx in transactions" 
         :key="tx.id" 
-        class="transaction-card bg-gray-800 border border-gray-700 rounded-lg p-4 hover:bg-gray-700 transition-colors"
+        :class="[
+          'transaction-card rounded-lg p-4 hover:bg-gray-700 transition-colors',
+          tx.is_test_transaction 
+            ? 'bg-gray-800 border border-dashed border-yellow-600 relative' 
+            : 'bg-gray-800 border border-gray-700'
+        ]"
       >
+        <!-- Test Transaction Badge -->
+        <div v-if="tx.is_test_transaction" class="absolute top-2 right-2">
+          <span class="inline-flex items-center px-2 py-1 text-xs font-bold text-yellow-800 bg-yellow-200 rounded-full">
+            🧪 TEST
+          </span>
+        </div>
+
         <!-- Status and Date Row -->
         <div class="flex items-center justify-between mb-3">
-          <span :class="getStatusClass(tx.status)" class="inline-flex px-2 py-1 text-xs font-semibold rounded-full">
-            {{ tx.status_display }}
-          </span>
+          <div class="flex items-center space-x-2">
+            <span :class="getStatusClass(tx.status)" class="inline-flex px-2 py-1 text-xs font-semibold rounded-full">
+              {{ tx.status_display }}
+            </span>
+          </div>
           <span class="text-sm text-gray-400">
             {{ formatDate(tx.created_at) }}
           </span>
         </div>
 
         <!-- Transaction Flow -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+        <div :class="['grid grid-cols-1 md:grid-cols-3 gap-4 items-center', tx.is_test_transaction ? 'opacity-80' : '']">
           <!-- Ethereum Payment -->
-          <div class="text-center">
+          <div class="text-left">
             <div class="text-xs text-gray-400 mb-1">Payment</div>
             <div class="text-white font-mono text-sm mb-1">
               {{ formatAmount(tx.payment.amount) }} {{ tx.payment.token }}
             </div>
-            <div v-if="tx.payment.tx_hash" class="flex items-center justify-center space-x-1">
+            <div v-if="tx.payment.tx_hash" class="flex items-center space-x-1">
               <a 
                 :href="getEtherscanUrl(tx.payment.tx_hash, tx.payment.chain)" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                class="text-blue-400 hover:text-blue-300 text-xs font-mono"
+                :class="[
+                  'text-xs font-mono',
+                  tx.is_test_transaction 
+                    ? 'text-blue-300 hover:text-blue-200' 
+                    : 'text-blue-400 hover:text-blue-300'
+                ]"
               >
                 {{ formatTxHash(tx.payment.tx_hash) }}
               </a>
-              <UIcon name="i-heroicons-arrow-top-right-on-square" class="w-3 h-3 text-gray-400" />
+              <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+              </svg>
             </div>
             <div v-else class="text-gray-500 text-xs">-</div>
           </div>
 
           <!-- Arrow -->
           <div class="flex justify-center">
-            <UIcon name="i-heroicons-arrow-right" class="w-5 h-5 text-gray-400" />
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
           </div>
 
           <!-- CIRX Transfer -->
-          <div class="text-center">
+          <div class="text-left">
             <div class="text-xs text-gray-400 mb-1">CIRX Transfer</div>
             <div class="text-white font-mono text-sm mb-1">
               {{ tx.cirx.amount }} CIRX
             </div>
-            <div v-if="tx.cirx.tx_hash" class="flex items-center justify-center space-x-1">
+            <div v-if="tx.cirx.tx_hash" class="flex items-center space-x-1">
               <a 
                 :href="getCircularExplorerUrl(tx.cirx.tx_hash)" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                class="text-green-400 hover:text-green-300 text-xs font-mono"
+                :class="[
+                  'text-xs font-mono',
+                  tx.is_test_transaction 
+                    ? 'text-green-300 hover:text-green-200' 
+                    : 'text-green-400 hover:text-green-300'
+                ]"
               >
                 {{ formatTxHash(tx.cirx.tx_hash) }}
               </a>
-              <UIcon name="i-heroicons-arrow-top-right-on-square" class="w-3 h-3 text-gray-400" />
+              <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+              </svg>
             </div>
             <div v-else class="text-gray-500 text-xs">
               {{ tx.status === 'completed' ? 'Processing...' : 'Pending' }}
@@ -71,7 +101,9 @@
     </div>
 
     <div v-if="loading" class="text-center py-4">
-      <UIcon name="i-heroicons-arrow-path" class="animate-spin w-6 h-6 text-white" />
+      <svg class="animate-spin w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+      </svg>
       <span class="ml-2 text-white">Loading transactions...</span>
     </div>
 
@@ -80,9 +112,12 @@
     </div>
 
     <div v-if="pagination && pagination.hasMore" class="mt-4 flex justify-center">
-      <UButton @click="loadMore" variant="outline">
+      <button 
+        @click="loadMore" 
+        class="px-4 py-2 border border-gray-600 hover:border-gray-500 bg-transparent text-white rounded-lg hover:bg-gray-800 transition-colors"
+      >
         Load More
-      </UButton>
+      </button>
     </div>
   </div>
 </template>
