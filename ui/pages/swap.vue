@@ -133,6 +133,7 @@
                   
                   <div class="input-content">
                     <input
+                      ref="amountInputRef"
                       :value="inputAmount"
                       @input="handleInputAmountChange($event.target.value)"
                       type="text"
@@ -471,8 +472,23 @@
               </div>
             </div>
 
-            <div
-              style="width: 100%; padding: 16px 24px; border-radius: 12px; font-weight: 600; font-size: 18px; background-color: #0B5443; color: #01DA9D; cursor: pointer; text-align: center;"
+            <button
+              type="button"
+              :disabled="isButtonShowingDots || loading || quoteLoading || reverseQuoteLoading"
+              :style="{
+                width: '100%',
+                padding: '16px 24px',
+                borderRadius: '12px',
+                fontWeight: '600',
+                fontSize: '18px',
+                backgroundColor: isButtonShowingDots ? '#374151' : '#0B5443',
+                color: isButtonShowingDots ? '#9CA3AF' : '#01DA9D',
+                cursor: isButtonShowingDots ? 'not-allowed' : 'pointer',
+                textAlign: 'center',
+                opacity: isButtonShowingDots ? '0.6' : '1',
+                transition: 'all 0.2s ease',
+                border: 'none'
+              }"
               @click="handleSwap"
             >
               <span v-if="loading">{{ loadingText || 'Processing...' }}</span>
@@ -489,7 +505,7 @@
               <span v-else-if="recipientAddress && recipientAddressError">Get CIRX Wallet</span>
               <span v-else-if="activeTab === 'liquid'">Buy Liquid CIRX</span>
               <span v-else>Buy Vested CIRX</span>
-            </div>
+            </button>
           </form>
         </div>
           
@@ -815,6 +831,22 @@ const formatCirxBalance = computed(() => '0.0000')
 const isCircularChainAvailable = computed(() => false)
 const isCircularChainConnected = computed(() => false)
 
+// Check if button should be disabled (either showing "..." or processing)
+const isButtonShowingDots = computed(() => {
+  // Disable during loading states (transaction processing)
+  if (loading.value || quoteLoading.value || reverseQuoteLoading.value) return true
+  
+  // Don't disable if not connected or no address - these are actionable states
+  if (!isConnected.value) return false
+  if (isConnected.value && (!recipientAddress.value || recipientAddress.value.trim() === '')) return false
+  
+  // Disable for the specific "..." conditions (address validation states)
+  return (
+    addressValidationState.value === 'validating' ||
+    (recipientAddress.value && (recipientAddress.value === '0' || (recipientAddress.value.startsWith('0x') && recipientAddress.value.length < 66))) ||
+    (recipientAddress.value && recipientAddress.value.length === 66 && recipientAddress.value.startsWith('0x') && addressValidationState.value === 'idle')
+  )
+})
 
 // Format ETH balance with full decimal precision using official Wagmi data
 const formattedEthBalance = computed(() => {
@@ -894,6 +926,7 @@ const showStaking = ref(false)
 
 // Focus handler for address input
 const addressInputRef = ref(null)
+const amountInputRef = ref(null)
 const recipientAddress = ref('')
 const recipientAddressError = ref('')
 const recipientAddressType = ref('')
@@ -1688,6 +1721,32 @@ const handleSwap = async () => {
     address: address.value,
     connector: connector.value,
     recipientAddress: recipientAddress.value,
+    inputAmount: inputAmount.value,
+  })
+  
+  // If button shows "Enter Address", focus the address input field instead of swapping
+  if (isConnected.value && (!recipientAddress.value || recipientAddress.value.trim() === '')) {
+    console.log('🔥 No address entered, focusing address input field')
+    const addressInput = addressInputRef.value
+    if (addressInput) {
+      addressInput.focus()
+      addressInput.select() // Also select any existing text
+    }
+    return // Don't proceed with swap
+  }
+  
+  // If button shows "Enter an amount", focus the input field instead of swapping
+  if (!inputAmount.value || parseFloat(inputAmount.value) <= 0) {
+    console.log('🔥 No amount entered, focusing amount input field')
+    const amountInput = amountInputRef.value
+    if (amountInput) {
+      amountInput.focus()
+      amountInput.select() // Also select any existing text
+    }
+    return // Don't proceed with swap
+  }
+  
+  console.log('🔥 Proceeding with swap logic...', {
     recipientAddressError: recipientAddressError.value,
     inputAmount: inputAmount.value,
     loading: loading.value,
