@@ -23,6 +23,57 @@ class TransactionStatusController
     }
 
     /**
+     * Get all transactions in table format for status dashboard
+     */
+    public function getAllTransactionsTable(Request $request, Response $response): Response
+    {
+        try {
+            $queryParams = $request->getQueryParams();
+            $limit = (int)($queryParams['limit'] ?? 50);
+            $offset = (int)($queryParams['offset'] ?? 0);
+            $status = $queryParams['status'] ?? null;
+
+            $query = Transaction::orderBy('created_at', 'desc');
+            
+            if ($status) {
+                $query->where('swap_status', $status);
+            }
+            
+            $transactions = $query->offset($offset)->limit($limit)->get();
+            $totalCount = Transaction::count();
+            
+            $tableData = $transactions->map(function ($transaction) {
+                return $this->buildTableRow($transaction);
+            });
+
+            return $this->jsonResponse($response, [
+                'success' => true,
+                'data' => [
+                    'transactions' => $tableData,
+                    'pagination' => [
+                        'total' => $totalCount,
+                        'limit' => $limit,
+                        'offset' => $offset,
+                        'hasMore' => ($offset + $limit) < $totalCount
+                    ]
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to get transactions table', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return $this->jsonResponse($response, [
+                'success' => false,
+                'error' => 'Internal server error',
+                'code' => 'INTERNAL_ERROR'
+            ], 500);
+        }
+    }
+
+    /**
      * Get transaction status by ID
      */
     public function getStatus(Request $request, Response $response, array $args): Response
@@ -185,6 +236,153 @@ class TransactionStatusController
             Transaction::STATUS_COMPLETED => 0,
             default => null
         };
+    }
+
+    /**
+     * Build a single table row for transaction display
+     */
+    private function buildTableRow(Transaction $transaction): array
+    {
+        // Generate Etherscan URL for payment transaction
+        $etherscanUrl = null;
+        if ($transaction->payment_tx_id && $transaction->payment_chain) {
+            $etherscanUrl = $this->getEtherscanUrl($transaction->payment_tx_id, $transaction->payment_chain);
+        }
+
+        // Generate Circular explorer URL for CIRX transaction
+        $circularExplorerUrl = null;
+        if ($transaction->cirx_transfer_tx_id) {
+            $circularExplorerUrl = $this->getCircularExplorerUrl($transaction->cirx_transfer_tx_id);
+        }
+
+        // Calculate CIRX amount (with platform fee deducted)
+        $grossCirx = $this->calculateGrossCirxAmount($transaction);
+        $netCirx = max(0, $grossCirx - 4.0); // Subtract 4 CIRX platform fee
+
+        return [
+            'id' => $transaction->id,
+            'created_at' => $transaction->created_at?->toISOString(),
+            'status' => $transaction->swap_status,
+            'status_display' => $this->getStatusDisplayName($transaction->swap_status),
+            'payment' => [
+                'tx_hash' => $transaction->payment_tx_id,
+                'chain' => $transaction->payment_chain,
+                'amount' => $transaction->amount_paid,
+                'token' => $transaction->payment_token,
+                'etherscan_url' => $etherscanUrl
+            ],
+            'cirx' => [
+                'tx_hash' => $transaction->cirx_transfer_tx_id,
+                'recipient' => $transaction->cirx_recipient_address,
+                'amount' => number_format($netCirx, 1, '.', ''),
+                'circular_explorer_url' => $circularExplorerUrl
+            ],
+            'progress' => $this->getProgressPercentage($transaction->swap_status),
+            'retry_info' => [
+                'retry_count' => $transaction->retry_count ?? 0,
+                'last_retry_at' => $transaction->last_retry_at
+            ]
+        ];
+    }
+
+    /**
+     * Get Etherscan URL for a transaction hash
+     */
+    private function getEtherscanUrl(string $txHash, string $chain): string
+    {
+        $baseUrls = [
+            'ethereum' => 'https://etherscan.io/tx/',
+            'eth' => 'https://etherscan.io/tx/',
+            'mainnet' => 'https://etherscan.io/tx/',
+            'sepolia' => 'https://sepolia.etherscan.io/tx/',
+            'goerli' => 'https://goerli.etherscan.io/tx/',
+            'polygon' => 'https://polygonscan.com/tx/',
+            'matic' => 'https://polygonscan.com/tx/',
+            'bsc' => 'https://bscscan.com/tx/',
+            'binance' => 'https://bscscan.com/tx/',
+            'arbitrum' => 'https://arbiscan.io/tx/',
+            'optimism' => 'https://optimistic.etherscan.io/tx/',
+            'avalanche' => 'https://snowtrace.io/tx/',
+            'avax' => 'https://snowtrace.io/tx/'
+        ];
+
+        $chainKey = strtolower($chain);
+        $baseUrl = $baseUrls[$chainKey] ?? $baseUrls['ethereum']; // Default to Ethereum
+
+        return $baseUrl . $txHash;
+    }
+
+    /**
+     * Get Circular Protocol explorer URL for a transaction hash
+     */
+    private function getCircularExplorerUrl(string $txHash): string
+    {
+        // Determine environment for correct explorer
+        $environment = $_ENV['APP_ENV'] ?? 'development';
+        
+        switch ($environment) {
+            case 'production':
+                return "https://explorer.circular.net/tx/{$txHash}";
+            case 'staging':
+                return "https://staging-explorer.circular.net/tx/{$txHash}";
+            default:
+                return "https://sandbox-explorer.circular.net/tx/{$txHash}";
+        }
+    }
+
+    /**
+     * Get user-friendly status display name
+     */
+    private function getStatusDisplayName(string $status): string
+    {
+        return match ($status) {
+            Transaction::STATUS_INITIATED => 'Initiated',
+            Transaction::STATUS_PAYMENT_PENDING => 'Awaiting Payment',
+            Transaction::STATUS_PENDING_PAYMENT_VERIFICATION => 'Verifying Payment',
+            Transaction::STATUS_PAYMENT_VERIFIED => 'Payment Confirmed',
+            Transaction::STATUS_TRANSFER_PENDING,
+            Transaction::STATUS_CIRX_TRANSFER_PENDING => 'Preparing Transfer',
+            Transaction::STATUS_CIRX_TRANSFER_INITIATED,
+            Transaction::STATUS_TRANSFER_INITIATED => 'Transferring CIRX',
+            Transaction::STATUS_COMPLETED => 'Completed',
+            Transaction::STATUS_FAILED_PAYMENT_VERIFICATION => 'Payment Failed',
+            Transaction::STATUS_FAILED_CIRX_TRANSFER => 'Transfer Failed',
+            default => 'Unknown'
+        };
+    }
+
+    /**
+     * Calculate gross CIRX amount before platform fee deduction
+     */
+    private function calculateGrossCirxAmount(Transaction $transaction): float
+    {
+        // Convert payment to USD
+        $tokenPrices = [
+            'ETH' => 2700.0,   // $2,700 per ETH
+            'USDC' => 1.0,     // $1 per USDC
+            'USDT' => 1.0,     // $1 per USDT
+            'SOL' => 100.0,    // $100 per SOL
+            'BNB' => 300.0,    // $300 per BNB
+            'MATIC' => 0.80,   // $0.80 per MATIC
+        ];
+
+        $paymentAmount = floatval($transaction->amount_paid);
+        $tokenPrice = $tokenPrices[strtoupper($transaction->payment_token)] ?? 1.0;
+        $usdAmount = $paymentAmount * $tokenPrice;
+        
+        // Base CIRX rate: $2.50 per CIRX
+        $baseCirxAmount = $usdAmount / 2.5;
+        
+        // Apply discount for large amounts (OTC logic)
+        if ($usdAmount >= 50000) {
+            $baseCirxAmount *= 1.12; // 12% discount
+        } elseif ($usdAmount >= 10000) {
+            $baseCirxAmount *= 1.08; // 8% discount
+        } elseif ($usdAmount >= 1000) {
+            $baseCirxAmount *= 1.05; // 5% discount
+        }
+        
+        return $baseCirxAmount;
     }
 
     /**

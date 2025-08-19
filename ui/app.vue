@@ -41,10 +41,14 @@
 
 <script setup>
 import { ref, onMounted, onErrorCaptured } from 'vue'
+import { useAutoWorker } from '~/composables/useAutoWorker.js'
 
 // Global error state
 const globalError = ref(null)
 const toastManager = ref(null)
+
+// Auto-worker for background transaction processing
+const { isProcessing, getWorkerStatus } = useAutoWorker()
 
 // Global error handler
 const handleGlobalError = (error, context = 'Unknown') => {

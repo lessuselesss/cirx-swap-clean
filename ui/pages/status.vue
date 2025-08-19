@@ -136,6 +136,14 @@
           </div>
         </div>
 
+        <!-- Transaction Table -->
+        <div class="bg-gray-900/95 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-6 mb-6">
+          <h2 class="text-lg font-semibold text-white mb-4">
+            Recent Transactions
+          </h2>
+          <TransactionTable />
+        </div>
+
         <!-- Help Card -->
         <div class="bg-gray-900/95 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-6">
           <h2 class="text-lg font-semibold text-white mb-4">

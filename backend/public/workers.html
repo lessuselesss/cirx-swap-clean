@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CIRX Workers Dashboard</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #e0e0e0;
+        }
+        .container {
+            background: #2a2a2a;
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid #333;
+        }
+        h1 {
+            color: #4CAF50;
+            margin-bottom: 30px;
+        }
+        .button {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 8px;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        .button:hover { background: #45a049; }
+        .button:disabled { background: #666; cursor: not-allowed; }
+        .button.secondary { background: #2196F3; }
+        .button.secondary:hover { background: #1976D2; }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            background: #333;
+            border-left: 4px solid #4CAF50;
+        }
+        .error {
+            border-left-color: #f44336;
+            background: #2a1a1a;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: #333;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #bbb;
+            margin-top: 5px;
+        }
+        pre {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 12px;
+            border: 1px solid #333;
+        }
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #333;
+            border-top: 2px solid #4CAF50;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .info {
+            background: #1a2a3a;
+            border-left-color: #2196F3;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 CIRX Workers Dashboard</h1>
+        
+        <div class="result info">
+            <strong>FTP Deployment Solution</strong><br>
+            Use these endpoints to manually process pending transactions when you can't run background services.
+        </div>
+
+        <div class="stats" id="stats">
+            <!-- Stats will be loaded here -->
+        </div>
+
+        <div style="margin: 20px 0;">
+            <button class="button" onclick="processTransactions()">
+                <span id="process-loading" class="loading" style="display: none;"></span>
+                Process Transactions
+            </button>
+            <button class="button secondary" onclick="getStats()">
+                <span id="stats-loading" class="loading" style="display: none;"></span>
+                Refresh Stats
+            </button>
+            <button class="button secondary" onclick="healthCheck()">
+                <span id="health-loading" class="loading" style="display: none;"></span>
+                Health Check
+            </button>
+        </div>
+
+        <div id="result"></div>
+
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #333;">
+            <h3>External Cron Service Setup</h3>
+            <p style="color: #bbb;">For automatic processing, set up a cron job at <a href="https://cron-job.org" style="color: #4CAF50;">cron-job.org</a> to call:</p>
+            <pre id="cron-url">Loading...</pre>
+            <p style="color: #888; font-size: 12px;">Recommended: Every 2-5 minutes</p>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api/v1';
+
+        async function makeRequest(endpoint, method = 'GET') {
+            try {
+                const response = await fetch(API_BASE + endpoint, { method });
+                return await response.json();
+            } catch (error) {
+                return { success: false, error: error.message };
+            }
+        }
+
+        async function processTransactions() {
+            const button = document.querySelector('button');
+            const loading = document.getElementById('process-loading');
+            const result = document.getElementById('result');
+            
+            button.disabled = true;
+            loading.style.display = 'inline-block';
+            
+            const data = await makeRequest('/workers/process', 'POST');
+            
+            button.disabled = false;
+            loading.style.display = 'none';
+            
+            result.innerHTML = `<div class="result ${data.success ? '' : 'error'}">
+                <h3>${data.success ? '✅ Processing Complete' : '❌ Processing Failed'}</h3>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+            </div>`;
+
+            if (data.success) {
+                getStats(); // Refresh stats after processing
+            }
+        }
+
+        async function getStats() {
+            const loading = document.getElementById('stats-loading');
+            loading.style.display = 'inline-block';
+            
+            const data = await makeRequest('/workers/stats');
+            
+            loading.style.display = 'none';
+            
+            if (data.success) {
+                const stats = document.getElementById('stats');
+                const pv = data.payment_verification || {};
+                const ct = data.cirx_transfers || {};
+                
+                stats.innerHTML = `
+                    <div class="stat-card">
+                        <div class="stat-number">${pv.pending_verification || 0}</div>
+                        <div class="stat-label">Pending Payment Verification</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${ct.ready_for_transfer || 0}</div>
+                        <div class="stat-label">Ready for CIRX Transfer</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${ct.completed || 0}</div>
+                        <div class="stat-label">Completed Transactions</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${(ct.failed_transfers || 0) + (pv.failed_verification || 0)}</div>
+                        <div class="stat-label">Failed Transactions</div>
+                    </div>
+                `;
+            }
+        }
+
+        async function healthCheck() {
+            const loading = document.getElementById('health-loading');
+            const result = document.getElementById('result');
+            
+            loading.style.display = 'inline-block';
+            
+            const data = await makeRequest('/workers/health');
+            
+            loading.style.display = 'none';
+            
+            result.innerHTML = `<div class="result ${data.success ? '' : 'error'}">
+                <h3>${data.success ? '💚 Workers Healthy' : '❌ Health Check Failed'}</h3>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+            </div>`;
+        }
+
+        // Set up cron URL
+        document.getElementById('cron-url').textContent = 
+            `${window.location.origin}${API_BASE}/workers/auto?key=YOUR_API_KEY`;
+
+        // Load initial stats
+        getStats();
+    </script>
+</body>
+</html>

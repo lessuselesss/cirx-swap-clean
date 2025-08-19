@@ -8,7 +8,7 @@ export function useBackendApi() {
   const runtimeConfig = useRuntimeConfig()
   
   // Configuration
-  const API_BASE_URL = runtimeConfig.public.apiBaseUrl || 'http://localhost:8080'
+  const API_BASE_URL = runtimeConfig.public.apiBaseUrl || 'http://localhost:8080/api'
   const API_KEY = runtimeConfig.public.apiKey || null
   
   // Deposit wallet addresses for different chains/tokens
@@ -66,7 +66,11 @@ export function useBackendApi() {
       }
       
       // Make API request
-      const response = await fetch(`${API_BASE_URL}/v1/transactions/initiate-swap`, {
+      const fullUrl = `${API_BASE_URL}/v1/transactions/initiate-swap`
+      console.log('🔥 Making API request to:', fullUrl)
+      console.log('🔥 Swap data:', swapData)
+      
+      const response = await fetch(fullUrl, {
         method: 'POST',
         headers: getHeaders(),
         body: JSON.stringify(swapData)
