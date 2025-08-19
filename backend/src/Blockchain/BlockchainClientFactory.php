@@ -151,8 +151,8 @@ class BlockchainClientFactory
     private function getCirxConfig(): array
     {
         return [
-            'rpc_url' => $_ENV['CIRX_RPC_URL'] ?? 'http://localhost:8545',
-            'backup_rpc_url' => $_ENV['CIRX_RPC_URL_BACKUP'] ?? null,
+            'rpc_url' => $_ENV['CIRX_NAG_URL'] ?? 'http://localhost:8545',
+            'backup_rpc_url' => $_ENV['CIRX_NAG_URL_BACKUP'] ?? null,
             'wallet_address' => $_ENV['CIRX_WALLET_ADDRESS'] ?? '',
             'private_key' => $_ENV['CIRX_WALLET_PRIVATE_KEY'] ?? null,
             'decimals' => (int)($_ENV['CIRX_DECIMALS'] ?? 18),

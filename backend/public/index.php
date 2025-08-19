@@ -8,6 +8,7 @@ use App\Controllers\TransactionStatusController;
 use App\Controllers\TransactionTestController;
 use App\Controllers\DebugController;
 use App\Controllers\ConfigController;
+use App\Controllers\WorkerController;
 use App\Middleware\ApiKeyAuthMiddleware;
 use App\Middleware\RateLimitMiddleware;
 use App\Middleware\CorsMiddleware;
@@ -185,6 +186,12 @@ $app->group('/api/v1', function ($group) {
         return $controller->getStatus($request, $response, $args);
     });
 
+    // Transaction table for status dashboard (with explorer links)
+    $group->get('/transactions/table', function (Request $request, Response $response) {
+        $controller = new TransactionStatusController();
+        return $controller->getAllTransactionsTable($request, $response);
+    });
+
     // CIRX balance endpoint
     $group->get('/cirx/balance/{address}', function (Request $request, Response $response, array $args) {
         $controller = new TransactionController();
@@ -195,6 +202,28 @@ $app->group('/api/v1', function ($group) {
     $group->get('/config/circular-network', function (Request $request, Response $response) {
         $controller = new ConfigController();
         return $controller->getCircularNetworkConfig($request, $response);
+    });
+
+    // Worker endpoints (for FTP deployments without cron/systemd)
+    $group->post('/workers/process', function (Request $request, Response $response) {
+        $controller = new WorkerController();
+        return $controller->processTransactions($request, $response);
+    });
+
+    $group->get('/workers/stats', function (Request $request, Response $response) {
+        $controller = new WorkerController();
+        return $controller->getStats($request, $response);
+    });
+
+    $group->get('/workers/health', function (Request $request, Response $response) {
+        $controller = new WorkerController();
+        return $controller->healthCheck($request, $response);
+    });
+
+    // Auto-processing endpoint (for external cron services)
+    $group->get('/workers/auto', function (Request $request, Response $response) {
+        $controller = new WorkerController();
+        return $controller->autoProcess($request, $response);
     });
 
     // Debug endpoints (always available)
@@ -221,6 +250,16 @@ $app->group('/api/v1', function ($group) {
     $group->get('/debug/env', function (Request $request, Response $response) {
         $controller = new DebugController();
         return $controller->debugEnv($request, $response);
+    });
+
+    $group->post('/debug/set-cirx-recipient', function (Request $request, Response $response) {
+        $controller = new DebugController();
+        return $controller->setCirxRecipientOverride($request, $response);
+    });
+
+    $group->get('/debug/cirx-recipient-override', function (Request $request, Response $response) {
+        $controller = new DebugController();
+        return $controller->getCirxRecipientOverride($request, $response);
     });
 
     // Demo/Testing endpoints (only in development)

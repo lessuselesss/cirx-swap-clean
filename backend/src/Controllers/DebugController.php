@@ -328,7 +328,7 @@ class DebugController
             'cirx_wallet_address' => $_ENV['CIRX_WALLET_ADDRESS'] ?? 'NOT SET',
             'cirx_private_key_set' => !empty($_ENV['CIRX_WALLET_PRIVATE_KEY']),
             'cirx_private_key_length' => isset($_ENV['CIRX_WALLET_PRIVATE_KEY']) ? strlen($_ENV['CIRX_WALLET_PRIVATE_KEY']) : 0,
-            'cirx_rpc_url' => $_ENV['CIRX_RPC_URL'] ?? 'NOT SET',
+            'cirx_nag_url' => $_ENV['CIRX_NAG_URL'] ?? 'NOT SET',
             'app_env' => $_ENV['APP_ENV'] ?? 'NOT SET'
         ];
         
