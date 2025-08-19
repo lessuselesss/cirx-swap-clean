@@ -1,5 +1,5 @@
 {
-  "indexed_at": "2025-08-19T15:45:23.856108",
+  "indexed_at": "2025-08-19T15:50:03.410568",
   "root": ".",
   "project_structure": {
     "type": "tree",
@@ -1373,38 +1373,38 @@
               ],
               "signature": "()",
               "called_by": [
-                "po",
-                "CE"
+                "CE",
+                "po"
               ]
             },
             "validateConfig": {
               "signature": "()",
               "called_by": [
-                "EventListener.constructor",
-                "updateConfig",
                 "EventListener.__init__",
+                "updateConfig",
+                "EventListener.constructor",
                 "fetchConfig"
               ]
             },
             "initializeDatabaseSafely": {
               "signature": "()",
               "called_by": [
-                "EventListener.constructor",
-                "EventListener.__init__"
+                "EventListener.__init__",
+                "EventListener.constructor"
               ]
             },
             "prepareDatabaseStatements": {
               "signature": "()",
               "called_by": [
-                "EventListener.constructor",
-                "EventListener.__init__"
+                "EventListener.__init__",
+                "EventListener.constructor"
               ]
             },
             "getLastProcessedBlock": {
               "signature": "()",
               "called_by": [
-                "EventListener.constructor",
-                "EventListener.__init__"
+                "EventListener.__init__",
+                "EventListener.constructor"
               ]
             },
             "start": {
@@ -1755,8 +1755,8 @@
             "constructor": {
               "signature": "(message, code = 'INDEXER_ERROR', details = {})",
               "called_by": [
-                "po",
-                "CE"
+                "CE",
+                "po"
               ]
             },
             "__init__": "(message, code = 'INDEXER_ERROR', details = {})"
@@ -1769,8 +1769,8 @@
             "constructor": {
               "signature": "(message, details = {})",
               "called_by": [
-                "po",
-                "CE"
+                "CE",
+                "po"
               ]
             },
             "__init__": "(message, details = {})"
@@ -1783,8 +1783,8 @@
             "constructor": {
               "signature": "(message, details = {})",
               "called_by": [
-                "po",
-                "CE"
+                "CE",
+                "po"
               ]
             },
             "__init__": "(message, details = {})"
@@ -1797,8 +1797,8 @@
             "constructor": {
               "signature": "(message, details = {})",
               "called_by": [
-                "po",
-                "CE"
+                "CE",
+                "po"
               ]
             },
             "__init__": "(message, details = {})"
@@ -1811,8 +1811,8 @@
             "constructor": {
               "signature": "(message, details = {})",
               "called_by": [
-                "po",
-                "CE"
+                "CE",
+                "po"
               ]
             },
             "__init__": "(message, details = {})"
@@ -1825,8 +1825,8 @@
             "constructor": {
               "signature": "(message, details = {})",
               "called_by": [
-                "po",
-                "CE"
+                "CE",
+                "po"
               ]
             },
             "__init__": "(message, details = {})"
@@ -1839,8 +1839,8 @@
             "constructor": {
               "signature": "(threshold = 5, timeout = 60000, monitorWindow = 300000)",
               "called_by": [
-                "po",
-                "CE"
+                "CE",
+                "po"
               ]
             },
             "execute": "async (operation, context = {})",
@@ -1888,8 +1888,8 @@
             "constructor": {
               "signature": "(options = {})",
               "called_by": [
-                "po",
-                "CE"
+                "CE",
+                "po"
               ]
             },
             "debug": "(message, data = {})",
@@ -1900,11 +1900,11 @@
             "log": {
               "signature": "(level, message, data = {})",
               "called_by": [
+                "showHelp",
                 "removeTarget",
                 "log",
-                "cleanup",
-                "showHelp",
-                "cleanGlobPattern"
+                "cleanGlobPattern",
+                "cleanup"
               ]
             },
             "logToConsole": "(level, entry)",
@@ -1918,8 +1918,8 @@
             "constructor": {
               "signature": "(parentLogger, context)",
               "called_by": [
-                "po",
-                "CE"
+                "CE",
+                "po"
               ]
             },
             "debug": "(message, data = {})",
@@ -1936,8 +1936,8 @@
             "constructor": {
               "signature": "(logger, operation)",
               "called_by": [
-                "po",
-                "CE"
+                "CE",
+                "po"
               ]
             },
             "checkpoint": "(name)",
@@ -1950,8 +1950,8 @@
             "constructor": {
               "signature": "()",
               "called_by": [
-                "po",
-                "CE"
+                "CE",
+                "po"
               ]
             },
             "recordError": "(error, context = {})",
@@ -3079,8 +3079,8 @@
             "constructor": {
               "signature": "(message, status, code, requestId, endpoint, originalError)",
               "called_by": [
-                "po",
-                "CE"
+                "CE",
+                "po"
               ]
             },
             "__init__": "(message, status, code, requestId, endpoint, originalError)"
@@ -3091,8 +3091,8 @@
             "constructor": {
               "signature": "(message, status, code, requestId, endpoint, originalError)",
               "called_by": [
-                "po",
-                "CE"
+                "CE",
+                "po"
               ]
             },
             "__init__": "(message, status, code, requestId, endpoint, originalError)"
@@ -23969,5 +23969,5 @@
       "vue"
     ]
   },
-  "staleness_check": 1755035129.849509
+  "staleness_check": 1755035410.849936
 }
