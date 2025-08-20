@@ -115,7 +115,7 @@
           
           <form @submit.prevent="handleSwap" novalidate>
             
-            <!-- Uniswap-style Connected Swap Fields -->
+            <!-- CIRX OTC Connected Swap Fields -->
             <div class="mb-6 relative">
               <div class="swap-container" :data-tab="activeTab">
                 <!-- Sell Field (Top) -->
@@ -720,6 +720,8 @@ import { getTokenPrices } from '~/services/priceService.js'
 import { isValidCircularAddress, isValidEthereumAddress, isValidSolanaAddress } from '~/utils/addressFormatting.js'
 // Import backend API integration
 import { useBackendApi } from '~/composables/useBackendApi.js'
+// Import real-time transaction updates via IROH
+import { useRealTimeTransactions } from '~/composables/useRealTimeTransactions.js'
 // Import Circular address validation
 import { useCircularAddressValidation } from '~/composables/useCircularAddressValidation.js'
 // Extension detection disabled
@@ -771,6 +773,15 @@ const {
   DEPOSIT_ADDRESSES,
   tokenPrices: backendTokenPrices
 } = useBackendApi()
+
+// Real-time transaction updates via IROH
+const {
+  subscribeToTransaction,
+  monitorTransaction,
+  getTransaction,
+  isConnected: irohConnected,
+  connectionStatus: irohStatus
+} = useRealTimeTransactions()
 
 // Circular address validation
 const { checkAddressExists, isValidCircularAddressFormat, isAddressPending } = useCircularAddressValidation()
@@ -2668,7 +2679,7 @@ useHead({
   100% { opacity: 0.2; }
 }
 
-/* Uniswap-style Connected Swap Fields */
+/* CIRX OTC Connected Swap Fields */
 .swap-container {
   position: relative;
   background: #000306;

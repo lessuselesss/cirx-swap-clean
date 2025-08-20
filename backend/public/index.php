@@ -10,6 +10,7 @@ use App\Controllers\TelegramTestController;
 use App\Controllers\DebugController;
 use App\Controllers\ConfigController;
 use App\Controllers\WorkerController;
+use App\Controllers\IrohTransactionController;
 use App\Middleware\ApiKeyAuthMiddleware;
 use App\Middleware\RateLimitMiddleware;
 use App\Middleware\CorsMiddleware;
@@ -198,6 +199,22 @@ $app->group('/api/v1', function ($group) {
     $group->get('/cirx/balance/{address}', function (Request $request, Response $response, array $args) {
         $controller = new TransactionController();
         return $controller->getCirxBalance($request, $response, $args);
+    });
+
+    // IROH networking endpoints
+    $group->get('/iroh/status', function (Request $request, Response $response) {
+        $controller = new IrohTransactionController();
+        return $controller->getNetworkStatus($request, $response);
+    });
+
+    $group->post('/iroh/discover', function (Request $request, Response $response) {
+        $controller = new IrohTransactionController();
+        return $controller->discoverPeers($request, $response);
+    });
+
+    $group->get('/transactions/{id}/status/realtime', function (Request $request, Response $response, array $args) {
+        $controller = new IrohTransactionController();
+        return $controller->getTransactionStatusWithUpdates($request, $response, $args);
     });
 
     // Configuration endpoint (frontend/backend synchronization)

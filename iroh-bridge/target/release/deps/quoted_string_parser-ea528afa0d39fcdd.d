@@ -1,0 +1,9 @@
+/home/lessuseless/Projects/Orgs/Circular-Protocol/Autoswap/cirx-swap/iroh-bridge/target/release/deps/quoted_string_parser-ea528afa0d39fcdd.d: /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/quoted-string-parser-0.1.0/src/lib.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/quoted-string-parser-0.1.0/src/parser.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/quoted-string-parser-0.1.0/src/quoted_string.pest
+
+/home/lessuseless/Projects/Orgs/Circular-Protocol/Autoswap/cirx-swap/iroh-bridge/target/release/deps/libquoted_string_parser-ea528afa0d39fcdd.rlib: /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/quoted-string-parser-0.1.0/src/lib.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/quoted-string-parser-0.1.0/src/parser.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/quoted-string-parser-0.1.0/src/quoted_string.pest
+
+/home/lessuseless/Projects/Orgs/Circular-Protocol/Autoswap/cirx-swap/iroh-bridge/target/release/deps/libquoted_string_parser-ea528afa0d39fcdd.rmeta: /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/quoted-string-parser-0.1.0/src/lib.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/quoted-string-parser-0.1.0/src/parser.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/quoted-string-parser-0.1.0/src/quoted_string.pest
+
+/home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/quoted-string-parser-0.1.0/src/lib.rs:
+/home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/quoted-string-parser-0.1.0/src/parser.rs:
+/home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/quoted-string-parser-0.1.0/src/quoted_string.pest:

@@ -1,0 +1,10 @@
+/home/lessuseless/Projects/Orgs/Circular-Protocol/Autoswap/cirx-swap/iroh-bridge/target/release/deps/thiserror-23c74021f38beaac.d: /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.16/src/lib.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.16/src/aserror.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.16/src/display.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.16/src/var.rs
+
+/home/lessuseless/Projects/Orgs/Circular-Protocol/Autoswap/cirx-swap/iroh-bridge/target/release/deps/libthiserror-23c74021f38beaac.rlib: /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.16/src/lib.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.16/src/aserror.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.16/src/display.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.16/src/var.rs
+
+/home/lessuseless/Projects/Orgs/Circular-Protocol/Autoswap/cirx-swap/iroh-bridge/target/release/deps/libthiserror-23c74021f38beaac.rmeta: /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.16/src/lib.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.16/src/aserror.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.16/src/display.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.16/src/var.rs
+
+/home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.16/src/lib.rs:
+/home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.16/src/aserror.rs:
+/home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.16/src/display.rs:
+/home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.16/src/var.rs:

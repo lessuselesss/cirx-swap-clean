@@ -137,6 +137,90 @@
           </div>
         </div>
 
+        <!-- Telegram Debug -->
+        <div class="bg-gray-800 rounded-lg p-6">
+          <h3 class="text-xl font-semibold text-white mb-4">📱 Telegram Debug</h3>
+          <div class="space-y-3">
+            <button 
+              @click="testTelegramConnection"
+              :disabled="telegramLoading.connection"
+              class="block w-full p-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 rounded-lg text-white transition-colors"
+            >
+              <div class="font-medium flex items-center justify-center">
+                <span v-if="telegramLoading.connection" class="animate-spin mr-2">⟳</span>
+                Test Bot Connection
+              </div>
+              <div class="text-sm text-blue-200">Check if bot token and chat ID work</div>
+            </button>
+            
+            <button 
+              @click="sendTestError"
+              :disabled="telegramLoading.error"
+              class="block w-full p-3 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 rounded-lg text-white transition-colors"
+            >
+              <div class="font-medium flex items-center justify-center">
+                <span v-if="telegramLoading.error" class="animate-spin mr-2">⟳</span>
+                Send Test Error
+              </div>
+              <div class="text-sm text-red-200">Trigger error notification to Telegram</div>
+            </button>
+            
+            <button 
+              @click="testRateLimit"
+              :disabled="telegramLoading.rateLimit"
+              class="block w-full p-3 bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-600 rounded-lg text-white transition-colors"
+            >
+              <div class="font-medium flex items-center justify-center">
+                <span v-if="telegramLoading.rateLimit" class="animate-spin mr-2">⟳</span>
+                Test Rate Limiting
+              </div>
+              <div class="text-sm text-yellow-200">Test spam protection (3 msgs/5min)</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Backend Workers Debug -->
+        <div class="bg-gray-800 rounded-lg p-6">
+          <h3 class="text-xl font-semibold text-white mb-4">⚙️ Backend Workers</h3>
+          <div class="space-y-3">
+            <button 
+              @click="processTransactions"
+              :disabled="workersLoading.process"
+              class="block w-full p-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 rounded-lg text-white transition-colors"
+            >
+              <div class="font-medium flex items-center justify-center">
+                <span v-if="workersLoading.process" class="animate-spin mr-2">⟳</span>
+                Process Transactions
+              </div>
+              <div class="text-sm text-green-200">Run payment verification & CIRX transfers</div>
+            </button>
+            
+            <button 
+              @click="getWorkerStats"
+              :disabled="workersLoading.stats"
+              class="block w-full p-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 rounded-lg text-white transition-colors"
+            >
+              <div class="font-medium flex items-center justify-center">
+                <span v-if="workersLoading.stats" class="animate-spin mr-2">⟳</span>
+                Refresh Worker Stats
+              </div>
+              <div class="text-sm text-blue-200">Get transaction processing statistics</div>
+            </button>
+            
+            <button 
+              @click="checkWorkerHealth"
+              :disabled="workersLoading.health"
+              class="block w-full p-3 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 rounded-lg text-white transition-colors"
+            >
+              <div class="font-medium flex items-center justify-center">
+                <span v-if="workersLoading.health" class="animate-spin mr-2">⟳</span>
+                Health Check
+              </div>
+              <div class="text-sm text-purple-200">Check backend worker system health</div>
+            </button>
+          </div>
+        </div>
+
         <!-- Console Scripts -->
         <div class="bg-gray-800 rounded-lg p-6">
           <h3 class="text-xl font-semibold text-white mb-4">🔍 Console Scripts</h3>
@@ -257,6 +341,23 @@ definePageMeta({
   ssr: false
 })
 
+// Telegram loading states
+const telegramLoading = ref({
+  connection: false,
+  error: false,
+  rateLimit: false
+})
+
+// Workers loading states
+const workersLoading = ref({
+  process: false,
+  stats: false,
+  health: false
+})
+
+// Result display
+const telegramResult = ref(null)
+
 // Quick action functions
 const openConsole = () => {
   alert('Press F12 or Ctrl+Shift+I (Cmd+Option+I on Mac) to open the browser console')
@@ -272,6 +373,110 @@ const clearStorage = () => {
 
 const refreshPage = () => {
   location.reload(true)
+}
+
+// Telegram debug functions
+const testTelegramConnection = async () => {
+  telegramLoading.value.connection = true
+  try {
+    const response = await fetch('http://localhost:8080/api/v1/telegram/test/connection')
+    const data = await response.json()
+    
+    const status = data.success ? '✅ Connected' : '❌ Failed'
+    alert(`${status}\n\n${JSON.stringify(data, null, 2)}`)
+  } catch (error) {
+    alert(`❌ Connection Error\n\nMake sure the backend is running on port 8080.\n\nError: ${error.message}`)
+  } finally {
+    telegramLoading.value.connection = false
+  }
+}
+
+const sendTestError = async () => {
+  telegramLoading.value.error = true
+  try {
+    const response = await fetch('http://localhost:8080/api/v1/telegram/test/error', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        error_type: 'debug_test_error',
+        message: 'Test error notification from debug dashboard',
+        context: { timestamp: new Date().toISOString(), page: 'debug-dashboard' }
+      })
+    })
+    const data = await response.json()
+    
+    const status = data.success ? '📱 Sent' : '❌ Failed'
+    alert(`${status}\n\nCheck your Telegram for the notification!\n\n${JSON.stringify(data, null, 2)}`)
+  } catch (error) {
+    alert(`❌ Send Error\n\nMake sure the backend is running on port 8080.\n\nError: ${error.message}`)
+  } finally {
+    telegramLoading.value.error = false
+  }
+}
+
+const testRateLimit = async () => {
+  telegramLoading.value.rateLimit = true
+  try {
+    const response = await fetch('http://localhost:8080/api/v1/telegram/test/multiple', {
+      method: 'POST'
+    })
+    const data = await response.json()
+    
+    const status = data.success ? '🔄 Complete' : '❌ Failed'
+    alert(`${status}\n\nRate limiting test completed. Check results below:\n\n${JSON.stringify(data, null, 2)}`)
+  } catch (error) {
+    alert(`❌ Test Error\n\nMake sure the backend is running on port 8080.\n\nError: ${error.message}`)
+  } finally {
+    telegramLoading.value.rateLimit = false
+  }
+}
+
+// Workers debug functions
+const processTransactions = async () => {
+  workersLoading.value.process = true
+  try {
+    const response = await fetch('http://localhost:8080/api/v1/workers/process', {
+      method: 'POST'
+    })
+    const data = await response.json()
+    
+    const status = data.success ? '✅ Processing Complete' : '❌ Processing Failed'
+    alert(`${status}\n\n${JSON.stringify(data, null, 2)}`)
+  } catch (error) {
+    alert(`❌ Processing Error\n\nMake sure the backend is running on port 8080.\n\nError: ${error.message}`)
+  } finally {
+    workersLoading.value.process = false
+  }
+}
+
+const getWorkerStats = async () => {
+  workersLoading.value.stats = true
+  try {
+    const response = await fetch('http://localhost:8080/api/v1/workers/stats')
+    const data = await response.json()
+    
+    const status = data.success ? '📊 Stats Retrieved' : '❌ Stats Failed'
+    alert(`${status}\n\n${JSON.stringify(data, null, 2)}`)
+  } catch (error) {
+    alert(`❌ Stats Error\n\nMake sure the backend is running on port 8080.\n\nError: ${error.message}`)
+  } finally {
+    workersLoading.value.stats = false
+  }
+}
+
+const checkWorkerHealth = async () => {
+  workersLoading.value.health = true
+  try {
+    const response = await fetch('http://localhost:8080/api/v1/workers/health')
+    const data = await response.json()
+    
+    const status = data.success ? '💚 Workers Healthy' : '❌ Health Check Failed'
+    alert(`${status}\n\n${JSON.stringify(data, null, 2)}`)
+  } catch (error) {
+    alert(`❌ Health Check Error\n\nMake sure the backend is running on port 8080.\n\nError: ${error.message}`)
+  } finally {
+    workersLoading.value.health = false
+  }
 }
 
 // Head configuration

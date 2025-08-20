@@ -7,6 +7,7 @@ use App\Exceptions\CirxTransferException;
 use App\Blockchain\BlockchainClientFactory;
 use App\Blockchain\CirxBlockchainClient;
 use App\Blockchain\Exceptions\BlockchainException;
+use App\Services\IrohServiceBridge;
 
 /**
  * CIRX Transfer Service
@@ -22,8 +23,9 @@ class CirxTransferService
     private BlockchainClientFactory $blockchainFactory;
     private ?CirxBlockchainClient $cirxClient;
     private bool $testMode;
+    private ?IrohServiceBridge $irohBridge;
 
-    public function __construct(?BlockchainClientFactory $blockchainFactory = null)
+    public function __construct(?BlockchainClientFactory $blockchainFactory = null, ?IrohServiceBridge $irohBridge = null)
     {
         // In production, these would come from environment variables or a price oracle
         $this->tokenPrices = [
@@ -40,6 +42,7 @@ class CirxTransferService
         $this->blockchainFactory = $blockchainFactory ?? new BlockchainClientFactory();
         $this->cirxClient = null;
         $this->testMode = ($_ENV['APP_ENV'] ?? 'production') === 'testing' || defined('PHPUNIT_RUNNING');
+        $this->irohBridge = $irohBridge ?? new IrohServiceBridge();
     }
 
     /**
@@ -110,6 +113,9 @@ class CirxTransferService
                 // Update transaction with transfer details
                 $transaction->cirx_transfer_tx_id = $transferResult['txHash'];
                 $transaction->markCompleted();
+                
+                // Broadcast completion via IROH network
+                $this->broadcastTransferCompletion($transaction, $transferResult);
                 
                 return CirxTransferResult::success(
                     $transferResult['txHash'],
@@ -483,5 +489,38 @@ class CirxTransferService
         $amountFloat = floatval($paymentAmount);
         $amountUSD = $amountFloat * 1.0; // Assuming payment is in USD equivalent
         return floatval($this->getDiscountPercentage($amountUSD));
+    }
+
+    /**
+     * Broadcast CIRX transfer completion to IROH network
+     */
+    private function broadcastTransferCompletion(Transaction $transaction, array $transferResult): void
+    {
+        if (!$this->irohBridge->isEnabled()) {
+            return;
+        }
+
+        try {
+            $this->irohBridge->broadcastCirxTransfer(
+                $transaction->id,
+                $transaction->cirx_recipient_address ?? '',
+                (string) $transaction->amount_paid,
+                $transferResult['txHash'] ?? ''
+            );
+
+            $this->irohBridge->broadcastTransactionUpdate(
+                $transaction->id,
+                Transaction::STATUS_COMPLETED,
+                [
+                    'cirx_transfer_tx_id' => $transferResult['txHash'],
+                    'gas_used' => $transferResult['gasUsed'] ?? 0,
+                    'block_number' => $transferResult['blockNumber'] ?? 0,
+                    'completion_timestamp' => time()
+                ]
+            );
+        } catch (\Exception $e) {
+            // Don't fail the transfer if broadcasting fails
+            error_log("Failed to broadcast transfer completion: " . $e->getMessage());
+        }
     }
 }

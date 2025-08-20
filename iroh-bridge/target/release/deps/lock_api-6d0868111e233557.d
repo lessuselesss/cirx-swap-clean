@@ -1,0 +1,10 @@
+/home/lessuseless/Projects/Orgs/Circular-Protocol/Autoswap/cirx-swap/iroh-bridge/target/release/deps/lock_api-6d0868111e233557.d: /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/lock_api-0.4.13/src/lib.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/lock_api-0.4.13/src/mutex.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/lock_api-0.4.13/src/remutex.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/lock_api-0.4.13/src/rwlock.rs
+
+/home/lessuseless/Projects/Orgs/Circular-Protocol/Autoswap/cirx-swap/iroh-bridge/target/release/deps/liblock_api-6d0868111e233557.rlib: /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/lock_api-0.4.13/src/lib.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/lock_api-0.4.13/src/mutex.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/lock_api-0.4.13/src/remutex.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/lock_api-0.4.13/src/rwlock.rs
+
+/home/lessuseless/Projects/Orgs/Circular-Protocol/Autoswap/cirx-swap/iroh-bridge/target/release/deps/liblock_api-6d0868111e233557.rmeta: /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/lock_api-0.4.13/src/lib.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/lock_api-0.4.13/src/mutex.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/lock_api-0.4.13/src/remutex.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/lock_api-0.4.13/src/rwlock.rs
+
+/home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/lock_api-0.4.13/src/lib.rs:
+/home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/lock_api-0.4.13/src/mutex.rs:
+/home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/lock_api-0.4.13/src/remutex.rs:
+/home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/lock_api-0.4.13/src/rwlock.rs:

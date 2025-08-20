@@ -1,0 +1,10 @@
+/home/lessuseless/Projects/Orgs/Circular-Protocol/Autoswap/cirx-swap/iroh-bridge/target/release/deps/bounded_integer-0ac0a78cda4adff3.d: /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bounded-integer-0.5.8/src/lib.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bounded-integer-0.5.8/src/types/mod.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bounded-integer-0.5.8/src/types/indexing.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bounded-integer-0.5.8/src/parse.rs
+
+/home/lessuseless/Projects/Orgs/Circular-Protocol/Autoswap/cirx-swap/iroh-bridge/target/release/deps/libbounded_integer-0ac0a78cda4adff3.rlib: /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bounded-integer-0.5.8/src/lib.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bounded-integer-0.5.8/src/types/mod.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bounded-integer-0.5.8/src/types/indexing.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bounded-integer-0.5.8/src/parse.rs
+
+/home/lessuseless/Projects/Orgs/Circular-Protocol/Autoswap/cirx-swap/iroh-bridge/target/release/deps/libbounded_integer-0ac0a78cda4adff3.rmeta: /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bounded-integer-0.5.8/src/lib.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bounded-integer-0.5.8/src/types/mod.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bounded-integer-0.5.8/src/types/indexing.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bounded-integer-0.5.8/src/parse.rs
+
+/home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bounded-integer-0.5.8/src/lib.rs:
+/home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bounded-integer-0.5.8/src/types/mod.rs:
+/home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bounded-integer-0.5.8/src/types/indexing.rs:
+/home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bounded-integer-0.5.8/src/parse.rs:

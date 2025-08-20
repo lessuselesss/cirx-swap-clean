@@ -76,6 +76,9 @@ export default defineNuxtConfig({
       // Backend API configuration
       apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'http://localhost:8080/api',
       apiKey: process.env.NUXT_PUBLIC_API_KEY || '',
+      // IROH networking configuration
+      irohEnabled: process.env.NUXT_PUBLIC_IROH_ENABLED === 'true',
+      irohBridgeUrl: process.env.NUXT_PUBLIC_IROH_BRIDGE_URL || 'http://localhost:9090',
     }
   },
 

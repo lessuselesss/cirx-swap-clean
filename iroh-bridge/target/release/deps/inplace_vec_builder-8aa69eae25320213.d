@@ -1,0 +1,9 @@
+/home/lessuseless/Projects/Orgs/Circular-Protocol/Autoswap/cirx-swap/iroh-bridge/target/release/deps/inplace_vec_builder-8aa69eae25320213.d: /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/inplace-vec-builder-0.1.1/src/lib.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/inplace-vec-builder-0.1.1/src/small_vec_builder.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/inplace-vec-builder-0.1.1/src/../README.md
+
+/home/lessuseless/Projects/Orgs/Circular-Protocol/Autoswap/cirx-swap/iroh-bridge/target/release/deps/libinplace_vec_builder-8aa69eae25320213.rlib: /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/inplace-vec-builder-0.1.1/src/lib.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/inplace-vec-builder-0.1.1/src/small_vec_builder.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/inplace-vec-builder-0.1.1/src/../README.md
+
+/home/lessuseless/Projects/Orgs/Circular-Protocol/Autoswap/cirx-swap/iroh-bridge/target/release/deps/libinplace_vec_builder-8aa69eae25320213.rmeta: /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/inplace-vec-builder-0.1.1/src/lib.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/inplace-vec-builder-0.1.1/src/small_vec_builder.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/inplace-vec-builder-0.1.1/src/../README.md
+
+/home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/inplace-vec-builder-0.1.1/src/lib.rs:
+/home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/inplace-vec-builder-0.1.1/src/small_vec_builder.rs:
+/home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/inplace-vec-builder-0.1.1/src/../README.md:

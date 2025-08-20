@@ -51,7 +51,7 @@
 // Page metadata
 definePageMeta({
   title: 'Circular CIRX OTC Trading Platform',
-  description: 'Buy CIRX tokens with instant delivery or OTC discounts up to 12%. Professional trading platform powered by UniswapV4.',
+  description: 'Buy CIRX tokens with instant delivery or OTC discounts up to 12%. Professional OTC trading platform for the Circular Protocol ecosystem.',
   ssr: false // Disable SSR for this page due to client-only dependencies
 })
 
