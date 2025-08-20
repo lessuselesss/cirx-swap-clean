@@ -1,5 +1,5 @@
 {
-  "indexed_at": "2025-08-20T14:16:48.131116",
+  "indexed_at": "2025-08-20T15:07:16.031545",
   "root": ".",
   "project_structure": {
     "type": "tree",
@@ -777,8 +777,8 @@
         "Run only backend tests"
       ],
       "architecture_hints": [
-        "backend/tests/E2E/",
-        "ui/e2e/"
+        "ui/e2e/",
+        "backend/tests/E2E/"
       ]
     },
     "CLEANUP_NOTES.md": {
@@ -1435,17 +1435,17 @@
               ],
               "signature": "()",
               "called_by": [
-                "CE",
-                "po"
+                "po",
+                "CE"
               ]
             },
             "validateConfig": {
               "signature": "()",
               "called_by": [
-                "updateConfig",
                 "fetchConfig",
                 "EventListener.__init__",
-                "EventListener.constructor"
+                "EventListener.constructor",
+                "updateConfig"
               ]
             },
             "initializeDatabaseSafely": {
@@ -2392,8 +2392,8 @@
             "constructor": {
               "signature": "(message, code = 'INDEXER_ERROR', details = {})",
               "called_by": [
-                "CE",
-                "po"
+                "po",
+                "CE"
               ]
             },
             "__init__": "(message, code = 'INDEXER_ERROR', details = {})"
@@ -2406,8 +2406,8 @@
             "constructor": {
               "signature": "(message, details = {})",
               "called_by": [
-                "CE",
-                "po"
+                "po",
+                "CE"
               ]
             },
             "__init__": "(message, details = {})"
@@ -2420,8 +2420,8 @@
             "constructor": {
               "signature": "(message, details = {})",
               "called_by": [
-                "CE",
-                "po"
+                "po",
+                "CE"
               ]
             },
             "__init__": "(message, details = {})"
@@ -2434,8 +2434,8 @@
             "constructor": {
               "signature": "(message, details = {})",
               "called_by": [
-                "CE",
-                "po"
+                "po",
+                "CE"
               ]
             },
             "__init__": "(message, details = {})"
@@ -2448,8 +2448,8 @@
             "constructor": {
               "signature": "(message, details = {})",
               "called_by": [
-                "CE",
-                "po"
+                "po",
+                "CE"
               ]
             },
             "__init__": "(message, details = {})"
@@ -2462,8 +2462,8 @@
             "constructor": {
               "signature": "(message, details = {})",
               "called_by": [
-                "CE",
-                "po"
+                "po",
+                "CE"
               ]
             },
             "__init__": "(message, details = {})"
@@ -2476,8 +2476,8 @@
             "constructor": {
               "signature": "(threshold = 5, timeout = 60000, monitorWindow = 300000)",
               "called_by": [
-                "CE",
-                "po"
+                "po",
+                "CE"
               ]
             },
             "execute": "async (operation, context = {})",
@@ -2525,18 +2525,18 @@
             "constructor": {
               "signature": "(options = {})",
               "called_by": [
-                "CE",
-                "po"
+                "po",
+                "CE"
               ]
             },
             "debug": "(message, data = {})",
             "info": {
               "signature": "(message, data = {})",
               "called_by": [
+                "analyzeNetworkTopology",
                 "performLoadTest",
-                "simulateDistributedTransactions",
                 "runDistributedSystemDemo",
-                "analyzeNetworkTopology"
+                "simulateDistributedTransactions"
               ]
             },
             "warn": {
@@ -2548,11 +2548,11 @@
             "error": {
               "signature": "(message, error = null, data = {})",
               "called_by": [
-                "simulateDistributedTransactions",
-                "systemHealthCheck",
                 "trackRequest",
-                "runDistributedSystemDemo",
-                "analyzeNetworkTopology"
+                "systemHealthCheck",
+                "simulateDistributedTransactions",
+                "analyzeNetworkTopology",
+                "runDistributedSystemDemo"
               ]
             },
             "critical": "(message, error = null, data = {})",
@@ -2560,17 +2560,17 @@
               "signature": "(level, message, data = {})",
               "called_by": [
                 "showHelp",
-                "simulateDistributedTransactions",
-                "systemHealthCheck",
-                "performLoadTest",
-                "log",
+                "generatePerformanceReport",
                 "trackRequest",
+                "systemHealthCheck",
+                "simulateDistributedTransactions",
+                "removeTarget",
                 "cleanGlobPattern",
                 "cleanup",
-                "generatePerformanceReport",
-                "runDistributedSystemDemo",
-                "removeTarget",
-                "analyzeNetworkTopology"
+                "log",
+                "analyzeNetworkTopology",
+                "performLoadTest",
+                "runDistributedSystemDemo"
               ]
             },
             "logToConsole": "(level, entry)",
@@ -2584,18 +2584,18 @@
             "constructor": {
               "signature": "(parentLogger, context)",
               "called_by": [
-                "CE",
-                "po"
+                "po",
+                "CE"
               ]
             },
             "debug": "(message, data = {})",
             "info": {
               "signature": "(message, data = {})",
               "called_by": [
+                "analyzeNetworkTopology",
                 "performLoadTest",
-                "simulateDistributedTransactions",
                 "runDistributedSystemDemo",
-                "analyzeNetworkTopology"
+                "simulateDistributedTransactions"
               ]
             },
             "warn": {
@@ -2607,11 +2607,11 @@
             "error": {
               "signature": "(message, error = null, data = {})",
               "called_by": [
-                "simulateDistributedTransactions",
-                "systemHealthCheck",
                 "trackRequest",
-                "runDistributedSystemDemo",
-                "analyzeNetworkTopology"
+                "systemHealthCheck",
+                "simulateDistributedTransactions",
+                "analyzeNetworkTopology",
+                "runDistributedSystemDemo"
               ]
             },
             "critical": "(message, error = null, data = {})",
@@ -2624,8 +2624,8 @@
             "constructor": {
               "signature": "(logger, operation)",
               "called_by": [
-                "CE",
-                "po"
+                "po",
+                "CE"
               ]
             },
             "checkpoint": "(name)",
@@ -2638,8 +2638,8 @@
             "constructor": {
               "signature": "()",
               "called_by": [
-                "CE",
-                "po"
+                "po",
+                "CE"
               ]
             },
             "recordError": "(error, context = {})",
@@ -3771,8 +3771,8 @@
             "constructor": {
               "signature": "(message, status, code, requestId, endpoint, originalError)",
               "called_by": [
-                "CE",
-                "po"
+                "po",
+                "CE"
               ]
             },
             "__init__": "(message, status, code, requestId, endpoint, originalError)"
@@ -3783,8 +3783,8 @@
             "constructor": {
               "signature": "(message, status, code, requestId, endpoint, originalError)",
               "called_by": [
-                "CE",
-                "po"
+                "po",
+                "CE"
               ]
             },
             "__init__": "(message, status, code, requestId, endpoint, originalError)"
@@ -24862,5 +24862,5 @@
       "vue"
     ]
   },
-  "staleness_check": 1755116214.425471
+  "staleness_check": 1755119241.075996
 }
