@@ -135,6 +135,9 @@ class LoggerService
                 error_log("Failed to create development file logger: " . $e->getMessage());
             }
         }
+
+        // Add Telegram notification handler for errors and critical logs in development too
+        self::addTelegramHandler($logger, $logLevel);
     }
 
     /**

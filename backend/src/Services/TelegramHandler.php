@@ -58,7 +58,7 @@ class TelegramHandler extends AbstractProcessingHandler
                 $errorType,
                 $record->message,
                 $record->context,
-                $record->level_name
+                $record->level->getName()
             );
         }
         

@@ -131,7 +131,7 @@ class TelegramNotificationService
                 'json' => [
                     'chat_id' => $this->chatId,
                     'text' => $text,
-                    'parse_mode' => 'Markdown',
+                    'parse_mode' => 'HTML',
                     'disable_notification' => $silent
                 ],
                 'timeout' => 10,
@@ -179,13 +179,13 @@ class TelegramNotificationService
         array $context,
         string $level
     ): string {
-        $text = "{$emoji} *CIRX Backend Alert*\n\n";
-        $text .= "🔴 *Error Type:* {$errorType}\n";
-        $text .= "📊 *Level:* " . strtoupper($level) . "\n";
-        $text .= "📝 *Message:* {$message}\n";
-        $text .= "⏰ *Time:* " . date('Y-m-d H:i:s T') . "\n";
-        $text .= "🖥️ *Server:* " . gethostname() . "\n";
-        $text .= "🌍 *Environment:* " . ($_ENV['APP_ENV'] ?? 'unknown') . "\n";
+        $text = "{$emoji} <b>CIRX Backend Alert</b>\n\n";
+        $text .= "🔴 <b>Error Type:</b> " . htmlspecialchars($errorType, ENT_QUOTES, 'UTF-8') . "\n";
+        $text .= "📊 <b>Level:</b> " . strtoupper($level) . "\n";
+        $text .= "📝 <b>Message:</b> " . htmlspecialchars($message, ENT_QUOTES, 'UTF-8') . "\n";
+        $text .= "⏰ <b>Time:</b> " . date('Y-m-d H:i:s T') . "\n";
+        $text .= "🖥️ <b>Server:</b> " . gethostname() . "\n";
+        $text .= "🌍 <b>Environment:</b> " . ($_ENV['APP_ENV'] ?? 'unknown') . "\n";
         
         if (!empty($context)) {
             $text .= "\n📊 *Context:*\n";
@@ -345,12 +345,27 @@ class TelegramNotificationService
      */
     public function sendTestNotification(): bool
     {
-        $testMessage = "🧪 *CIRX Backend Test Notification*\n\n";
+        $testMessage = "🧪 <b>CIRX Backend Test Notification</b>\n\n";
         $testMessage .= "✅ Telegram notifications are working!\n";
-        $testMessage .= "⏰ *Time:* " . date('Y-m-d H:i:s T') . "\n";
-        $testMessage .= "🖥️ *Server:* " . gethostname() . "\n";
-        $testMessage .= "🌍 *Environment:* " . ($_ENV['APP_ENV'] ?? 'unknown');
+        $testMessage .= "⏰ <b>Time:</b> " . date('Y-m-d H:i:s T') . "\n";
+        $testMessage .= "🖥️ <b>Server:</b> " . gethostname() . "\n";
+        $testMessage .= "🌍 <b>Environment:</b> " . ($_ENV['APP_ENV'] ?? 'unknown');
         
         return $this->sendMessage($testMessage, false);
+    }
+    
+    /**
+     * Escape special characters for Telegram Markdown parsing
+     */
+    private function escapeMarkdown(string $text): string
+    {
+        // Escape special Markdown characters for Telegram
+        $specialChars = ['*', '_', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'];
+        
+        foreach ($specialChars as $char) {
+            $text = str_replace($char, '\\' . $char, $text);
+        }
+        
+        return $text;
     }
 }
