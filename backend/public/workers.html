@@ -128,6 +128,22 @@
             </button>
         </div>
 
+        <div style="margin: 20px 0; padding: 20px; background: #333; border-radius: 8px;">
+            <h3 style="color: #4CAF50; margin-bottom: 15px;">🔔 Telegram Notifications</h3>
+            <button class="button secondary" onclick="testTelegramConnection()">
+                <span id="telegram-conn-loading" class="loading" style="display: none;"></span>
+                Test Connection
+            </button>
+            <button class="button secondary" onclick="testTelegramError()">
+                <span id="telegram-error-loading" class="loading" style="display: none;"></span>
+                Send Test Error
+            </button>
+            <button class="button secondary" onclick="testTelegramMultiple()">
+                <span id="telegram-multi-loading" class="loading" style="display: none;"></span>
+                Test Rate Limiting
+            </button>
+        </div>
+
         <div id="result"></div>
 
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #333;">
@@ -219,6 +235,54 @@
             
             result.innerHTML = `<div class="result ${data.success ? '' : 'error'}">
                 <h3>${data.success ? '💚 Workers Healthy' : '❌ Health Check Failed'}</h3>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+            </div>`;
+        }
+
+        async function testTelegramConnection() {
+            const loading = document.getElementById('telegram-conn-loading');
+            const result = document.getElementById('result');
+            
+            loading.style.display = 'inline-block';
+            
+            const data = await makeRequest('/telegram/test/connection');
+            
+            loading.style.display = 'none';
+            
+            result.innerHTML = `<div class="result ${data.success ? '' : 'error'}">
+                <h3>${data.success ? '✅ Telegram Connected' : '❌ Connection Failed'}</h3>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+            </div>`;
+        }
+
+        async function testTelegramError() {
+            const loading = document.getElementById('telegram-error-loading');
+            const result = document.getElementById('result');
+            
+            loading.style.display = 'inline-block';
+            
+            const data = await makeRequest('/telegram/test/error', 'POST');
+            
+            loading.style.display = 'none';
+            
+            result.innerHTML = `<div class="result ${data.success ? '' : 'error'}">
+                <h3>${data.success ? '📱 Test Error Sent' : '❌ Send Failed'}</h3>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+            </div>`;
+        }
+
+        async function testTelegramMultiple() {
+            const loading = document.getElementById('telegram-multi-loading');
+            const result = document.getElementById('result');
+            
+            loading.style.display = 'inline-block';
+            
+            const data = await makeRequest('/telegram/test/multiple', 'POST');
+            
+            loading.style.display = 'none';
+            
+            result.innerHTML = `<div class="result ${data.success ? '' : 'error'}">
+                <h3>${data.success ? '🔄 Rate Limit Test Complete' : '❌ Test Failed'}</h3>
                 <pre>${JSON.stringify(data, null, 2)}</pre>
             </div>`;
         }

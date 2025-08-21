@@ -1,0 +1,10 @@
+/home/lessuseless/Projects/Orgs/Circular-Protocol/Autoswap/cirx-swap/iroh-bridge/target/release/deps/iroh_metrics-82d70a5f8e1c8cff.d: /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/iroh-metrics-0.28.0/src/lib.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/iroh-metrics-0.28.0/src/metrics.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/iroh-metrics-0.28.0/src/core.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/iroh-metrics-0.28.0/src/service.rs
+
+/home/lessuseless/Projects/Orgs/Circular-Protocol/Autoswap/cirx-swap/iroh-bridge/target/release/deps/libiroh_metrics-82d70a5f8e1c8cff.rlib: /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/iroh-metrics-0.28.0/src/lib.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/iroh-metrics-0.28.0/src/metrics.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/iroh-metrics-0.28.0/src/core.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/iroh-metrics-0.28.0/src/service.rs
+
+/home/lessuseless/Projects/Orgs/Circular-Protocol/Autoswap/cirx-swap/iroh-bridge/target/release/deps/libiroh_metrics-82d70a5f8e1c8cff.rmeta: /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/iroh-metrics-0.28.0/src/lib.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/iroh-metrics-0.28.0/src/metrics.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/iroh-metrics-0.28.0/src/core.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/iroh-metrics-0.28.0/src/service.rs
+
+/home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/iroh-metrics-0.28.0/src/lib.rs:
+/home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/iroh-metrics-0.28.0/src/metrics.rs:
+/home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/iroh-metrics-0.28.0/src/core.rs:
+/home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/iroh-metrics-0.28.0/src/service.rs:

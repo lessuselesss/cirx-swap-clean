@@ -1,0 +1,33 @@
+# IROH Bridge Configuration for CIRX Swap Platform
+
+[network]
+enable_local_discovery = true
+enable_n0_discovery = true
+custom_relays = []
+prefer_local = true
+
+[relay]
+enable = true
+stun_port = 3478
+# custom_url = "https://my-relay.example.com"
+
+[gossip]
+enable = true
+topics = [
+    "service-discovery",
+    "transaction-updates", 
+    "order-book-sync",
+    "cirx-notifications"
+]
+max_message_size = 1048576  # 1MB
+
+[http_bridge]
+listen_address = "0.0.0.0:9090"
+enable_cors = true
+request_timeout = 30
+max_concurrent_requests = 100
+
+[backend]
+service_url = "http://localhost:8080"
+health_endpoint = "/api/v1/health"
+health_check_interval = 30

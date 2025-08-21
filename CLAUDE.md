@@ -11,6 +11,12 @@ This is a **Circular CIRX OTC Trading Platform** with API-first architecture:
 
 **Current Status**: Production-ready platform with comprehensive E2E testing framework.
 
+**AI Context**: For comprehensive project understanding, refer to `@PROJECT_INDEX.json` which contains:
+- Complete file structure with 228 tracked files across PHP, Vue, JavaScript, and configuration files
+- Function signatures and relationships across the entire codebase
+- Architecture patterns and component dependencies
+- Testing structure mapping between backend PHPUnit and frontend E2E tests
+
 ## ✅ RECENT PROGRESS SUMMARY (2025-08-04)
 
 ### **Critical Wallet Connection Issues RESOLVED**
@@ -80,6 +86,7 @@ This is a **Circular CIRX OTC Trading Platform** with API-first architecture:
 - **Version Control**: Jujutsu (jj) in colocated mode with Git compatibility
 - **Deployment**: Cloudflare Pages (frontend), Docker (backend)
 - **Testing**: Playwright (E2E), PHPUnit (backend), comprehensive test suite
+- **Package Management**: Nix Flakes for reproducible development environment
 
 ## Development Commands
 
@@ -96,6 +103,11 @@ php vendor/bin/phpunit --configuration=phpunit.e2e.xml  # Run E2E tests
 # Database operations
 php migrate.php               # Run database migrations
 php artisan migrate:fresh --seed  # Fresh database with seed data
+
+# Using Nix (if PHP not available locally)
+nix run nixpkgs#php -- -S localhost:8080 public/index.php  # Start server with Nix
+nix run nixpkgs#php -- vendor/bin/phpunit                  # Run tests with Nix
+nix run nixpkgs#composer -- install                        # Install dependencies with Nix
 ```
 
 ### Frontend Development
@@ -138,6 +150,32 @@ wrangler pages deploy .output/public  # Deploy to Cloudflare Pages
 ### Testing Structure
 - **Backend**: `/tests/` - PHPUnit with Unit, Integration, and E2E test suites
 - **Frontend**: Playwright E2E testing with comprehensive browser coverage
+
+## Nix Development Environment
+
+This project uses **Nix Flakes** for reproducible development environments. When packages aren't available locally, use:
+
+```bash
+# General pattern for any package
+nix run nixpkgs#<package> -- <command>
+
+# Common examples
+nix run nixpkgs#php -- -v                    # Check PHP version
+nix run nixpkgs#php -- -S localhost:8080 .   # Start PHP dev server
+nix run nixpkgs#composer -- install          # Install PHP dependencies
+nix run nixpkgs#python3 -- script.py         # Run Python scripts
+nix run nixpkgs#curl -- -s http://localhost  # Make HTTP requests
+nix run nixpkgs#jq -- '.key' data.json       # Parse JSON data
+
+# Testing Telegram notifications
+nix run nixpkgs#php -- test_telegram_direct.php  # Test Telegram setup
+```
+
+**Benefits of Nix approach:**
+- ✅ **No global dependencies** - packages are isolated per-project
+- ✅ **Reproducible builds** - same environment across all machines  
+- ✅ **Version control** - exact package versions specified
+- ✅ **Easy cleanup** - no leftover packages after development
 
 ## Critical Development Principles
 

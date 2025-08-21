@@ -1,5 +1,5 @@
 {
-  "indexed_at": "2025-08-19T17:24:31.652459",
+  "indexed_at": "2025-08-20T15:07:16.031545",
   "root": ".",
   "project_structure": {
     "type": "tree",
@@ -7,7 +7,7 @@
     "tree": [
       ".",
       "\u251c\u2500\u2500 _archive/",
-      "\u251c\u2500\u2500 backend/ (4805 files)",
+      "\u251c\u2500\u2500 backend/ (4808 files)",
       "\u2502   \u251c\u2500\u2500 bin/ (2 files)",
       "\u2502   \u251c\u2500\u2500 database/ (6 files)",
       "\u2502   \u2502   \u2514\u2500\u2500 migrations/ (4 files)",
@@ -15,15 +15,15 @@
       "\u2502   \u251c\u2500\u2500 public/ (2 files)",
       "\u2502   \u2502   \u2514\u2500\u2500 storage/",
       "\u2502   \u2502       \u2514\u2500\u2500 logs/",
-      "\u2502   \u251c\u2500\u2500 src/ (38 files)",
+      "\u2502   \u251c\u2500\u2500 src/ (40 files)",
       "\u2502   \u2502   \u251c\u2500\u2500 Blockchain/ (6 files)",
       "\u2502   \u2502   \u2502   \u2514\u2500\u2500 Exceptions/ (1 files)",
       "\u2502   \u2502   \u251c\u2500\u2500 Commands/ (1 files)",
-      "\u2502   \u2502   \u251c\u2500\u2500 Controllers/ (8 files)",
+      "\u2502   \u2502   \u251c\u2500\u2500 Controllers/ (9 files)",
       "\u2502   \u2502   \u251c\u2500\u2500 Exceptions/ (2 files)",
       "\u2502   \u2502   \u251c\u2500\u2500 Middleware/ (4 files)",
       "\u2502   \u2502   \u251c\u2500\u2500 Models/ (1 files)",
-      "\u2502   \u2502   \u251c\u2500\u2500 Services/ (10 files)",
+      "\u2502   \u2502   \u251c\u2500\u2500 Services/ (11 files)",
       "\u2502   \u2502   \u251c\u2500\u2500 Utils/ (3 files)",
       "\u2502   \u2502   \u251c\u2500\u2500 Validators/ (1 files)",
       "\u2502   \u2502   \u2514\u2500\u2500 Workers/ (2 files)",
@@ -526,26 +526,31 @@
       "\u2502   \u2502           \u2502       \u2514\u2500\u2500 ...",
       "\u2502   \u2502           \u2514\u2500\u2500 README.md",
       "\u2502   \u2514\u2500\u2500 README.md",
+      "\u251c\u2500\u2500 docs/",
       "\u251c\u2500\u2500 indexer/ (10 files)",
       "\u2502   \u251c\u2500\u2500 abis/ (2 files)",
       "\u2502   \u251c\u2500\u2500 scripts/ (1 files)",
       "\u2502   \u251c\u2500\u2500 utils/ (2 files)",
       "\u2502   \u251c\u2500\u2500 package.json",
       "\u2502   \u2514\u2500\u2500 README.md",
-      "\u251c\u2500\u2500 scripts/ (1 files)",
+      "\u251c\u2500\u2500 iroh-bridge/ (592 files)",
+      "\u2502   \u251c\u2500\u2500 config/",
+      "\u2502   \u251c\u2500\u2500 src/ (6 files)",
+      "\u2502   \u2514\u2500\u2500 Cargo.toml",
+      "\u251c\u2500\u2500 scripts/ (10 files)",
       "\u251c\u2500\u2500 test/ (3 files)",
-      "\u251c\u2500\u2500 ui/ (81721 files)",
+      "\u251c\u2500\u2500 ui/ (81541 files)",
       "\u2502   \u251c\u2500\u2500 2/ (104 files)",
       "\u2502   \u251c\u2500\u2500 assets/ (1 files)",
       "\u2502   \u2502   \u2514\u2500\u2500 css/ (1 files)",
       "\u2502   \u251c\u2500\u2500 components/ (27 files)",
       "\u2502   \u2502   \u2514\u2500\u2500 __tests__/ (2 files)",
-      "\u2502   \u251c\u2500\u2500 composables/ (20 files)",
+      "\u2502   \u251c\u2500\u2500 composables/ (22 files)",
       "\u2502   \u251c\u2500\u2500 config/ (4 files)",
       "\u2502   \u251c\u2500\u2500 e2e/ (6 files)",
       "\u2502   \u251c\u2500\u2500 layouts/ (1 files)",
-      "\u2502   \u251c\u2500\u2500 pages/ (20 files)",
-      "\u2502   \u2502   \u2514\u2500\u2500 debug/ (14 files)",
+      "\u2502   \u251c\u2500\u2500 pages/ (22 files)",
+      "\u2502   \u2502   \u2514\u2500\u2500 debug/ (15 files)",
       "\u2502   \u2502       \u2514\u2500\u2500 scripts/ (2 files)",
       "\u2502   \u251c\u2500\u2500 playwright-report/ (14 files)",
       "\u2502   \u2502   \u251c\u2500\u2500 data/",
@@ -682,6 +687,21 @@
         "Button Element Fix",
         "canPurchase Logic Fix  ",
         "Focus Fix"
+      ],
+      "architecture_hints": []
+    },
+    "cloudflare-config-guide.md": {
+      "sections": [
+        "Cloudflare Frontend \u2192 Local Backend Setup Guide",
+        "Quick Setup Instructions",
+        "1. Start Your Local Services",
+        "Terminal 1: Start enhanced IROH bridge",
+        "Terminal 2: Start PHP backend  ",
+        "Terminal 3: Expose via tunnel",
+        "2. Update Cloudflare Pages Environment Variables",
+        "3. Redeploy Cloudflare Pages",
+        "Alternative: Deploy Backend to Cloud",
+        "CORS Configuration Updated"
       ],
       "architecture_hints": []
     },
@@ -1173,6 +1193,7 @@
     "ui/config": "Configuration files and settings",
     "indexer/utils": "Shared utility functions and helpers",
     "indexer/scripts": "Build and utility scripts",
+    "iroh-bridge/src": "Source code root directory",
     "ui/utils/__tests__": "Test files and test utilities",
     "ui/components/__tests__": "Test files and test utilities",
     "ui/pages/debug": "Test files and test utilities",
@@ -1199,23 +1220,24 @@
     "backend/tests/Unit/Workers": "Test files and test utilities"
   },
   "stats": {
-    "total_files": 227,
-    "total_directories": 1024,
+    "total_files": 249,
+    "total_directories": 1023,
     "fully_parsed": {
-      "javascript": 62,
+      "javascript": 68,
       "typescript": 10,
-      "shell": 2
+      "shell": 7
     },
     "listed_only": {
       "json": 10,
       "shell": 1,
       "sql": 3,
-      "php": 82,
+      "php": 85,
       "html": 8,
-      "vue": 43,
+      "vue": 45,
+      "rs": 6,
       "css": 6
     },
-    "markdown_files": 34
+    "markdown_files": 35
   },
   "files": {
     "package.json": {
@@ -1254,6 +1276,11 @@
     "backend/migrate.php": {
       "language": "php",
       "parsed": false
+    },
+    "backend/test_telegram_direct.php": {
+      "language": "php",
+      "parsed": false,
+      "purpose": "Test file"
     },
     "backend/composer.json": {
       "language": "json",
@@ -1416,30 +1443,30 @@
               "signature": "()",
               "called_by": [
                 "fetchConfig",
-                "EventListener.constructor",
                 "EventListener.__init__",
+                "EventListener.constructor",
                 "updateConfig"
               ]
             },
             "initializeDatabaseSafely": {
               "signature": "()",
               "called_by": [
-                "EventListener.constructor",
-                "EventListener.__init__"
+                "EventListener.__init__",
+                "EventListener.constructor"
               ]
             },
             "prepareDatabaseStatements": {
               "signature": "()",
               "called_by": [
-                "EventListener.constructor",
-                "EventListener.__init__"
+                "EventListener.__init__",
+                "EventListener.constructor"
               ]
             },
             "getLastProcessedBlock": {
               "signature": "()",
               "called_by": [
-                "EventListener.constructor",
-                "EventListener.__init__"
+                "EventListener.__init__",
+                "EventListener.constructor"
               ]
             },
             "start": {
@@ -1670,6 +1697,59 @@
       ],
       "call_graph": {}
     },
+    "scripts/start-iroh-dev.sh": {
+      "language": "shell",
+      "parsed": true,
+      "functions": {
+        "command_exists": {
+          "doc": "Function to check if command exists",
+          "signature": "()"
+        },
+        "cleanup": {
+          "doc": "Function to cleanup on exit",
+          "signature": "()",
+          "called_by": [
+            "monitorTransaction",
+            "hardReset"
+          ]
+        }
+      },
+      "variables": [
+        "IROH_PID",
+        "BACKEND_PID",
+        "FRONTEND_PID"
+      ],
+      "exports": {
+        "IROH_ENABLED": "value",
+        "IROH_BRIDGE_URL": "value",
+        "NUXT_PUBLIC_IROH_ENABLED": "value",
+        "NUXT_PUBLIC_IROH_BRIDGE_URL": "value"
+      },
+      "call_graph": {}
+    },
+    "scripts/expose-local-backend.sh": {
+      "language": "shell",
+      "parsed": true,
+      "functions": {
+        "cleanup": {
+          "doc": "Cleanup function",
+          "signature": "()",
+          "called_by": [
+            "monitorTransaction",
+            "hardReset"
+          ]
+        }
+      },
+      "variables": [
+        "NGROK_BACKEND_PID",
+        "NGROK_IROH_PID",
+        "BACKEND_URL",
+        "IROH_URL",
+        "CF_BACKEND_PID",
+        "CF_IROH_PID"
+      ],
+      "call_graph": {}
+    },
     "scripts/run-e2e-tests.sh": {
       "language": "shell",
       "parsed": true,
@@ -1680,19 +1760,46 @@
           "signature": "()",
           "called_by": [
             "log",
+            "trackRequest",
+            "systemHealthCheck",
+            "analyzeNetworkTopology",
+            "simulateDistributedTransactions",
+            "performLoadTest",
+            "generatePerformanceReport",
+            "runDistributedSystemDemo",
+            "log",
             "removeTarget",
             "cleanGlobPattern",
             "cleanup",
             "showHelp"
           ]
         },
-        "success": "()",
+        "success": {
+          "signature": "()",
+          "called_by": [
+            "systemHealthCheck",
+            "analyzeNetworkTopology",
+            "simulateDistributedTransactions",
+            "performLoadTest",
+            "runDistributedSystemDemo"
+          ]
+        },
         "warning": "()",
-        "error": "()",
+        "error": {
+          "signature": "()",
+          "called_by": [
+            "trackRequest",
+            "systemHealthCheck",
+            "analyzeNetworkTopology",
+            "simulateDistributedTransactions",
+            "runDistributedSystemDemo"
+          ]
+        },
         "cleanup": {
           "doc": "Cleanup function",
           "signature": "()",
           "called_by": [
+            "monitorTransaction",
             "hardReset"
           ]
         },
@@ -1744,6 +1851,501 @@
         "E2E_TEST_SEED_PHRASE": "str"
       },
       "call_graph": {}
+    },
+    "scripts/mock-iroh-bridge.js": {
+      "language": "javascript",
+      "parsed": true,
+      "imports": [
+        "http",
+        "url"
+      ],
+      "functions": {
+        "jsonResponse": {
+          "signature": "(res, statusCode, data)",
+          "called_by": [
+            "handleRequest"
+          ]
+        },
+        "handleRequest": {
+          "calls": [
+            "jsonResponse"
+          ],
+          "signature": "(req, res)"
+        }
+      },
+      "classes": {},
+      "constants": {
+        "PORT": "number"
+      },
+      "variables": [
+        "http",
+        "url",
+        "mockNodeId",
+        "mockServices",
+        "parsedUrl",
+        "path",
+        "method",
+        "body",
+        "data",
+        "serviceName",
+        "maxResults",
+        "results",
+        "newService",
+        "server"
+      ],
+      "call_graph": {}
+    },
+    "scripts/test-iroh-transaction.js": {
+      "language": "javascript",
+      "parsed": true,
+      "purpose": "Test file",
+      "functions": {
+        "makeRequest": {
+          "signature": "async (url, options = {})",
+          "called_by": [
+            "createTransaction",
+            "broadcastTransactionUpdate",
+            "checkTransactionStatus",
+            "monitorNetworkActivity"
+          ]
+        },
+        "createTransaction": {
+          "calls": [
+            "makeRequest"
+          ],
+          "signature": "async ()",
+          "called_by": [
+            "runTest"
+          ]
+        },
+        "broadcastTransactionUpdate": {
+          "calls": [
+            "makeRequest"
+          ],
+          "signature": "async (transactionId, status)",
+          "called_by": [
+            "runTest"
+          ]
+        },
+        "checkTransactionStatus": {
+          "calls": [
+            "makeRequest"
+          ],
+          "signature": "async (transactionId)",
+          "called_by": [
+            "runTest"
+          ]
+        },
+        "monitorNetworkActivity": {
+          "calls": [
+            "makeRequest"
+          ],
+          "signature": "async ()",
+          "called_by": [
+            "runTest"
+          ]
+        },
+        "runTest": {
+          "calls": [
+            "broadcastTransactionUpdate",
+            "checkTransactionStatus",
+            "createTransaction",
+            "monitorNetworkActivity"
+          ],
+          "signature": "async ()"
+        }
+      },
+      "classes": {},
+      "constants": {
+        "BACKEND_URL": "str",
+        "IROH_BRIDGE_URL": "str"
+      },
+      "variables": [
+        "response",
+        "txData",
+        "updateData",
+        "irohStatus",
+        "services",
+        "nodeInfo",
+        "transactionId",
+        "mockTxId",
+        "statuses"
+      ],
+      "call_graph": {}
+    },
+    "scripts/distributed-system-demo.js": {
+      "language": "javascript",
+      "parsed": true,
+      "functions": {
+        "log": {
+          "calls": [
+            "log"
+          ],
+          "signature": "(color, prefix, message)",
+          "called_by": [
+            "log",
+            "trackRequest",
+            "systemHealthCheck",
+            "analyzeNetworkTopology",
+            "simulateDistributedTransactions",
+            "performLoadTest",
+            "generatePerformanceReport",
+            "runDistributedSystemDemo",
+            "log",
+            "removeTarget",
+            "cleanGlobPattern",
+            "cleanup",
+            "showHelp"
+          ]
+        },
+        "success": {
+          "signature": "(msg)",
+          "called_by": [
+            "systemHealthCheck",
+            "analyzeNetworkTopology",
+            "simulateDistributedTransactions",
+            "performLoadTest",
+            "runDistributedSystemDemo"
+          ]
+        },
+        "error": {
+          "signature": "(msg)",
+          "called_by": [
+            "trackRequest",
+            "systemHealthCheck",
+            "analyzeNetworkTopology",
+            "simulateDistributedTransactions",
+            "runDistributedSystemDemo"
+          ]
+        },
+        "info": {
+          "signature": "(msg)",
+          "called_by": [
+            "analyzeNetworkTopology",
+            "simulateDistributedTransactions",
+            "performLoadTest",
+            "runDistributedSystemDemo"
+          ]
+        },
+        "warn": {
+          "signature": "(msg)",
+          "called_by": [
+            "systemHealthCheck"
+          ]
+        },
+        "trackRequest": {
+          "calls": [
+            "error",
+            "log"
+          ],
+          "signature": "async (name, requestFn)",
+          "called_by": [
+            "systemHealthCheck",
+            "analyzeNetworkTopology",
+            "simulateDistributedTransactions",
+            "performLoadTest"
+          ]
+        },
+        "systemHealthCheck": {
+          "calls": [
+            "error",
+            "log",
+            "success",
+            "trackRequest",
+            "warn"
+          ],
+          "signature": "async ()",
+          "called_by": [
+            "runDistributedSystemDemo"
+          ]
+        },
+        "analyzeNetworkTopology": {
+          "calls": [
+            "error",
+            "info",
+            "log",
+            "success",
+            "trackRequest"
+          ],
+          "signature": "async ()",
+          "called_by": [
+            "runDistributedSystemDemo"
+          ]
+        },
+        "simulateDistributedTransactions": {
+          "calls": [
+            "error",
+            "info",
+            "log",
+            "success",
+            "trackRequest"
+          ],
+          "signature": "async ()",
+          "called_by": [
+            "runDistributedSystemDemo"
+          ]
+        },
+        "performLoadTest": {
+          "calls": [
+            "info",
+            "log",
+            "success",
+            "trackRequest"
+          ],
+          "signature": "async ()",
+          "called_by": [
+            "runDistributedSystemDemo"
+          ]
+        },
+        "generatePerformanceReport": {
+          "calls": [
+            "log"
+          ],
+          "signature": "()",
+          "called_by": [
+            "runDistributedSystemDemo"
+          ]
+        },
+        "runDistributedSystemDemo": {
+          "calls": [
+            "analyzeNetworkTopology",
+            "error",
+            "generatePerformanceReport",
+            "info",
+            "log",
+            "performLoadTest",
+            "simulateDistributedTransactions",
+            "success",
+            "systemHealthCheck"
+          ],
+          "signature": "async ()"
+        }
+      },
+      "classes": {},
+      "constants": {
+        "BACKEND_URL": "str",
+        "IROH_BRIDGE_URL": "str",
+        "FRONTEND_URL": "str"
+      },
+      "variables": [
+        "colors",
+        "log",
+        "success",
+        "error",
+        "info",
+        "warn",
+        "performance",
+        "trackRequest",
+        "start",
+        "result",
+        "duration",
+        "totalLatency",
+        "systemHealthCheck",
+        "services",
+        "healthResults",
+        "response",
+        "analyzeNetworkTopology",
+        "nodeInfo",
+        "metrics",
+        "discovery",
+        "avgLatency",
+        "totalBandwidth",
+        "simulateDistributedTransactions",
+        "transactions",
+        "statuses",
+        "transactionPromises",
+        "statusIndex",
+        "status",
+        "startTime",
+        "completedTransactions",
+        "performLoadTest",
+        "concurrentRequests",
+        "requests",
+        "i",
+        "results",
+        "successfulResults",
+        "successRate",
+        "generatePerformanceReport",
+        "totalTime",
+        "sortedLatencies",
+        "p95",
+        "p99",
+        "grade",
+        "runDistributedSystemDemo",
+        "networkTopology",
+        "loadTestResults"
+      ],
+      "call_graph": {}
+    },
+    "scripts/deploy-backend-cloud.sh": {
+      "language": "shell",
+      "parsed": true,
+      "functions": {
+        "deploy_to_railway": {
+          "doc": "Check for deployment options",
+          "signature": "()"
+        },
+        "deploy_to_render": "()",
+        "deploy_to_heroku": "()",
+        "deploy_to_digitalocean": "()"
+      },
+      "call_graph": {}
+    },
+    "scripts/enhanced-iroh-bridge.js": {
+      "language": "javascript",
+      "parsed": true,
+      "imports": [
+        "http",
+        "url"
+      ],
+      "functions": {
+        "jsonResponse": {
+          "signature": "(res, statusCode, data)",
+          "called_by": [
+            "handleRequest"
+          ]
+        },
+        "handleRequest": "(req, res)",
+        "setupWebSocket": "()",
+        "handleWebSocketMessage": "(ws, data)",
+        "broadcastToWebSockets": {
+          "signature": "(message)",
+          "called_by": [
+            "simulateNetworkActivity"
+          ]
+        },
+        "simulateNetworkActivity": {
+          "calls": [
+            "broadcastToWebSockets"
+          ],
+          "signature": "()"
+        }
+      },
+      "classes": {},
+      "constants": {
+        "PORT": "number",
+        "WS_PORT": "number"
+      },
+      "variables": [
+        "http",
+        "url",
+        "mockNodeId",
+        "connectedPeers",
+        "subscribedTopics",
+        "messageHistory",
+        "performanceMetrics",
+        "wsServer",
+        "wsClients",
+        "mockServices",
+        "i",
+        "peerId",
+        "setupWebSocket",
+        "handleWebSocketMessage",
+        "broadcastToWebSockets",
+        "response",
+        "responseStr",
+        "simulateNetworkActivity",
+        "transactionUpdate",
+        "parsedUrl",
+        "path",
+        "method",
+        "body",
+        "data",
+        "serviceName",
+        "maxResults",
+        "results",
+        "newService",
+        "server"
+      ],
+      "call_graph": {}
+    },
+    "scripts/multi-node-test.sh": {
+      "language": "shell",
+      "parsed": true,
+      "purpose": "Test file",
+      "functions": {
+        "start_node": {
+          "doc": "Function to start a node in background",
+          "signature": "()"
+        },
+        "test_connectivity": {
+          "doc": "Function to test node connectivity",
+          "signature": "()"
+        },
+        "test_inter_node_communication": {
+          "doc": "Function to simulate inter-node communication",
+          "signature": "()"
+        },
+        "cleanup": {
+          "doc": "Function to cleanup",
+          "signature": "()",
+          "called_by": [
+            "monitorTransaction",
+            "hardReset"
+          ]
+        },
+        "main": {
+          "doc": "Main execution",
+          "signature": "()"
+        }
+      },
+      "call_graph": {}
+    },
+    "scripts/test-iroh.sh": {
+      "language": "shell",
+      "parsed": true,
+      "purpose": "Test file",
+      "functions": {
+        "check_service": {
+          "doc": "Function to check if a service is running",
+          "signature": "()"
+        },
+        "test_endpoint": {
+          "doc": "Function to test API endpoint",
+          "signature": "()"
+        },
+        "test_json_endpoint": {
+          "doc": "Function to test JSON response",
+          "signature": "()"
+        }
+      },
+      "variables": [
+        "RED",
+        "GREEN",
+        "YELLOW",
+        "BLUE",
+        "NC",
+        "IROH_BRIDGE_URL",
+        "BACKEND_URL",
+        "FRONTEND_URL"
+      ],
+      "call_graph": {}
+    },
+    "iroh-bridge/src/service_registry.rs": {
+      "language": "rs",
+      "parsed": false
+    },
+    "iroh-bridge/src/iroh_client.rs": {
+      "language": "rs",
+      "parsed": false
+    },
+    "iroh-bridge/src/http_bridge.rs": {
+      "language": "rs",
+      "parsed": false
+    },
+    "iroh-bridge/src/config.rs": {
+      "language": "rs",
+      "parsed": false,
+      "purpose": "Configuration"
+    },
+    "iroh-bridge/src/main.rs": {
+      "language": "rs",
+      "parsed": false,
+      "purpose": "Application entry point"
+    },
+    "iroh-bridge/src/error.rs": {
+      "language": "rs",
+      "parsed": false
     },
     "indexer/utils/errors.js": {
       "language": "javascript",
@@ -1928,18 +2530,47 @@
               ]
             },
             "debug": "(message, data = {})",
-            "info": "(message, data = {})",
-            "warn": "(message, data = {})",
-            "error": "(message, error = null, data = {})",
+            "info": {
+              "signature": "(message, data = {})",
+              "called_by": [
+                "analyzeNetworkTopology",
+                "performLoadTest",
+                "runDistributedSystemDemo",
+                "simulateDistributedTransactions"
+              ]
+            },
+            "warn": {
+              "signature": "(message, data = {})",
+              "called_by": [
+                "systemHealthCheck"
+              ]
+            },
+            "error": {
+              "signature": "(message, error = null, data = {})",
+              "called_by": [
+                "trackRequest",
+                "systemHealthCheck",
+                "simulateDistributedTransactions",
+                "analyzeNetworkTopology",
+                "runDistributedSystemDemo"
+              ]
+            },
             "critical": "(message, error = null, data = {})",
             "log": {
               "signature": "(level, message, data = {})",
               "called_by": [
-                "cleanGlobPattern",
                 "showHelp",
+                "generatePerformanceReport",
+                "trackRequest",
+                "systemHealthCheck",
+                "simulateDistributedTransactions",
                 "removeTarget",
+                "cleanGlobPattern",
                 "cleanup",
-                "log"
+                "log",
+                "analyzeNetworkTopology",
+                "performLoadTest",
+                "runDistributedSystemDemo"
               ]
             },
             "logToConsole": "(level, entry)",
@@ -1958,9 +2589,31 @@
               ]
             },
             "debug": "(message, data = {})",
-            "info": "(message, data = {})",
-            "warn": "(message, data = {})",
-            "error": "(message, error = null, data = {})",
+            "info": {
+              "signature": "(message, data = {})",
+              "called_by": [
+                "analyzeNetworkTopology",
+                "performLoadTest",
+                "runDistributedSystemDemo",
+                "simulateDistributedTransactions"
+              ]
+            },
+            "warn": {
+              "signature": "(message, data = {})",
+              "called_by": [
+                "systemHealthCheck"
+              ]
+            },
+            "error": {
+              "signature": "(message, error = null, data = {})",
+              "called_by": [
+                "trackRequest",
+                "systemHealthCheck",
+                "simulateDistributedTransactions",
+                "analyzeNetworkTopology",
+                "runDistributedSystemDemo"
+              ]
+            },
             "critical": "(message, error = null, data = {})",
             "child": "(additionalContext = {})",
             "__init__": "(parentLogger, context)"
@@ -2563,7 +3216,10 @@
           "calls": [
             "fetchConfig"
           ],
-          "signature": "async ()"
+          "signature": "async ()",
+          "called_by": [
+            "reconnect"
+          ]
         }
       },
       "classes": {},
@@ -2714,6 +3370,7 @@
           ],
           "signature": "()",
           "called_by": [
+            "monitorTransaction",
             "hardReset"
           ]
         }
@@ -3732,6 +4389,82 @@
       ],
       "call_graph": {}
     },
+    "ui/composables/useRealTimeTransactions.js": {
+      "language": "javascript",
+      "parsed": true,
+      "functions": {
+        "return": "()",
+        "useRealTimeTransactions": "()",
+        "subscribeToTransaction": {
+          "calls": [
+            "handleTransactionUpdate"
+          ],
+          "signature": "(transactionId, callback)",
+          "called_by": [
+            "monitorTransaction"
+          ]
+        },
+        "handleTransactionUpdate": {
+          "signature": "(update)",
+          "called_by": [
+            "subscribeToTransaction"
+          ]
+        },
+        "getTransaction": "async (transactionId)",
+        "monitorTransaction": {
+          "calls": [
+            "cleanup",
+            "subscribeToTransaction"
+          ],
+          "signature": "(transactionId, options = {})"
+        },
+        "cleanup": {
+          "signature": "()",
+          "called_by": [
+            "monitorTransaction",
+            "hardReset"
+          ]
+        },
+        "broadcastTransactionEvent": "async (transactionId, eventType, data = {})",
+        "getAllTransactions": "()",
+        "clearCache": "()",
+        "getCachedTransaction": "(transactionId)",
+        "updateCachedTransaction": "(transactionId, updates)",
+        "isMonitoring": "(transactionId)",
+        "getMonitoringStats": "()"
+      },
+      "classes": {},
+      "variables": [
+        "useRealTimeTransactions",
+        "transactions",
+        "subscriptions",
+        "updateListeners",
+        "subscribeToTransaction",
+        "unsubscribe",
+        "listeners",
+        "handleTransactionUpdate",
+        "transactionId",
+        "existingTransaction",
+        "updatedTransaction",
+        "getTransaction",
+        "cached",
+        "response",
+        "transaction",
+        "monitorTransaction",
+        "cleanup",
+        "broadcastTransactionEvent",
+        "event",
+        "getAllTransactions",
+        "clearCache",
+        "getCachedTransaction",
+        "updateCachedTransaction",
+        "existing",
+        "updated",
+        "isMonitoring",
+        "getMonitoringStats"
+      ],
+      "call_graph": {}
+    },
     "ui/composables/usePriceData.js": {
       "language": "javascript",
       "parsed": true,
@@ -3898,6 +4631,7 @@
         "cleanup": {
           "signature": "()",
           "called_by": [
+            "monitorTransaction",
             "hardReset"
           ]
         },
@@ -4395,6 +5129,89 @@
       ],
       "call_graph": {}
     },
+    "ui/composables/useIrohNetwork.js": {
+      "language": "javascript",
+      "parsed": true,
+      "functions": {
+        "useIrohNetwork": "()",
+        "initialize": {
+          "calls": [
+            "startNetworkMonitoring"
+          ],
+          "signature": "async ()",
+          "called_by": [
+            "reconnect"
+          ]
+        },
+        "discoverServices": {
+          "signature": "async (serviceName, capabilities = [], maxResults = 10)",
+          "called_by": [
+            "discoverBackends"
+          ]
+        },
+        "discoverBackends": {
+          "calls": [
+            "discoverServices"
+          ],
+          "signature": "async ()"
+        },
+        "sendToNode": "async (nodeId, payload)",
+        "broadcastToTopic": "async (topic, message)",
+        "subscribeToTransactionUpdates": "(callback)",
+        "getNetworkStats": {
+          "signature": "async ()",
+          "called_by": [
+            "startNetworkMonitoring"
+          ]
+        },
+        "startNetworkMonitoring": {
+          "calls": [
+            "getNetworkStats"
+          ],
+          "signature": "()",
+          "called_by": [
+            "initialize"
+          ]
+        },
+        "getAllServices": "async ()",
+        "reconnect": {
+          "calls": [
+            "initialize"
+          ],
+          "signature": "async ()"
+        }
+      },
+      "classes": {},
+      "variables": [
+        "useIrohNetwork",
+        "config",
+        "isEnabled",
+        "isConnected",
+        "nodeId",
+        "discoveredServices",
+        "connectionStatus",
+        "networkStats",
+        "bridgeUrl",
+        "initialize",
+        "healthResponse",
+        "nodeResponse",
+        "discoverServices",
+        "response",
+        "services",
+        "discoverBackends",
+        "sendToNode",
+        "broadcastToTopic",
+        "subscribeToTransactionUpdates",
+        "interval",
+        "backends",
+        "getNetworkStats",
+        "startNetworkMonitoring",
+        "getAllServices",
+        "reconnect",
+        "success"
+      ],
+      "call_graph": {}
+    },
     "ui/components/SwapTabs.vue": {
       "language": "vue",
       "parsed": false
@@ -4521,6 +5338,14 @@
           "signature": "(message, color = 'reset')",
           "called_by": [
             "log",
+            "trackRequest",
+            "systemHealthCheck",
+            "analyzeNetworkTopology",
+            "simulateDistributedTransactions",
+            "performLoadTest",
+            "generatePerformanceReport",
+            "runDistributedSystemDemo",
+            "log",
             "removeTarget",
             "cleanGlobPattern",
             "cleanup",
@@ -4571,6 +5396,7 @@
           ],
           "signature": "async ()",
           "called_by": [
+            "monitorTransaction",
             "hardReset"
           ]
         },
@@ -4622,6 +5448,10 @@
       "parsed": false
     },
     "ui/pages/history.vue": {
+      "language": "vue",
+      "parsed": false
+    },
+    "ui/pages/monitor.vue": {
       "language": "vue",
       "parsed": false
     },
@@ -4741,7 +5571,10 @@
           "calls": [
             "updateActivity"
           ],
-          "signature": "async ()"
+          "signature": "async ()",
+          "called_by": [
+            "reconnect"
+          ]
         },
         "openWalletModal": {
           "signature": "()",
@@ -4945,7 +5778,10 @@
             "attemptAutoReconnect",
             "checkPhantomSilently"
           ],
-          "signature": "async ()"
+          "signature": "async ()",
+          "called_by": [
+            "reconnect"
+          ]
         },
         "promptConnectIfNoPreference": {
           "calls": [
@@ -4993,6 +5829,7 @@
         "cleanup": {
           "signature": "()",
           "called_by": [
+            "monitorTransaction",
             "hardReset"
           ]
         }
@@ -5224,6 +6061,10 @@
       "language": "vue",
       "parsed": false,
       "purpose": "Test file"
+    },
+    "ui/pages/debug/iroh-network.vue": {
+      "language": "vue",
+      "parsed": false
     },
     "ui/pages/debug/backend-wallet.vue": {
       "language": "vue",
@@ -23637,6 +24478,10 @@
       "language": "php",
       "parsed": false
     },
+    "backend/src/Controllers/IrohTransactionController.php": {
+      "language": "php",
+      "parsed": false
+    },
     "backend/src/Controllers/TransactionTestController.php": {
       "language": "php",
       "parsed": false,
@@ -23704,6 +24549,10 @@
       "parsed": false
     },
     "backend/src/Services/PaymentVerificationResult.php": {
+      "language": "php",
+      "parsed": false
+    },
+    "backend/src/Services/IrohServiceBridge.php": {
       "language": "php",
       "parsed": false
     },
@@ -23913,6 +24762,14 @@
       "fs",
       "child_process"
     ],
+    "scripts/mock-iroh-bridge.js": [
+      "http",
+      "url"
+    ],
+    "scripts/enhanced-iroh-bridge.js": [
+      "http",
+      "url"
+    ],
     "indexer/utils/logger.js": [
       "indexer/utils/errors.js"
     ],
@@ -24005,5 +24862,5 @@
       "vue"
     ]
   },
-  "staleness_check": 1755041078.084637
+  "staleness_check": 1755119241.075996
 }

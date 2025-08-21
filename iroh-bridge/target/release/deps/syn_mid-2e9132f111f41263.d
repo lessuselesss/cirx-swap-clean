@@ -1,0 +1,11 @@
+/home/lessuseless/Projects/Orgs/Circular-Protocol/Autoswap/cirx-swap/iroh-bridge/target/release/deps/syn_mid-2e9132f111f41263.d: /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/syn-mid-0.5.4/src/lib.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/syn-mid-0.5.4/src/macros.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/syn-mid-0.5.4/src/func.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/syn-mid-0.5.4/src/pat.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/syn-mid-0.5.4/src/path.rs
+
+/home/lessuseless/Projects/Orgs/Circular-Protocol/Autoswap/cirx-swap/iroh-bridge/target/release/deps/libsyn_mid-2e9132f111f41263.rlib: /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/syn-mid-0.5.4/src/lib.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/syn-mid-0.5.4/src/macros.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/syn-mid-0.5.4/src/func.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/syn-mid-0.5.4/src/pat.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/syn-mid-0.5.4/src/path.rs
+
+/home/lessuseless/Projects/Orgs/Circular-Protocol/Autoswap/cirx-swap/iroh-bridge/target/release/deps/libsyn_mid-2e9132f111f41263.rmeta: /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/syn-mid-0.5.4/src/lib.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/syn-mid-0.5.4/src/macros.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/syn-mid-0.5.4/src/func.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/syn-mid-0.5.4/src/pat.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/syn-mid-0.5.4/src/path.rs
+
+/home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/syn-mid-0.5.4/src/lib.rs:
+/home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/syn-mid-0.5.4/src/macros.rs:
+/home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/syn-mid-0.5.4/src/func.rs:
+/home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/syn-mid-0.5.4/src/pat.rs:
+/home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/syn-mid-0.5.4/src/path.rs:

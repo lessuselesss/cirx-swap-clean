@@ -1,0 +1,10 @@
+/home/lessuseless/Projects/Orgs/Circular-Protocol/Autoswap/cirx-swap/iroh-bridge/target/release/deps/resolv_conf-35bab0642219db77.d: /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/resolv-conf-0.7.4/src/lib.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/resolv-conf-0.7.4/src/config.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/resolv-conf-0.7.4/src/grammar.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/resolv-conf-0.7.4/src/ip.rs
+
+/home/lessuseless/Projects/Orgs/Circular-Protocol/Autoswap/cirx-swap/iroh-bridge/target/release/deps/libresolv_conf-35bab0642219db77.rlib: /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/resolv-conf-0.7.4/src/lib.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/resolv-conf-0.7.4/src/config.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/resolv-conf-0.7.4/src/grammar.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/resolv-conf-0.7.4/src/ip.rs
+
+/home/lessuseless/Projects/Orgs/Circular-Protocol/Autoswap/cirx-swap/iroh-bridge/target/release/deps/libresolv_conf-35bab0642219db77.rmeta: /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/resolv-conf-0.7.4/src/lib.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/resolv-conf-0.7.4/src/config.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/resolv-conf-0.7.4/src/grammar.rs /home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/resolv-conf-0.7.4/src/ip.rs
+
+/home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/resolv-conf-0.7.4/src/lib.rs:
+/home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/resolv-conf-0.7.4/src/config.rs:
+/home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/resolv-conf-0.7.4/src/grammar.rs:
+/home/lessuseless/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/resolv-conf-0.7.4/src/ip.rs:
