@@ -1307,7 +1307,7 @@
       "functions": {},
       "classes": {},
       "updated_by_hook": true,
-      "updated_at": "2025-08-21T11:17:31.734297",
+      "updated_at": "2025-08-21T12:36:31.036885",
       "purpose": "Configuration"
     },
     "ui/tailwind.config.js": {
@@ -3955,27 +3955,10 @@
     "ui/composables/useBackendApi.js": {
       "language": "javascript",
       "parsed": true,
-      "imports": [
-        "vue"
-      ],
       "functions": {
         "useBackendApi": "()",
-        "getHeaders": {
-          "signature": "()",
-          "called_by": [
-            "initiateSwap",
-            "getTransactionStatus",
-            "getCirxBalance"
-          ]
-        },
-        "handleApiResponse": {
-          "signature": "async (response)",
-          "called_by": [
-            "initiateSwap",
-            "getTransactionStatus",
-            "getCirxBalance"
-          ]
-        },
+        "getHeaders": "()",
+        "handleApiResponse": "async (response)",
         "initiateSwap": {
           "calls": [
             "getHeaders",
@@ -4003,52 +3986,8 @@
         "createSwapTransaction": "(paymentTxId, paymentChain, cirxRecipientAddress, amountPaid, paymentToken)"
       },
       "classes": {},
-      "constants": {
-        "API_BASE_URL": "value"
-      },
-      "variables": [
-        "runtimeConfig",
-        "isLoading",
-        "lastError",
-        "getHeaders",
-        "headers",
-        "handleApiResponse",
-        "errorData",
-        "errorMessage",
-        "initiateSwap",
-        "requiredFields",
-        "missing",
-        "fullUrl",
-        "response",
-        "result",
-        "getTransactionStatus",
-        "data",
-        "getCirxBalance",
-        "calculateCirxQuote",
-        "amount",
-        "tokenPrices",
-        "tokenPrice",
-        "platformFeeCirx",
-        "platformFeeUsd",
-        "usdAmount",
-        "grossCirxAmount",
-        "discountPercentage",
-        "discountMultiplier",
-        "netCirxAmount",
-        "totalPaymentRequired",
-        "getDepositAddress",
-        "tokenAddressMap",
-        "chainAddressMap",
-        "validateCircularAddress",
-        "circularAddressRegex",
-        "createSwapTransaction"
-      ],
-      "interfaces": {
-        "return": {
-          "doc": "Backend API Integration for CIRX OTC Platform"
-        }
-      },
-      "call_graph": {}
+      "updated_by_hook": true,
+      "updated_at": "2025-08-21T12:35:35.830442"
     },
     "ui/composables/useSwapButtonState.js": {
       "language": "javascript",

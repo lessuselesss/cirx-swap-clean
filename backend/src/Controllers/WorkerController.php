@@ -191,8 +191,8 @@ class WorkerController
 
             $this->logger->info('Manual retry triggered by admin');
             
-            // Reset failed transactions to pending for re-verification
-            $resetCount = \App\Models\Transaction::where('swap_status', 'failed_payment_verification')
+            // Reset failed payment verification transactions
+            $paymentResetCount = \App\Models\Transaction::where('swap_status', 'failed_payment_verification')
                 ->where('cirx_amount', '!=', '0.0') // Exclude invalid test transactions
                 ->update([
                     'swap_status' => 'pending_payment_verification',
@@ -201,6 +201,18 @@ class WorkerController
                     'failure_reason' => null,
                     'updated_at' => new \DateTime()
                 ]);
+            
+            // Reset failed CIRX transfer transactions back to payment_verified for retry
+            $cirxResetCount = \App\Models\Transaction::where('swap_status', 'failed_cirx_transfer')
+                ->update([
+                    'swap_status' => 'payment_verified',
+                    'retry_count' => 0,
+                    'last_retry_at' => null,
+                    'failure_reason' => null,
+                    'updated_at' => new \DateTime()
+                ]);
+            
+            $resetCount = $paymentResetCount + $cirxResetCount;
 
             // Immediately process the reset transactions
             $paymentWorker = new PaymentVerificationWorker();
