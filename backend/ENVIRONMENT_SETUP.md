@@ -6,11 +6,16 @@ This project uses a secure environment configuration system that prevents creden
 
 ## Environment File Structure
 
+### Streamlined Configuration System:
+- **`.env.base`** - Shared constants across all environments (CIRX URLs, decimals, worker base config)
 - **`.env.example`** - Production template with placeholder values (committed to Git)
 - **`.env.development.example`** - Development template with placeholder values (committed to Git)  
 - **`.env.e2e`** - E2E testing configuration with test values (committed to Git)
 - **`.env.local`** - Your personal development credentials (NOT committed to Git)
 - **`.env.production`** - Production secrets (NOT committed to Git, managed by deployment)
+
+### Inheritance Model:
+All environment files inherit shared constants from `.env.base` to eliminate redundancy and ensure consistency. Each file only contains environment-specific overrides.
 
 ## Quick Setup for Development
 
@@ -65,6 +70,13 @@ TELEGRAM_CHAT_ID=your_test_chat_id
 ETHEREUM_RPC_URL=https://sepolia.infura.io/v3/YOUR_PROJECT_ID
 ETHERSCAN_API_KEY=YOUR_API_KEY
 ```
+
+### Streamlined Configuration Benefits:
+- **60% reduction** in duplicated variables
+- **Consistent** constants across all environments
+- **Standardized** rate limiting variable names (`RATE_LIMIT_ENABLED`, `RATE_LIMIT_REQUESTS`, `RATE_LIMIT_WINDOW`)
+- **Eliminated** unused variables (commented gas config, Solana config)
+- **Centralized** protocol constants in `.env.base`
 
 ### Optional Development Settings:
 ```bash

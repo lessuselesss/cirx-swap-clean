@@ -1073,13 +1073,13 @@
         "Environment Configuration Guide",
         "Overview",
         "Environment File Structure",
+        "Streamlined Configuration System:",
+        "Inheritance Model:",
         "Quick Setup for Development",
         "Security Guidelines",
         "\u2705 DO:",
         "\u274c DON'T:",
-        "Environment Variables Reference",
-        "Required for Development:",
-        "Database"
+        "Environment Variables Reference"
       ],
       "architecture_hints": []
     }
@@ -1148,7 +1148,7 @@
       "rs": 6,
       "css": 6
     },
-    "markdown_files": 36
+    "markdown_files": 38
   },
   "files": {
     "package.json": {
