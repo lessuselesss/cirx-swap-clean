@@ -93,21 +93,15 @@ This is a **Circular CIRX OTC Trading Platform** with API-first architecture:
 ### Backend Development
 
 ```bash
-# From backend directory
-composer install               # Install PHP dependencies
-php -S localhost:8080 public/index.php  # Start development server
-php vendor/bin/phpunit        # Run all tests
-php vendor/bin/phpunit --group=integration  # Run integration tests
-php vendor/bin/phpunit --configuration=phpunit.e2e.xml  # Run E2E tests
+# From backend directory  
+nix run nixpkgs#composer -- install  # Install PHP dependencies
+nix run nixpkgs#php -- -S localhost:8080 public/index.php  # Start development server
+nix run nixpkgs#php -- vendor/bin/phpunit        # Run all tests
+nix run nixpkgs#php -- vendor/bin/phpunit --group=integration  # Run integration tests
+nix run nixpkgs#php -- vendor/bin/phpunit --configuration=phpunit.e2e.xml  # Run E2E tests
 
 # Database operations
-php migrate.php               # Run database migrations
-php artisan migrate:fresh --seed  # Fresh database with seed data
-
-# Using Nix (if PHP not available locally)
-nix run nixpkgs#php -- -S localhost:8080 public/index.php  # Start server with Nix
-nix run nixpkgs#php -- vendor/bin/phpunit                  # Run tests with Nix
-nix run nixpkgs#composer -- install                        # Install dependencies with Nix
+nix run nixpkgs#php -- migrate.php               # Run database migrations
 ```
 
 ### Frontend Development
@@ -151,9 +145,9 @@ wrangler pages deploy .output/public  # Deploy to Cloudflare Pages
 - **Backend**: `/tests/` - PHPUnit with Unit, Integration, and E2E test suites
 - **Frontend**: Playwright E2E testing with comprehensive browser coverage
 
-## Nix Development Environment
+## NixOS Development Environment
 
-This project uses **Nix Flakes** for reproducible development environments. When packages aren't available locally, use:
+This project runs on **NixOS with Nix Flakes** for reproducible development environments. All development commands use `nix run` as the primary approach:
 
 ```bash
 # General pattern for any package
@@ -171,11 +165,12 @@ nix run nixpkgs#jq -- '.key' data.json       # Parse JSON data
 nix run nixpkgs#php -- test_telegram_direct.php  # Test Telegram setup
 ```
 
-**Benefits of Nix approach:**
-- ✅ **No global dependencies** - packages are isolated per-project
-- ✅ **Reproducible builds** - same environment across all machines  
-- ✅ **Version control** - exact package versions specified
-- ✅ **Easy cleanup** - no leftover packages after development
+**Benefits of NixOS + Nix Flakes:**
+- ✅ **No global package conflicts** - packages are isolated per-project
+- ✅ **Reproducible builds** - identical environment across all machines  
+- ✅ **Deterministic versions** - exact package versions specified in flakes
+- ✅ **Clean system** - no leftover packages or dependencies after development
+- ✅ **Instant availability** - any package from nixpkgs available on-demand
 
 ## Critical Development Principles
 
@@ -285,7 +280,7 @@ jj edit -r main                           # Switch to main
 jj new -r main
 jj describe -m "Add transaction status endpoint"
 # Edit backend in backend/src/
-cd backend && php vendor/bin/phpunit     # Run tests
+cd backend && nix run nixpkgs#php -- vendor/bin/phpunit     # Run tests
 
 # Move to frontend work
 jj new
@@ -320,10 +315,10 @@ jj git push --allow-new
 
 ### Local Development Setup
 1. **Initialize jj**: `jj git init --colocate` (if not already done)
-2. **Start Backend**: `cd backend && php -S localhost:8080 public/index.php`
+2. **Start Backend**: `cd backend && nix run nixpkgs#php -- -S localhost:8080 public/index.php`
 3. **Configure Database**: Set up PostgreSQL and run migrations
 4. **Start Frontend**: `cd ui && npm run dev`
-5. **Run Tests**: `php vendor/bin/phpunit` for backend, `npx playwright test` for E2E
+5. **Run Tests**: `nix run nixpkgs#php -- vendor/bin/phpunit` for backend, `npx playwright test` for E2E
 
 ### Testing Strategy
 - **Backend API**: Use PHPUnit for unit, integration, and E2E testing
@@ -420,10 +415,10 @@ diff.tool = ["code", "--wait", "--diff", "$left", "$right"]
 
 [aliases]
 # Backend development aliases
-"backend-test" = ["!cd", "backend", "&&", "php", "vendor/bin/phpunit"]
-"backend-serve" = ["!cd", "backend", "&&", "php", "-S", "localhost:8080", "public/index.php"]
+"backend-test" = ["!cd", "backend", "&&", "nix", "run", "nixpkgs#php", "--", "vendor/bin/phpunit"]
+"backend-serve" = ["!cd", "backend", "&&", "nix", "run", "nixpkgs#php", "--", "-S", "localhost:8080", "public/index.php"]
 "e2e-test" = ["!./scripts/run-e2e-tests.sh"]
-"migrate" = ["!cd", "backend", "&&", "php", "migrate.php"]
+"migrate" = ["!cd", "backend", "&&", "nix", "run", "nixpkgs#php", "--", "migrate.php"]
 
 # Frontend development aliases  
 "dev-ui" = ["!cd", "ui", "&&", "npm", "run", "dev"]
