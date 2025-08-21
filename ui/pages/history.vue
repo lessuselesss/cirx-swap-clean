@@ -290,7 +290,7 @@
                 <!-- Transaction Hash -->
                 <div class="flex items-center gap-2">
                   <a
-                    :href="`https://etherscan.io/tx/${tx.hash}`"
+                    :href="getEtherscanUrl(tx.hash)"
                     target="_blank"
                     class="text-gray-400 hover:text-white transition-colors"
                     title="View on Etherscan"
@@ -526,6 +526,13 @@ const displayCirxBalance = computed(() => {
 
 // Claiming state
 const claimingPositions = ref([])
+
+// Helper function to generate correct Etherscan URL
+const getEtherscanUrl = (txHash) => {
+  const config = useRuntimeConfig()
+  const isTestnet = config.public.testnetMode === true || config.public.testnetMode === 'true'
+  return isTestnet ? `https://sepolia.etherscan.io/tx/${txHash}` : `https://etherscan.io/tx/${txHash}`
+}
 
 const claimTokens = async (positionId) => {
   if (claimingPositions.value.includes(positionId)) return

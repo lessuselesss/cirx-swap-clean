@@ -324,7 +324,11 @@ export const useTransactionHistory = () => {
       cirxAmount: parseFloat(tx.cirx_amount_formatted).toLocaleString(),
       discount: tx.discount_percentage || 0,
       hash: tx.tx_hash,
-      etherscanUrl: tx.etherscan_url || `https://etherscan.io/tx/${tx.tx_hash}`,
+      etherscanUrl: tx.etherscan_url || (() => {
+        const config = useRuntimeConfig()
+        const isTestnet = config.public.testnetMode === true || config.public.testnetMode === 'true'
+        return isTestnet ? `https://sepolia.etherscan.io/tx/${tx.tx_hash}` : `https://etherscan.io/tx/${tx.tx_hash}`
+      })(),
       timestamp: tx.timestamp,
       gasUsed: tx.gas_used,
       gasPrice: tx.gas_price

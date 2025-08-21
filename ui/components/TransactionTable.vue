@@ -183,16 +183,16 @@ const formatDate = (dateString) => {
 }
 
 const getEtherscanUrl = (txHash, chain = 'ethereum') => {
-  const baseUrls = {
-    'ethereum': 'https://etherscan.io/tx/',
-    'eth': 'https://etherscan.io/tx/',
-    'mainnet': 'https://etherscan.io/tx/',
-    'sepolia': 'https://sepolia.etherscan.io/tx/',
-    'goerli': 'https://goerli.etherscan.io/tx/'
+  const config = useRuntimeConfig()
+  const isTestnet = config.public.testnetMode === true || config.public.testnetMode === 'true'
+  const network = config.public.ethereumNetwork || 'mainnet'
+  
+  // Use environment-driven network configuration
+  if (isTestnet || network === 'sepolia') {
+    return `https://sepolia.etherscan.io/tx/${txHash}`
+  } else {
+    return `https://etherscan.io/tx/${txHash}`
   }
-  const chainKey = chain?.toLowerCase() || 'ethereum'
-  const baseUrl = baseUrls[chainKey] || baseUrls['ethereum']
-  return baseUrl + txHash
 }
 
 const getCircularExplorerUrl = (txHash) => {

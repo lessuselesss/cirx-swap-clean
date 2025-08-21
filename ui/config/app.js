@@ -6,6 +6,8 @@
 // Environment detection
 const isDevelopment = process.env.NODE_ENV === 'development'
 const isProduction = process.env.NODE_ENV === 'production'
+const isTestnet = process.env.NUXT_PUBLIC_TESTNET_MODE === 'true'
+const network = process.env.NUXT_PUBLIC_ETHEREUM_NETWORK || 'mainnet'
 
 export const config = {
   // Feature flags
@@ -52,8 +54,14 @@ export const config = {
     oracle: null // Price oracle contract
   },
 
-  // Network settings
+  // Network settings - environment-driven
   networks: {
+    current: {
+      chainId: isTestnet ? 11155111 : 1,
+      name: isTestnet ? 'Sepolia Testnet' : 'Ethereum Mainnet',
+      rpcUrl: isTestnet ? 'https://sepolia.infura.io/v3/' : 'https://ethereum.publicnode.com',
+      blockExplorer: isTestnet ? 'https://sepolia.etherscan.io' : 'https://etherscan.io'
+    },
     ethereum: {
       chainId: 1,
       name: 'Ethereum Mainnet',

@@ -583,7 +583,12 @@ const handleSwap = async () => {
             autoTimeoutMs: 10000,
             actions: [{
               label: 'View Transaction',
-              handler: () => window.open(`https://etherscan.io/tx/${txHash}`, '_blank'),
+              handler: () => {
+                const config = useRuntimeConfig()
+                const isTestnet = config.public.testnetMode === true || config.public.testnetMode === 'true'
+                const baseUrl = isTestnet ? 'https://sepolia.etherscan.io/tx/' : 'https://etherscan.io/tx/'
+                window.open(`${baseUrl}${txHash}`, '_blank')
+              },
               primary: false
             }]
           })
