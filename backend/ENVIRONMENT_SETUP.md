@@ -54,9 +54,9 @@ All environment files inherit shared constants from `.env.base` to eliminate red
 
 ### Required for Development:
 ```bash
-# Database
+# Database (relative path from backend directory)
 DB_CONNECTION=sqlite
-DB_DATABASE=/path/to/your/local/database.sqlite
+DB_DATABASE=storage/database.sqlite
 
 # CIRX Blockchain (REQUIRED)
 CIRX_WALLET_PRIVATE_KEY=your_testnet_cirx_private_key
