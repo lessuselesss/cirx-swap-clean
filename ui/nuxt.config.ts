@@ -73,6 +73,10 @@ export default defineNuxtConfig({
       appName: 'Circular CIRX OTC Platform',
       appDescription: 'Circular CIRX OTC Trading Platform - Buy CIRX tokens with instant delivery or OTC discounts up to 12%',
       appUrl: process.env.APP_URL || 'https://circular.io',
+      // Network configuration
+      testnetMode: process.env.NUXT_PUBLIC_TESTNET_MODE === 'true',
+      ethereumNetwork: process.env.NUXT_PUBLIC_ETHEREUM_NETWORK || 'mainnet',
+      ethereumChainId: process.env.NUXT_PUBLIC_ETHEREUM_CHAIN_ID || '1',
       // Backend API configuration
       apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'http://localhost:8080/api',
       apiKey: process.env.NUXT_PUBLIC_API_KEY || '',
