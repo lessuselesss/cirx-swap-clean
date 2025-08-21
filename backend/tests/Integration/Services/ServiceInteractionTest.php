@@ -41,7 +41,7 @@ class ServiceInteractionTest extends IntegrationTestCase
         // Create test transaction (matching integration test schema)
         $transactionData = [
             'transaction_id' => 'tx_service_integration_001',
-            'user_wallet_address' => '0x742d35Cc6635C0532925a3b8D10C6c2EE5c2B9a3',
+            'user_wallet_address' => '0x834244d016f29d6acb42c1b054a88e2e9b1c9228',
             'payment_token' => 'USDC', 
             'payment_amount' => '5000.000000',
             'cirx_amount' => '10800.000000',

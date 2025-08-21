@@ -28,7 +28,7 @@ class CompleteSwapFlowTest extends IntegrationTestCase
     {
         // Step 1: Initiate swap transaction
         $swapRequest = [
-            'user_wallet_address' => '0x742d35Cc6635C0532925a3b8D10C6c2EE5c2B9a3',
+            'user_wallet_address' => '0x834244d016f29d6acb42c1b054a88e2e9b1c9228',
             'payment_token' => 'USDC',
             'payment_amount' => '5000.00',
             'cirx_recipient_address' => '0xbb9dbe8b94ae940016e89837574e84e2651f7f10da7809fff0728cc419514370'
@@ -103,7 +103,7 @@ class CompleteSwapFlowTest extends IntegrationTestCase
             
             // Invalid payment amount
             [
-                'user_wallet_address' => '0x742d35Cc6635C0532925a3b8D10C6c2EE5c2B9a3',
+                'user_wallet_address' => '0x834244d016f29d6acb42c1b054a88e2e9b1c9228',
                 'payment_token' => 'USDC',
                 'payment_amount' => '-100.00', // Negative amount
                 'cirx_recipient_address' => '0xbb9dbe8b94ae940016e89837574e84e2651f7f10da7809fff0728cc419514370'
@@ -134,7 +134,7 @@ class CompleteSwapFlowTest extends IntegrationTestCase
     public function testSwapInitiationWithoutAuthentication(): void
     {
         $swapRequest = [
-            'user_wallet_address' => '0x742d35Cc6635C0532925a3b8D10C6c2EE5c2B9a3',
+            'user_wallet_address' => '0x834244d016f29d6acb42c1b054a88e2e9b1c9228',
             'payment_token' => 'USDC',
             'payment_amount' => '1000.00',
             'cirx_recipient_address' => '0xbb9dbe8b94ae940016e89837574e84e2651f7f10da7809fff0728cc419514370'

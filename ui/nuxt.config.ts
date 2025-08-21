@@ -83,6 +83,12 @@ export default defineNuxtConfig({
       // IROH networking configuration
       irohEnabled: process.env.NUXT_PUBLIC_IROH_ENABLED === 'true',
       irohBridgeUrl: process.env.NUXT_PUBLIC_IROH_BRIDGE_URL || 'http://localhost:9090',
+      // Platform wallet addresses (CRITICAL: must match backend PLATFORM_FEE_WALLET)
+      ethDepositAddress: process.env.NUXT_PUBLIC_ETH_DEPOSIT_ADDRESS || '0x834244d016f29d6acb42c1b054a88e2e9b1c9228',
+      usdcDepositAddress: process.env.NUXT_PUBLIC_USDC_DEPOSIT_ADDRESS || '0x834244d016f29d6acb42c1b054a88e2e9b1c9228',
+      usdtDepositAddress: process.env.NUXT_PUBLIC_USDT_DEPOSIT_ADDRESS || '0x834244d016f29d6acb42c1b054a88e2e9b1c9228',
+      polygonDepositAddress: process.env.NUXT_PUBLIC_POLYGON_DEPOSIT_ADDRESS || '0x834244d016f29d6acb42c1b054a88e2e9b1c9228',
+      bscDepositAddress: process.env.NUXT_PUBLIC_BSC_DEPOSIT_ADDRESS || '0x834244d016f29d6acb42c1b054a88e2e9b1c9228',
     }
   },
 

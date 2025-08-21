@@ -475,7 +475,7 @@ class PaymentVerificationService
             $paymentChain = $transaction->payment_chain ?? 'ethereum';
             $amountPaid = $transaction->amount_paid ?? '0';
             $paymentToken = $transaction->payment_token ?? 'USDC';
-            $projectWallet = $_ENV['PROJECT_WALLET_ADDRESS'] ?? '0x742d35Cc6635C0532925a3b8D10C6c2EE5c2B9a3';
+            $projectWallet = $_ENV['PLATFORM_FEE_WALLET'] ?? $_ENV['PROJECT_WALLET_ADDRESS'] ?? '0x834244d016f29d6acb42c1b054a88e2e9b1c9228';
 
             if (empty($paymentTxId)) {
                 return PaymentVerificationResult::failure('', 'Missing payment transaction ID');

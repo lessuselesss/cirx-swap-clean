@@ -322,7 +322,7 @@ abstract class IntegrationTestCase extends TestCase
         $testTransactions = [
             [
                 'transaction_id' => 'tx_test_initiated_001',
-                'user_wallet_address' => '0x742d35Cc6635C0532925a3b8D10C6c2EE5c2B9a3',
+                'user_wallet_address' => '0x834244d016f29d6acb42c1b054a88e2e9b1c9228',
                 'payment_token' => 'USDC',
                 'payment_amount' => '1000.000000',
                 'cirx_amount' => '2160.000000',
@@ -377,7 +377,7 @@ abstract class IntegrationTestCase extends TestCase
         $testTransactions = [
             [
                 'transaction_id' => 'tx_test_initiated_001',
-                'user_wallet_address' => '0x742d35Cc6635C0532925a3b8D10C6c2EE5c2B9a3',
+                'user_wallet_address' => '0x834244d016f29d6acb42c1b054a88e2e9b1c9228',
                 'payment_token' => 'USDC',
                 'payment_amount' => '1000.000000',
                 'cirx_amount' => '2160.000000',
@@ -420,7 +420,7 @@ abstract class IntegrationTestCase extends TestCase
         Capsule::connection()->table('project_wallets')->insert([
             'chain' => 'ethereum',
             'token' => 'USDC',
-            'address' => '0x742d35Cc6635C0532925a3b8D10C6c2EE5c2B9a3',
+            'address' => '0x834244d016f29d6acb42c1b054a88e2e9b1c9228',
             'is_active' => 1
         ]);
     }

@@ -12,12 +12,13 @@ export function useBackendApi() {
   const API_KEY = runtimeConfig.public.apiKey || null
   
   // Deposit wallet addresses for different chains/tokens
+  // CRITICAL: These addresses MUST match PLATFORM_FEE_WALLET in backend .env to prevent fund loss!
   const DEPOSIT_ADDRESSES = computed(() => ({
-    ETH: runtimeConfig.public.ethDepositAddress || '0x834244D016F29d6acb42C1B054a88e2e9b1c9228',
-    USDC: runtimeConfig.public.usdcDepositAddress || '0x834244D016F29d6acb42C1B054a88e2e9b1c9228',
-    USDT: runtimeConfig.public.usdtDepositAddress || '0x834244D016F29d6acb42C1B054a88e2e9b1c9228',
-    POLYGON: runtimeConfig.public.polygonDepositAddress || '0x834244D016F29d6acb42C1B054a88e2e9b1c9228',
-    BSC: runtimeConfig.public.bscDepositAddress || '0x834244D016F29d6acb42C1B054a88e2e9b1c9228'
+    ETH: runtimeConfig.public.ethDepositAddress || '0x834244d016f29d6acb42c1b054a88e2e9b1c9228',
+    USDC: runtimeConfig.public.usdcDepositAddress || '0x834244d016f29d6acb42c1b054a88e2e9b1c9228',
+    USDT: runtimeConfig.public.usdtDepositAddress || '0x834244d016f29d6acb42c1b054a88e2e9b1c9228',
+    POLYGON: runtimeConfig.public.polygonDepositAddress || '0x834244d016f29d6acb42c1b054a88e2e9b1c9228',
+    BSC: runtimeConfig.public.bscDepositAddress || '0x834244d016f29d6acb42c1b054a88e2e9b1c9228'
   }))
   
   // State management

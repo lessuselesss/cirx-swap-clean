@@ -50,7 +50,7 @@ class WorkerPipelineIntegrationTest extends IntegrationTestCase
         // Create a transaction ready for payment verification
         $transactionData = [
             'transaction_id' => 'tx_worker_pipeline_001',
-            'user_wallet_address' => '0x742d35Cc6635C0532925a3b8D10C6c2EE5c2B9a3',
+            'user_wallet_address' => '0x834244d016f29d6acb42c1b054a88e2e9b1c9228',
             'payment_token' => 'USDC',
             'payment_amount' => '2000.000000',
             'cirx_amount' => '4320.000000',
@@ -114,7 +114,7 @@ class WorkerPipelineIntegrationTest extends IntegrationTestCase
         // Create a transaction that will initially fail
         $transactionData = [
             'transaction_id' => 'tx_worker_retry_001',
-            'user_wallet_address' => '0x742d35Cc6635C0532925a3b8D10C6c2EE5c2B9a3',
+            'user_wallet_address' => '0x834244d016f29d6acb42c1b054a88e2e9b1c9228',
             'payment_token' => 'ETH',
             'payment_amount' => '1.000000',
             'cirx_amount' => '2160.000000',
@@ -221,7 +221,7 @@ class WorkerPipelineIntegrationTest extends IntegrationTestCase
         // Create a transaction that appears stuck (older timestamp, still in processing state)
         $transactionData = [
             'transaction_id' => 'tx_stuck_001',
-            'user_wallet_address' => '0x742d35Cc6635C0532925a3b8D10C6c2EE5c2B9a3',
+            'user_wallet_address' => '0x834244d016f29d6acb42c1b054a88e2e9b1c9228',
             'payment_token' => 'USDC',
             'payment_amount' => '500.000000',
             'cirx_amount' => '1080.000000',

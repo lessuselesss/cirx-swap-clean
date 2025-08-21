@@ -22,7 +22,7 @@ class TransactionDataIntegrityTest extends IntegrationTestCase
     {
         $transactionData = [
             'transaction_id' => 'tx_integrity_test_001',
-            'user_wallet_address' => '0x742d35Cc6635C0532925a3b8D10C6c2EE5c2B9a3',
+            'user_wallet_address' => '0x834244d016f29d6acb42c1b054a88e2e9b1c9228',
             'payment_token' => 'USDC',
             'payment_amount' => '3000.500000',
             'cirx_amount' => '6480.000000',
@@ -150,7 +150,7 @@ class TransactionDataIntegrityTest extends IntegrationTestCase
     {
         $transactionData = [
             'transaction_id' => 'tx_precision_test_001',
-            'user_wallet_address' => '0x742d35Cc6635C0532925a3b8D10C6c2EE5c2B9a3',
+            'user_wallet_address' => '0x834244d016f29d6acb42c1b054a88e2e9b1c9228',
             'payment_token' => 'USDC',
             'payment_amount' => '1234.12345678', // 8 decimal places
             'cirx_amount' => '9876.87654321',   // 8 decimal places
@@ -307,7 +307,7 @@ class TransactionDataIntegrityTest extends IntegrationTestCase
         $invalidScenarios = [
             [
                 'description' => 'Null transaction_id',
-                'data' => [null, '0x742d35Cc6635C0532925a3b8D10C6c2EE5c2B9a3', 'USDC', '1000.00', '2160.00', '0xbb9...', 'initiated']
+                'data' => [null, '0x834244d016f29d6acb42c1b054a88e2e9b1c9228', 'USDC', '1000.00', '2160.00', '0xbb9...', 'initiated']
             ],
             [
                 'description' => 'Empty user_wallet_address',
@@ -392,7 +392,7 @@ class TransactionDataIntegrityTest extends IntegrationTestCase
 
         $stmt->execute([
             $transactionId,
-            '0x742d35Cc6635C0532925a3b8D10C6c2EE5c2B9a3',
+            '0x834244d016f29d6acb42c1b054a88e2e9b1c9228',
             'USDC',
             '1000.000000',
             '2160.000000',

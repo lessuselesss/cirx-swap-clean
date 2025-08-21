@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Workers\PaymentVerificationWorker;
 use App\Workers\CirxTransferWorker;
+use App\Workers\StuckTransactionRecoveryWorker;
 use App\Services\LoggerService;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -57,6 +58,21 @@ class WorkerController
             // Process stuck transactions
             $stuckResults = $cirxWorker->processStuckTransactions();
             $results['cirx_transfers']['stuck'] = $stuckResults;
+
+            // Run stuck transaction recovery periodically (every 10th call to reduce overhead)
+            if (rand(1, 10) === 1) {
+                $recoveryWorker = new StuckTransactionRecoveryWorker();
+                $recoveryResults = $recoveryWorker->processStuckTransactions();
+                $results['stuck_transaction_recovery'] = $recoveryResults;
+                
+                if ($recoveryResults['recovered'] > 0) {
+                    $this->logger->info('Stuck transaction recovery completed', [
+                        'scanned' => $recoveryResults['scanned'],
+                        'recovered' => $recoveryResults['recovered'],
+                        'permanently_failed' => $recoveryResults['permanently_failed']
+                    ]);
+                }
+            }
 
             $this->logger->info('Web worker completed', [
                 'payment_processed' => $paymentResults['processed'] ?? 0,
