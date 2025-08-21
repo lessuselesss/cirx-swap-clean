@@ -282,7 +282,7 @@ class CirxTransferService
      */
     public function isTransactionReadyForTransfer(Transaction $transaction): bool
     {
-        return $transaction->swap_status === Transaction::STATUS_PAYMENT_VERIFIED;
+        return $transaction->swap_status === Transaction::STATUS_CIRX_TRANSFER_PENDING;
     }
 
     /**

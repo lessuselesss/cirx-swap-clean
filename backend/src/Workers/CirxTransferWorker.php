@@ -99,6 +99,15 @@ class CirxTransferWorker
     public function processTransaction(Transaction $transaction): array
     {
         try {
+            // Validate transaction is ready for transfer BEFORE changing status
+            if ($transaction->swap_status !== Transaction::STATUS_PAYMENT_VERIFIED) {
+                return [
+                    'status' => 'failed',
+                    'message' => 'Transaction not in valid state for transfer',
+                    'error' => 'Expected payment_verified status, got: ' . $transaction->swap_status
+                ];
+            }
+            
             // Update status to indicate transfer is in progress
             $transaction->swap_status = Transaction::STATUS_CIRX_TRANSFER_PENDING;
             $transaction->save();
