@@ -279,15 +279,13 @@ function updateDemoTransactionStatus(phase) {
  * Show a toast for a specific phase
  */
 function showPhaseToast(phaseKey, phaseConfig) {
-  const toast = useNuxtApp().$toast
-  if (!toast) return
-  
-  toast.add({
-    title: phaseConfig.title,
-    description: phaseConfig.message,
-    color: phaseConfig.color,
-    icon: phaseConfig.icon,
-    timeout: 4000
+  // Import and use safe toast
+  import('~/utils/toast.js').then(({ safeToast }) => {
+    if (phaseConfig.color === 'green') {
+      safeToast.success(`${phaseConfig.title}: ${phaseConfig.message}`)
+    } else {
+      safeToast.error(`${phaseConfig.title}: ${phaseConfig.message}`)
+    }
   })
 }
 

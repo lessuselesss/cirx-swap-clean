@@ -5,6 +5,8 @@
  */
 import { ref, reactive, computed, onUnmounted } from 'vue'
 import { useBackendApi } from './useBackendApi'
+// Import safe toast utility
+import { safeToast } from '~/utils/toast.js'
 
 export function useTransactionStatus() {
   const { apiCall } = useBackendApi()
@@ -240,16 +242,16 @@ export function useTransactionStatus() {
     // Show appropriate toast type
     switch (phaseConfig.type) {
       case 'success':
-        toast.add({ ...notification, color: 'green' })
+        safeToast.success(`${notification.title}: ${notification.description}`)
         break
       case 'error':
-        toast.add({ ...notification, color: 'red' })
+        safeToast.error(`${notification.title}: ${notification.description}`)
         break
       case 'warning':
-        toast.add({ ...notification, color: 'yellow' })
+        safeToast.error(`${notification.title}: ${notification.description}`)
         break
       default:
-        toast.add({ ...notification, color: 'blue' })
+        safeToast.success(`${notification.title}: ${notification.description}`)
     }
   }
 

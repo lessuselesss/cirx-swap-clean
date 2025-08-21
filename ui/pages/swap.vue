@@ -726,6 +726,8 @@ import { useBackendApi } from '~/composables/useBackendApi.js'
 import { useRealTimeTransactions } from '~/composables/useRealTimeTransactions.js'
 // Import Circular address validation
 import { useCircularAddressValidation } from '~/composables/useCircularAddressValidation.js'
+// Import safe toast utility
+import { safeToast } from '~/utils/toast.js'
 // Extension detection disabled
 // import { detectAllExtensions } from '~/utils/comprehensiveExtensionDetection.js'
 // Removed useCircularChain import - Saturn wallet detection disabled
@@ -2022,12 +2024,7 @@ const handleSwap = async () => {
       
       // Show success notification
       if (result?.swapId) {
-        toast.add({
-          title: 'Swap Initiated Successfully',
-          description: `Transaction hash: ${transactionHash.slice(0, 10)}...${transactionHash.slice(-8)}`,
-          color: 'green',
-          timeout: 5000
-        })
+        safeToast.success(`Swap Initiated Successfully - Transaction: ${transactionHash.slice(0, 10)}...${transactionHash.slice(-8)}`)
       }
     } catch (backendError) {
       console.error('🔥 BACKEND API FAILED:', backendError)

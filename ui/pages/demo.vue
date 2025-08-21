@@ -206,20 +206,17 @@ function showTestToast(phaseKey, phase) {
   showToast(phase.title, phase.message, phase.color)
 }
 
-function showToast(title, message, color = 'blue') {
+async function showToast(title, message, color = 'blue') {
   // Simple browser notification simulation
   console.log(`${title}: ${message}`)
   
-  // If Nuxt UI toast is available, use it
+  // Use safe toast system
   try {
-    const { $toast } = useNuxtApp()
-    if ($toast) {
-      $toast.add({
-        title,
-        description: message,
-        color,
-        timeout: 4000
-      })
+    const { safeToast } = await import('~/utils/toast.js')
+    if (color === 'green') {
+      safeToast.success(`${title}: ${message}`)
+    } else {
+      safeToast.error(`${title}: ${message}`)
     }
   } catch (error) {
     // Fallback to browser notification

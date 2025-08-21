@@ -3747,10 +3747,6 @@
     "ui/composables/useTransactionStatus.js": {
       "language": "javascript",
       "parsed": true,
-      "imports": [
-        "vue",
-        "./useBackendApi"
-      ],
       "functions": {
         "useTransactionStatus": "()",
         "trackTransaction": {
@@ -3765,44 +3761,22 @@
             "stopPolling",
             "updateTransactionStatus"
           ],
-          "signature": "(transactionId, interval = 3000)",
-          "called_by": [
-            "trackTransaction"
-          ]
+          "signature": "(transactionId, interval = 3000)"
         },
-        "stopPolling": {
-          "signature": "(transactionId)",
-          "called_by": [
-            "startPolling",
-            "removeTransaction",
-            "pollStatus"
-          ]
-        },
+        "stopPolling": "(transactionId)",
         "updateTransactionStatus": {
           "calls": [
             "showPhaseNotification"
           ],
-          "signature": "(transactionId, statusData)",
-          "called_by": [
-            "startPolling",
-            "pollStatus"
-          ]
+          "signature": "(transactionId, statusData)"
         },
         "showPhaseNotification": {
           "calls": [
             "getNotificationTimeout"
           ],
-          "signature": "(phase, statusData)",
-          "called_by": [
-            "updateTransactionStatus"
-          ]
+          "signature": "(phase, statusData)"
         },
-        "getNotificationTimeout": {
-          "signature": "(phase)",
-          "called_by": [
-            "showPhaseNotification"
-          ]
-        },
+        "getNotificationTimeout": "(phase)",
         "getTransaction": "(transactionId)",
         "removeTransaction": {
           "calls": [
@@ -3815,32 +3789,12 @@
             "stopPolling",
             "updateTransactionStatus"
           ],
-          "signature": "async ()",
-          "called_by": [
-            "startPolling"
-          ]
+          "signature": "async ()"
         }
       },
       "classes": {},
-      "variables": [
-        "transactions",
-        "activePolling",
-        "pollingIntervals",
-        "transactionPhases",
-        "transactionState",
-        "transaction",
-        "pollStatus",
-        "response",
-        "statusData",
-        "intervalId",
-        "previousPhase",
-        "phaseConfig",
-        "toast",
-        "notification",
-        "allTransactions",
-        "activeTransactions"
-      ],
-      "call_graph": {}
+      "updated_by_hook": true,
+      "updated_at": "2025-08-21T00:54:51.557021"
     },
     "ui/composables/useWallet.js": {
       "language": "javascript",
