@@ -156,19 +156,19 @@ USDT_CONTRACT_ADDRESS=0xdAC17F958D2ee523a2206206994597C13D831ec7
 
 ### PaymentVerificationService
 
-**Enhanced Fallback Verification**:
-- When indexer is unavailable, uses blockchain clients directly
+**Direct Blockchain Verification**:
+- Uses blockchain clients directly for payment verification (indexer disabled for custodial architecture)
 - Verifies transaction status, confirmations, amounts, and recipients
 - Supports all major tokens (ETH, USDC, USDT, MATIC, BNB)
 - Maintains test mode compatibility
 
 **Key Methods**:
 ```php
-// Existing indexer-based verification (primary)
+// Direct blockchain verification (indexer disabled for custodial architecture)
 $result = $service->verifyPayment($txHash, $chain, $amount, $token, $wallet);
 
-// Fallback blockchain verification (automatic)
-// Triggered when indexer is unhealthy
+// Automatically uses blockchain fallback verification when INDEXER_URL is disabled
+// This is the recommended configuration for custodial wallet + NAG API architecture
 ```
 
 ### CirxTransferService  
@@ -288,7 +288,7 @@ use App\Services\PaymentVerificationService;
 
 $verificationService = new PaymentVerificationService();
 
-// Verify a payment (uses indexer primarily, blockchain as fallback)
+// Verify a payment (uses direct blockchain verification with indexer disabled)
 $result = $verificationService->verifyPayment(
     '0xabc123...',  // Transaction hash
     'ethereum',     // Blockchain network
@@ -452,7 +452,7 @@ The blockchain integration maintains full backward compatibility:
 1. **Existing tests continue to work** - Test mode detection preserves mock behavior
 2. **Service interfaces unchanged** - No breaking changes to public APIs
 3. **Configuration additive** - New environment variables, existing ones preserved
-4. **Gradual rollout** - Indexer remains primary, blockchain is fallback
+4. **Indexer disabled** - Direct blockchain verification used for custodial architecture
 
 ### Production Migration Steps
 
