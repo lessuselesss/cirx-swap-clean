@@ -1,6 +1,6 @@
 # CIRX Swap Platform
 
-A comprehensive OTC (Over-The-Counter) trading platform for CIRX tokens built on UniswapV4 infrastructure with dual-tab interface for liquid and vested purchases.
+A comprehensive OTC (Over-The-Counter) trading platform for CIRX tokens built on UniswapV4 infrastructure with dual-tab interface for liquid and vested purchases. 
 
 ## 🚀 Quick Start
 
