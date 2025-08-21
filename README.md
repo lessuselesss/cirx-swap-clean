@@ -157,21 +157,80 @@ docker-compose -f docker-compose.e2e.yml down  # Stop E2E environment
 
 ## 📋 Configuration
 
-### Environment Variables
+### Unified Environment Configuration
 
-**Frontend (.env)**:
+This project uses a **unified environment configuration approach** providing identical developer experience across frontend and backend:
+
+**✅ Identical File Structure:**
+Both `backend/` and `ui/` directories have the same environment files:
+- `.env.example` (master template - tracked in git)
+- `.env.development` (derived from template)
+- `.env.production` (derived from template)  
+- `.env.local` (derived from template)
+- `.env` (symlinks to `.env.local`)
+
+**✅ Master Template Approach:**
+- **Backend**: 305 lines, 96+ environment variables consolidated
+- **Frontend**: 118 lines, 7 core variables with optional extensions
+- All variables from existing configs captured and documented
+- Clear sections showing development vs production differences
+- Placeholder values easily identifiable
+
+**✅ Developer Workflow:**
+1. Copy `.env.example` to `.env.local` in either directory
+2. Customize values for your environment
+3. `.env` symlink automatically points to `.env.local`
+4. Same process in both directories
+
+**✅ Git Configuration:**
+- Only `.env.example` files are tracked in version control
+- All other environment files are git-ignored (contain secrets)
+- Clean separation between templates and actual configurations
+
+### Key Environment Variables
+
+**Frontend (.env.local)**:
 ```bash
-NUXT_PUBLIC_API_BASE_URL=http://localhost:8080
-NUXT_PUBLIC_CHAIN_ID=11155111
+# Network Configuration
+NUXT_PUBLIC_TESTNET_MODE=true
+NUXT_PUBLIC_ETHEREUM_NETWORK=sepolia
+NUXT_PUBLIC_ETHEREUM_CHAIN_ID=11155111
+
+# Backend API
+NUXT_PUBLIC_API_BASE_URL=http://localhost:8080/api/v1
+
+# Development Features
+NUXT_PUBLIC_DEBUG_MODE=true
+NUXT_PUBLIC_SHOW_NETWORK_INDICATOR=true
+
+# Wallet Integration
+NUXT_PUBLIC_REOWN_PROJECT_ID=your-reown-project-id-here
 ```
 
-**Backend (.env)**:
+**Backend (.env.local)**:
 ```bash
-APP_ENV=local
-DB_CONNECTION=pgsql
-DB_HOST=localhost
-DB_DATABASE=cirx_swap
-SEPOLIA_RPC_URL=https://sepolia.infura.io/v3/YOUR_KEY
+# Application
+APP_ENV=development
+APP_DEBUG=true
+APP_URL=http://localhost:8080
+
+# Database (Development)
+DB_CONNECTION=sqlite
+DB_DATABASE=storage/database.sqlite
+
+# Ethereum (Sepolia Testnet)
+ETHEREUM_CHAIN_ID=11155111
+ETHEREUM_NETWORK=sepolia
+ETHEREUM_RPC_URL=https://sepolia.infura.io/v3/YOUR_INFURA_PROJECT_ID
+ETHERSCAN_BASE_URL=https://sepolia.etherscan.io
+
+# CIRX Blockchain
+CIRX_WALLET_PRIVATE_KEY=your_cirx_wallet_private_key_here_REQUIRED
+CIRX_WALLET_ADDRESS=your_cirx_wallet_address_here
+
+# Testing-Only Private Keys (NEVER use mainnet keys!)
+SEPOLIA_PRIVATE_KEY=your_sepolia_testnet_private_key_here
+ETHEREUM_PRIVATE_KEY=your_ethereum_testnet_private_key_here
 ```
 
 **E2E Testing**:
