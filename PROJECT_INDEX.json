@@ -1148,7 +1148,7 @@
       "rs": 6,
       "css": 6
     },
-    "markdown_files": 39
+    "markdown_files": 40
   },
   "files": {
     "package.json": {
@@ -3587,54 +3587,28 @@
       "parsed": true,
       "functions": {
         "useTransactionHistory": "()",
-        "apiCall": {
-          "signature": "async (endpoint, options = {})",
-          "called_by": [
-            "fetchTransactionHistory",
-            "fetchVestingPositions",
-            "fetchUserStats"
-          ]
-        },
-        "withRetry": {
-          "signature": "async (operation, maxRetries = 3)",
-          "called_by": [
-            "fetchTransactionHistory"
-          ]
-        },
+        "apiCall": "async (endpoint, options = {})",
+        "withRetry": "async (operation, maxRetries = 3)",
         "fetchTransactionHistory": {
           "calls": [
             "apiCall",
             "getUserFriendlyError",
             "withRetry"
           ],
-          "signature": "async (userAddress, options = {})",
-          "called_by": [
-            "fetchUserData"
-          ]
+          "signature": "async (userAddress, options = {})"
         },
-        "getUserFriendlyError": {
-          "signature": "(error)",
-          "called_by": [
-            "fetchTransactionHistory"
-          ]
-        },
+        "getUserFriendlyError": "(error)",
         "fetchVestingPositions": {
           "calls": [
             "apiCall"
           ],
-          "signature": "async (userAddress)",
-          "called_by": [
-            "fetchUserData"
-          ]
+          "signature": "async (userAddress)"
         },
         "fetchUserStats": {
           "calls": [
             "apiCall"
           ],
-          "signature": "async (userAddress)",
-          "called_by": [
-            "fetchUserData"
-          ]
+          "signature": "async (userAddress)"
         },
         "fetchUserData": {
           "calls": [
@@ -3651,19 +3625,9 @@
           "signature": "(tx)"
         },
         "formatVestingPosition": "(position)",
-        "getTokenSymbol": {
-          "signature": "(tokenAddress)",
-          "called_by": [
-            "formatTransaction"
-          ]
-        },
+        "getTokenSymbol": "(tokenAddress)",
         "formatUserStats": "(stats)",
-        "checkIndexerHealth": {
-          "signature": "async ()",
-          "called_by": [
-            "checkServiceStatus"
-          ]
-        },
+        "checkIndexerHealth": "async ()",
         "checkServiceStatus": {
           "calls": [
             "checkIndexerHealth"
@@ -3674,75 +3638,21 @@
       "classes": {
         "for": {
           "methods": {
-            "constructor": {
-              "signature": "(message, status, code, requestId, endpoint, originalError)",
-              "called_by": [
-                "po",
-                "CE"
-              ]
-            },
+            "constructor": "(message, status, code, requestId, endpoint, originalError)",
             "__init__": "(message, status, code, requestId, endpoint, originalError)"
           }
         },
         "ApiError": {
           "methods": {
-            "constructor": {
-              "signature": "(message, status, code, requestId, endpoint, originalError)",
-              "called_by": [
-                "po",
-                "CE"
-              ]
-            },
+            "constructor": "(message, status, code, requestId, endpoint, originalError)",
             "__init__": "(message, status, code, requestId, endpoint, originalError)"
           },
           "extends": "Error",
           "type": "exception"
         }
       },
-      "constants": {
-        "INDEXER_API_BASE": "str"
-      },
-      "variables": [
-        "useTransactionHistory",
-        "isLoading",
-        "error",
-        "transactions",
-        "vestingPositions",
-        "userStats",
-        "apiCall",
-        "controller",
-        "timeoutId",
-        "response",
-        "withRetry",
-        "attempt",
-        "baseDelay",
-        "delay",
-        "fetchTransactionHistory",
-        "queryParams",
-        "endpoint",
-        "data",
-        "userFriendlyError",
-        "getUserFriendlyError",
-        "fetchVestingPositions",
-        "fetchUserStats",
-        "fetchUserData",
-        "formatTransaction",
-        "formatVestingPosition",
-        "getTokenSymbol",
-        "tokenMap",
-        "formatUserStats",
-        "checkIndexerHealth",
-        "serviceStatus",
-        "checkServiceStatus",
-        "isHealthy",
-        "formattedTransactions",
-        "formattedVestingPositions",
-        "formattedUserStats",
-        "hasTransactions",
-        "hasVestingPositions",
-        "hasAnyData"
-      ],
-      "call_graph": {}
+      "updated_by_hook": true,
+      "updated_at": "2025-08-21T08:59:00.280814"
     },
     "ui/composables/useTransactionStatus.js": {
       "language": "javascript",
@@ -5828,27 +5738,12 @@
     "ui/config/appkit.js": {
       "language": "javascript",
       "parsed": true,
-      "imports": [
-        "@reown/appkit-adapter-wagmi",
-        "@reown/appkit-adapter-solana",
-        "@reown/appkit/networks"
-      ],
       "functions": {
         "getAppUrl": "()"
       },
       "classes": {},
-      "variables": [
-        "projectId",
-        "evmNetworks",
-        "solanaNetworks",
-        "networks",
-        "getAppUrl",
-        "metadata",
-        "wagmiAdapter",
-        "solanaAdapter",
-        "wagmiConfig"
-      ],
-      "call_graph": {}
+      "updated_by_hook": true,
+      "updated_at": "2025-08-21T08:16:44.481250"
     },
     "ui/config/walletConfig.js": {
       "language": "javascript",
@@ -5868,7 +5763,6 @@
     "ui/config/app.js": {
       "language": "javascript",
       "parsed": true,
-      "purpose": "Application entry point",
       "functions": {
         "isFeatureEnabled": "(featureName)",
         "getApiEndpoint": "(apiName)",
@@ -5878,18 +5772,9 @@
         "isProd": "()"
       },
       "classes": {},
-      "variables": [
-        "isDevelopment",
-        "isProduction",
-        "config",
-        "isFeatureEnabled",
-        "getApiEndpoint",
-        "getContractAddress",
-        "getNetworkConfig",
-        "isDev",
-        "isProd"
-      ],
-      "call_graph": {}
+      "updated_by_hook": true,
+      "updated_at": "2025-08-21T08:56:56.112364",
+      "purpose": "Application entry point"
     },
     "ui/assets/css/main.css": {
       "language": "css",
