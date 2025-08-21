@@ -55,7 +55,7 @@ class CirxTransferService
             if (!$this->isTransactionReadyForTransfer($transaction)) {
                 $transaction->markFailed('Transaction not ready for CIRX transfer');
                 return CirxTransferResult::failure(
-                    $transaction->user_address,
+                    $transaction->cirx_recipient_address ?? 'unknown',
                     '0',
                     'Transaction not in valid state for transfer'
                 );
@@ -92,15 +92,15 @@ class CirxTransferService
                 );
             }
 
-            // Calculate gross CIRX amount from payment
-            $grossCirxAmount = $this->calculateCirxAmount(
+            // Calculate CIRX amount from payment
+            // Platform fee is already included in the payment amount - no deduction needed
+            $cirxAmount = $this->calculateCirxAmount(
                 $transaction->amount_paid,
                 $transaction->payment_token,
                 $this->determineSwapType($transaction)
             );
             
-            // Subtract 4 CIRX platform fee from the transfer amount
-            $cirxAmount = max(0, $grossCirxAmount - 4.0);
+            // Format to 1 decimal place
             $cirxAmount = number_format($cirxAmount, 1, '.', '');
 
             // Execute the blockchain transfer
@@ -306,8 +306,8 @@ class CirxTransferService
             $swapType
         );
         
-        // Ensure we can still transfer CIRX after 4 CIRX platform fee deduction
-        return floatval($expectedCirxAmount) > 4.0;
+        // Ensure we have a valid CIRX amount to transfer (platform fee is cosmetic only)
+        return floatval($expectedCirxAmount) > 0;
     }
 
     /**
