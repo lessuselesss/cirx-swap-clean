@@ -55,7 +55,9 @@ class CirxBlockchainClient extends AbstractBlockchainClient
             // Use the SDK's transaction retrieval method
             // Parameters: blockchain, txID, start, end (start/end can be 0 for single tx)
             $response = $this->cirxApi->getTransactionByID('circular', $txHash, 0, 0);
-            return $response;
+            
+            // Convert stdClass to array if needed for type consistency
+            return is_object($response) ? json_decode(json_encode($response), true) : $response;
         } catch (\Exception $e) {
             if (str_contains($e->getMessage(), 'not found') || $e->getCode() === 404) {
                 return null;
