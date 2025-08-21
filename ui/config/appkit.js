@@ -25,11 +25,19 @@ export const solanaNetworks = [
 // All supported networks (for AppKit)
 export const networks = [...evmNetworks, ...solanaNetworks]
 
-// Application metadata
+// Application metadata - use dynamic URL to avoid mismatch warnings
+const getAppUrl = () => {
+  if (typeof window !== 'undefined') {
+    return window.location.origin
+  }
+  // Fallback for SSR
+  return process.env.NUXT_PUBLIC_SITE_URL || 'https://circular.io'
+}
+
 export const metadata = {
   name: 'Circular CIRX OTC Platform',
   description: 'Professional OTC trading platform for CIRX tokens with instant delivery and discounted vesting options.',
-  url: 'https://circular.io',
+  url: getAppUrl(),
   icons: ['https://circular.io/circular-logo.svg']
 }
 

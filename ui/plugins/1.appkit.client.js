@@ -108,10 +108,23 @@ export default defineNuxtPlugin(() => {
       // Force sync AppKit with any existing Wagmi connection
       setTimeout(() => {
         try {
-          const account = wagmiAdapter.wagmiConfig.getAccount()
+          // Check if wagmiAdapter and wagmiConfig exist
+          if (!wagmiAdapter?.wagmiConfig) {
+            console.log('⚠️ WagmiConfig not yet available, skipping sync')
+            return
+          }
+          
+          // Use the getAccount function if available, otherwise check state
+          let account = {}
+          if (typeof wagmiAdapter.wagmiConfig.getAccount === 'function') {
+            account = wagmiAdapter.wagmiConfig.getAccount()
+          } else if (wagmiAdapter.wagmiConfig.state?.current) {
+            account = wagmiAdapter.wagmiConfig.state.current
+          }
+          
           console.log('🔄 Checking for existing Wagmi connection:', account)
           
-          if (account.isConnected && account.address) {
+          if (account?.isConnected && account?.address) {
             console.log('🔧 Wagmi is connected, forcing AppKit to recognize this connection')
             
             // Force trigger AppKit's internal state update by simulating adapter events

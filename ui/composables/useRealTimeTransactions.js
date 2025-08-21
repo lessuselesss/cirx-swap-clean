@@ -4,8 +4,11 @@
  * Provides real-time transaction status updates via IROH networking
  */
 
+import { ref, computed } from 'vue'
+import { useIrohNetwork } from './useIrohNetwork'
+
 export const useRealTimeTransactions = () => {
-    const { isConnected, subscribeToTransactionUpdates, broadcastToTopic } = useIrohNetwork()
+    const { isEnabled, isConnected, nodeId, discoveredServices, connectionStatus, networkStats, subscribeToTransactionUpdates, broadcastToTopic } = useIrohNetwork()
     
     const transactions = ref(new Map())
     const subscriptions = ref(new Map())
