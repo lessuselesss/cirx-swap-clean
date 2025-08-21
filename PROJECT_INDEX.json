@@ -1067,6 +1067,21 @@
         "Blockchain RPC Endpoints (for payment verification)"
       ],
       "architecture_hints": []
+    },
+    "backend/ENVIRONMENT_SETUP.md": {
+      "sections": [
+        "Environment Configuration Guide",
+        "Overview",
+        "Environment File Structure",
+        "Quick Setup for Development",
+        "Security Guidelines",
+        "\u2705 DO:",
+        "\u274c DON'T:",
+        "Environment Variables Reference",
+        "Required for Development:",
+        "Database"
+      ],
+      "architecture_hints": []
     }
   },
   "directory_purposes": {
@@ -1133,7 +1148,7 @@
       "rs": 6,
       "css": 6
     },
-    "markdown_files": 35
+    "markdown_files": 36
   },
   "files": {
     "package.json": {

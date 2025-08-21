@@ -10,8 +10,14 @@ out/
 # Docs
 docs/
 
-# Dotenv file
+# Environment files with secrets (NEVER COMMIT)
 .env
+.env.local
+.env.*.local
+backend/.env
+backend/.env.local
+backend/.env.production
+ui/.env.local
 mcp.json
 .claude/
 
