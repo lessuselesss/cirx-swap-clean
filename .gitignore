@@ -11,13 +11,22 @@ out/
 docs/
 
 # Environment files with secrets (NEVER COMMIT)
+# Only .env.example files are tracked - all others contain secrets
 .env
 .env.local
-.env.*.local
+.env.development
+.env.production
+.env.e2e
 backend/.env
 backend/.env.local
+backend/.env.development
 backend/.env.production
+backend/.env.e2e
+backend/.env.base
+ui/.env
 ui/.env.local
+ui/.env.development
+ui/.env.production
 mcp.json
 .claude/
 
