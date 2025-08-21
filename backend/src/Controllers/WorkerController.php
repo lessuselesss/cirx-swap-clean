@@ -172,6 +172,72 @@ class WorkerController
     }
 
     /**
+     * Manual retry endpoint for stuck transactions (admin only)
+     */
+    public function manualRetry(Request $request, Response $response): Response
+    {
+        try {
+            // Simple authentication check
+            $queryParams = $request->getQueryParams();
+            $adminToken = $queryParams['admin_token'] ?? '';
+            $expectedToken = $_ENV['ADMIN_TOKEN'] ?? 'admin_dev_token_2024_cirx_secure_debug_new';
+            
+            if ($adminToken !== $expectedToken) {
+                return $this->jsonResponse($response, [
+                    'success' => false,
+                    'error' => 'Unauthorized - admin token required'
+                ], 401);
+            }
+
+            $this->logger->info('Manual retry triggered by admin');
+            
+            // Reset failed transactions to pending for re-verification
+            $resetCount = \App\Models\Transaction::where('swap_status', 'failed_payment_verification')
+                ->where('cirx_amount', '!=', '0.0') // Exclude invalid test transactions
+                ->update([
+                    'swap_status' => 'pending_payment_verification',
+                    'retry_count' => 0,
+                    'last_retry_at' => null,
+                    'failure_reason' => null,
+                    'updated_at' => new \DateTime()
+                ]);
+
+            // Immediately process the reset transactions
+            $paymentWorker = new PaymentVerificationWorker();
+            $cirxWorker = new CirxTransferWorker();
+            
+            $results = [
+                'success' => true,
+                'reset_count' => $resetCount,
+                'timestamp' => date('Y-m-d H:i:s'),
+                'payment_verification' => $paymentWorker->processPendingTransactions(),
+                'cirx_transfers' => $cirxWorker->processReadyTransactions()
+            ];
+
+            $this->logger->info('Manual retry completed', [
+                'reset_transactions' => $resetCount,
+                'payment_processed' => $results['payment_verification']['processed'] ?? 0,
+                'cirx_processed' => $results['cirx_transfers']['processed'] ?? 0
+            ]);
+
+            return $this->jsonResponse($response, $results);
+
+        } catch (\Exception $e) {
+            $this->logger->error('Manual retry failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return $this->jsonResponse($response, [
+                'success' => false,
+                'error' => 'Manual retry execution failed',
+                'message' => $e->getMessage(),
+                'timestamp' => date('Y-m-d H:i:s')
+            ], 500);
+        }
+    }
+
+    /**
      * Get last execution time from log files
      */
     private function getLastExecutionTime(): ?string

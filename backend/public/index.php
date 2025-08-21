@@ -239,6 +239,12 @@ $app->group('/api/v1', function ($group) {
         return $controller->healthCheck($request, $response);
     });
 
+    // Manual retry endpoint (admin only)
+    $group->post('/workers/retry', function (Request $request, Response $response) {
+        $controller = new WorkerController();
+        return $controller->manualRetry($request, $response);
+    });
+
     // Auto-processing endpoint (for external cron services)
     $group->get('/workers/auto', function (Request $request, Response $response) {
         $controller = new WorkerController();
