@@ -1,5 +1,5 @@
 {
-  "indexed_at": "2025-08-20T15:07:16.031545",
+  "indexed_at": "2025-08-20T23:17:32.127672",
   "root": ".",
   "project_structure": {
     "type": "tree",
@@ -7,14 +7,11 @@
     "tree": [
       ".",
       "\u251c\u2500\u2500 _archive/",
-      "\u251c\u2500\u2500 backend/ (4808 files)",
+      "\u251c\u2500\u2500 backend/ (4730 files)",
       "\u2502   \u251c\u2500\u2500 bin/ (2 files)",
       "\u2502   \u251c\u2500\u2500 database/ (6 files)",
       "\u2502   \u2502   \u2514\u2500\u2500 migrations/ (4 files)",
-      "\u2502   \u251c\u2500\u2500 docs/ (1 files)",
       "\u2502   \u251c\u2500\u2500 public/ (2 files)",
-      "\u2502   \u2502   \u2514\u2500\u2500 storage/",
-      "\u2502   \u2502       \u2514\u2500\u2500 logs/",
       "\u2502   \u251c\u2500\u2500 src/ (40 files)",
       "\u2502   \u2502   \u251c\u2500\u2500 Blockchain/ (6 files)",
       "\u2502   \u2502   \u2502   \u2514\u2500\u2500 Exceptions/ (1 files)",
@@ -28,7 +25,6 @@
       "\u2502   \u2502   \u251c\u2500\u2500 Validators/ (1 files)",
       "\u2502   \u2502   \u2514\u2500\u2500 Workers/ (2 files)",
       "\u2502   \u251c\u2500\u2500 storage/ (1 files)",
-      "\u2502   \u2502   \u2514\u2500\u2500 logs/",
       "\u2502   \u251c\u2500\u2500 tests/ (30 files)",
       "\u2502   \u2502   \u251c\u2500\u2500 E2E/ (7 files)",
       "\u2502   \u2502   \u251c\u2500\u2500 Integration/ (6 files)",
@@ -526,7 +522,6 @@
       "\u2502   \u2502           \u2502       \u2514\u2500\u2500 ...",
       "\u2502   \u2502           \u2514\u2500\u2500 README.md",
       "\u2502   \u2514\u2500\u2500 README.md",
-      "\u251c\u2500\u2500 docs/",
       "\u251c\u2500\u2500 indexer/ (10 files)",
       "\u2502   \u251c\u2500\u2500 abis/ (2 files)",
       "\u2502   \u251c\u2500\u2500 scripts/ (1 files)",
@@ -539,8 +534,7 @@
       "\u2502   \u2514\u2500\u2500 Cargo.toml",
       "\u251c\u2500\u2500 scripts/ (10 files)",
       "\u251c\u2500\u2500 test/ (3 files)",
-      "\u251c\u2500\u2500 ui/ (81541 files)",
-      "\u2502   \u251c\u2500\u2500 2/ (104 files)",
+      "\u251c\u2500\u2500 ui/ (124 files)",
       "\u2502   \u251c\u2500\u2500 assets/ (1 files)",
       "\u2502   \u2502   \u2514\u2500\u2500 css/ (1 files)",
       "\u2502   \u251c\u2500\u2500 components/ (27 files)",
@@ -553,7 +547,6 @@
       "\u2502   \u2502   \u2514\u2500\u2500 debug/ (15 files)",
       "\u2502   \u2502       \u2514\u2500\u2500 scripts/ (2 files)",
       "\u2502   \u251c\u2500\u2500 playwright-report/ (14 files)",
-      "\u2502   \u2502   \u251c\u2500\u2500 data/",
       "\u2502   \u2502   \u2514\u2500\u2500 trace/ (13 files)",
       "\u2502   \u2502       \u2514\u2500\u2500 assets/ (2 files)",
       "\u2502   \u251c\u2500\u2500 plugins/ (3 files)",
@@ -569,103 +562,6 @@
       "\u2502   \u251c\u2500\u2500 services/ (2 files)",
       "\u2502   \u251c\u2500\u2500 stores/ (2 files)",
       "\u2502   \u251c\u2500\u2500 test/ (1 files)",
-      "\u2502   \u251c\u2500\u2500 test-results/",
-      "\u2502   \u2502   \u251c\u2500\u2500 app-has-title-chromium-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 app-has-title-firefox-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 app-has-title-webkit-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 error-scenarios-Error-Scen-544fc-network-connectivity-issues-chromium-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 error-scenarios-Error-Scen-544fc-network-connectivity-issues-firefox-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 error-scenarios-Error-Scen-544fc-network-connectivity-issues-webkit-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 error-scenarios-Error-Scen-56666-ing-concurrent-user-actions-chromium-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 error-scenarios-Error-Scen-56666-ing-concurrent-user-actions-firefox-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 error-scenarios-Error-Scen-56666-ing-concurrent-user-actions-webkit-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 error-scenarios-Error-Scen-7100f--wallet-connection-failures-chromium-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 error-scenarios-Error-Scen-7100f--wallet-connection-failures-firefox-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 error-scenarios-Error-Scen-7100f--wallet-connection-failures-webkit-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 error-scenarios-Error-Scen-76302-les-API-failures-gracefully-chromium-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 error-scenarios-Error-Scen-76302-les-API-failures-gracefully-firefox-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 error-scenarios-Error-Scen-76302-les-API-failures-gracefully-webkit-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 error-scenarios-Error-Scen-83713-ng-session-timeout-handling-chromium-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 error-scenarios-Error-Scen-83713-ng-session-timeout-handling-firefox-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 error-scenarios-Error-Scen-83713-ng-session-timeout-handling-webkit-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 error-scenarios-Error-Scen-ab504-rowser-compatibility-issues-chromium-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 error-scenarios-Error-Scen-ab504-rowser-compatibility-issues-firefox-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 error-scenarios-Error-Scen-ab504-rowser-compatibility-issues-webkit-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 error-scenarios-Error-Scen-cacff-insufficient-wallet-balance-chromium-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 error-scenarios-Error-Scen-cacff-insufficient-wallet-balance-firefox-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 error-scenarios-Error-Scen-cacff-insufficient-wallet-balance-webkit-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 error-scenarios-Error-Scen-e3117-ng-invalid-input-validation-chromium-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 error-scenarios-Error-Scen-e3117-ng-invalid-input-validation-firefox-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 error-scenarios-Error-Scen-e3117-ng-invalid-input-validation-webkit-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 error-scenarios-Error-Scen-e3607-ing-malformed-API-responses-chromium-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 error-scenarios-Error-Scen-e3607-ing-malformed-API-responses-firefox-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 error-scenarios-Error-Scen-e3607-ing-malformed-API-responses-webkit-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 frontend-backend-integrati-06cb7--status-updates-via-polling-chromium-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 frontend-backend-integrati-06cb7--status-updates-via-polling-firefox-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 frontend-backend-integrati-06cb7--status-updates-via-polling-webkit-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 frontend-backend-integrati-90101--API-rate-limiting-handling-chromium-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 frontend-backend-integrati-90101--API-rate-limiting-handling-firefox-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 frontend-backend-integrati-90101--API-rate-limiting-handling-webkit-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 frontend-backend-integrati-9fcb6-ion-history-API-integration-chromium-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 frontend-backend-integrati-9fcb6-ion-history-API-integration-firefox-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 frontend-backend-integrati-9fcb6-ion-history-API-integration-webkit-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 frontend-backend-integrati-aaa60--authentication-and-headers-chromium-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 frontend-backend-integrati-aaa60--authentication-and-headers-firefox-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 frontend-backend-integrati-aaa60--authentication-and-headers-webkit-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 frontend-backend-integrati-b78b7-or-handling-and-retry-logic-chromium-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 frontend-backend-integrati-b78b7-or-handling-and-retry-logic-firefox-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 frontend-backend-integrati-b78b7-or-handling-and-retry-logic-webkit-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 frontend-backend-integrati-e5585-tegration-with-real-backend-chromium-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 frontend-backend-integrati-e5585-tegration-with-real-backend-firefox-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 frontend-backend-integrati-e5585-tegration-with-real-backend-webkit-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 performance-Performance-Te-182c0-I-response-time-performance-chromium-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 performance-Performance-Te-182c0-I-response-time-performance-firefox-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 performance-Performance-Te-182c0-I-response-time-performance-webkit-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 performance-Performance-Te-2f703-mance-with-slow-connections-chromium-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 performance-Performance-Te-2f703-mance-with-slow-connections-firefox-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 performance-Performance-Te-2f703-mance-with-slow-connections-webkit-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 performance-Performance-Te-e9e1b-e-data-handling-performance-chromium-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 performance-Performance-Te-e9e1b-e-data-handling-performance-firefox-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 performance-Performance-Te-e9e1b-e-data-handling-performance-webkit-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 performance-Performance-Te-ff42b--usage-and-resource-cleanup-chromium-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 performance-Performance-Te-ff42b--usage-and-resource-cleanup-firefox-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 performance-Performance-Te-ff42b--usage-and-resource-cleanup-webkit-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 performance-Performance-Testing-concurrent-user-simulation-chromium-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 performance-Performance-Testing-concurrent-user-simulation-firefox-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 performance-Performance-Testing-concurrent-user-simulation-webkit-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 performance-Performance-Testing-form-interaction-performance-chromium-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 performance-Performance-Testing-form-interaction-performance-firefox-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 performance-Performance-Testing-form-interaction-performance-webkit-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 performance-Performance-Testing-page-load-performance-chromium-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 performance-Performance-Testing-page-load-performance-firefox-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 performance-Performance-Testing-page-load-performance-webkit-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 swap-flow-Complete-Swap-Fl-27fb8-TH-to-CIRX-liquid-swap-flow-chromium-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 swap-flow-Complete-Swap-Fl-27fb8-TH-to-CIRX-liquid-swap-flow-firefox-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 swap-flow-Complete-Swap-Fl-27fb8-TH-to-CIRX-liquid-swap-flow-webkit-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 swap-flow-Complete-Swap-Fl-ad522-wap-with-wallet-integration-chromium-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 swap-flow-Complete-Swap-Fl-ad522-wap-with-wallet-integration-firefox-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 swap-flow-Complete-Swap-Fl-ad522-wap-with-wallet-integration-webkit-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 swap-flow-Complete-Swap-Fl-eb8c3-ndles-API-errors-gracefully-chromium-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 swap-flow-Complete-Swap-Fl-eb8c3-ndles-API-errors-gracefully-firefox-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 swap-flow-Complete-Swap-Fl-eb8c3-ndles-API-errors-gracefully-webkit-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 swap-flow-Complete-Swap-Fl-f0a8d-lidation-and-error-handling-chromium-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 swap-flow-Complete-Swap-Fl-f0a8d-lidation-and-error-handling-firefox-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 swap-flow-Complete-Swap-Fl-f0a8d-lidation-and-error-handling-webkit-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 swap-flow-Complete-Swap-Flow-E2E-responsive-design-on-mobile-chromium-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 swap-flow-Complete-Swap-Flow-E2E-responsive-design-on-mobile-firefox-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 swap-flow-Complete-Swap-Flow-E2E-responsive-design-on-mobile-webkit-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 wallet-integration-Wallet--5baa9-work-switching-for-Ethereum-chromium-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 wallet-integration-Wallet--5baa9-work-switching-for-Ethereum-firefox-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 wallet-integration-Wallet--a6a92-E-wallet-disconnection-flow-chromium-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 wallet-integration-Wallet--a6a92-E-wallet-disconnection-flow-firefox-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 wallet-integration-Wallet--af8bd-llet-not-installed-scenario-chromium-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 wallet-integration-Wallet--af8bd-llet-not-installed-scenario-firefox-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 wallet-integration-Wallet--bcd1a-allet-connection-for-Solana-chromium-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 wallet-integration-Wallet--bcd1a-allet-connection-for-Solana-firefox-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 wallet-integration-Wallet--bcd1a-allet-connection-for-Solana-webkit-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 wallet-integration-Wallet--cb08b-te-MetaMask-connection-flow-chromium-retry1/",
-      "\u2502   \u2502   \u251c\u2500\u2500 wallet-integration-Wallet--cb08b-te-MetaMask-connection-flow-firefox-retry1/",
-      "\u2502   \u2502   \u2514\u2500\u2500 wallet-integration-Wallet--cb08b-te-MetaMask-connection-flow-webkit-retry1/",
       "\u2502   \u251c\u2500\u2500 utils/ (5 files)",
       "\u2502   \u2502   \u2514\u2500\u2500 __tests__/ (1 files)",
       "\u2502   \u251c\u2500\u2500 package.json",
@@ -1220,8 +1116,8 @@
     "backend/tests/Unit/Workers": "Test files and test utilities"
   },
   "stats": {
-    "total_files": 249,
-    "total_directories": 1023,
+    "total_files": 248,
+    "total_directories": 759,
     "fully_parsed": {
       "javascript": 68,
       "typescript": 10,
@@ -1231,7 +1127,7 @@
       "json": 10,
       "shell": 1,
       "sql": 3,
-      "php": 85,
+      "php": 84,
       "html": 8,
       "vue": 45,
       "rs": 6,
@@ -1276,11 +1172,6 @@
     "backend/migrate.php": {
       "language": "php",
       "parsed": false
-    },
-    "backend/test_telegram_direct.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Test file"
     },
     "backend/composer.json": {
       "language": "json",
@@ -1442,31 +1333,31 @@
             "validateConfig": {
               "signature": "()",
               "called_by": [
+                "EventListener.constructor",
                 "fetchConfig",
                 "EventListener.__init__",
-                "EventListener.constructor",
                 "updateConfig"
               ]
             },
             "initializeDatabaseSafely": {
               "signature": "()",
               "called_by": [
-                "EventListener.__init__",
-                "EventListener.constructor"
+                "EventListener.constructor",
+                "EventListener.__init__"
               ]
             },
             "prepareDatabaseStatements": {
               "signature": "()",
               "called_by": [
-                "EventListener.__init__",
-                "EventListener.constructor"
+                "EventListener.constructor",
+                "EventListener.__init__"
               ]
             },
             "getLastProcessedBlock": {
               "signature": "()",
               "called_by": [
-                "EventListener.__init__",
-                "EventListener.constructor"
+                "EventListener.constructor",
+                "EventListener.__init__"
               ]
             },
             "start": {
@@ -2533,10 +2424,10 @@
             "info": {
               "signature": "(message, data = {})",
               "called_by": [
-                "analyzeNetworkTopology",
-                "performLoadTest",
+                "simulateDistributedTransactions",
                 "runDistributedSystemDemo",
-                "simulateDistributedTransactions"
+                "analyzeNetworkTopology",
+                "performLoadTest"
               ]
             },
             "warn": {
@@ -2548,29 +2439,29 @@
             "error": {
               "signature": "(message, error = null, data = {})",
               "called_by": [
-                "trackRequest",
+                "runDistributedSystemDemo",
+                "analyzeNetworkTopology",
                 "systemHealthCheck",
                 "simulateDistributedTransactions",
-                "analyzeNetworkTopology",
-                "runDistributedSystemDemo"
+                "trackRequest"
               ]
             },
             "critical": "(message, error = null, data = {})",
             "log": {
               "signature": "(level, message, data = {})",
               "called_by": [
-                "showHelp",
-                "generatePerformanceReport",
-                "trackRequest",
-                "systemHealthCheck",
-                "simulateDistributedTransactions",
-                "removeTarget",
-                "cleanGlobPattern",
-                "cleanup",
-                "log",
+                "runDistributedSystemDemo",
                 "analyzeNetworkTopology",
+                "cleanup",
+                "cleanGlobPattern",
+                "systemHealthCheck",
+                "removeTarget",
+                "log",
+                "simulateDistributedTransactions",
+                "generatePerformanceReport",
                 "performLoadTest",
-                "runDistributedSystemDemo"
+                "showHelp",
+                "trackRequest"
               ]
             },
             "logToConsole": "(level, entry)",
@@ -2592,10 +2483,10 @@
             "info": {
               "signature": "(message, data = {})",
               "called_by": [
-                "analyzeNetworkTopology",
-                "performLoadTest",
+                "simulateDistributedTransactions",
                 "runDistributedSystemDemo",
-                "simulateDistributedTransactions"
+                "analyzeNetworkTopology",
+                "performLoadTest"
               ]
             },
             "warn": {
@@ -2607,11 +2498,11 @@
             "error": {
               "signature": "(message, error = null, data = {})",
               "called_by": [
-                "trackRequest",
+                "runDistributedSystemDemo",
+                "analyzeNetworkTopology",
                 "systemHealthCheck",
                 "simulateDistributedTransactions",
-                "analyzeNetworkTopology",
-                "runDistributedSystemDemo"
+                "trackRequest"
               ]
             },
             "critical": "(message, error = null, data = {})",
@@ -4392,6 +4283,10 @@
     "ui/composables/useRealTimeTransactions.js": {
       "language": "javascript",
       "parsed": true,
+      "imports": [
+        "vue",
+        "./useIrohNetwork"
+      ],
       "functions": {
         "return": "()",
         "useRealTimeTransactions": "()",
@@ -5963,7 +5858,28 @@
     },
     "ui/config/appkit.js": {
       "language": "javascript",
-      "parsed": false
+      "parsed": true,
+      "imports": [
+        "@reown/appkit-adapter-wagmi",
+        "@reown/appkit-adapter-solana",
+        "@reown/appkit/networks"
+      ],
+      "functions": {
+        "getAppUrl": "()"
+      },
+      "classes": {},
+      "variables": [
+        "projectId",
+        "evmNetworks",
+        "solanaNetworks",
+        "networks",
+        "getAppUrl",
+        "metadata",
+        "wagmiAdapter",
+        "solanaAdapter",
+        "wagmiConfig"
+      ],
+      "call_graph": {}
     },
     "ui/config/walletConfig.js": {
       "language": "javascript",
@@ -24731,6 +24647,24 @@
       "language": "php",
       "parsed": false,
       "purpose": "Test file"
+    },
+    "ui/utils/toast.js": {
+      "language": "javascript",
+      "parsed": true,
+      "functions": {
+        "checkForToast": "()"
+      },
+      "classes": {},
+      "updated_by_hook": true,
+      "updated_at": "2025-08-20T23:25:06.179493"
+    },
+    "ui/plugins/0.toast-init.client.js": {
+      "language": "javascript",
+      "parsed": false,
+      "functions": {},
+      "classes": {},
+      "updated_by_hook": true,
+      "updated_at": "2025-08-20T23:27:05.429738"
     }
   },
   "dependency_graph": {
@@ -24818,6 +24752,10 @@
     "ui/composables/useSwapButtonState.js": [
       "vue"
     ],
+    "ui/composables/useRealTimeTransactions.js": [
+      "vue",
+      "ui/composables/useIrohNetwork.js"
+    ],
     "ui/composables/usePriceData.js": [
       "vue"
     ],
@@ -24860,7 +24798,12 @@
     ],
     "ui/config/solana.js": [
       "vue"
+    ],
+    "ui/config/appkit.js": [
+      "@reown/appkit-adapter-wagmi",
+      "@reown/appkit-adapter-solana",
+      "@reown/appkit/networks"
     ]
   },
-  "staleness_check": 1755119241.075996
+  "staleness_check": 1755148654.475598
 }

@@ -42,6 +42,7 @@
 <script setup>
 import { ref, onMounted, onErrorCaptured } from 'vue'
 import { useAutoWorker } from '~/composables/useAutoWorker.js'
+import { safeToast } from '~/utils/toast.js'
 
 // Global error state
 const globalError = ref(null)
@@ -106,17 +107,15 @@ onErrorCaptured((error, instance, info) => {
   
   // For non-critical errors, show toast notification
   console.warn('⚠️ Non-critical Vue error - showing toast')
-  if (toastManager.value) {
-    toastManager.value.error('A component error occurred. Some features may not work correctly.', {
-      title: 'Component Error',
-      autoTimeoutMs: 8000,
-      actions: [{
-        label: 'Refresh Page',
-        handler: () => window.location.reload(),
-        primary: true
-      }]
-    })
-  }
+  safeToast.error('A component error occurred. Some features may not work correctly.', {
+    title: 'Component Error',
+    autoTimeoutMs: 8000,
+    actions: [{
+      label: 'Refresh Page',
+      handler: () => window.location.reload(),
+      primary: true
+    }]
+  })
   
   return false
 })
@@ -153,16 +152,14 @@ onMounted(() => {
     } else if (isWalletError) {
       console.warn('🔒 WALLET ERROR - handled without critical dialog')
       // Don't show critical error for wallet issues
-      if (toastManager.value) {
-        toastManager.value.error('Wallet connection issue. Please try again.', {
-          title: 'Wallet Error',
-          autoTimeoutMs: 4000
-        })
-      }
-    } else if (toastManager.value) {
+      safeToast.error('Wallet connection issue. Please try again.', {
+        title: 'Wallet Error',
+        autoTimeoutMs: 4000
+      })
+    } else {
       console.warn('⚠️ OTHER ERROR - showing as toast')
       // Show as toast for other errors
-      toastManager.value.error('An unexpected error occurred.', {
+      safeToast.error('An unexpected error occurred.', {
         title: 'Application Error',
         autoTimeoutMs: 6000
       })
@@ -180,12 +177,10 @@ onMounted(() => {
       return
     }
     
-    if (toastManager.value) {
-      toastManager.value.error('A JavaScript error occurred.', {
-        title: 'Script Error',
-        autoTimeoutMs: 6000
-      })
-    }
+    safeToast.error('A JavaScript error occurred.', {
+      title: 'Script Error',
+      autoTimeoutMs: 6000
+    })
   })
   
   // Make toast manager globally available
