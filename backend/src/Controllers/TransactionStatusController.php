@@ -291,9 +291,15 @@ class TransactionStatusController
      */
     private function getEtherscanUrl(string $txHash, string $chain): string
     {
+        // For Ethereum chains, determine the correct network based on environment
+        $chainKey = strtolower($chain);
+        if (in_array($chainKey, ['ethereum', 'eth'])) {
+            // Check environment to determine mainnet vs testnet
+            $network = $_ENV['ETHEREUM_NETWORK'] ?? 'mainnet';
+            $chainKey = $network; // Use the actual network (sepolia, mainnet, etc.)
+        }
+
         $baseUrls = [
-            'ethereum' => 'https://etherscan.io/tx/',
-            'eth' => 'https://etherscan.io/tx/',
             'mainnet' => 'https://etherscan.io/tx/',
             'sepolia' => 'https://sepolia.etherscan.io/tx/',
             'goerli' => 'https://goerli.etherscan.io/tx/',
@@ -307,8 +313,7 @@ class TransactionStatusController
             'avax' => 'https://snowtrace.io/tx/'
         ];
 
-        $chainKey = strtolower($chain);
-        $baseUrl = $baseUrls[$chainKey] ?? $baseUrls['ethereum']; // Default to Ethereum
+        $baseUrl = $baseUrls[$chainKey] ?? $baseUrls['mainnet']; // Default to mainnet
 
         return $baseUrl . $txHash;
     }
