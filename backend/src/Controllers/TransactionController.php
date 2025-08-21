@@ -55,6 +55,10 @@ class TransactionController
 
             $transaction = Transaction::create($transactionData);
 
+            // Log successful creation for debugging
+            error_log("Transaction created successfully with ID: " . $swapId);
+            error_log("Database file: " . ($_ENV['DB_DATABASE'] ?? 'not set'));
+
             // Return success response
             $responseData = [
                 'status' => 'success',
@@ -68,7 +72,16 @@ class TransactionController
                 ->withHeader('Content-Type', 'application/json');
 
         } catch (\Exception $e) {
-            return $this->errorResponse($response, 500, 'Internal server error.');
+            // Log the actual error for debugging
+            error_log("TransactionController::initiateSwap Error: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            
+            // Return detailed error in development
+            $errorMessage = ($_ENV['APP_ENV'] ?? 'production') === 'development' 
+                ? 'Database error: ' . $e->getMessage()
+                : 'Internal server error.';
+                
+            return $this->errorResponse($response, 500, $errorMessage);
         }
     }
 
