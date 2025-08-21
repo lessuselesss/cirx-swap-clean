@@ -5,15 +5,27 @@ import { mainnet, arbitrum, sepolia, base, optimism, polygon, solana, solanaTest
 // Project ID from Reown Cloud
 export const projectId = '2585d3b6fd8a214ece0e26b344957169'
 
-// EVM networks for Wagmi adapter
-export const evmNetworks = [
-  mainnet,
-  sepolia, // Testnet
-  polygon,
-  arbitrum,
-  optimism,
-  base
-]
+// Environment-driven network configuration
+const isDevelopment = process.env.NODE_ENV === 'development' || process.env.NUXT_PUBLIC_TESTNET_MODE === 'true'
+
+// EVM networks for Wagmi adapter - prioritize based on environment
+export const evmNetworks = isDevelopment 
+  ? [
+      sepolia,  // Testnet first in development
+      mainnet,  // Mainnet available but not default
+      polygon,
+      arbitrum,
+      optimism, 
+      base
+    ]
+  : [
+      mainnet,  // Mainnet first in production
+      polygon,
+      arbitrum,
+      optimism,
+      base,
+      sepolia   // Testnet available but not default
+    ]
 
 // Solana networks
 export const solanaNetworks = [
