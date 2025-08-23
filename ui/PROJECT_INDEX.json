@@ -1,815 +1,46 @@
 {
-  "indexed_at": "2025-08-23T10:03:35.244198",
+  "indexed_at": "2025-08-23T07:39:23.315105",
   "root": ".",
   "project_structure": {
     "type": "tree",
     "root": ".",
     "tree": [
       ".",
-      "\u251c\u2500\u2500 _archive/",
-      "\u251c\u2500\u2500 backend/ (4730 files)",
-      "\u2502   \u251c\u2500\u2500 bin/ (2 files)",
-      "\u2502   \u251c\u2500\u2500 database/ (7 files)",
-      "\u2502   \u2502   \u2514\u2500\u2500 migrations/ (4 files)",
-      "\u2502   \u251c\u2500\u2500 public/ (2 files)",
-      "\u2502   \u251c\u2500\u2500 src/ (41 files)",
-      "\u2502   \u2502   \u251c\u2500\u2500 Blockchain/ (6 files)",
-      "\u2502   \u2502   \u2502   \u2514\u2500\u2500 Exceptions/ (1 files)",
-      "\u2502   \u2502   \u251c\u2500\u2500 Commands/ (1 files)",
-      "\u2502   \u2502   \u251c\u2500\u2500 Controllers/ (9 files)",
-      "\u2502   \u2502   \u251c\u2500\u2500 Exceptions/ (2 files)",
-      "\u2502   \u2502   \u251c\u2500\u2500 Middleware/ (4 files)",
-      "\u2502   \u2502   \u251c\u2500\u2500 Models/ (1 files)",
-      "\u2502   \u2502   \u251c\u2500\u2500 Services/ (11 files)",
-      "\u2502   \u2502   \u251c\u2500\u2500 Utils/ (3 files)",
-      "\u2502   \u2502   \u251c\u2500\u2500 Validators/ (1 files)",
-      "\u2502   \u2502   \u2514\u2500\u2500 Workers/ (3 files)",
-      "\u2502   \u251c\u2500\u2500 storage/ (1 files)",
-      "\u2502   \u2502   \u2514\u2500\u2500 logs/",
-      "\u2502   \u251c\u2500\u2500 tests/ (30 files)",
-      "\u2502   \u2502   \u251c\u2500\u2500 E2E/ (7 files)",
-      "\u2502   \u2502   \u251c\u2500\u2500 Integration/ (6 files)",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 API/ (1 files)",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 CircularProtocol/ (1 files)",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 Database/ (1 files)",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 Services/ (1 files)",
-      "\u2502   \u2502   \u2502   \u2514\u2500\u2500 Workers/ (1 files)",
-      "\u2502   \u2502   \u2514\u2500\u2500 Unit/ (15 files)",
-      "\u2502   \u2502       \u251c\u2500\u2500 Blockchain/ (1 files)",
-      "\u2502   \u2502       \u251c\u2500\u2500 CircularProtocol/ (1 files)",
-      "\u2502   \u2502       \u251c\u2500\u2500 Controllers/ (1 files)",
-      "\u2502   \u2502       \u251c\u2500\u2500 Middleware/ (4 files)",
-      "\u2502   \u2502       \u251c\u2500\u2500 Models/ (1 files)",
-      "\u2502   \u2502       \u251c\u2500\u2500 Services/ (5 files)",
-      "\u2502   \u2502       \u2514\u2500\u2500 Workers/ (2 files)",
-      "\u2502   \u251c\u2500\u2500 vendor/ (4638 files)",
-      "\u2502   \u2502   \u251c\u2500\u2500 bin/",
-      "\u2502   \u2502   \u251c\u2500\u2500 brick/ (16 files)",
-      "\u2502   \u2502   \u2502   \u2514\u2500\u2500 math/ (16 files)",
-      "\u2502   \u2502   \u2502       \u2514\u2500\u2500 src/ (15 files)",
-      "\u2502   \u2502   \u2502           \u251c\u2500\u2500 Exception/ (6 files)",
-      "\u2502   \u2502   \u2502           \u2514\u2500\u2500 Internal/ (4 files)",
-      "\u2502   \u2502   \u2502               \u2514\u2500\u2500 ...",
-      "\u2502   \u2502   \u251c\u2500\u2500 carbonphp/ (8 files)",
-      "\u2502   \u2502   \u2502   \u2514\u2500\u2500 carbon-doctrine-types/ (8 files)",
-      "\u2502   \u2502   \u2502       \u251c\u2500\u2500 src/ (7 files)",
-      "\u2502   \u2502   \u2502       \u2502   \u2514\u2500\u2500 Carbon/ (7 files)",
-      "\u2502   \u2502   \u2502       \u2502       \u2514\u2500\u2500 ...",
-      "\u2502   \u2502   \u2502       \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u251c\u2500\u2500 circular-protocol/ (2 files)",
-      "\u2502   \u2502   \u2502   \u2514\u2500\u2500 circular-protocol-api/ (2 files)",
-      "\u2502   \u2502   \u2502       \u251c\u2500\u2500 lib/ (1 files)",
-      "\u2502   \u2502   \u2502       \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u251c\u2500\u2500 composer/ (11 files)",
-      "\u2502   \u2502   \u251c\u2500\u2500 doctrine/ (50 files)",
-      "\u2502   \u2502   \u2502   \u2514\u2500\u2500 inflector/ (50 files)",
-      "\u2502   \u2502   \u2502       \u251c\u2500\u2500 docs/",
-      "\u2502   \u2502   \u2502       \u2502   \u2514\u2500\u2500 en/",
-      "\u2502   \u2502   \u2502       \u251c\u2500\u2500 src/ (49 files)",
-      "\u2502   \u2502   \u2502       \u2502   \u2514\u2500\u2500 Rules/ (40 files)",
-      "\u2502   \u2502   \u2502       \u2502       \u2514\u2500\u2500 ...",
-      "\u2502   \u2502   \u2502       \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u251c\u2500\u2500 fakerphp/ (511 files)",
-      "\u2502   \u2502   \u2502   \u2514\u2500\u2500 faker/ (511 files)",
-      "\u2502   \u2502   \u2502       \u251c\u2500\u2500 src/ (509 files)",
-      "\u2502   \u2502   \u2502       \u2502   \u2514\u2500\u2500 Faker/ (508 files)",
-      "\u2502   \u2502   \u2502       \u2502       \u2514\u2500\u2500 ...",
-      "\u2502   \u2502   \u2502       \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u251c\u2500\u2500 fig/ (3 files)",
-      "\u2502   \u2502   \u2502   \u2514\u2500\u2500 http-message-util/ (3 files)",
-      "\u2502   \u2502   \u2502       \u251c\u2500\u2500 src/ (2 files)",
-      "\u2502   \u2502   \u2502       \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u251c\u2500\u2500 firebase/ (9 files)",
-      "\u2502   \u2502   \u2502   \u2514\u2500\u2500 php-jwt/ (9 files)",
-      "\u2502   \u2502   \u2502       \u251c\u2500\u2500 src/ (8 files)",
-      "\u2502   \u2502   \u2502       \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u251c\u2500\u2500 graham-campbell/ (4 files)",
-      "\u2502   \u2502   \u2502   \u2514\u2500\u2500 result-type/ (4 files)",
-      "\u2502   \u2502   \u2502       \u2514\u2500\u2500 src/ (3 files)",
-      "\u2502   \u2502   \u251c\u2500\u2500 guzzlehttp/ (91 files)",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 guzzle/ (42 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 src/ (41 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Cookie/ (5 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Exception/ (9 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 Handler/ (9 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 promises/ (17 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 src/ (16 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502   \u2514\u2500\u2500 psr7/ (32 files)",
-      "\u2502   \u2502   \u2502       \u251c\u2500\u2500 src/ (31 files)",
-      "\u2502   \u2502   \u2502       \u2502   \u2514\u2500\u2500 Exception/ (1 files)",
-      "\u2502   \u2502   \u2502       \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u251c\u2500\u2500 hamcrest/ (79 files)",
-      "\u2502   \u2502   \u2502   \u2514\u2500\u2500 hamcrest-php/ (79 files)",
-      "\u2502   \u2502   \u2502       \u251c\u2500\u2500 generator/ (9 files)",
-      "\u2502   \u2502   \u2502       \u2502   \u2514\u2500\u2500 parts/",
-      "\u2502   \u2502   \u2502       \u251c\u2500\u2500 hamcrest/ (69 files)",
-      "\u2502   \u2502   \u2502       \u2502   \u2514\u2500\u2500 Hamcrest/ (68 files)",
-      "\u2502   \u2502   \u2502       \u2502       \u2514\u2500\u2500 ...",
-      "\u2502   \u2502   \u2502       \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u251c\u2500\u2500 illuminate/ (457 files)",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 collections/ (10 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 Traits/ (1 files)",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 conditionable/ (3 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 Traits/ (1 files)",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 container/ (7 files)",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 contracts/ (138 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Auth/ (13 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Access/ (2 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 Middleware/ (1 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Broadcasting/ (6 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Bus/ (2 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Cache/ (6 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Config/ (1 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Console/ (4 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Container/ (4 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Cookie/ (2 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Database/ (12 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Eloquent/ (7 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Events/ (1 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 Query/ (3 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Debug/ (1 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Encryption/ (4 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Events/ (3 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Filesystem/ (5 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Foundation/ (5 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Hashing/ (1 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Http/ (1 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Mail/ (5 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Notifications/ (2 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Pagination/ (3 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Pipeline/ (2 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Process/ (2 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Queue/ (14 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Redis/ (4 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Routing/ (5 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Session/ (2 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 Middleware/ (1 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Support/ (11 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Translation/ (3 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Validation/ (10 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 View/ (4 files)",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 database/ (207 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Capsule/ (1 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Concerns/ (5 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Connectors/ (7 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Console/ (23 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Factories/ (1 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 ...",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Migrations/ (10 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 Seeds/ (3 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502       \u2514\u2500\u2500 ...",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 DBAL/ (1 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Eloquent/ (71 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Attributes/ (2 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Casts/ (10 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Concerns/ (11 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Factories/ (7 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 Relations/ (21 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502       \u2514\u2500\u2500 ...",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Events/ (22 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Migrations/ (5 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 stubs/",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 PDO/ (7 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 Concerns/ (1 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Query/ (15 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Grammars/ (5 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 Processors/ (5 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Schema/ (21 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 Grammars/ (7 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 macroable/ (2 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 Traits/ (1 files)",
-      "\u2502   \u2502   \u2502   \u2514\u2500\u2500 support/ (90 files)",
-      "\u2502   \u2502   \u2502       \u251c\u2500\u2500 Exceptions/ (1 files)",
-      "\u2502   \u2502   \u2502       \u251c\u2500\u2500 Facades/ (40 files)",
-      "\u2502   \u2502   \u2502       \u251c\u2500\u2500 Testing/ (12 files)",
-      "\u2502   \u2502   \u2502       \u2502   \u2514\u2500\u2500 Fakes/ (12 files)",
-      "\u2502   \u2502   \u2502       \u2514\u2500\u2500 Traits/ (5 files)",
-      "\u2502   \u2502   \u251c\u2500\u2500 mockery/ (97 files)",
-      "\u2502   \u2502   \u2502   \u2514\u2500\u2500 mockery/ (97 files)",
-      "\u2502   \u2502   \u2502       \u251c\u2500\u2500 docs/ (1 files)",
-      "\u2502   \u2502   \u2502       \u2502   \u251c\u2500\u2500 _static/",
-      "\u2502   \u2502   \u2502       \u2502   \u251c\u2500\u2500 cookbook/",
-      "\u2502   \u2502   \u2502       \u2502   \u251c\u2500\u2500 getting_started/",
-      "\u2502   \u2502   \u2502       \u2502   \u251c\u2500\u2500 mockery/",
-      "\u2502   \u2502   \u2502       \u2502   \u251c\u2500\u2500 reference/",
-      "\u2502   \u2502   \u2502       \u2502   \u251c\u2500\u2500 Makefile",
-      "\u2502   \u2502   \u2502       \u2502   \u251c\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502       \u2502   \u2514\u2500\u2500 requirements.txt",
-      "\u2502   \u2502   \u2502       \u251c\u2500\u2500 library/ (94 files)",
-      "\u2502   \u2502   \u2502       \u2502   \u2514\u2500\u2500 Mockery/ (92 files)",
-      "\u2502   \u2502   \u2502       \u2502       \u2514\u2500\u2500 ...",
-      "\u2502   \u2502   \u2502       \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u251c\u2500\u2500 monolog/ (122 files)",
-      "\u2502   \u2502   \u2502   \u2514\u2500\u2500 monolog/ (122 files)",
-      "\u2502   \u2502   \u2502       \u251c\u2500\u2500 src/ (121 files)",
-      "\u2502   \u2502   \u2502       \u2502   \u2514\u2500\u2500 Monolog/ (121 files)",
-      "\u2502   \u2502   \u2502       \u2502       \u2514\u2500\u2500 ...",
-      "\u2502   \u2502   \u2502       \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u251c\u2500\u2500 myclabs/ (28 files)",
-      "\u2502   \u2502   \u2502   \u2514\u2500\u2500 deep-copy/ (28 files)",
-      "\u2502   \u2502   \u2502       \u251c\u2500\u2500 src/ (27 files)",
-      "\u2502   \u2502   \u2502       \u2502   \u2514\u2500\u2500 DeepCopy/ (27 files)",
-      "\u2502   \u2502   \u2502       \u2502       \u2514\u2500\u2500 ...",
-      "\u2502   \u2502   \u2502       \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u251c\u2500\u2500 nesbot/ (912 files)",
-      "\u2502   \u2502   \u2502   \u2514\u2500\u2500 carbon/ (912 files)",
-      "\u2502   \u2502   \u2502       \u251c\u2500\u2500 bin/",
-      "\u2502   \u2502   \u2502       \u251c\u2500\u2500 lazy/ (8 files)",
-      "\u2502   \u2502   \u2502       \u2502   \u2514\u2500\u2500 Carbon/ (8 files)",
-      "\u2502   \u2502   \u2502       \u2502       \u2514\u2500\u2500 ...",
-      "\u2502   \u2502   \u2502       \u2514\u2500\u2500 src/ (901 files)",
-      "\u2502   \u2502   \u2502           \u2514\u2500\u2500 Carbon/ (901 files)",
-      "\u2502   \u2502   \u2502               \u2514\u2500\u2500 ...",
-      "\u2502   \u2502   \u251c\u2500\u2500 nikic/ (302 files)",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 fast-route/ (32 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 src/ (19 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 DataGenerator/ (5 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Dispatcher/ (5 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 RouteParser/ (1 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 test/ (12 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Dispatcher/ (5 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 HackTypechecker/ (4 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 ...",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 RouteParser/ (1 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502   \u2514\u2500\u2500 php-parser/ (270 files)",
-      "\u2502   \u2502   \u2502       \u251c\u2500\u2500 bin/",
-      "\u2502   \u2502   \u2502       \u251c\u2500\u2500 lib/ (269 files)",
-      "\u2502   \u2502   \u2502       \u2502   \u2514\u2500\u2500 PhpParser/ (269 files)",
-      "\u2502   \u2502   \u2502       \u2502       \u2514\u2500\u2500 ...",
-      "\u2502   \u2502   \u2502       \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u251c\u2500\u2500 phar-io/ (76 files)",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 manifest/ (54 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 src/ (51 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 exceptions/ (11 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 values/ (21 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 xml/ (16 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 tools/ (1 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 php-cs-fixer.d/ (1 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502   \u2514\u2500\u2500 version/ (22 files)",
-      "\u2502   \u2502   \u2502       \u251c\u2500\u2500 src/ (21 files)",
-      "\u2502   \u2502   \u2502       \u2502   \u251c\u2500\u2500 constraints/ (9 files)",
-      "\u2502   \u2502   \u2502       \u2502   \u2514\u2500\u2500 exceptions/ (6 files)",
-      "\u2502   \u2502   \u2502       \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u251c\u2500\u2500 phpoption/ (5 files)",
-      "\u2502   \u2502   \u2502   \u2514\u2500\u2500 phpoption/ (5 files)",
-      "\u2502   \u2502   \u2502       \u2514\u2500\u2500 src/ (4 files)",
-      "\u2502   \u2502   \u2502           \u2514\u2500\u2500 PhpOption/ (4 files)",
-      "\u2502   \u2502   \u251c\u2500\u2500 phpunit/ (1009 files)",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 php-code-coverage/ (93 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 src/ (92 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Data/ (2 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Driver/ (4 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Exception/ (20 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Node/ (6 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Report/ (37 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 ...",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 StaticAnalysis/ (7 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 TestSize/ (6 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 TestStatus/ (5 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 Util/ (2 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 php-file-iterator/ (5 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 src/ (4 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 php-invoker/ (5 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 src/ (4 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 exceptions/ (3 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 php-text-template/ (5 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 src/ (4 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 exceptions/ (3 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 php-timer/ (7 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 src/ (6 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 exceptions/ (3 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502   \u2514\u2500\u2500 phpunit/ (894 files)",
-      "\u2502   \u2502   \u2502       \u251c\u2500\u2500 schema/",
-      "\u2502   \u2502   \u2502       \u251c\u2500\u2500 src/ (893 files)",
-      "\u2502   \u2502   \u2502       \u2502   \u251c\u2500\u2500 Event/ (226 files)",
-      "\u2502   \u2502   \u2502       \u2502   \u2502   \u2514\u2500\u2500 ...",
-      "\u2502   \u2502   \u2502       \u2502   \u251c\u2500\u2500 Framework/ (239 files)",
-      "\u2502   \u2502   \u2502       \u2502   \u2502   \u2514\u2500\u2500 ...",
-      "\u2502   \u2502   \u2502       \u2502   \u251c\u2500\u2500 Logging/ (54 files)",
-      "\u2502   \u2502   \u2502       \u2502   \u2502   \u2514\u2500\u2500 ...",
-      "\u2502   \u2502   \u2502       \u2502   \u251c\u2500\u2500 Metadata/ (70 files)",
-      "\u2502   \u2502   \u2502       \u2502   \u2502   \u2514\u2500\u2500 ...",
-      "\u2502   \u2502   \u2502       \u2502   \u251c\u2500\u2500 Runner/ (94 files)",
-      "\u2502   \u2502   \u2502       \u2502   \u2502   \u2514\u2500\u2500 ...",
-      "\u2502   \u2502   \u2502       \u2502   \u251c\u2500\u2500 TextUI/ (185 files)",
-      "\u2502   \u2502   \u2502       \u2502   \u2502   \u2514\u2500\u2500 ...",
-      "\u2502   \u2502   \u2502       \u2502   \u2514\u2500\u2500 Util/ (24 files)",
-      "\u2502   \u2502   \u2502       \u2502       \u2514\u2500\u2500 ...",
-      "\u2502   \u2502   \u2502       \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u251c\u2500\u2500 psr/ (43 files)",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 clock/ (2 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 src/ (1 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 container/ (4 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 src/ (3 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 http-client/ (5 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 src/ (4 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 http-factory/ (7 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 src/ (6 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 http-message/ (8 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 docs/",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 src/ (7 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 http-server-handler/ (2 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 src/ (1 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 http-server-middleware/ (2 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 src/ (1 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 log/ (9 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 src/ (8 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502   \u2514\u2500\u2500 simple-cache/ (4 files)",
-      "\u2502   \u2502   \u2502       \u251c\u2500\u2500 src/ (3 files)",
-      "\u2502   \u2502   \u2502       \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u251c\u2500\u2500 ralouphie/ (2 files)",
-      "\u2502   \u2502   \u2502   \u2514\u2500\u2500 getallheaders/ (2 files)",
-      "\u2502   \u2502   \u2502       \u251c\u2500\u2500 src/ (1 files)",
-      "\u2502   \u2502   \u2502       \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u251c\u2500\u2500 ramsey/ (145 files)",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 collection/ (31 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 src/ (30 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Exception/ (7 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Map/ (7 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 Tool/ (3 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502   \u2514\u2500\u2500 uuid/ (114 files)",
-      "\u2502   \u2502   \u2502       \u251c\u2500\u2500 src/ (113 files)",
-      "\u2502   \u2502   \u2502       \u2502   \u251c\u2500\u2500 Builder/ (5 files)",
-      "\u2502   \u2502   \u2502       \u2502   \u251c\u2500\u2500 Codec/ (6 files)",
-      "\u2502   \u2502   \u2502       \u2502   \u251c\u2500\u2500 Converter/ (10 files)",
-      "\u2502   \u2502   \u2502       \u2502   \u2502   \u2514\u2500\u2500 ...",
-      "\u2502   \u2502   \u2502       \u2502   \u251c\u2500\u2500 Exception/ (13 files)",
-      "\u2502   \u2502   \u2502       \u2502   \u251c\u2500\u2500 Fields/ (2 files)",
-      "\u2502   \u2502   \u2502       \u2502   \u251c\u2500\u2500 Generator/ (17 files)",
-      "\u2502   \u2502   \u2502       \u2502   \u251c\u2500\u2500 Guid/ (3 files)",
-      "\u2502   \u2502   \u2502       \u2502   \u251c\u2500\u2500 Lazy/ (1 files)",
-      "\u2502   \u2502   \u2502       \u2502   \u251c\u2500\u2500 Math/ (3 files)",
-      "\u2502   \u2502   \u2502       \u2502   \u251c\u2500\u2500 Nonstandard/ (4 files)",
-      "\u2502   \u2502   \u2502       \u2502   \u251c\u2500\u2500 Provider/ (11 files)",
-      "\u2502   \u2502   \u2502       \u2502   \u2502   \u2514\u2500\u2500 ...",
-      "\u2502   \u2502   \u2502       \u2502   \u251c\u2500\u2500 Rfc4122/ (20 files)",
-      "\u2502   \u2502   \u2502       \u2502   \u251c\u2500\u2500 Type/ (6 files)",
-      "\u2502   \u2502   \u2502       \u2502   \u2514\u2500\u2500 Validator/ (2 files)",
-      "\u2502   \u2502   \u2502       \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u251c\u2500\u2500 sebastian/ (120 files)",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 cli-parser/ (7 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 src/ (6 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 exceptions/ (5 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 code-unit/ (17 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 src/ (16 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 exceptions/ (4 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 code-unit-reverse-lookup/ (2 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 src/ (1 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 comparator/ (17 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 src/ (16 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 exceptions/ (2 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 complexity/ (9 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 src/ (8 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Complexity/ (3 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Exception/ (2 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 Visitor/ (2 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 diff/ (17 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 src/ (16 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Exception/ (3 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 Output/ (5 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 environment/ (3 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 src/ (2 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 exporter/ (2 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 src/ (1 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 global-state/ (7 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 src/ (6 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 exceptions/ (2 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 lines-of-code/ (8 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 src/ (7 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 Exception/ (4 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 object-enumerator/ (2 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 src/ (1 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 object-reflector/ (2 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 src/ (1 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 recursion-context/ (2 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 src/ (1 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 type/ (23 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 src/ (21 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 exception/ (2 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 type/ (16 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502   \u2514\u2500\u2500 version/ (2 files)",
-      "\u2502   \u2502   \u2502       \u251c\u2500\u2500 src/ (1 files)",
-      "\u2502   \u2502   \u2502       \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u251c\u2500\u2500 simplito/ (39 files)",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 bigint-wrapper-php/ (6 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 lib/ (1 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 test/ (4 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 bn-php/ (3 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 lib/ (2 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502   \u2514\u2500\u2500 elliptic-php/ (30 files)",
-      "\u2502   \u2502   \u2502       \u251c\u2500\u2500 benchmarks/ (1 files)",
-      "\u2502   \u2502   \u2502       \u251c\u2500\u2500 lib/ (19 files)",
-      "\u2502   \u2502   \u2502       \u2502   \u251c\u2500\u2500 Curve/ (10 files)",
-      "\u2502   \u2502   \u2502       \u2502   \u2502   \u2514\u2500\u2500 ...",
-      "\u2502   \u2502   \u2502       \u2502   \u251c\u2500\u2500 EC/ (2 files)",
-      "\u2502   \u2502   \u2502       \u2502   \u2514\u2500\u2500 EdDSA/ (2 files)",
-      "\u2502   \u2502   \u2502       \u251c\u2500\u2500 tests/ (8 files)",
-      "\u2502   \u2502   \u2502       \u2502   \u2514\u2500\u2500 fixtures/ (1 files)",
-      "\u2502   \u2502   \u2502       \u251c\u2500\u2500 Makefile",
-      "\u2502   \u2502   \u2502       \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u251c\u2500\u2500 slim/ (121 files)",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 psr7/ (48 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 src/ (18 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Factory/ (6 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 Interfaces/ (1 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 tests/ (29 files)",
-      "\u2502   \u2502   \u2502   \u2502       \u251c\u2500\u2500 Assets/ (1 files)",
-      "\u2502   \u2502   \u2502   \u2502       \u251c\u2500\u2500 Factory/ (6 files)",
-      "\u2502   \u2502   \u2502   \u2502       \u251c\u2500\u2500 Integration/ (7 files)",
-      "\u2502   \u2502   \u2502   \u2502       \u2514\u2500\u2500 Mocks/ (1 files)",
-      "\u2502   \u2502   \u2502   \u2514\u2500\u2500 slim/ (73 files)",
-      "\u2502   \u2502   \u2502       \u2514\u2500\u2500 Slim/ (72 files)",
-      "\u2502   \u2502   \u2502           \u251c\u2500\u2500 Error/ (5 files)",
-      "\u2502   \u2502   \u2502           \u2502   \u2514\u2500\u2500 ...",
-      "\u2502   \u2502   \u2502           \u251c\u2500\u2500 Exception/ (11 files)",
-      "\u2502   \u2502   \u2502           \u251c\u2500\u2500 Factory/ (12 files)",
-      "\u2502   \u2502   \u2502           \u2502   \u2514\u2500\u2500 ...",
-      "\u2502   \u2502   \u2502           \u251c\u2500\u2500 Handlers/ (5 files)",
-      "\u2502   \u2502   \u2502           \u2502   \u2514\u2500\u2500 ...",
-      "\u2502   \u2502   \u2502           \u251c\u2500\u2500 Interfaces/ (17 files)",
-      "\u2502   \u2502   \u2502           \u251c\u2500\u2500 Middleware/ (6 files)",
-      "\u2502   \u2502   \u2502           \u2514\u2500\u2500 Routing/ (11 files)",
-      "\u2502   \u2502   \u251c\u2500\u2500 symfony/ (129 files)",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 deprecation-contracts/ (2 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 polyfill-ctype/ (4 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 polyfill-mbstring/ (8 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Resources/ (4 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 unidata/ (4 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 polyfill-php80/ (9 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Resources/ (5 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 stubs/ (5 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502   \u251c\u2500\u2500 translation/ (100 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Catalogue/ (4 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Command/ (4 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 DataCollector/ (1 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 DependencyInjection/ (6 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Dumper/ (12 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Exception/ (11 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Extractor/ (10 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 Visitor/ (4 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Formatter/ (4 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Loader/ (14 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Provider/ (9 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Reader/ (2 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Resources/ (3 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 bin/ (1 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 data/ (1 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 schemas/",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Test/ (2 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Util/ (2 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500 Writer/ (2 files)",
-      "\u2502   \u2502   \u2502   \u2502   \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u2502   \u2514\u2500\u2500 translation-contracts/ (6 files)",
-      "\u2502   \u2502   \u2502       \u251c\u2500\u2500 Test/ (1 files)",
-      "\u2502   \u2502   \u2502       \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u251c\u2500\u2500 theseer/ (9 files)",
-      "\u2502   \u2502   \u2502   \u2514\u2500\u2500 tokenizer/ (9 files)",
-      "\u2502   \u2502   \u2502       \u251c\u2500\u2500 src/ (8 files)",
-      "\u2502   \u2502   \u2502       \u2514\u2500\u2500 README.md",
-      "\u2502   \u2502   \u251c\u2500\u2500 vlucas/ (42 files)",
-      "\u2502   \u2502   \u2502   \u2514\u2500\u2500 phpdotenv/ (42 files)",
-      "\u2502   \u2502   \u2502       \u2514\u2500\u2500 src/ (41 files)",
-      "\u2502   \u2502   \u2502           \u251c\u2500\u2500 Exception/ (5 files)",
-      "\u2502   \u2502   \u2502           \u251c\u2500\u2500 Loader/ (3 files)",
-      "\u2502   \u2502   \u2502           \u251c\u2500\u2500 Parser/ (7 files)",
-      "\u2502   \u2502   \u2502           \u251c\u2500\u2500 Repository/ (16 files)",
-      "\u2502   \u2502   \u2502           \u2502   \u2514\u2500\u2500 ...",
-      "\u2502   \u2502   \u2502           \u251c\u2500\u2500 Store/ (6 files)",
-      "\u2502   \u2502   \u2502           \u2502   \u2514\u2500\u2500 ...",
-      "\u2502   \u2502   \u2502           \u2514\u2500\u2500 Util/ (2 files)",
-      "\u2502   \u2502   \u2514\u2500\u2500 voku/ (195 files)",
-      "\u2502   \u2502       \u2514\u2500\u2500 portable-ascii/ (195 files)",
-      "\u2502   \u2502           \u251c\u2500\u2500 src/ (194 files)",
-      "\u2502   \u2502           \u2502   \u2514\u2500\u2500 voku/ (194 files)",
-      "\u2502   \u2502           \u2502       \u2514\u2500\u2500 ...",
-      "\u2502   \u2502           \u2514\u2500\u2500 README.md",
-      "\u2502   \u2514\u2500\u2500 README.md",
-      "\u251c\u2500\u2500 iroh-bridge/ (592 files)",
-      "\u2502   \u251c\u2500\u2500 config/",
-      "\u2502   \u251c\u2500\u2500 src/ (6 files)",
-      "\u2502   \u2514\u2500\u2500 Cargo.toml",
-      "\u251c\u2500\u2500 scripts/ (10 files)",
-      "\u251c\u2500\u2500 test/ (3 files)",
-      "\u251c\u2500\u2500 ui/ (81230 files)",
-      "\u2502   \u251c\u2500\u2500 assets/ (1 files)",
-      "\u2502   \u2502   \u2514\u2500\u2500 css/ (1 files)",
-      "\u2502   \u251c\u2500\u2500 components/ (27 files)",
-      "\u2502   \u2502   \u2514\u2500\u2500 __tests__/ (2 files)",
-      "\u2502   \u251c\u2500\u2500 composables/ (22 files)",
-      "\u2502   \u251c\u2500\u2500 config/ (4 files)",
-      "\u2502   \u251c\u2500\u2500 e2e/ (6 files)",
-      "\u2502   \u251c\u2500\u2500 layouts/ (1 files)",
-      "\u2502   \u251c\u2500\u2500 pages/ (22 files)",
-      "\u2502   \u2502   \u2514\u2500\u2500 debug/ (15 files)",
-      "\u2502   \u2502       \u2514\u2500\u2500 scripts/ (2 files)",
-      "\u2502   \u251c\u2500\u2500 playwright-report/ (14 files)",
-      "\u2502   \u2502   \u2514\u2500\u2500 trace/ (13 files)",
-      "\u2502   \u2502       \u2514\u2500\u2500 assets/ (2 files)",
-      "\u2502   \u251c\u2500\u2500 plugins/ (4 files)",
-      "\u2502   \u251c\u2500\u2500 public/ (2 files)",
-      "\u2502   \u2502   \u251c\u2500\u2500 icons/",
-      "\u2502   \u2502   \u2502   \u2514\u2500\u2500 wallets/",
-      "\u2502   \u2502   \u251c\u2500\u2500 images/",
-      "\u2502   \u2502   \u2502   \u2514\u2500\u2500 logo/",
-      "\u2502   \u2502   \u2502       \u251c\u2500\u2500 PNG/",
-      "\u2502   \u2502   \u2502       \u2514\u2500\u2500 SVG/",
-      "\u2502   \u2502   \u2514\u2500\u2500 swap/ (1 files)",
-      "\u2502   \u251c\u2500\u2500 scripts/ (1 files)",
-      "\u2502   \u251c\u2500\u2500 services/ (2 files)",
-      "\u2502   \u251c\u2500\u2500 stores/ (2 files)",
-      "\u2502   \u251c\u2500\u2500 test/ (1 files)",
-      "\u2502   \u251c\u2500\u2500 utils/ (6 files)",
-      "\u2502   \u2502   \u2514\u2500\u2500 __tests__/ (1 files)",
-      "\u2502   \u251c\u2500\u2500 package.json",
-      "\u2502   \u2514\u2500\u2500 README.md",
+      "\u251c\u2500\u2500 assets/ (1 files)",
+      "\u2502   \u2514\u2500\u2500 css/ (1 files)",
+      "\u251c\u2500\u2500 components/ (27 files)",
+      "\u2502   \u2514\u2500\u2500 __tests__/ (2 files)",
+      "\u251c\u2500\u2500 composables/ (22 files)",
+      "\u251c\u2500\u2500 config/ (4 files)",
+      "\u251c\u2500\u2500 e2e/ (6 files)",
+      "\u251c\u2500\u2500 layouts/ (1 files)",
+      "\u251c\u2500\u2500 pages/ (22 files)",
+      "\u2502   \u2514\u2500\u2500 debug/ (15 files)",
+      "\u2502       \u2514\u2500\u2500 scripts/ (2 files)",
+      "\u251c\u2500\u2500 playwright-report/ (14 files)",
+      "\u2502   \u2514\u2500\u2500 trace/ (13 files)",
+      "\u2502       \u2514\u2500\u2500 assets/ (2 files)",
+      "\u251c\u2500\u2500 plugins/ (4 files)",
+      "\u251c\u2500\u2500 public/ (2 files)",
+      "\u2502   \u251c\u2500\u2500 icons/",
+      "\u2502   \u2502   \u2514\u2500\u2500 wallets/",
+      "\u2502   \u251c\u2500\u2500 images/",
+      "\u2502   \u2502   \u2514\u2500\u2500 logo/",
+      "\u2502   \u2502       \u251c\u2500\u2500 PNG/",
+      "\u2502   \u2502       \u2514\u2500\u2500 SVG/",
+      "\u2502   \u2514\u2500\u2500 swap/ (1 files)",
+      "\u251c\u2500\u2500 scripts/ (1 files)",
+      "\u251c\u2500\u2500 services/ (2 files)",
+      "\u251c\u2500\u2500 stores/ (2 files)",
+      "\u251c\u2500\u2500 test/ (1 files)",
+      "\u251c\u2500\u2500 utils/ (6 files)",
+      "\u2502   \u2514\u2500\u2500 __tests__/ (1 files)",
       "\u251c\u2500\u2500 package.json",
       "\u2514\u2500\u2500 README.md"
     ]
   },
   "documentation_map": {
-    "DEBUG_NOTES.md": {
-      "sections": [
-        "CIRX Swap Debug Notes",
-        "\ud83c\udfaf CURRENT STATUS: Ready to Test Transaction Flow",
-        "\u2705 COMPLETED FIXES",
-        "\ud83d\udd27 READY TO TEST: Backend API Integration",
-        "\ud83d\udd0d KEY DEBUG LOCATIONS",
-        "\ud83c\udfae TEST WORKFLOW",
-        "\ud83d\udea8 CRITICAL FIXES MADE",
-        "Button Element Fix",
-        "canPurchase Logic Fix  ",
-        "Focus Fix"
-      ],
-      "architecture_hints": []
-    },
-    "cloudflare-config-guide.md": {
-      "sections": [
-        "Cloudflare Frontend \u2192 Local Backend Setup Guide",
-        "Quick Setup Instructions",
-        "1. Start Your Local Services",
-        "Terminal 1: Start enhanced IROH bridge",
-        "Terminal 2: Start PHP backend  ",
-        "Terminal 3: Expose via tunnel",
-        "2. Update Cloudflare Pages Environment Variables",
-        "3. Redeploy Cloudflare Pages",
-        "Alternative: Deploy Backend to Cloud",
-        "CORS Configuration Updated"
-      ],
-      "architecture_hints": []
-    },
-    "SECURITY_AUDIT_REPORT.md": {
-      "sections": [
-        "Circular CIRX OTC Trading Platform - Security Audit Report",
-        "Executive Summary",
-        "Overall Risk Assessment: **MEDIUM** \ud83d\udfe1",
-        "Key Findings Summary:",
-        "Compliance Assessment:",
-        "Detailed Security Findings",
-        "\ud83d\udd34 HIGH SEVERITY FINDINGS",
-        "Line 66: Production private key in environment"
-      ],
-      "architecture_hints": []
-    },
     "README.md": {
-      "sections": [
-        "CIRX Swap Platform",
-        "\ud83d\ude80 Quick Start",
-        "Prerequisites",
-        "Development Setup",
-        "\ud83e\uddea E2E Testing Quick Start",
-        "Run all tests (frontend + backend + integration)",
-        "Run only frontend tests",
-        "Run only backend tests  ",
-        "Run with detailed logs",
-        "Frontend E2E tests"
-      ],
-      "architecture_hints": []
-    },
-    "REFACTORING_AUDIT_REPORT.md": {
-      "sections": [
-        "Circular CIRX OTC Trading Platform - Refactoring Audit Report",
-        "Executive Summary",
-        "Key Findings Overview",
-        "Refactoring Priorities (ROI-based)",
-        "Critical Priority Issues (Immediate Action Required)",
-        "1. Monolithic Component Architecture - `/ui/pages/swap.vue` (2700 lines)",
-        "2. Complex Blockchain Transaction Logic - `/backend/src/Blockchain/CirxBlockchainClient.php` (679 lines)",
-        "3. Frontend State Management Complexity - `/ui/stores/wallet.js` (578 lines)"
-      ],
-      "architecture_hints": [
-        "//"
-      ]
-    },
-    "CLAUDE.md": {
-      "sections": [
-        "CLAUDE.md",
-        "Project Overview",
-        "\u2705 RECENT PROGRESS SUMMARY (2025-08-04)",
-        "**Critical Wallet Connection Issues RESOLVED**",
-        "**Current System Status**",
-        "**What's Working**",
-        "**Next Steps for Development**",
-        "**Files Modified in This Session**",
-        "**Technical Debt Addressed**",
-        "Technology Stack"
-      ],
-      "architecture_hints": []
-    },
-    "README.E2E.md": {
-      "sections": [
-        "E2E Testing Guide for CIRX Swap Platform",
-        "Overview",
-        "Architecture",
-        "Testing Layers",
-        "Components",
-        "Quick Start",
-        "Prerequisites",
-        "Basic Test Execution",
-        "Run all E2E tests",
-        "Run only backend tests"
-      ],
-      "architecture_hints": [
-        "backend/tests/E2E/",
-        "ui/e2e/"
-      ]
-    },
-    "CLEANUP_NOTES.md": {
-      "sections": [
-        "Cleanup Notes",
-        "Leftover Foundry Files (Not Currently Used)",
-        "Files to Consider Removing:",
-        "Keep These Files:",
-        "Current Architecture",
-        "If You Want to Remove Foundry Files:",
-        "Remove Foundry configuration",
-        "Remove Solidity contracts and tests (keep JS debug files)",
-        "Or remove entire directories if empty after cleanup",
-        "(but keep test/*.js files)"
-      ],
-      "architecture_hints": []
-    },
-    "backend/BLOCKCHAIN_INTEGRATION.md": {
-      "sections": [
-        "CIRX OTC Backend - Blockchain Integration",
-        "Overview",
-        "Architecture",
-        "Blockchain Client Layer",
-        "Components",
-        "1. BlockchainClientInterface",
-        "2. AbstractBlockchainClient",
-        "3. EthereumBlockchainClient",
-        "4. CirxBlockchainClient",
-        "5. BlockchainClientFactory"
-      ],
-      "architecture_hints": []
-    },
-    "backend/LAUNCH_GUIDE.md": {
-      "sections": [
-        "\ud83d\ude80 CIRX Backend Launch Guide - Complete Deployment",
-        "\ud83d\udccb Pre-Launch Checklist",
-        "\u2705 Core System Status",
-        "\ud83d\udd27 Quick Launch (5 Minutes)",
-        "1. **Environment Setup**",
-        "Clone and enter project",
-        "Enter Nix development environment",
-        "Install dependencies (if needed)",
-        "Setup environment",
-        "2. **Configure Environment** "
-      ],
-      "architecture_hints": []
-    },
-    "backend/MONITORING.md": {
-      "sections": [
-        "CIRX Transaction Monitoring",
-        "Problem Statement",
-        "Root Cause Analysis",
-        "Monitoring Solution",
-        "1. Transaction Monitoring Service",
-        "2. Monitoring Endpoints",
-        "3. CLI Monitoring Command",
-        "Basic monitoring check",
-        "JSON output for integrations",
-        "Show only alerts"
-      ],
-      "architecture_hints": []
-    },
-    "backend/ENVIRONMENT_SETUP.md": {
-      "sections": [
-        "Environment Configuration Guide",
-        "Overview",
-        "Environment File Structure",
-        "Streamlined Configuration System:",
-        "Inheritance Model:",
-        "Quick Setup for Development",
-        "Security Guidelines",
-        "\u2705 DO:",
-        "\u274c DON'T:",
-        "Environment Variables Reference"
-      ],
-      "architecture_hints": []
-    },
-    "backend/TODO.md": {
-      "sections": [
-        "CIRX OTC Backend TODO",
-        "\u2705 Completed",
-        "\ud83d\udccb Pending (High Priority)",
-        "\ud83d\udccb Pending (Medium Priority)",
-        "\ud83d\udccb Pending (Lower Priority)",
-        "Current Status: **~95% Complete**"
-      ],
-      "architecture_hints": []
-    },
-    "backend/architecture.md": {
-      "sections": [
-        "**Proposed PHP & MySQL Backend Architecture**"
-      ],
-      "architecture_hints": []
-    },
-    "backend/README.md": {
-      "sections": [
-        "\ud83c\udf7e CIRX OTC Backend API - **TRANSACTION BREAKTHROUGH SUCCESS!**",
-        "\ud83d\ude80 Quick Start",
-        "Prerequisites",
-        "Start Development Server",
-        "Enter Nix development environment",
-        "Start the backend server",
-        "Server available at http://localhost:8080",
-        "Test CIRX Transfer (\ud83c\udfaf WORKING!)",
-        "\ud83c\udfc6 Breakthrough Technical Solution",
-        "Working Transaction Parameters"
-      ],
-      "architecture_hints": []
-    },
-    "backend/TELEGRAM_SETUP.md": {
-      "sections": [
-        "Telegram Error Notifications Setup Guide",
-        "Overview",
-        "Quick Setup (5 minutes)",
-        "1. Create Telegram Bot",
-        "2. Get Chat ID",
-        "3. Configure Environment Variables",
-        "Telegram Bot Configuration for Error Notifications",
-        "4. Test the Setup",
-        "Error Priority Levels",
-        "\ud83d\udd25 Critical Errors (Always sent, never silent)"
-      ],
-      "architecture_hints": []
-    },
-    "backend/IMPLEMENTATION_PLAN.md": {
-      "sections": [
-        "CIRX OTC Backend Implementation Plan",
-        "Project Overview",
-        "Architecture Summary",
-        "Implementation Strategy: TDD Approach",
-        "Phase 1: Foundation Setup",
-        "Phase 2: Database Layer (TDD)",
-        "Phase 3: API Endpoints (TDD)",
-        "Phase 4: Blockchain Integration (TDD)",
-        "Phase 5: Background Processing (TDD)",
-        "Technology Stack"
-      ],
-      "architecture_hints": []
-    },
-    "ui/README.md": {
       "sections": [
         "Circular CIRX OTC Platform - Frontend",
         "Features",
@@ -823,311 +54,53 @@
         "3. Development Server"
       ],
       "architecture_hints": []
-    },
-    ".github/workflows/PRs/Pull-Request-List.md": {
-      "sections": [
-        "Instructions",
-        "\ud83d\udd34 PR 0: Fix Test Infrastructure (Unskipped Tests)",
-        "\ud83d\udd34 PR 1: CI/CD Test Execution (GitHub Actions)",
-        "\ud83d\udfe0 PR 2: Runtime Config & Hardcoded Values",
-        "\ud83d\udfe0 PR 3: Lock Down Admin Endpoints"
-      ],
-      "architecture_hints": [
-        "ui/test-results/junit.xml"
-      ]
-    },
-    "_archive/.md/MIGRATION_GUIDE.md": {
-      "sections": [
-        "Migration Guide: From Custom Wallets to Reown AppKit",
-        "\u2705 **Migration Complete**",
-        "**What Changed**",
-        "**Before (Old System)**",
-        "**After (Reown AppKit)**",
-        "**Files Replaced**",
-        "**Deprecated (Can be removed)**",
-        "**New Files Added**",
-        "**API Changes**",
-        "**Old API (Custom)**"
-      ],
-      "architecture_hints": []
-    },
-    "_archive/.md/INTEGRATION_COMPLETE.md": {
-      "sections": [
-        "\u2705 Frontend-Backend Integration Complete",
-        "\ud83c\udfaf **Mission Accomplished**",
-        "\ud83d\ude80 **New User Flow**",
-        "**Complete Wallet-to-Wallet Transaction Flow:**",
-        "\ud83d\udd27 **Technical Implementation**",
-        "**Frontend Enhancements:**",
-        "**Key Features Implemented:**",
-        "\ud83d\udccb **Environment Configuration Ready**",
-        "**Frontend (.env.local)**",
-        "Backend API"
-      ],
-      "architecture_hints": []
-    },
-    "_archive/.md/STARTUP_GUIDE.md": {
-      "sections": [
-        "\ud83d\ude80 CIRX OTC Platform - Complete Startup Guide",
-        "\ud83d\udccb Prerequisites",
-        "Quick Install Commands",
-        "Install Foundry",
-        "Verify installations",
-        "\ud83c\udfd7\ufe0f Project Architecture",
-        "\ud83d\udd04 Complete Setup Process",
-        "Step 1: Smart Contracts & Local Blockchain",
-        "1. Start local blockchain (keep this running)",
-        "This runs on http://localhost:8545 with funded test accounts"
-      ],
-      "architecture_hints": []
-    },
-    "_archive/.md/CONSOLE_CHECK_GUIDE.md": {
-      "sections": [
-        "Console Debugging Guide - CIRX Swap App",
-        "Current Status",
-        "Debugging Steps Performed",
-        "1. Automated Browser Tools",
-        "2. Static Analysis Completed",
-        "3. Component Structure Analysis",
-        "Manual Testing Required",
-        "Step 1: Open Browser Console",
-        "Step 2: Look for These Error Patterns",
-        "Step 3: Test Wallet Connection Flow"
-      ],
-      "architecture_hints": []
-    },
-    "_archive/.md/TRADINGVIEW_INTEGRATION.md": {
-      "sections": [
-        "TradingView Charting Library Integration",
-        "\u2705 **Integration Complete**",
-        "**What Was Implemented**",
-        "**1. TradingView Charting Library (Full Version)**",
-        "**2. Components Created**",
-        "**3. Custom Datafeed Implementation**",
-        "**4. Plugin System**",
-        "**Files Structure**",
-        "**Integration Points**",
-        "**Swap Page Integration**"
-      ],
-      "architecture_hints": []
-    },
-    "_archive/.md/Circular_CIRX_OTC_Purchase_Form.md": {
-      "sections": [
-        "**Circular CIRX OTC Purchase Form** **Product Requirements Document (PRD)**",
-        "**Don\u2019t need to connect their Circular wallet \\- just paste the wallet address.**",
-        "**1\\. Purpose**",
-        "**2\\. Background & Rationale**",
-        "**3\\. Goals & Objectives**",
-        "**4\\. Scope**",
-        "**5\\. User Stories**",
-        "**6\\. Functional Requirements**"
-      ],
-      "architecture_hints": []
-    },
-    "_archive/.md/wallet-debugging-record.md": {
-      "sections": [
-        "Wallet Integration Debugging Record",
-        "Problem Summary",
-        "Root Causes Identified",
-        "1. **Timeout Layering Issue** (Primary)",
-        "2. **MetaMask Auto-Initialization Errors** (Secondary)",
-        "3. **Dynamic Import State Loss** (Previously Fixed)",
-        "Debugging Process",
-        "Phase 1: Brand Assets Replacement",
-        "Phase 2: Connection Failure Investigation",
-        "Phase 3: Retry Logic Implementation"
-      ],
-      "architecture_hints": []
-    },
-    "_archive/.md/TRADINGVIEW_DEBUG_GUIDE.md": {
-      "sections": [
-        "TradingView Chart Debug Guide",
-        "Quick Debug Checklist",
-        "1. Check Library Loading",
-        "2. Check Container Element",
-        "3. Check Console Logs",
-        "4. Network Tab Verification",
-        "Systematic Debugging Steps",
-        "Step 1: Library Loading Issues",
-        "Step 2: Container Element Issues",
-        "Step 3: Datafeed Debugging"
-      ],
-      "architecture_hints": []
-    },
-    "_archive/.md/project_state_20250728.md": {
-      "sections": [
-        "Project State Summary (as of 2025-07-28)",
-        "Overall Status",
-        "Feature Implementation Checklist",
-        "Next Steps & Recommendations"
-      ],
-      "architecture_hints": []
-    },
-    "_archive/.md/CLAUDE-OPEN.md": {
-      "sections": [
-        "Gemini CLI: Best Practices for Effective Collaboration",
-        "Project Context: Go API Alignment",
-        "Task Management",
-        "File Handling and Reading",
-        "File Editing"
-      ],
-      "architecture_hints": []
-    },
-    "_archive/.md/MANUAL_TEST_GUIDE copy.md": {
-      "sections": [
-        "Manual Testing Guide - Wallet Connection Debug",
-        "Quick Test Commands",
-        "1. Environment Check",
-        "2. Wallet Provider Detection",
-        "3. Vue/Nuxt App State",
-        "4. Component Registration Check",
-        "5. Wallet Store Debug",
-        "6. Event Listener Test",
-        "Test Scenarios",
-        "Scenario 1: Page Load"
-      ],
-      "architecture_hints": []
-    },
-    "_archive/.md/audit-2025-08-08-web3-security.md": {
-      "sections": [
-        "Web3 Security Audit Report",
-        "Executive Summary",
-        "Overall Security Posture: MODERATE (72/100)",
-        "Risk Distribution",
-        "Key Strengths",
-        "Critical Findings (0)",
-        "High Severity Findings (3)",
-        "H-1: Missing CSRF Protection and Security Headers",
-        "H-2: Price Oracle Centralization Risk",
-        "H-3: RPC Endpoint Exposure"
-      ],
-      "architecture_hints": []
-    },
-    "_archive/.md/REOWN_IMPLEMENTATION.md": {
-      "sections": [
-        "Reown AppKit Implementation Guide",
-        "Overview",
-        "Project ID",
-        "Packages Installed",
-        "Architecture",
-        "1. Configuration (`config/appkit.js`)",
-        "2. Plugins",
-        "3. Components",
-        "4. Store",
-        "Features Enabled"
-      ],
-      "architecture_hints": []
-    },
-    "_archive/.md/MANUAL_TEST_GUIDE.md": {
-      "sections": [
-        "CIRX Logo Visibility Fix - Manual Testing Guide",
-        "Issue Summary",
-        "Quick Fix Verification",
-        "Advanced Debugging (if needed)",
-        "What to Look For",
-        "\u2705 SUCCESS Indicators:",
-        "\u274c FAILURE Indicators:",
-        "Manual Step-by-Step Test",
-        "Step 1: Check Initial State",
-        "Step 2: Switch to OTC Tab"
-      ],
-      "architecture_hints": []
-    },
-    "_archive/.md/SIMPLE_STARTUP_GUIDE.md": {
-      "sections": [
-        "\ud83d\ude80 CIRX OTC Platform - Simple Startup Guide",
-        "\ud83c\udfd7\ufe0f Simple Architecture",
-        "\ud83d\udccb Prerequisites",
-        "\ud83d\ude80 Quick Start (3 Services Only!)",
-        "Step 1: Configure Project Wallet",
-        "Step 2: Start Indexer Service",
-        "Install dependencies",
-        "Configure for real blockchain",
-        "Use real Ethereum mainnet or testnet",
-        "Or for testing: https://sepolia.infura.io/v3/YOUR_INFURA_KEY"
-      ],
-      "architecture_hints": []
-    },
-    "_archive/.md/SETUP_GUIDE.md": {
-      "sections": [
-        "CIRX OTC Platform Setup Guide",
-        "Overview",
-        "Environment Variables Needed",
-        "Frontend Configuration (ui/.env.local)",
-        "Backend API Configuration",
-        "Deposit Wallet Addresses (CRITICAL - Replace with real addresses)",
-        "WalletConnect Configuration",
-        "Backend Configuration (backend/.env)",
-        "CIRX Hot Wallet (CRITICAL - Replace with real credentials)",
-        "Blockchain RPC Endpoints (for payment verification)"
-      ],
-      "architecture_hints": []
     }
   },
   "directory_purposes": {
-    "backend": "Test files and test utilities",
-    "ui": "Test files and test utilities",
+    "utils": "Shared utility functions and helpers",
+    "e2e": "Test files and test utilities",
+    "services": "Business logic and external service integrations",
+    "components": "Reusable UI components",
     "test": "Test files and test utilities",
     "scripts": "Build and utility scripts",
-    "backend/tests": "Test files and test utilities",
-    "backend/public": "Publicly accessible files",
-    "backend/bin": "Test files and test utilities",
-    "_archive/.md": "Test files and test utilities",
-    "ui/utils": "Shared utility functions and helpers",
-    "ui/e2e": "Test files and test utilities",
-    "ui/services": "Business logic and external service integrations",
-    "ui/components": "Reusable UI components",
-    "ui/test": "Test files and test utilities",
-    "ui/scripts": "Build and utility scripts",
-    "ui/public": "Publicly accessible files",
-    "ui/config": "Configuration files and settings",
-    "iroh-bridge/src": "Source code root directory",
-    "ui/utils/__tests__": "Test files and test utilities",
-    "ui/components/__tests__": "Test files and test utilities",
-    "ui/pages/debug": "Test files and test utilities",
-    "ui/pages/debug/scripts": "Build and utility scripts",
-    "backend/tests/Integration": "Test files and test utilities",
-    "backend/tests/E2E": "Test files and test utilities",
-    "backend/database/migrations": "Database migration files",
-    "backend/src/Middleware": "Middleware functions and handlers",
-    "backend/src/Utils": "Shared utility functions and helpers",
-    "backend/src/Controllers": "Request handlers and business logic",
-    "backend/src/Models": "Data models and database schemas",
-    "backend/src/Services": "Business logic and external service integrations",
-    "backend/tests/Integration/API": "API endpoints and route handlers",
-    "backend/tests/Integration/CircularProtocol": "Test files and test utilities",
-    "backend/tests/Integration/Database": "Test files and test utilities",
-    "backend/tests/Integration/Services": "Business logic and external service integrations",
-    "backend/tests/Integration/Workers": "Test files and test utilities",
-    "backend/tests/Unit/Middleware": "Middleware functions and handlers",
-    "backend/tests/Unit/Blockchain": "Test files and test utilities",
-    "backend/tests/Unit/CircularProtocol": "Test files and test utilities",
-    "backend/tests/Unit/Controllers": "Request handlers and business logic",
-    "backend/tests/Unit/Models": "Data models and database schemas",
-    "backend/tests/Unit/Services": "Business logic and external service integrations",
-    "backend/tests/Unit/Workers": "Test files and test utilities"
+    "public": "Publicly accessible files",
+    "config": "Configuration files and settings",
+    "utils/__tests__": "Test files and test utilities",
+    "components/__tests__": "Test files and test utilities",
+    "pages/debug": "Test files and test utilities",
+    "pages/debug/scripts": "Build and utility scripts"
   },
   "stats": {
-    "total_files": 241,
-    "total_directories": 763,
+    "total_files": 127,
+    "total_directories": 36,
     "fully_parsed": {
-      "javascript": 61,
       "typescript": 10,
-      "shell": 7
+      "javascript": 53
     },
     "listed_only": {
-      "json": 10,
-      "shell": 1,
-      "php": 85,
-      "html": 8,
+      "json": 6,
+      "html": 7,
       "vue": 45,
-      "rs": 6,
-      "css": 6,
-      "sql": 2
+      "css": 6
     },
-    "markdown_files": 35
+    "markdown_files": 1
   },
   "files": {
+    "tsconfig.json": {
+      "language": "json",
+      "parsed": false,
+      "purpose": "Configuration"
+    },
+    "test-api.html": {
+      "language": "html",
+      "parsed": false,
+      "purpose": "Test file"
+    },
+    "playwright.config.ts": {
+      "language": "typescript",
+      "parsed": false,
+      "purpose": "Configuration"
+    },
     "package.json": {
       "language": "json",
       "parsed": false
@@ -1136,116 +109,17 @@
       "language": "json",
       "parsed": false
     },
-    "build.sh": {
-      "language": "shell",
-      "parsed": false
-    },
-    "backend/debug.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/monitoring-check.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/test_telegram.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Test file"
-    },
-    "backend/migrate.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/composer.json": {
-      "language": "json",
-      "parsed": false
-    },
-    "backend/debug-server.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/test-api.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Test file"
-    },
-    "backend/test-auto-worker.js": {
-      "language": "javascript",
-      "parsed": true,
-      "purpose": "Test file",
-      "functions": {
-        "testWorkerEndpoint": {
-          "signature": "async (endpoint, method = 'GET')",
-          "called_by": [
-            "runTest"
-          ]
-        },
-        "runTest": {
-          "calls": [
-            "testWorkerEndpoint"
-          ],
-          "signature": "async ()"
-        }
-      },
-      "classes": {},
-      "constants": {
-        "API_BASE": "str"
-      },
-      "variables": [
-        "response",
-        "data",
-        "health",
-        "stats",
-        "pv",
-        "ct",
-        "process",
-        "payment",
-        "cirx",
-        "i",
-        "result",
-        "total"
-      ],
-      "call_graph": {}
-    },
-    "backend/worker.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "ui/tsconfig.json": {
-      "language": "json",
-      "parsed": false,
-      "purpose": "Configuration"
-    },
-    "ui/test-api.html": {
-      "language": "html",
-      "parsed": false,
-      "purpose": "Test file"
-    },
-    "ui/playwright.config.ts": {
-      "language": "typescript",
-      "parsed": false,
-      "purpose": "Configuration"
-    },
-    "ui/package.json": {
-      "language": "json",
-      "parsed": false
-    },
-    "ui/PROJECT_INDEX.json": {
-      "language": "json",
-      "parsed": false
-    },
-    "ui/app.vue": {
+    "app.vue": {
       "language": "vue",
       "parsed": false,
       "purpose": "Application entry point"
     },
-    "ui/vitest.config.ts": {
+    "vitest.config.ts": {
       "language": "typescript",
       "parsed": false,
       "purpose": "Test file"
     },
-    "ui/check-console.js": {
+    "check-console.js": {
       "language": "javascript",
       "parsed": true,
       "imports": [
@@ -1269,760 +143,26 @@
       ],
       "call_graph": {}
     },
-    "ui/_routes.json": {
+    "_routes.json": {
       "language": "json",
       "parsed": false,
       "purpose": "Route definitions"
     },
-    "ui/nuxt.config.ts": {
+    "nuxt.config.ts": {
       "language": "typescript",
       "parsed": false,
       "purpose": "Configuration"
     },
-    "ui/tailwind.config.js": {
+    "tailwind.config.js": {
       "language": "javascript",
       "parsed": false,
       "purpose": "Configuration"
     },
-    "ui/package-lock.json": {
+    "package-lock.json": {
       "language": "json",
       "parsed": false
     },
-    "test/debug-console.js": {
-      "language": "javascript",
-      "parsed": false
-    },
-    "test/check-console.js": {
-      "language": "javascript",
-      "parsed": true,
-      "imports": [
-        "child_process",
-        "child_process"
-      ],
-      "functions": {
-        "captureConsole": {
-          "signature": "async ()",
-          "called_by": [
-            "main"
-          ]
-        },
-        "checkDebugCommands": {
-          "signature": "async ()",
-          "called_by": [
-            "main"
-          ]
-        },
-        "main": {
-          "calls": [
-            "captureConsole",
-            "checkDebugCommands"
-          ],
-          "signature": "async ()"
-        }
-      },
-      "classes": {},
-      "variables": [
-        "chromiumArgs",
-        "chromium",
-        "stdout",
-        "stderr",
-        "lines",
-        "relevantLines",
-        "curl",
-        "output"
-      ],
-      "call_graph": {}
-    },
-    "test/console-capture.js": {
-      "language": "javascript",
-      "parsed": true,
-      "imports": [
-        "fs",
-        "child_process"
-      ],
-      "functions": {
-        "captureConsoleLogs": {
-          "signature": "async ()",
-          "called_by": [
-            "main"
-          ]
-        },
-        "main": {
-          "calls": [
-            "captureConsoleLogs"
-          ],
-          "signature": "async ()"
-        }
-      },
-      "classes": {},
-      "variables": [
-        "consoleScript",
-        "originalLog",
-        "originalError",
-        "originalWarn",
-        "originalInfo",
-        "output",
-        "chromiumArgs",
-        "chromium",
-        "stdout",
-        "stderr",
-        "logMatch",
-        "capturedData",
-        "icon"
-      ],
-      "call_graph": {}
-    },
-    "scripts/start-iroh-dev.sh": {
-      "language": "shell",
-      "parsed": true,
-      "functions": {
-        "command_exists": {
-          "doc": "Function to check if command exists",
-          "signature": "()"
-        },
-        "cleanup": {
-          "doc": "Function to cleanup on exit",
-          "signature": "()",
-          "called_by": [
-            "monitorTransaction",
-            "hardReset"
-          ]
-        }
-      },
-      "variables": [
-        "IROH_PID",
-        "BACKEND_PID",
-        "FRONTEND_PID"
-      ],
-      "exports": {
-        "IROH_ENABLED": "value",
-        "IROH_BRIDGE_URL": "value",
-        "NUXT_PUBLIC_IROH_ENABLED": "value",
-        "NUXT_PUBLIC_IROH_BRIDGE_URL": "value"
-      },
-      "call_graph": {}
-    },
-    "scripts/expose-local-backend.sh": {
-      "language": "shell",
-      "parsed": true,
-      "functions": {
-        "cleanup": {
-          "doc": "Cleanup function",
-          "signature": "()",
-          "called_by": [
-            "monitorTransaction",
-            "hardReset"
-          ]
-        }
-      },
-      "variables": [
-        "NGROK_BACKEND_PID",
-        "NGROK_IROH_PID",
-        "BACKEND_URL",
-        "IROH_URL",
-        "CF_BACKEND_PID",
-        "CF_IROH_PID"
-      ],
-      "call_graph": {}
-    },
-    "scripts/run-e2e-tests.sh": {
-      "language": "shell",
-      "parsed": true,
-      "purpose": "Test file",
-      "functions": {
-        "log": {
-          "doc": "Functions",
-          "signature": "()",
-          "called_by": [
-            "log",
-            "trackRequest",
-            "systemHealthCheck",
-            "analyzeNetworkTopology",
-            "simulateDistributedTransactions",
-            "performLoadTest",
-            "generatePerformanceReport",
-            "runDistributedSystemDemo",
-            "log",
-            "removeTarget",
-            "cleanGlobPattern",
-            "cleanup",
-            "showHelp"
-          ]
-        },
-        "success": {
-          "signature": "()",
-          "called_by": [
-            "systemHealthCheck",
-            "analyzeNetworkTopology",
-            "simulateDistributedTransactions",
-            "performLoadTest",
-            "runDistributedSystemDemo"
-          ]
-        },
-        "warning": "()",
-        "error": {
-          "signature": "()",
-          "called_by": [
-            "trackRequest",
-            "systemHealthCheck",
-            "analyzeNetworkTopology",
-            "simulateDistributedTransactions",
-            "runDistributedSystemDemo"
-          ]
-        },
-        "cleanup": {
-          "doc": "Cleanup function",
-          "signature": "()",
-          "called_by": [
-            "monitorTransaction",
-            "hardReset"
-          ]
-        },
-        "check_prerequisites": {
-          "doc": "Check prerequisites",
-          "signature": "()"
-        },
-        "wait_for_service": {
-          "doc": "Wait for service to be healthy",
-          "signature": "()"
-        },
-        "start_environment": {
-          "doc": "Start E2E environment",
-          "signature": "()"
-        },
-        "run_backend_tests": {
-          "doc": "Run backend E2E tests",
-          "signature": "()"
-        },
-        "run_frontend_tests": {
-          "doc": "Run frontend E2E tests",
-          "signature": "()"
-        },
-        "generate_reports": {
-          "doc": "Generate test reports",
-          "signature": "()"
-        },
-        "show_logs": {
-          "doc": "Show service logs",
-          "signature": "()"
-        },
-        "main": {
-          "doc": "Main execution",
-          "signature": "()"
-        }
-      },
-      "variables": [
-        "RED",
-        "GREEN",
-        "YELLOW",
-        "BLUE",
-        "NC",
-        "COMPOSE_FILE",
-        "BACKEND_HEALTH_URL",
-        "FRONTEND_HEALTH_URL",
-        "TIMEOUT"
-      ],
-      "exports": {
-        "E2E_TEST_SEED_PHRASE": "str"
-      },
-      "call_graph": {}
-    },
-    "scripts/mock-iroh-bridge.js": {
-      "language": "javascript",
-      "parsed": true,
-      "imports": [
-        "http",
-        "url"
-      ],
-      "functions": {
-        "jsonResponse": {
-          "signature": "(res, statusCode, data)",
-          "called_by": [
-            "handleRequest"
-          ]
-        },
-        "handleRequest": {
-          "calls": [
-            "jsonResponse"
-          ],
-          "signature": "(req, res)"
-        }
-      },
-      "classes": {},
-      "constants": {
-        "PORT": "number"
-      },
-      "variables": [
-        "http",
-        "url",
-        "mockNodeId",
-        "mockServices",
-        "parsedUrl",
-        "path",
-        "method",
-        "body",
-        "data",
-        "serviceName",
-        "maxResults",
-        "results",
-        "newService",
-        "server"
-      ],
-      "call_graph": {}
-    },
-    "scripts/test-iroh-transaction.js": {
-      "language": "javascript",
-      "parsed": true,
-      "purpose": "Test file",
-      "functions": {
-        "makeRequest": {
-          "signature": "async (url, options = {})",
-          "called_by": [
-            "createTransaction",
-            "broadcastTransactionUpdate",
-            "checkTransactionStatus",
-            "monitorNetworkActivity"
-          ]
-        },
-        "createTransaction": {
-          "calls": [
-            "makeRequest"
-          ],
-          "signature": "async ()",
-          "called_by": [
-            "runTest"
-          ]
-        },
-        "broadcastTransactionUpdate": {
-          "calls": [
-            "makeRequest"
-          ],
-          "signature": "async (transactionId, status)",
-          "called_by": [
-            "runTest"
-          ]
-        },
-        "checkTransactionStatus": {
-          "calls": [
-            "makeRequest"
-          ],
-          "signature": "async (transactionId)",
-          "called_by": [
-            "runTest"
-          ]
-        },
-        "monitorNetworkActivity": {
-          "calls": [
-            "makeRequest"
-          ],
-          "signature": "async ()",
-          "called_by": [
-            "runTest"
-          ]
-        },
-        "runTest": {
-          "calls": [
-            "broadcastTransactionUpdate",
-            "checkTransactionStatus",
-            "createTransaction",
-            "monitorNetworkActivity"
-          ],
-          "signature": "async ()"
-        }
-      },
-      "classes": {},
-      "constants": {
-        "BACKEND_URL": "str",
-        "IROH_BRIDGE_URL": "str"
-      },
-      "variables": [
-        "response",
-        "txData",
-        "updateData",
-        "irohStatus",
-        "services",
-        "nodeInfo",
-        "transactionId",
-        "mockTxId",
-        "statuses"
-      ],
-      "call_graph": {}
-    },
-    "scripts/distributed-system-demo.js": {
-      "language": "javascript",
-      "parsed": true,
-      "functions": {
-        "log": {
-          "calls": [
-            "log"
-          ],
-          "signature": "(color, prefix, message)",
-          "called_by": [
-            "log",
-            "trackRequest",
-            "systemHealthCheck",
-            "analyzeNetworkTopology",
-            "simulateDistributedTransactions",
-            "performLoadTest",
-            "generatePerformanceReport",
-            "runDistributedSystemDemo",
-            "log",
-            "removeTarget",
-            "cleanGlobPattern",
-            "cleanup",
-            "showHelp"
-          ]
-        },
-        "success": {
-          "signature": "(msg)",
-          "called_by": [
-            "systemHealthCheck",
-            "analyzeNetworkTopology",
-            "simulateDistributedTransactions",
-            "performLoadTest",
-            "runDistributedSystemDemo"
-          ]
-        },
-        "error": {
-          "signature": "(msg)",
-          "called_by": [
-            "trackRequest",
-            "systemHealthCheck",
-            "analyzeNetworkTopology",
-            "simulateDistributedTransactions",
-            "runDistributedSystemDemo"
-          ]
-        },
-        "info": {
-          "signature": "(msg)",
-          "called_by": [
-            "analyzeNetworkTopology",
-            "simulateDistributedTransactions",
-            "performLoadTest",
-            "runDistributedSystemDemo"
-          ]
-        },
-        "warn": {
-          "signature": "(msg)",
-          "called_by": [
-            "systemHealthCheck"
-          ]
-        },
-        "trackRequest": {
-          "calls": [
-            "error",
-            "log"
-          ],
-          "signature": "async (name, requestFn)",
-          "called_by": [
-            "systemHealthCheck",
-            "analyzeNetworkTopology",
-            "simulateDistributedTransactions",
-            "performLoadTest"
-          ]
-        },
-        "systemHealthCheck": {
-          "calls": [
-            "error",
-            "log",
-            "success",
-            "trackRequest",
-            "warn"
-          ],
-          "signature": "async ()",
-          "called_by": [
-            "runDistributedSystemDemo"
-          ]
-        },
-        "analyzeNetworkTopology": {
-          "calls": [
-            "error",
-            "info",
-            "log",
-            "success",
-            "trackRequest"
-          ],
-          "signature": "async ()",
-          "called_by": [
-            "runDistributedSystemDemo"
-          ]
-        },
-        "simulateDistributedTransactions": {
-          "calls": [
-            "error",
-            "info",
-            "log",
-            "success",
-            "trackRequest"
-          ],
-          "signature": "async ()",
-          "called_by": [
-            "runDistributedSystemDemo"
-          ]
-        },
-        "performLoadTest": {
-          "calls": [
-            "info",
-            "log",
-            "success",
-            "trackRequest"
-          ],
-          "signature": "async ()",
-          "called_by": [
-            "runDistributedSystemDemo"
-          ]
-        },
-        "generatePerformanceReport": {
-          "calls": [
-            "log"
-          ],
-          "signature": "()",
-          "called_by": [
-            "runDistributedSystemDemo"
-          ]
-        },
-        "runDistributedSystemDemo": {
-          "calls": [
-            "analyzeNetworkTopology",
-            "error",
-            "generatePerformanceReport",
-            "info",
-            "log",
-            "performLoadTest",
-            "simulateDistributedTransactions",
-            "success",
-            "systemHealthCheck"
-          ],
-          "signature": "async ()"
-        }
-      },
-      "classes": {},
-      "constants": {
-        "BACKEND_URL": "str",
-        "IROH_BRIDGE_URL": "str",
-        "FRONTEND_URL": "str"
-      },
-      "variables": [
-        "colors",
-        "log",
-        "success",
-        "error",
-        "info",
-        "warn",
-        "performance",
-        "trackRequest",
-        "start",
-        "result",
-        "duration",
-        "totalLatency",
-        "systemHealthCheck",
-        "services",
-        "healthResults",
-        "response",
-        "analyzeNetworkTopology",
-        "nodeInfo",
-        "metrics",
-        "discovery",
-        "avgLatency",
-        "totalBandwidth",
-        "simulateDistributedTransactions",
-        "transactions",
-        "statuses",
-        "transactionPromises",
-        "statusIndex",
-        "status",
-        "startTime",
-        "completedTransactions",
-        "performLoadTest",
-        "concurrentRequests",
-        "requests",
-        "i",
-        "results",
-        "successfulResults",
-        "successRate",
-        "generatePerformanceReport",
-        "totalTime",
-        "sortedLatencies",
-        "p95",
-        "p99",
-        "grade",
-        "runDistributedSystemDemo",
-        "networkTopology",
-        "loadTestResults"
-      ],
-      "call_graph": {}
-    },
-    "scripts/deploy-backend-cloud.sh": {
-      "language": "shell",
-      "parsed": true,
-      "functions": {
-        "deploy_to_railway": {
-          "doc": "Check for deployment options",
-          "signature": "()"
-        },
-        "deploy_to_render": "()",
-        "deploy_to_heroku": "()",
-        "deploy_to_digitalocean": "()"
-      },
-      "call_graph": {}
-    },
-    "scripts/enhanced-iroh-bridge.js": {
-      "language": "javascript",
-      "parsed": true,
-      "imports": [
-        "http",
-        "url"
-      ],
-      "functions": {
-        "jsonResponse": {
-          "signature": "(res, statusCode, data)",
-          "called_by": [
-            "handleRequest"
-          ]
-        },
-        "handleRequest": "(req, res)",
-        "setupWebSocket": "()",
-        "handleWebSocketMessage": "(ws, data)",
-        "broadcastToWebSockets": {
-          "signature": "(message)",
-          "called_by": [
-            "simulateNetworkActivity"
-          ]
-        },
-        "simulateNetworkActivity": {
-          "calls": [
-            "broadcastToWebSockets"
-          ],
-          "signature": "()"
-        }
-      },
-      "classes": {},
-      "constants": {
-        "PORT": "number",
-        "WS_PORT": "number"
-      },
-      "variables": [
-        "http",
-        "url",
-        "mockNodeId",
-        "connectedPeers",
-        "subscribedTopics",
-        "messageHistory",
-        "performanceMetrics",
-        "wsServer",
-        "wsClients",
-        "mockServices",
-        "i",
-        "peerId",
-        "setupWebSocket",
-        "handleWebSocketMessage",
-        "broadcastToWebSockets",
-        "response",
-        "responseStr",
-        "simulateNetworkActivity",
-        "transactionUpdate",
-        "parsedUrl",
-        "path",
-        "method",
-        "body",
-        "data",
-        "serviceName",
-        "maxResults",
-        "results",
-        "newService",
-        "server"
-      ],
-      "call_graph": {}
-    },
-    "scripts/multi-node-test.sh": {
-      "language": "shell",
-      "parsed": true,
-      "purpose": "Test file",
-      "functions": {
-        "start_node": {
-          "doc": "Function to start a node in background",
-          "signature": "()"
-        },
-        "test_connectivity": {
-          "doc": "Function to test node connectivity",
-          "signature": "()"
-        },
-        "test_inter_node_communication": {
-          "doc": "Function to simulate inter-node communication",
-          "signature": "()"
-        },
-        "cleanup": {
-          "doc": "Function to cleanup",
-          "signature": "()",
-          "called_by": [
-            "monitorTransaction",
-            "hardReset"
-          ]
-        },
-        "main": {
-          "doc": "Main execution",
-          "signature": "()"
-        }
-      },
-      "call_graph": {}
-    },
-    "scripts/test-iroh.sh": {
-      "language": "shell",
-      "parsed": true,
-      "purpose": "Test file",
-      "functions": {
-        "check_service": {
-          "doc": "Function to check if a service is running",
-          "signature": "()"
-        },
-        "test_endpoint": {
-          "doc": "Function to test API endpoint",
-          "signature": "()"
-        },
-        "test_json_endpoint": {
-          "doc": "Function to test JSON response",
-          "signature": "()"
-        }
-      },
-      "variables": [
-        "RED",
-        "GREEN",
-        "YELLOW",
-        "BLUE",
-        "NC",
-        "IROH_BRIDGE_URL",
-        "BACKEND_URL",
-        "FRONTEND_URL"
-      ],
-      "call_graph": {}
-    },
-    "iroh-bridge/src/service_registry.rs": {
-      "language": "rs",
-      "parsed": false
-    },
-    "iroh-bridge/src/iroh_client.rs": {
-      "language": "rs",
-      "parsed": false
-    },
-    "iroh-bridge/src/http_bridge.rs": {
-      "language": "rs",
-      "parsed": false
-    },
-    "iroh-bridge/src/config.rs": {
-      "language": "rs",
-      "parsed": false,
-      "purpose": "Configuration"
-    },
-    "iroh-bridge/src/main.rs": {
-      "language": "rs",
-      "parsed": false,
-      "purpose": "Application entry point"
-    },
-    "iroh-bridge/src/error.rs": {
-      "language": "rs",
-      "parsed": false
-    },
-    "ui/utils/extensionDetection.js": {
+    "utils/extensionDetection.js": {
       "language": "javascript",
       "parsed": true,
       "functions": {
@@ -2083,7 +223,7 @@
       ],
       "call_graph": {}
     },
-    "ui/utils/formatting.js": {
+    "utils/formatting.js": {
       "language": "javascript",
       "parsed": true,
       "functions": {
@@ -2135,7 +275,7 @@
       ],
       "call_graph": {}
     },
-    "ui/utils/toast.js": {
+    "utils/toast.js": {
       "language": "javascript",
       "parsed": true,
       "functions": {
@@ -2149,7 +289,7 @@
       ],
       "call_graph": {}
     },
-    "ui/utils/addressFormatting.js": {
+    "utils/addressFormatting.js": {
       "language": "javascript",
       "parsed": true,
       "functions": {
@@ -2203,7 +343,7 @@
       ],
       "call_graph": {}
     },
-    "ui/utils/validation.js": {
+    "utils/validation.js": {
       "language": "javascript",
       "parsed": true,
       "imports": [
@@ -2231,32 +371,32 @@
       ],
       "call_graph": {}
     },
-    "ui/e2e/wallet-integration.spec.ts": {
+    "e2e/wallet-integration.spec.ts": {
       "language": "typescript",
       "parsed": false,
       "purpose": "Test file"
     },
-    "ui/e2e/performance.spec.ts": {
+    "e2e/performance.spec.ts": {
       "language": "typescript",
       "parsed": false,
       "purpose": "Test file"
     },
-    "ui/e2e/error-scenarios.spec.ts": {
+    "e2e/error-scenarios.spec.ts": {
       "language": "typescript",
       "parsed": false,
       "purpose": "Test file"
     },
-    "ui/e2e/frontend-backend-integration.spec.ts": {
+    "e2e/frontend-backend-integration.spec.ts": {
       "language": "typescript",
       "parsed": false,
       "purpose": "Test file"
     },
-    "ui/e2e/app.spec.ts": {
+    "e2e/app.spec.ts": {
       "language": "typescript",
       "parsed": false,
       "purpose": "Test file"
     },
-    "ui/e2e/swap-flow.spec.ts": {
+    "e2e/swap-flow.spec.ts": {
       "language": "typescript",
       "parsed": true,
       "purpose": "Test file",
@@ -2294,7 +434,7 @@
       ],
       "call_graph": {}
     },
-    "ui/services/tokenService.js": {
+    "services/tokenService.js": {
       "language": "javascript",
       "parsed": true,
       "functions": {
@@ -2373,7 +513,7 @@
       ],
       "call_graph": {}
     },
-    "ui/services/priceService.js": {
+    "services/priceService.js": {
       "language": "javascript",
       "parsed": true,
       "functions": {
@@ -2494,11 +634,11 @@
       ],
       "call_graph": {}
     },
-    "ui/layouts/default.vue": {
+    "layouts/default.vue": {
       "language": "vue",
       "parsed": false
     },
-    "ui/composables/useOtcConfig.js": {
+    "composables/useOtcConfig.js": {
       "language": "javascript",
       "parsed": true,
       "purpose": "Configuration",
@@ -2589,7 +729,7 @@
       ],
       "call_graph": {}
     },
-    "ui/composables/useSolanaWallet.js": {
+    "composables/useSolanaWallet.js": {
       "language": "javascript",
       "parsed": true,
       "imports": [
@@ -2755,7 +895,7 @@
       },
       "call_graph": {}
     },
-    "ui/composables/useSwapService.js": {
+    "composables/useSwapService.js": {
       "language": "javascript",
       "parsed": true,
       "imports": [
@@ -2941,7 +1081,7 @@
       },
       "call_graph": {}
     },
-    "ui/composables/useAutoWorker.js": {
+    "composables/useAutoWorker.js": {
       "language": "javascript",
       "parsed": true,
       "imports": [
@@ -3007,7 +1147,7 @@
       ],
       "call_graph": {}
     },
-    "ui/composables/useTransactionHistory.js": {
+    "composables/useTransactionHistory.js": {
       "language": "javascript",
       "parsed": true,
       "functions": {
@@ -3102,8 +1242,8 @@
             "constructor": {
               "signature": "(message, status, code, requestId, endpoint, originalError)",
               "called_by": [
-                "CE",
-                "po"
+                "po",
+                "CE"
               ]
             },
             "__init__": "(message, status, code, requestId, endpoint, originalError)"
@@ -3114,8 +1254,8 @@
             "constructor": {
               "signature": "(message, status, code, requestId, endpoint, originalError)",
               "called_by": [
-                "CE",
-                "po"
+                "po",
+                "CE"
               ]
             },
             "__init__": "(message, status, code, requestId, endpoint, originalError)"
@@ -3171,7 +1311,7 @@
       ],
       "call_graph": {}
     },
-    "ui/composables/useTransactionStatus.js": {
+    "composables/useTransactionStatus.js": {
       "language": "javascript",
       "parsed": true,
       "imports": [
@@ -3270,7 +1410,7 @@
       ],
       "call_graph": {}
     },
-    "ui/composables/useWallet.js": {
+    "composables/useWallet.js": {
       "language": "javascript",
       "parsed": true,
       "imports": [
@@ -3326,7 +1466,7 @@
       ],
       "call_graph": {}
     },
-    "ui/composables/useCookieConsent.js": {
+    "composables/useCookieConsent.js": {
       "language": "javascript",
       "parsed": true,
       "functions": {
@@ -3377,7 +1517,7 @@
       ],
       "call_graph": {}
     },
-    "ui/composables/useErrorHandler.js": {
+    "composables/useErrorHandler.js": {
       "language": "javascript",
       "parsed": true,
       "imports": [
@@ -3473,7 +1613,7 @@
       ],
       "call_graph": {}
     },
-    "ui/composables/useWalletConnect.js": {
+    "composables/useWalletConnect.js": {
       "language": "javascript",
       "parsed": true,
       "imports": [
@@ -3512,7 +1652,7 @@
       ],
       "call_graph": {}
     },
-    "ui/composables/useBackendApi.js": {
+    "composables/useBackendApi.js": {
       "language": "javascript",
       "parsed": true,
       "imports": [
@@ -3610,7 +1750,7 @@
       },
       "call_graph": {}
     },
-    "ui/composables/useSwapButtonState.js": {
+    "composables/useSwapButtonState.js": {
       "language": "javascript",
       "parsed": true,
       "imports": [
@@ -3636,7 +1776,7 @@
       ],
       "call_graph": {}
     },
-    "ui/composables/useTradingViewDatafeed.js": {
+    "composables/useTradingViewDatafeed.js": {
       "language": "javascript",
       "parsed": true,
       "functions": {
@@ -3723,7 +1863,7 @@
       ],
       "call_graph": {}
     },
-    "ui/composables/useRealTimeTransactions.js": {
+    "composables/useRealTimeTransactions.js": {
       "language": "javascript",
       "parsed": true,
       "imports": [
@@ -3803,7 +1943,7 @@
       ],
       "call_graph": {}
     },
-    "ui/composables/usePriceData.js": {
+    "composables/usePriceData.js": {
       "language": "javascript",
       "parsed": true,
       "imports": [
@@ -3893,7 +2033,7 @@
       ],
       "call_graph": {}
     },
-    "ui/composables/useMetaMask.js": {
+    "composables/useMetaMask.js": {
       "language": "javascript",
       "parsed": true,
       "imports": [
@@ -4039,7 +2179,7 @@
       ],
       "call_graph": {}
     },
-    "ui/composables/useExtensionDetection.js": {
+    "composables/useExtensionDetection.js": {
       "language": "javascript",
       "parsed": true,
       "imports": [
@@ -4073,7 +2213,7 @@
       ],
       "call_graph": {}
     },
-    "ui/composables/useSwapLogic.js": {
+    "composables/useSwapLogic.js": {
       "language": "javascript",
       "parsed": true,
       "imports": [
@@ -4254,7 +2394,7 @@
       ],
       "call_graph": {}
     },
-    "ui/composables/useCircularAddressValidation.js": {
+    "composables/useCircularAddressValidation.js": {
       "language": "javascript",
       "parsed": true,
       "imports": [
@@ -4315,7 +2455,7 @@
       ],
       "call_graph": {}
     },
-    "ui/composables/useCircularChain.js": {
+    "composables/useCircularChain.js": {
       "language": "javascript",
       "parsed": true,
       "imports": [
@@ -4376,7 +2516,7 @@
       ],
       "call_graph": {}
     },
-    "ui/composables/useNumberInput.js": {
+    "composables/useNumberInput.js": {
       "language": "javascript",
       "parsed": true,
       "imports": [
@@ -4467,7 +2607,7 @@
       ],
       "call_graph": {}
     },
-    "ui/composables/useIrohNetwork.js": {
+    "composables/useIrohNetwork.js": {
       "language": "javascript",
       "parsed": true,
       "functions": {
@@ -4550,116 +2690,116 @@
       ],
       "call_graph": {}
     },
-    "ui/components/SwapTabs.vue": {
+    "components/SwapTabs.vue": {
       "language": "vue",
       "parsed": false
     },
-    "ui/components/CirxStakingPanel.vue": {
+    "components/CirxStakingPanel.vue": {
       "language": "vue",
       "parsed": false
     },
-    "ui/components/BaseModal.vue": {
+    "components/BaseModal.vue": {
       "language": "vue",
       "parsed": false
     },
-    "ui/components/ErrorAlert.vue": {
+    "components/ErrorAlert.vue": {
       "language": "vue",
       "parsed": false
     },
-    "ui/components/TokenSelector.vue": {
+    "components/TokenSelector.vue": {
       "language": "vue",
       "parsed": false
     },
-    "ui/components/SwapSellField.vue": {
+    "components/SwapSellField.vue": {
       "language": "vue",
       "parsed": false
     },
-    "ui/components/ConnectionToast.vue": {
+    "components/ConnectionToast.vue": {
       "language": "vue",
       "parsed": false
     },
-    "ui/components/SwapQuoteDetails.vue": {
+    "components/SwapQuoteDetails.vue": {
       "language": "vue",
       "parsed": false
     },
-    "ui/components/MultiWalletButton.vue": {
+    "components/MultiWalletButton.vue": {
       "language": "vue",
       "parsed": false
     },
-    "ui/components/CookieConsent.vue": {
+    "components/CookieConsent.vue": {
       "language": "vue",
       "parsed": false
     },
-    "ui/components/TradingViewChart.vue": {
+    "components/TradingViewChart.vue": {
       "language": "vue",
       "parsed": false
     },
-    "ui/components/TransactionProgress.vue": {
+    "components/TransactionProgress.vue": {
       "language": "vue",
       "parsed": false
     },
-    "ui/components/WalletButton.vue": {
+    "components/WalletButton.vue": {
       "language": "vue",
       "parsed": false
     },
-    "ui/components/ReownWalletButton.vue": {
+    "components/ReownWalletButton.vue": {
       "language": "vue",
       "parsed": false
     },
-    "ui/components/ExtensionDetector.vue": {
+    "components/ExtensionDetector.vue": {
       "language": "vue",
       "parsed": false
     },
-    "ui/components/OtcDiscountDropdown.vue": {
+    "components/OtcDiscountDropdown.vue": {
       "language": "vue",
       "parsed": false
     },
-    "ui/components/CircularChainStatus.vue": {
+    "components/CircularChainStatus.vue": {
       "language": "vue",
       "parsed": false
     },
-    "ui/components/SwapForm.vue": {
+    "components/SwapForm.vue": {
       "language": "vue",
       "parsed": false
     },
-    "ui/components/CirxPriceChart.vue": {
+    "components/CirxPriceChart.vue": {
       "language": "vue",
       "parsed": false
     },
-    "ui/components/SwapBuyField.vue": {
+    "components/SwapBuyField.vue": {
       "language": "vue",
       "parsed": false
     },
-    "ui/components/RecipientAddressInput.vue": {
+    "components/RecipientAddressInput.vue": {
       "language": "vue",
       "parsed": false
     },
-    "ui/components/TransactionTable.vue": {
+    "components/TransactionTable.vue": {
       "language": "vue",
       "parsed": false
     },
-    "ui/components/SwapActionButton.vue": {
+    "components/SwapActionButton.vue": {
       "language": "vue",
       "parsed": false
     },
-    "ui/components/BaseButton.vue": {
+    "components/BaseButton.vue": {
       "language": "vue",
       "parsed": false
     },
-    "ui/components/ToastNotifications.vue": {
+    "components/ToastNotifications.vue": {
       "language": "vue",
       "parsed": false
     },
-    "ui/playwright-report/index.html": {
+    "playwright-report/index.html": {
       "language": "html",
       "parsed": false,
       "purpose": "Application entry point"
     },
-    "ui/test/setup.ts": {
+    "test/setup.ts": {
       "language": "typescript",
       "parsed": false
     },
-    "ui/scripts/cleanup.js": {
+    "scripts/cleanup.js": {
       "language": "javascript",
       "parsed": true,
       "imports": [
@@ -4675,14 +2815,6 @@
           ],
           "signature": "(message, color = 'reset')",
           "called_by": [
-            "log",
-            "trackRequest",
-            "systemHealthCheck",
-            "analyzeNetworkTopology",
-            "simulateDistributedTransactions",
-            "performLoadTest",
-            "generatePerformanceReport",
-            "runDistributedSystemDemo",
             "log",
             "removeTarget",
             "cleanGlobPattern",
@@ -4768,48 +2900,48 @@
       ],
       "call_graph": {}
     },
-    "ui/pages/pool.vue": {
+    "pages/pool.vue": {
       "language": "vue",
       "parsed": false
     },
-    "ui/pages/demo.vue": {
+    "pages/demo.vue": {
       "language": "vue",
       "parsed": false
     },
-    "ui/pages/index.vue": {
+    "pages/index.vue": {
       "language": "vue",
       "parsed": false,
       "purpose": "Application entry point"
     },
-    "ui/pages/swap.vue": {
+    "pages/swap.vue": {
       "language": "vue",
       "parsed": false
     },
-    "ui/pages/history.vue": {
+    "pages/history.vue": {
       "language": "vue",
       "parsed": false
     },
-    "ui/pages/monitor.vue": {
+    "pages/monitor.vue": {
       "language": "vue",
       "parsed": false
     },
-    "ui/pages/status.vue": {
+    "pages/status.vue": {
       "language": "vue",
       "parsed": false
     },
-    "ui/plugins/1.appkit.client.js": {
+    "plugins/1.appkit.client.js": {
       "language": "javascript",
       "parsed": false
     },
-    "ui/plugins/0.toast-init.client.js": {
+    "plugins/0.toast-init.client.js": {
       "language": "javascript",
       "parsed": false
     },
-    "ui/plugins/2.wagmi.client.js": {
+    "plugins/2.wagmi.client.js": {
       "language": "javascript",
       "parsed": false
     },
-    "ui/plugins/tradingview.client.js": {
+    "plugins/tradingview.client.js": {
       "language": "javascript",
       "parsed": true,
       "functions": {
@@ -4821,7 +2953,7 @@
       ],
       "call_graph": {}
     },
-    "ui/public/debug-console-commands.js": {
+    "public/debug-console-commands.js": {
       "language": "javascript",
       "parsed": true,
       "functions": {
@@ -4870,7 +3002,7 @@
       ],
       "call_graph": {}
     },
-    "ui/stores/reownWallet.js": {
+    "stores/reownWallet.js": {
       "language": "javascript",
       "parsed": true,
       "imports": [
@@ -5015,7 +3147,7 @@
       },
       "call_graph": {}
     },
-    "ui/stores/wallet.js": {
+    "stores/wallet.js": {
       "language": "javascript",
       "parsed": true,
       "imports": [
@@ -5251,7 +3383,7 @@
       },
       "call_graph": {}
     },
-    "ui/config/solana.js": {
+    "config/solana.js": {
       "language": "javascript",
       "parsed": true,
       "imports": [
@@ -5303,7 +3435,7 @@
       ],
       "call_graph": {}
     },
-    "ui/config/appkit.js": {
+    "config/appkit.js": {
       "language": "javascript",
       "parsed": true,
       "imports": [
@@ -5329,7 +3461,7 @@
       ],
       "call_graph": {}
     },
-    "ui/config/walletConfig.js": {
+    "config/walletConfig.js": {
       "language": "javascript",
       "parsed": true,
       "purpose": "Configuration",
@@ -5344,7 +3476,7 @@
       },
       "call_graph": {}
     },
-    "ui/config/app.js": {
+    "config/app.js": {
       "language": "javascript",
       "parsed": true,
       "purpose": "Application entry point",
@@ -5372,76 +3504,76 @@
       ],
       "call_graph": {}
     },
-    "ui/assets/css/main.css": {
+    "assets/css/main.css": {
       "language": "css",
       "parsed": false,
       "purpose": "Application entry point"
     },
-    "ui/public/swap/discount.json": {
+    "public/swap/discount.json": {
       "language": "json",
       "parsed": false
     },
-    "ui/pages/debug/swap-broken.vue": {
+    "pages/debug/swap-broken.vue": {
       "language": "vue",
       "parsed": false
     },
-    "ui/pages/debug/extensions-test.vue": {
+    "pages/debug/extensions-test.vue": {
       "language": "vue",
       "parsed": false,
       "purpose": "Test file"
     },
-    "ui/pages/debug/index.vue": {
+    "pages/debug/index.vue": {
       "language": "vue",
       "parsed": false,
       "purpose": "Application entry point"
     },
-    "ui/pages/debug/circular-wallet.vue": {
+    "pages/debug/circular-wallet.vue": {
       "language": "vue",
       "parsed": false
     },
-    "ui/pages/debug/debug-button.vue": {
+    "pages/debug/debug-button.vue": {
       "language": "vue",
       "parsed": false
     },
-    "ui/pages/debug/test-otc-visibility.html": {
+    "pages/debug/test-otc-visibility.html": {
       "language": "html",
       "parsed": false,
       "purpose": "Test file"
     },
-    "ui/pages/debug/test-transaction-status.vue": {
+    "pages/debug/test-transaction-status.vue": {
       "language": "vue",
       "parsed": false,
       "purpose": "Test file"
     },
-    "ui/pages/debug/manual-console-test.html": {
+    "pages/debug/manual-console-test.html": {
       "language": "html",
       "parsed": false,
       "purpose": "Test file"
     },
-    "ui/pages/debug/wallet-test.vue": {
+    "pages/debug/wallet-test.vue": {
       "language": "vue",
       "parsed": false,
       "purpose": "Test file"
     },
-    "ui/pages/debug/chart-test.vue": {
+    "pages/debug/chart-test.vue": {
       "language": "vue",
       "parsed": false,
       "purpose": "Test file"
     },
-    "ui/pages/debug/iroh-network.vue": {
+    "pages/debug/iroh-network.vue": {
       "language": "vue",
       "parsed": false
     },
-    "ui/pages/debug/backend-wallet.vue": {
+    "pages/debug/backend-wallet.vue": {
       "language": "vue",
       "parsed": false
     },
-    "ui/pages/debug/simple-chart-test.vue": {
+    "pages/debug/simple-chart-test.vue": {
       "language": "vue",
       "parsed": false,
       "purpose": "Test file"
     },
-    "ui/pages/debug/scripts/debug-wallet.js": {
+    "pages/debug/scripts/debug-wallet.js": {
       "language": "javascript",
       "parsed": true,
       "functions": {
@@ -5457,7 +3589,7 @@
       ],
       "call_graph": {}
     },
-    "ui/pages/debug/scripts/debug-console-commands.js": {
+    "pages/debug/scripts/debug-console-commands.js": {
       "language": "javascript",
       "parsed": true,
       "functions": {
@@ -5514,12 +3646,12 @@
       ],
       "call_graph": {}
     },
-    "ui/playwright-report/trace/defaultSettingsView.NYBT19Ch.css": {
+    "playwright-report/trace/defaultSettingsView.NYBT19Ch.css": {
       "language": "css",
       "parsed": false,
       "purpose": "Configuration"
     },
-    "ui/playwright-report/trace/uiMode.BCbdHUa5.js": {
+    "playwright-report/trace/uiMode.BCbdHUa5.js": {
       "language": "javascript",
       "parsed": true,
       "functions": {
@@ -5704,23 +3836,23 @@
       ],
       "call_graph": {}
     },
-    "ui/playwright-report/trace/uiMode.html": {
+    "playwright-report/trace/uiMode.html": {
       "language": "html",
       "parsed": false
     },
-    "ui/playwright-report/trace/snapshot.html": {
+    "playwright-report/trace/snapshot.html": {
       "language": "html",
       "parsed": false
     },
-    "ui/playwright-report/trace/xtermModule.Beg8tuEN.css": {
+    "playwright-report/trace/xtermModule.Beg8tuEN.css": {
       "language": "css",
       "parsed": false
     },
-    "ui/playwright-report/trace/codeMirrorModule.C3UTv-Ge.css": {
+    "playwright-report/trace/codeMirrorModule.C3UTv-Ge.css": {
       "language": "css",
       "parsed": false
     },
-    "ui/playwright-report/trace/sw.bundle.js": {
+    "playwright-report/trace/sw.bundle.js": {
       "language": "javascript",
       "parsed": true,
       "functions": {
@@ -7435,7 +5567,7 @@
       ],
       "call_graph": {}
     },
-    "ui/playwright-report/trace/index.Cu8n3rOi.js": {
+    "playwright-report/trace/index.Cu8n3rOi.js": {
       "language": "javascript",
       "parsed": true,
       "functions": {
@@ -7515,20 +5647,20 @@
       ],
       "call_graph": {}
     },
-    "ui/playwright-report/trace/uiMode.BatfzHMG.css": {
+    "playwright-report/trace/uiMode.BatfzHMG.css": {
       "language": "css",
       "parsed": false
     },
-    "ui/playwright-report/trace/index.html": {
+    "playwright-report/trace/index.html": {
       "language": "html",
       "parsed": false,
       "purpose": "Application entry point"
     },
-    "ui/playwright-report/trace/index.CFOW-Ezb.css": {
+    "playwright-report/trace/index.CFOW-Ezb.css": {
       "language": "css",
       "parsed": false
     },
-    "ui/playwright-report/trace/assets/defaultSettingsView-CUd-tHFm.js": {
+    "playwright-report/trace/assets/defaultSettingsView-CUd-tHFm.js": {
       "language": "javascript",
       "parsed": true,
       "purpose": "Configuration",
@@ -17115,7 +15247,7 @@
       ],
       "call_graph": {}
     },
-    "ui/playwright-report/trace/assets/codeMirrorModule-rKSJ91kC.js": {
+    "playwright-report/trace/assets/codeMirrorModule-rKSJ91kC.js": {
       "language": "javascript",
       "parsed": true,
       "functions": {
@@ -23699,528 +21831,120 @@
       },
       "call_graph": {}
     },
-    "ui/components/__tests__/ToastNotifications.test.js": {
+    "components/__tests__/ToastNotifications.test.js": {
       "language": "javascript",
       "parsed": false,
       "purpose": "Test file"
     },
-    "ui/components/__tests__/ConnectionToast.test.js": {
+    "components/__tests__/ConnectionToast.test.js": {
       "language": "javascript",
       "parsed": false,
       "purpose": "Test file"
     },
-    "ui/utils/__tests__/utilities.test.js": {
+    "utils/__tests__/utilities.test.js": {
       "language": "javascript",
-      "parsed": false,
-      "purpose": "Test file"
-    },
-    "backend/storage/debug_cirx_override.json": {
-      "language": "json",
-      "parsed": false
-    },
-    "backend/tests/bootstrap.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/tests/TestCase.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Test file"
-    },
-    "backend/public/index.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Application entry point"
-    },
-    "backend/public/workers.html": {
-      "language": "html",
-      "parsed": false
-    },
-    "backend/database/create_demo_transactions.sql": {
-      "language": "sql",
-      "parsed": false
-    },
-    "backend/database/Migrator.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/database/e2e-setup.sql": {
-      "language": "sql",
-      "parsed": false
-    },
-    "backend/bin/run-tests.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Test file"
-    },
-    "backend/bin/validate-e2e-setup.sh": {
-      "language": "shell",
-      "parsed": true,
-      "functions": {
-        "check_file": {
-          "doc": "Function to check if file exists",
-          "signature": "()"
-        },
-        "check_directory": {
-          "doc": "Function to check if directory exists",
-          "signature": "()"
-        },
-        "count_test_methods": {
-          "doc": "Count test methods in each file",
-          "signature": "()"
-        }
-      },
-      "variables": [
-        "ERRORS",
-        "ENV_VARS",
-        "TOTAL_TESTS"
-      ],
-      "call_graph": {}
-    },
-    "backend/src/Commands/MonitoringCheckCommand.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/src/Middleware/RateLimitMiddleware.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Middleware"
-    },
-    "backend/src/Middleware/LoggingMiddleware.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Middleware"
-    },
-    "backend/src/Middleware/CorsMiddleware.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Middleware"
-    },
-    "backend/src/Middleware/ApiKeyAuthMiddleware.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Middleware"
-    },
-    "backend/src/Utils/TestWallet.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Test file"
-    },
-    "backend/src/Utils/BlockchainTestUtils.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Test file"
-    },
-    "backend/src/Utils/SeedPhraseManager.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/src/Blockchain/EthereumBlockchainClient.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/src/Blockchain/BlockchainClientFactory.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/src/Blockchain/CirxBlockchainClient.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/src/Blockchain/AbstractBlockchainClient.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/src/Blockchain/BlockchainClientInterface.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/src/Controllers/DebugController.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/src/Controllers/ConfigController.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Configuration"
-    },
-    "backend/src/Controllers/WorkerController.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/src/Controllers/IrohTransactionController.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/src/Controllers/TransactionTestController.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Test file"
-    },
-    "backend/src/Controllers/TransactionController.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/src/Controllers/MonitoringController.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/src/Controllers/TelegramTestController.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Test file"
-    },
-    "backend/src/Controllers/TransactionStatusController.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/src/Exceptions/CirxTransferException.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/src/Exceptions/PaymentVerificationException.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/src/Models/Transaction.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/src/Services/HealthCheckService.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/src/Services/TelegramHandler.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/src/Services/PaymentVerificationService.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/src/Services/TelegramNotificationService.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/src/Services/LoggerService.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/src/Services/TransactionMonitoringService.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/src/Services/CirxTransferResult.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/src/Services/BlockchainApiClient.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/src/Services/PaymentVerificationResult.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/src/Services/IrohServiceBridge.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/src/Services/CirxTransferService.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/src/Workers/PaymentVerificationWorker.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/src/Workers/StuckTransactionRecoveryWorker.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/src/Workers/CirxTransferWorker.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/src/Validators/SwapRequestValidator.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/src/Blockchain/Exceptions/BlockchainException.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/database/migrations/003_add_retry_fields_to_transactions.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/database/migrations/002_create_project_wallets_table.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/database/migrations/004_create_migrations_table.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/database/migrations/001_create_transactions_table.php": {
-      "language": "php",
-      "parsed": false
-    },
-    "backend/tests/Integration/IntegrationTestCase.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Test file"
-    },
-    "backend/tests/E2E/E2ETestCase.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Test file"
-    },
-    "backend/tests/E2E/SepoliaOTCSwapTest.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Test file"
-    },
-    "backend/tests/E2E/PerformanceTest.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Test file"
-    },
-    "backend/tests/E2E/CompleteOTCSwapFlowTest.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Test file"
-    },
-    "backend/tests/E2E/RealBlockchainTest.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Test file"
-    },
-    "backend/tests/E2E/MultiTokenSwapTest.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Test file"
-    },
-    "backend/tests/E2E/ErrorScenarioTest.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Test file"
-    },
-    "backend/tests/Unit/Middleware/ApiKeyAuthMiddlewareTest.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Test file"
-    },
-    "backend/tests/Unit/Middleware/LoggingMiddlewareTest.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Test file"
-    },
-    "backend/tests/Unit/Middleware/CorsMiddlewareTest.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Test file"
-    },
-    "backend/tests/Unit/Middleware/RateLimitMiddlewareTest.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Test file"
-    },
-    "backend/tests/Unit/Blockchain/CirxBlockchainClientTest.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Test file"
-    },
-    "backend/tests/Unit/CircularProtocol/CircularProtocolAPITest.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Test file"
-    },
-    "backend/tests/Unit/Controllers/TransactionControllerTest.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Test file"
-    },
-    "backend/tests/Unit/Models/TransactionTest.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Test file"
-    },
-    "backend/tests/Unit/Services/PaymentVerificationServiceTest.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Test file"
-    },
-    "backend/tests/Unit/Services/CirxTransferServiceTest.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Test file"
-    },
-    "backend/tests/Unit/Services/HealthCheckServiceTest.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Test file"
-    },
-    "backend/tests/Unit/Services/TransactionMonitoringServiceTest.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Test file"
-    },
-    "backend/tests/Unit/Services/LoggerServiceTest.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Test file"
-    },
-    "backend/tests/Unit/Workers/PaymentVerificationWorkerTest.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Test file"
-    },
-    "backend/tests/Unit/Workers/CirxTransferWorkerTest.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Test file"
-    },
-    "backend/tests/Integration/API/CompleteSwapFlowTest.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Test file"
-    },
-    "backend/tests/Integration/CircularProtocol/CircularProtocolAPIIntegrationTest.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Test file"
-    },
-    "backend/tests/Integration/Database/TransactionDataIntegrityTest.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Test file"
-    },
-    "backend/tests/Integration/Services/ServiceInteractionTest.php": {
-      "language": "php",
-      "parsed": false,
-      "purpose": "Test file"
-    },
-    "backend/tests/Integration/Workers/WorkerPipelineIntegrationTest.php": {
-      "language": "php",
       "parsed": false,
       "purpose": "Test file"
     }
   },
   "dependency_graph": {
-    "ui/check-console.js": [
+    "check-console.js": [
       "http"
     ],
-    "test/check-console.js": [
-      "child_process",
-      "child_process"
+    "utils/validation.js": [
+      "utils/addressFormatting.js"
     ],
-    "test/console-capture.js": [
-      "fs",
-      "child_process"
-    ],
-    "scripts/mock-iroh-bridge.js": [
-      "http",
-      "url"
-    ],
-    "scripts/enhanced-iroh-bridge.js": [
-      "http",
-      "url"
-    ],
-    "ui/utils/validation.js": [
-      "ui/utils/addressFormatting.js"
-    ],
-    "ui/e2e/swap-flow.spec.ts": [
+    "e2e/swap-flow.spec.ts": [
       "@playwright/test"
     ],
-    "ui/composables/useOtcConfig.js": [
+    "composables/useOtcConfig.js": [
       "vue"
     ],
-    "ui/composables/useSolanaWallet.js": [
+    "composables/useSolanaWallet.js": [
       "vue"
     ],
-    "ui/composables/useSwapService.js": [
+    "composables/useSwapService.js": [
       "vue",
       "viem",
       "~/stores/wallet"
     ],
-    "ui/composables/useAutoWorker.js": [
+    "composables/useAutoWorker.js": [
       "vue"
     ],
-    "ui/composables/useTransactionStatus.js": [
+    "composables/useTransactionStatus.js": [
       "vue",
-      "ui/composables/useBackendApi.js",
+      "composables/useBackendApi.js",
       "~/utils/toast.js"
     ],
-    "ui/composables/useWallet.js": [
+    "composables/useWallet.js": [
       "vue",
       "pinia",
       "~/stores/wallet"
     ],
-    "ui/composables/useErrorHandler.js": [
+    "composables/useErrorHandler.js": [
       "vue"
     ],
-    "ui/composables/useWalletConnect.js": [
+    "composables/useWalletConnect.js": [
       "vue"
     ],
-    "ui/composables/useBackendApi.js": [
+    "composables/useBackendApi.js": [
       "vue"
     ],
-    "ui/composables/useSwapButtonState.js": [
+    "composables/useSwapButtonState.js": [
       "vue"
     ],
-    "ui/composables/useRealTimeTransactions.js": [
+    "composables/useRealTimeTransactions.js": [
       "vue",
-      "ui/composables/useIrohNetwork.js"
+      "composables/useIrohNetwork.js"
     ],
-    "ui/composables/usePriceData.js": [
+    "composables/usePriceData.js": [
       "vue"
     ],
-    "ui/composables/useMetaMask.js": [
+    "composables/useMetaMask.js": [
       "vue"
     ],
-    "ui/composables/useExtensionDetection.js": [
+    "composables/useExtensionDetection.js": [
       "vue"
     ],
-    "ui/composables/useSwapLogic.js": [
+    "composables/useSwapLogic.js": [
       "vue",
-      "ui/services/priceService.js"
+      "services/priceService.js"
     ],
-    "ui/composables/useCircularAddressValidation.js": [
+    "composables/useCircularAddressValidation.js": [
       "vue"
     ],
-    "ui/composables/useCircularChain.js": [
+    "composables/useCircularChain.js": [
       "vue"
     ],
-    "ui/composables/useNumberInput.js": [
+    "composables/useNumberInput.js": [
       "vue"
     ],
-    "ui/scripts/cleanup.js": [
+    "scripts/cleanup.js": [
       "fs",
       "child_process",
       "util",
       "path"
     ],
-    "ui/stores/reownWallet.js": [
+    "stores/reownWallet.js": [
       "pinia",
       "vue",
       "@reown/appkit/vue",
       "@wagmi/vue",
       "viem"
     ],
-    "ui/stores/wallet.js": [
+    "stores/wallet.js": [
       "pinia",
       "vue",
-      "ui/composables/useMetaMask.js"
+      "composables/useMetaMask.js"
     ],
-    "ui/config/solana.js": [
+    "config/solana.js": [
       "vue"
     ],
-    "ui/config/appkit.js": [
+    "config/appkit.js": [
       "@reown/appkit-adapter-wagmi",
       "@reown/appkit-adapter-solana",
       "@reown/appkit/networks"
     ]
   },
-  "staleness_check": 1755360220.444451
+  "staleness_check": 1755351565.635307
 }
