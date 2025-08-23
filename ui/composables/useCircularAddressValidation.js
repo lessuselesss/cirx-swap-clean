@@ -108,7 +108,7 @@ export const useCircularAddressValidation = () => {
         },
         body: JSON.stringify({
           Blockchain: config.blockchain_id,
-          Address: address,
+          Address: address.replace('0x', ''), // Strip 0x prefix as required by NAG API
           Version: config.version || '1.0.8'
         })
       })
@@ -138,7 +138,7 @@ export const useCircularAddressValidation = () => {
         },
         body: JSON.stringify({
           Blockchain: config.blockchain_id,
-          Address: address,
+          Address: address.replace('0x', ''), // Strip 0x prefix as required by NAG API
           Asset: 'CIRX',
           Version: config.version || '1.0.8'
         })

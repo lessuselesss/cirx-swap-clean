@@ -134,9 +134,10 @@ class CirxBlockchainClient extends AbstractBlockchainClient
             // but NAG API expects "Asset" with capital A. We'll call NAG directly for now.
             
             // Manual NAG call with correct capitalization
+            // Strip 0x prefix from addresses as required by NAG API
             $data = [
                 'Blockchain' => $this->getEnvironmentBlockchain(),
-                'Address' => $walletAddress,
+                'Address' => str_replace('0x', '', $walletAddress),
                 'Asset' => 'CIRX', // Correct capitalization
                 'Version' => '1.0.8'
             ];
