@@ -84,6 +84,13 @@ function runWorkers($type = 'both') {
         $stuckResults = $cirxWorker->processStuckTransactions();
         echo "Stuck transactions - Processed: {$stuckResults['processed']}, Reset: {$stuckResults['reset']}, Failed: {$stuckResults['failed']}\n";
         
+        // Automatic recovery results will be included in the main processReadyTransactions output
+        // but we can also call it directly for visibility during manual runs
+        $recoveryResults = $cirxWorker->recoverInconsistentTransactions();
+        if ($recoveryResults['scanned'] > 0) {
+            echo "Inconsistent state recovery - Scanned: {$recoveryResults['scanned']}, Recovered: {$recoveryResults['recovered']}, Failed: {$recoveryResults['failed']}\n";
+        }
+        
         // Try batch processing
         $batchResults = $cirxWorker->processBatchTransfer();
         echo "Batch processing - Processed: {$batchResults['processed']}, Completed: {$batchResults['completed']}, Failed: {$batchResults['failed']}\n";

@@ -83,6 +83,13 @@ class CirxTransferWorker
             $results['retried'] += $retryResults['retried'];
             $results['errors'] = array_merge($results['errors'], $retryResults['errors']);
 
+            // Automatically recover transactions in inconsistent states
+            $recoveryResults = $this->recoverInconsistentTransactions();
+            if ($recoveryResults['recovered'] > 0) {
+                $results['recovered'] = $recoveryResults['recovered'];
+                $results['errors'] = array_merge($results['errors'], $recoveryResults['errors']);
+            }
+
         } catch (Exception $e) {
             $results['errors'][] = [
                 'worker_error' => $e->getMessage(),
@@ -454,5 +461,95 @@ class CirxTransferWorker
     public function setRetryDelay(int $retryDelay): void
     {
         $this->retryDelay = max(0, $retryDelay);
+    }
+
+    /**
+     * Recover transactions in inconsistent states (pending with failure reasons)
+     * This handles the specific case where transactions get stuck with pending status
+     * but have failure_reason set, preventing normal processing.
+     */
+    public function recoverInconsistentTransactions(): array
+    {
+        $results = [
+            'scanned' => 0,
+            'recovered' => 0,
+            'failed' => 0,
+            'errors' => []
+        ];
+
+        try {
+            // Find transactions with inconsistent states:
+            // 1. cirx_transfer_pending status but have failure_reason (should be clean)
+            // 2. payment_verified status but have failure_reason (should be clean)  
+            // 3. Also catch any other pending statuses with failure reasons
+            $inconsistentTransactions = Transaction::where(function($query) {
+                $query->where('swap_status', Transaction::STATUS_CIRX_TRANSFER_PENDING)
+                      ->whereNotNull('failure_reason');
+            })->orWhere(function($query) {
+                $query->where('swap_status', Transaction::STATUS_PAYMENT_VERIFIED)
+                      ->whereNotNull('failure_reason');
+            })->orWhere(function($query) {
+                // Catch any other pending status with failure reason (like the test data)
+                $query->where('swap_status', 'LIKE', '%pending%')
+                      ->whereNotNull('failure_reason');
+            })
+            ->take(20) // Process in batches
+            ->get();
+
+            $results['scanned'] = $inconsistentTransactions->count();
+
+            foreach ($inconsistentTransactions as $transaction) {
+                $this->logTransactionEvent($transaction, 'inconsistent_state_detected', 
+                    "Detected inconsistent transaction state: {$transaction->swap_status} with failure reason");
+
+                // Check how old the failure is
+                $lastUpdate = new \DateTime($transaction->updated_at);
+                $now = new \DateTime();
+                $minutesSinceUpdate = $now->diff($lastUpdate)->i + ($now->diff($lastUpdate)->h * 60);
+
+                // Only auto-recover if the failure is more than 5 minutes old
+                // This prevents interfering with ongoing processing
+                if ($minutesSinceUpdate >= 5) {
+                    $retryCount = $transaction->retry_count ?? 0;
+                    
+                    // If we haven't exceeded max retries, clean up and retry
+                    if ($retryCount < $this->maxRetries) {
+                        // Clean up the inconsistent state
+                        $transaction->swap_status = Transaction::STATUS_PAYMENT_VERIFIED;
+                        $transaction->failure_reason = null;
+                        $transaction->last_retry_at = null;
+                        $transaction->retry_count = 0; // Reset retry count for fresh start
+                        $transaction->updated_at = (new \DateTime())->format('Y-m-d H:i:s');
+                        $transaction->save();
+
+                        $this->logTransactionEvent($transaction, 'inconsistent_state_recovered', 
+                            "Recovered inconsistent transaction state - reset to payment_verified for retry");
+                        $results['recovered']++;
+                    } else {
+                        // Mark as permanently failed if max retries exceeded
+                        $transaction->markFailed(
+                            "Auto-recovery failed after {$this->maxRetries} attempts: " . $transaction->failure_reason, 
+                            Transaction::STATUS_FAILED_CIRX_TRANSFER
+                        );
+                        
+                        $this->logTransactionEvent($transaction, 'inconsistent_state_failed', 
+                            "Marked inconsistent transaction as permanently failed");
+                        $results['failed']++;
+                    }
+                } else {
+                    // Too recent, skip recovery to avoid interfering with active processing
+                    $this->logTransactionEvent($transaction, 'inconsistent_state_skipped', 
+                        "Skipped recent inconsistent transaction - waiting for {5 - $minutesSinceUpdate} more minutes");
+                }
+            }
+
+        } catch (Exception $e) {
+            $results['errors'][] = [
+                'recovery_error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ];
+        }
+
+        return $results;
     }
 }

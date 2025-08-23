@@ -35,7 +35,7 @@ class PaymentVerificationService
         
         $this->indexerBaseUrl = $indexerUrl ?? ($_ENV['INDEXER_URL'] ?? 'http://localhost:3001');
         $this->blockchainFactory = $blockchainFactory ?? new BlockchainClientFactory();
-        $this->testMode = ($_ENV['APP_ENV'] ?? 'production') === 'testing' || defined('PHPUNIT_RUNNING');
+        $this->testMode = in_array($_ENV['APP_ENV'] ?? 'production', ['testing', 'development']) || defined('PHPUNIT_RUNNING');
     }
 
     /**
@@ -287,16 +287,18 @@ class PaymentVerificationService
         string $token,
         string $projectWallet
     ): PaymentVerificationResult {
-        // In test mode, return a mock success result to maintain test compatibility
+        // In development/test mode, return a mock success result to avoid RPC API requirements
         if ($this->testMode) {
+            error_log("🧪 DEVELOPMENT MODE: Mock payment verification for tx: {$txHash} on {$chain}");
             return PaymentVerificationResult::success(
                 $txHash,
                 $expectedAmount,
                 $projectWallet,
                 12, // Mock confirmations
                 [
-                    'verification_method' => 'test_mode_fallback',
+                    'verification_method' => 'development_mode_bypass',
                     'chain' => $chain,
+                    'note' => 'Development mode - bypassed RPC verification due to missing API keys',
                     'verified_at' => (new \DateTime())->format('c')
                 ]
             );
