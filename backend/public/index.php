@@ -10,6 +10,7 @@ use App\Controllers\TelegramTestController;
 use App\Controllers\DebugController;
 use App\Controllers\ConfigController;
 use App\Controllers\WorkerController;
+use App\Controllers\AdminController;
 use App\Controllers\IrohTransactionController;
 use App\Middleware\ApiKeyAuthMiddleware;
 use App\Middleware\RateLimitMiddleware;
@@ -322,6 +323,37 @@ $app->group('/api/v1', function ($group) {
             return $controller->getStatus($request, $response);
         });
     }
+});
+
+// Admin routes (outside API group to avoid CORS issues)
+$app->get('/admin', function (Request $request, Response $response) {
+    return $response->withHeader('Location', '/admin/dashboard')->withStatus(302);
+});
+
+$app->get('/admin/login', function (Request $request, Response $response) {
+    $controller = new AdminController();
+    return $controller->login($request, $response);
+});
+
+$app->post('/admin/authenticate', function (Request $request, Response $response) {
+    $controller = new AdminController();
+    return $controller->authenticate($request, $response);
+});
+
+$app->get('/admin/dashboard', function (Request $request, Response $response) {
+    $controller = new AdminController();
+    return $controller->dashboard($request, $response);
+});
+
+// Admin API routes
+$app->get('/admin/api/overview', function (Request $request, Response $response) {
+    $controller = new AdminController();
+    return $controller->getSystemOverview($request, $response);
+});
+
+$app->get('/admin/api/transactions', function (Request $request, Response $response) {
+    $controller = new AdminController();
+    return $controller->getTransactionManagement($request, $response);
 });
 
 // Handle preflight OPTIONS requests
