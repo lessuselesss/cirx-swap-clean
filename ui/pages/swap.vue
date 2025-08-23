@@ -474,24 +474,32 @@
 
             <button
               type="button"
-              :disabled="isButtonShowingDots || loading || quoteLoading || reverseQuoteLoading"
+              :disabled="!isBackendConnected || isButtonShowingDots || loading || quoteLoading || reverseQuoteLoading"
               :style="{
                 width: '100%',
                 padding: '16px 24px',
                 borderRadius: '12px',
                 fontWeight: '600',
                 fontSize: '18px',
-                backgroundColor: isButtonShowingDots ? '#374151' : '#0B5443',
-                color: isButtonShowingDots ? '#9CA3AF' : '#01DA9D',
-                cursor: isButtonShowingDots ? 'not-allowed' : 'pointer',
+                backgroundColor: !isBackendConnected ? '#dc2626' : (isButtonShowingDots ? '#374151' : '#0B5443'),
+                color: !isBackendConnected ? '#ffffff' : (isButtonShowingDots ? '#9CA3AF' : '#01DA9D'),
+                cursor: (!isBackendConnected || isButtonShowingDots) ? 'not-allowed' : 'pointer',
                 textAlign: 'center',
-                opacity: isButtonShowingDots ? '0.6' : '1',
+                opacity: (!isBackendConnected || isButtonShowingDots) ? '0.8' : '1',
                 transition: 'all 0.2s ease',
                 border: 'none'
               }"
               @click="handleSwap"
             >
-              <span v-if="loading">{{ loadingText || 'Processing...' }}</span>
+              <!-- Backend error overlay - shows on top of all other states -->
+              <span v-if="!isBackendConnected" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" style="animation: pulse 2s infinite;">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                </svg>
+                Error: Connect to Backend
+              </span>
+              <!-- Normal CTA states (hidden when backend is disconnected) -->
+              <span v-else-if="loading">{{ loadingText || 'Processing...' }}</span>
               <span v-else-if="quoteLoading || reverseQuoteLoading">
                 {{ reverseQuoteLoading ? 'Calculating...' : 'Getting Quote...' }}
               </span>
@@ -504,7 +512,7 @@
               <span v-else-if="!inputAmount">Enter an amount</span>
               <span v-else-if="recipientAddress && recipientAddressError">Get CIRX Wallet</span>
               <span v-else-if="activeTab === 'liquid'">Buy Liquid CIRX</span>
-              <span v-else>Buy Vested CIRX</span>
+              <span v-else-if="activeTab !== 'liquid'">Buy Vested CIRX</span>
             </button>
           </form>
         </div>
@@ -950,6 +958,10 @@ const isFetchingRecipientBalance = ref(false)
 const showTokenDropdown = ref(false)
 // Track whether user has clicked "Enter Address" button
 const hasClickedEnterAddress = ref(false)
+
+// Backend connectivity state
+const isBackendConnected = ref(true)
+const backendHealthCheckInterval = ref(null)
 // Track address validation state
 const addressValidationState = ref('idle') // 'idle', 'validating', 'valid', 'invalid'
 // Modal state for State 6
@@ -1730,6 +1742,37 @@ const formatAmount = (amount) => {
 }
 
 
+// Backend health check
+const checkBackendHealth = async () => {
+  try {
+    const config = useRuntimeConfig()
+    const apiBaseUrl = config.public.apiBaseUrl || 'http://localhost:8080/api'
+    
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 3000) // 3 second timeout
+    
+    const response = await fetch(`${apiBaseUrl}/v1/health`, {
+      signal: controller.signal,
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    
+    clearTimeout(timeoutId)
+    
+    if (response.ok) {
+      const data = await response.json()
+      isBackendConnected.value = data.status === 'healthy'
+    } else {
+      isBackendConnected.value = false
+    }
+  } catch (error) {
+    console.error('Backend health check failed:', error)
+    isBackendConnected.value = false
+  }
+}
+
 const handleSwap = async () => {
   console.log('🔥 HANDLESWAP CALLED IN SWAP.VUE!', {
     isConnected: isConnected.value,
@@ -1817,8 +1860,22 @@ const handleSwap = async () => {
     }
   }
 
-  // State 5: "Get CIRX Wallet" - Invalid address, show wallet modal
+  // State 5: "Get CIRX Wallet" - Invalid address, clear input for Ethereum/EVM addresses
   if (recipientAddress.value && recipientAddressError.value) {
+    // Check if it's an Ethereum address error - clear the input instead of showing modal
+    if (recipientAddressError.value.includes('Ethereum addresses are not supported')) {
+      recipientAddress.value = ''
+      hasClickedEnterAddress.value = false
+      // Focus the address input after clearing
+      nextTick(() => {
+        const addressInput = addressInputRef.value
+        if (addressInput) {
+          addressInput.focus()
+        }
+      })
+      return
+    }
+    // For other errors, show the modal
     showConfirmationModal.value = true
     return
   }
@@ -2181,7 +2238,12 @@ watch([cirxAmount, inputToken, activeTab], async () => {
 })
 
 watch(recipientAddress, async (newAddress) => {
+  // Do synchronous validation first for immediate error detection
+  validateRecipientAddressSync(newAddress)
+  
+  // Then do async validation if needed
   await validateRecipientAddress(newAddress)
+  
   // Fetch CIRX balance for the new address if it's valid
   if (newAddress && !recipientAddressError.value && addressValidationState.value === 'valid') {
     await fetchCirxBalanceForAddress(newAddress)
@@ -2272,6 +2334,51 @@ const sanitizeAddressInput = (event) => {
   }
 }
 
+// Synchronous validation for immediate format checks (Ethereum/Solana detection)
+const validateRecipientAddressSync = (address) => {
+  if (!address) {
+    recipientAddressError.value = ''
+    recipientAddressType.value = ''
+    recipientCirxBalance.value = null
+    addressValidationState.value = 'idle'
+    return true
+  }
+  
+  // Immediately reject Ethereum addresses (42 chars: 0x + 40 hex)
+  if (isValidEthereumAddress(address)) {
+    recipientAddressError.value = 'Ethereum addresses are not supported. Please enter a valid CIRX address'
+    recipientAddressType.value = ''
+    addressValidationState.value = 'invalid'
+    return false
+  }
+  
+  // Immediately reject Solana addresses
+  if (isValidSolanaAddress(address)) {
+    recipientAddressError.value = 'Solana addresses are not supported. Please enter a valid CIRX address'
+    recipientAddressType.value = ''
+    addressValidationState.value = 'invalid'
+    return false
+  }
+  
+  // Clear errors for partial addresses being typed
+  if (address === '0' || (address.startsWith('0x') && address.length < 66)) {
+    recipientAddressError.value = ''
+    recipientAddressType.value = ''
+    addressValidationState.value = 'idle'
+    return false
+  }
+  
+  // Invalid format check
+  if (address.startsWith('0') && !address.startsWith('0x')) {
+    recipientAddressError.value = 'Invalid address format. Circular addresses must start with "0x"'
+    recipientAddressType.value = ''
+    addressValidationState.value = 'invalid'
+    return false
+  }
+  
+  return true
+}
+
 const validateRecipientAddress = async (address) => {
   if (!address) {
     recipientAddressError.value = ''
@@ -2281,47 +2388,22 @@ const validateRecipientAddress = async (address) => {
     return true
   }
 
-  // Handle partial addresses that are still being typed (don't show errors)
-  if (address === '0') {
-    // Just "0" - user starting to type, no error
-    addressValidationState.value = 'idle'
-    recipientAddressError.value = ''
-    recipientAddressType.value = ''
+  // Skip validation if synchronous validation already handled these cases
+  // The sync validation handles: Ethereum, Solana, partial addresses, invalid formats
+  if (recipientAddressError.value) {
+    // Error already set by sync validation, skip async validation
     return false
   }
-
-  // Check for valid partial 0x format
-  if (address.startsWith('0x') && address.length < 66) {
-    // User is typing valid 0x format, don't show errors yet
-    addressValidationState.value = 'idle'
-    recipientAddressError.value = ''
-    recipientAddressType.value = ''
+  
+  // Skip partial addresses that were already handled
+  if (address === '0' || (address.startsWith('0x') && address.length < 66)) {
     return false
   }
-
-  // Check for invalid formats (starts with 0 but not 0x, or other invalid patterns)
-  if (address.startsWith('0') && !address.startsWith('0x')) {
-    recipientAddressError.value = 'Invalid address format. Circular addresses must start with "0x"'
-    recipientAddressType.value = ''
-    addressValidationState.value = 'invalid'
-    return false
-  }
-
-  // Note: isAddressPending only checks format, let validation continue for 66-char addresses
-
-  // Reject Ethereum addresses with specific error message
-  if (isValidEthereumAddress(address)) {
-    recipientAddressError.value = 'Ethereum addresses are not supported. Please enter a valid CIRX address'
-    recipientAddressType.value = ''
-    addressValidationState.value = 'invalid'
-    return false
-  }
-
-  // Reject Solana addresses with specific error message  
-  if (isValidSolanaAddress(address)) {
-    recipientAddressError.value = 'Solana addresses are not supported. Please enter a valid CIRX address'
-    recipientAddressType.value = ''
-    addressValidationState.value = 'invalid'
+  
+  // Skip invalid format addresses that were already handled
+  if ((address.startsWith('0') && !address.startsWith('0x')) ||
+      isValidEthereumAddress(address) || 
+      isValidSolanaAddress(address)) {
     return false
   }
 
@@ -2408,6 +2490,14 @@ const handleChainAdded = () => {
 
 // Close dropdown and slider when clicking outside
 onMounted(async () => {
+  // Start backend health check immediately
+  await checkBackendHealth()
+  
+  // Set up periodic health check every 10 seconds
+  backendHealthCheckInterval.value = setInterval(() => {
+    checkBackendHealth()
+  }, 10000)
+  
   // Fetch OTC configuration on component mount
   await fetchOtcConfig()
   
@@ -2494,6 +2584,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
   if (countdownTimer) clearInterval(countdownTimer)
+  if (backendHealthCheckInterval.value) clearInterval(backendHealthCheckInterval.value)
 })
 
 // Head configuration
@@ -3062,6 +3153,19 @@ input[type="number"] {
   50% { 
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+/* Pulse animation for backend error icon */
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
   }
 }
 
