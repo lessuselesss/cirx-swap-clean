@@ -2336,6 +2336,8 @@ const sanitizeAddressInput = (event) => {
 
 // Synchronous validation for immediate format checks (Ethereum/Solana detection)
 const validateRecipientAddressSync = (address) => {
+  console.log('🔍 Sync validation called with:', address, 'length:', address?.length)
+  
   if (!address) {
     recipientAddressError.value = ''
     recipientAddressType.value = ''
@@ -2344,24 +2346,18 @@ const validateRecipientAddressSync = (address) => {
     return true
   }
   
-  // Immediately reject Ethereum addresses (42 chars: 0x + 40 hex)
-  if (isValidEthereumAddress(address)) {
+  // Check for Ethereum addresses FIRST before treating as partial
+  // Ethereum addresses are exactly 42 chars (0x + 40 hex)
+  if (address.length === 42 && isValidEthereumAddress(address)) {
+    console.log('🔴 Ethereum address detected:', address)
     recipientAddressError.value = 'Ethereum addresses are not supported. Please enter a valid CIRX address'
     recipientAddressType.value = ''
     addressValidationState.value = 'invalid'
     return false
   }
   
-  // Immediately reject Solana addresses
-  if (isValidSolanaAddress(address)) {
-    recipientAddressError.value = 'Solana addresses are not supported. Please enter a valid CIRX address'
-    recipientAddressType.value = ''
-    addressValidationState.value = 'invalid'
-    return false
-  }
-  
-  // Clear errors for partial addresses being typed
-  if (address === '0' || (address.startsWith('0x') && address.length < 66)) {
+  // Clear errors for partial addresses being typed (but not complete Ethereum addresses)
+  if (address === '0' || (address.startsWith('0x') && address.length < 66 && address.length !== 42)) {
     recipientAddressError.value = ''
     recipientAddressType.value = ''
     addressValidationState.value = 'idle'
@@ -2371,6 +2367,29 @@ const validateRecipientAddressSync = (address) => {
   // Invalid format check
   if (address.startsWith('0') && !address.startsWith('0x')) {
     recipientAddressError.value = 'Invalid address format. Circular addresses must start with "0x"'
+    recipientAddressType.value = ''
+    addressValidationState.value = 'invalid'
+    return false
+  }
+  
+  // Check if it looks like a valid CIRX address (66 chars: 0x + 64 hex)
+  if (address.length === 66 && address.startsWith('0x')) {
+    // Valid CIRX format - let async validation verify it exists on network
+    // Don't set errors here
+    return true
+  }
+  
+  // Check for Solana addresses
+  if (isValidSolanaAddress(address)) {
+    recipientAddressError.value = 'Solana addresses are not supported. Please enter a valid CIRX address'
+    recipientAddressType.value = ''
+    addressValidationState.value = 'invalid'
+    return false
+  }
+  
+  // For any other length that's not partial, it's invalid
+  if (address.startsWith('0x') && address.length > 66) {
+    recipientAddressError.value = 'Invalid address format. Address is too long'
     recipientAddressType.value = ''
     addressValidationState.value = 'invalid'
     return false
@@ -2458,10 +2477,13 @@ const validateRecipientAddress = async (address) => {
     }
   }
 
-  // Invalid address format
-  recipientAddressError.value = 'Invalid Circular Protocol Address'
-  recipientAddressType.value = ''
-  addressValidationState.value = 'invalid'
+  // If we reach here and there's no error already set, it's an invalid format
+  // But DON'T overwrite errors that were already set by sync validation
+  if (!recipientAddressError.value) {
+    recipientAddressError.value = 'Invalid Circular Protocol Address'
+    recipientAddressType.value = ''
+    addressValidationState.value = 'invalid'
+  }
   return false
 }
 
