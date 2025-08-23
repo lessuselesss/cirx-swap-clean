@@ -24,7 +24,7 @@
         pattern="[0-9,]*\.?[0-9]*"
         placeholder="0.0"
         :class="[
-          'w-full pl-4 pr-32 py-4 text-xl font-semibold bg-transparent border-4 border-green-400 rounded-xl rounded-bl-none rounded-br-none text-white placeholder-gray-500 transition-all duration-300 shadow-lg shadow-green-400/50 ring-2 ring-green-300',
+          'w-full pl-4 pr-32 py-4 text-xl font-semibold bg-transparent border-4 border-green-400 border-b-0 rounded-t-xl text-white placeholder-gray-500 transition-all duration-300',
           activeTab === 'liquid' 
             ? 'hover:bg-circular-primary/5 focus:bg-circular-primary/5 focus:ring-2 focus:ring-circular-primary/50 focus:outline-none' 
             : 'hover:bg-circular-purple/5 focus:bg-circular-purple/5 focus:ring-2 focus:ring-circular-purple/50 focus:outline-none'

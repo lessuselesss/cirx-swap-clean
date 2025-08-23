@@ -1739,6 +1739,19 @@ const handleSwap = async () => {
     inputAmount: inputAmount.value,
   })
   
+  // PRIORITY: Handle wallet connection states FIRST (before input validation)
+  if (!isConnected.value && (!recipientAddress.value || recipientAddress.value.trim() === '')) {
+    console.log('🔥 State 1: Connect - Opening wallet modal')
+    open() // Open AppKit modal
+    return
+  }
+  
+  if (!isConnected.value && recipientAddress.value && recipientAddress.value.trim() !== '') {
+    console.log('🔥 State 2: Connect Wallet - Opening wallet modal')
+    open() // Open AppKit modal
+    return
+  }
+  
   // If button shows "Enter Address", focus the address input field instead of swapping
   if (isConnected.value && (!recipientAddress.value || recipientAddress.value.trim() === '')) {
     console.log('🔥 No address entered, focusing address input field')
@@ -1768,20 +1781,6 @@ const handleSwap = async () => {
     quoteLoading: quoteLoading.value,
     reverseQuoteLoading: reverseQuoteLoading.value
   })
-  
-  // Handle different CTA states - wallet connection takes priority
-  if (!isConnected.value && (!recipientAddress.value || recipientAddress.value.trim() === '')) {
-    console.log('🔥 State 1: Connect - Opening wallet modal')
-    // State: "Connect" - Open Reown modal
-    open() // Open AppKit modal
-    return
-  }
-  
-  // State 2: "Connect Wallet" - Has address input but wallet not connected
-  if (!isConnected.value && recipientAddress.value && recipientAddress.value.trim() !== '') {
-    open() // Open Reown modal
-    return
-  }
   
   // State 3: "Enter Address" - Wallet connected but no address input
   if (isConnected.value && (!recipientAddress.value || recipientAddress.value.trim() === '')) {
@@ -2178,7 +2177,7 @@ watch([cirxAmount, inputToken, activeTab], async () => {
       console.error('Reverse quote calculation failed:', error)
       reverseQuoteLoading.value = false
     }
-  }, 200)
+  }, 10000)
 })
 
 watch(recipientAddress, async (newAddress) => {
@@ -2774,31 +2773,44 @@ useHead({
 
 .input-section-top {
   border-radius: 12px 12px 0 0;
-  margin-bottom: 8px;
+  margin-bottom: 0;
   /* Consistent padding for alignment */
   padding: 20px 16px;
-  background: rgba(21, 30, 40, 0.3);
+  background: #0D141B;
   backdrop-filter: none;
   border: 1px solid #0D141B;
+  border-bottom: none;
 }
 
 .input-section-bottom {
   border-radius: 0 0 12px 12px;
-  margin-top: 8px;
+  margin-top: 0;
   /* Consistent padding for alignment */
   padding: 20px 16px;
-  background: rgba(21, 30, 40, 0.05);
+  background: #050A0F;
   backdrop-filter: none;
-  border: 1px solid #0D141B;
+  border: 1px solid #050A0F;
+  border-top: none;
 }
 
 .input-section:hover {
-  background: rgba(55, 65, 81, 0.1);
+  background: #151E28;
 }
 
 /* Simple focus states - just background color change */
 .input-section:focus-within {
   background: #151E28;
+}
+
+/* Opposite styling when the other field is selected */
+.swap-container:has(.input-section-top:focus-within) .input-section-bottom {
+  background: #0D141B !important;
+  border-color: #0D141B !important;
+}
+
+.swap-container:has(.input-section-bottom:focus-within) .input-section-top {
+  background: #050A0F !important;
+  border-color: #050A0F !important;
 }
 
 .input-header {

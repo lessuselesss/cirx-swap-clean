@@ -20,42 +20,47 @@
       <!-- Swap Form -->
       <div>
         
-        <!-- Sell Field Section -->
-        <div class="mb-6">
-          <SwapSellField
-            v-model:amount="inputAmount"
-            v-model:token="inputToken"
-            :balance="inputBalance"
-            :loading="loading"
-            :active-tab="activeTab"
-            @set-max="setMaxAmount"
-            @input-changed="handleInputAmountChange"
-          />
-        </div>
+        <!-- Combined Sell/Buy Fields with Arrow Overlay -->
+        <div class="relative">
+          <!-- Sell Field Section -->
+          <div>
+            <SwapSellField
+              v-model:amount="inputAmount"
+              v-model:token="inputToken"
+              :balance="inputBalance"
+              :loading="loading"
+              :active-tab="activeTab"
+              @set-max="setMaxAmount"
+              @input-changed="handleInputAmountChange"
+            />
+          </div>
 
-        <!-- Arrow -->
-        <div class="flex justify-center -my-3 relative z-10">
-          <div class="p-2 bg-gray-800 rounded-full border border-gray-700 shadow-lg">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="text-gray-400">
-              <path d="M7 13L12 18L17 13M7 6L12 11L17 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+          <!-- Buy Field Section - positioned directly against sell field -->
+          <div>
+            <SwapBuyField
+              v-model:cirx-amount="cirxAmount"
+              :quote="quote"
+              :active-tab="activeTab"
+              :loading="loading"
+              :editable="true"
+              :discount-tiers="discountTiers"
+              :selected-tier="selectedTier"
+              @cirx-changed="handleCirxAmountChange"
+              @tier-changed="handleTierChange"
+            />
+          </div>
+
+          <!-- Arrow - positioned as absolute overlay -->
+          <div class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
+            <div class="p-2 bg-gray-800 rounded-full border border-gray-700 shadow-lg">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="text-gray-400">
+                <path d="M7 13L12 18L17 13M7 6L12 11L17 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
           </div>
         </div>
 
-        <!-- Buy Field Section -->
-        <div class="mb-6">
-          <SwapBuyField
-            v-model:cirx-amount="cirxAmount"
-            :quote="quote"
-            :active-tab="activeTab"
-            :loading="loading"
-            :editable="true"
-            :discount-tiers="discountTiers"
-            :selected-tier="selectedTier"
-            @cirx-changed="handleCirxAmountChange"
-            @tier-changed="handleTierChange"
-          />
-        </div>
+        <div class="mb-6"></div>
 
         <!-- Recipient Address (always shown now per new workflow) -->
         <RecipientAddressInput

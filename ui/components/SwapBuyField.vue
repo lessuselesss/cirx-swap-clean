@@ -19,7 +19,7 @@
         pattern="[0-9,]*\.?[0-9]*"
         placeholder="0.0"
         :class="[
-          'w-full pl-4 pr-20 py-4 text-xl font-semibold bg-transparent border-4 border-green-400 rounded-xl rounded-tl-none rounded-tr-none text-white placeholder-gray-500 transition-all duration-300 shadow-lg shadow-green-400/50 ring-2 ring-green-300',
+          'w-full pl-4 pr-20 py-4 text-xl font-semibold bg-transparent border-4 border-green-400 border-t-0 rounded-b-xl text-white placeholder-gray-500 transition-all duration-300',
           'hover:bg-circular-primary/5 focus:bg-circular-primary/5 focus:ring-2 focus:ring-circular-primary/50 focus:outline-none',
           loading && 'opacity-50'
         ]"
@@ -27,7 +27,7 @@
       <div 
         v-else
         :class="[
-          'w-full pl-4 pr-20 py-4 text-xl font-semibold bg-transparent border-4 border-green-400 rounded-xl rounded-tl-none rounded-tr-none text-white transition-all duration-300 shadow-lg shadow-green-400/50 ring-2 ring-green-300'
+          'w-full pl-4 pr-20 py-4 text-xl font-semibold bg-transparent border-4 border-green-400 border-t-0 rounded-b-xl text-white transition-all duration-300'
         ]"
       >
         <span :class="[
