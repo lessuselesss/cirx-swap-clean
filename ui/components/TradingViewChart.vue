@@ -15,7 +15,7 @@ import { computed } from 'vue'
 const props = defineProps({
   symbol: {
     type: String,
-    default: 'BTCUSDT' // Use a real trading pair that TradingView supports
+    default: 'CIRX/USDT' // Use CIRX trading pair
   },
   interval: {
     type: String,

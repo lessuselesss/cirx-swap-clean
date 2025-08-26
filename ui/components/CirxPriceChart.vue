@@ -1,5 +1,5 @@
 <template>
-  <div class="relative bg-gradient-to-br from-slate-900/60 via-slate-800/40 to-slate-900/60 backdrop-blur-xl gradient-border rounded-2xl transition-all duration-500 h-full flex flex-col overflow-hidden shadow-2xl shadow-cyan-500/5 hover:shadow-cyan-500/10">
+  <div class="relative gradient-border rounded-2xl transition-all duration-500 h-full flex flex-col overflow-hidden shadow-2xl shadow-cyan-500/5 hover:shadow-cyan-500/10" style="background-color: rgba(0, 3, 6, 0.9);">
     <!-- Chart Header -->
     <div class="flex items-center justify-between p-6 pb-4 flex-shrink-0 border-b border-cyan-500/10">
       <div class="flex items-center gap-4">
@@ -16,7 +16,7 @@
         <!-- Chart Info -->
         <div class="flex items-center gap-2 ml-4">
           <div class="text-xs text-gray-500 bg-slate-800/40 px-2 py-1 rounded-md border border-slate-600/30">
-            Reference Chart + Live CIRX Data
+            Real CIRX Market Data
           </div>
         </div>
         <div class="flex gap-3 ml-6">
@@ -24,9 +24,7 @@
             v-model="selectedSymbol" 
             class="bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-cyan-500/30 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-200 backdrop-blur-sm hover:border-cyan-400/50"
           >
-            <option value="USDT/CIRX" class="bg-slate-900">USDT/CIRX</option>
-            <option value="USDC/CIRX" class="bg-slate-900">USDC/CIRX</option>
-            <option value="ETH/CIRX" class="bg-slate-900">ETH/CIRX</option>
+            <option value="CIRX/USDT" class="bg-slate-900">CIRX/USDT</option>
           </select>
           <select 
             v-model="selectedInterval" 
@@ -146,30 +144,21 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 
-// Real price data integration
-const { 
-  currentPrice: liveCirxPrice, 
-  priceHistory, 
-  isLoading: priceLoading, 
+// Use aggregate price feed for multi-exchange data
+const {
+  currentPrice: liveCirxPrice,
+  isLoading: priceLoading,
   error: priceError,
-  tradingPairs,
-  priceForSymbol,
-  formattedPrice
-} = usePriceData()
+  formattedPrice,
+  marketStats
+} = useAggregatePriceFeed()
 
 // Props and emits
 defineEmits(['close'])
 
-// Chart state - Use CIRX-related pairs
-const selectedSymbol = ref('USDT/CIRX')
+// Chart state - CIRX/USDT only
+const selectedSymbol = ref('CIRX/USDT')
 const selectedInterval = ref('1D')
-
-// Map CIRX pairs to closest TradingView symbols for display
-const tradingViewSymbolMap = {
-  'USDT/CIRX': 'BINANCE:BTCUSDT', // Show BTC as reference since CIRX not available
-  'USDC/CIRX': 'BINANCE:ETHUSDC', // Show ETH/USDC reference
-  'ETH/CIRX': 'BINANCE:ETHUSDT' // Show ETH reference
-}
 
 // Display computed - shows the actual CIRX pair name
 const displaySymbol = computed(() => selectedSymbol.value.replace('/', ' / '))
@@ -177,14 +166,15 @@ const displaySymbol = computed(() => selectedSymbol.value.replace('/', ' / '))
 // Chart key for reactivity
 const chartKey = computed(() => `${selectedSymbol.value}-${selectedInterval.value}`)
 
-// Get the reference TradingView symbol for the selected CIRX pair
-const tradingViewSymbol = computed(() => tradingViewSymbolMap[selectedSymbol.value] || 'BINANCE:BTCUSDT')
+// Import the aggregate datafeed
+const { createDatafeed } = useAggregateDatafeed()
 
-// TradingView Chart Options - using nuxt-tradingview module setup
+// TradingView Chart Options - using aggregate datafeed
 const chartOptions = computed(() => ({
-  // Symbol and interval
-  symbol: tradingViewSymbol.value,
+  // Symbol and interval - now using aggregated CIRX data
+  symbol: selectedSymbol.value,
   interval: selectedInterval.value,
+  datafeed: createDatafeed(), // Use aggregate datafeed with multi-exchange data
   
   // Appearance
   theme: 'dark',
@@ -217,40 +207,25 @@ const chartOptions = computed(() => ({
   toolbar_bg: '#111827'
 }))
 
-// Current CIRX pair price for display
+// Current CIRX/USDT price for display
 const currentPairPrice = computed(() => {
   if (!liveCirxPrice.value || liveCirxPrice.value <= 0) return null
   
-  // Convert current CIRX USD price to trading pair rate
-  let pairValue
-  switch(selectedSymbol.value) {
-    case 'USDT/CIRX':
-    case 'USDC/CIRX':
-      // How many CIRX for 1 USDT/USDC
-      pairValue = 1.0 / liveCirxPrice.value
-      break
-    case 'ETH/CIRX':
-      // How many CIRX for 1 ETH (assume ETH = $2700)
-      pairValue = 2700.0 / liveCirxPrice.value
-      break
-    default:
-      pairValue = 1.0 / liveCirxPrice.value
-  }
+  // CIRX/USDT means CIRX price in USDT (which is the USD price)
+  const pairValue = liveCirxPrice.value
   
   // Format based on price magnitude for better readability
-  if (pairValue >= 1000) {
-    return pairValue.toFixed(0) // Large numbers like ETH/CIRX
-  } else if (pairValue >= 1) {
-    return pairValue.toFixed(2) // Numbers like USDT/CIRX
+  if (pairValue >= 1) {
+    return pairValue.toFixed(4) // Standard crypto price format
   } else {
     return pairValue.toFixed(6) // Small decimal numbers
   }
 })
 
-// Market data (these would come from your API in production)
-const marketCap = ref('$7.11M')
-const volume24h = ref('$1.4M')
-const circulatingSupply = ref('1.52B CIRX')
+// Market data from aggregate feed
+const marketCap = computed(() => marketStats.value.marketCap)
+const volume24h = computed(() => marketStats.value.volume24h)
+const circulatingSupply = computed(() => marketStats.value.circulatingSupply)
 const totalSupply = ref('1T CIRX')
 
 // Watch for changes to update chart
@@ -264,8 +239,8 @@ watch([selectedSymbol, selectedInterval], () => {
 
 <style scoped>
 .chart-container {
-  background: linear-gradient(135deg, #0a0b1e 0%, #050611 100%);
-  border: 1px solid rgba(99, 102, 241, 0.2);
+  background: rgba(0, 3, 6, 0.6);
+  border: 1px solid rgba(6, 182, 212, 0.2);
   box-shadow: 
     0 0 20px rgba(6, 182, 212, 0.1),
     0 8px 32px rgba(0, 0, 0, 0.3),

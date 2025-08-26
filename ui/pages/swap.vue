@@ -943,7 +943,7 @@ const inputToken = ref('')
 const loading = ref(false)
 const loadingText = ref('')
 const quote = ref(null)
-const showChart = ref(false)
+const showChart = ref(true)
 const showStaking = ref(false)
 
 
