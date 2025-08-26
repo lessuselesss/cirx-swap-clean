@@ -4,14 +4,14 @@ services:
   # IROH networking bridge
   iroh-bridge:
     build: 
-      context: ./iroh-bridge
+      context: .
       dockerfile: Dockerfile
     container_name: cirx-iroh-bridge
     ports:
       - "9090:9090"      # HTTP bridge API
       - "3478:3478/udp"  # STUN port for relay
     volumes:
-      - ./iroh-bridge/config:/app/config:ro
+      - ./config:/app/config:ro
       - iroh-data:/app/data
     environment:
       - RUST_LOG=iroh_bridge=info,iroh=info
@@ -30,14 +30,14 @@ services:
   # Backend PHP service with IROH integration
   backend:
     build: 
-      context: ./backend
+      context: ../backend
       dockerfile: Dockerfile
     container_name: cirx-backend
     ports:
       - "8080:8080"
     volumes:
-      - ./backend:/var/www/html
-      - ./backend/.env:/var/www/html/.env:ro
+      - ../backend:/var/www/html
+      - ../backend/.env:/var/www/html/.env:ro
     environment:
       - IROH_ENABLED=true
       - IROH_BRIDGE_URL=http://iroh-bridge:9090
@@ -55,13 +55,13 @@ services:
   # Frontend Nuxt.js service
   frontend:
     build: 
-      context: ./ui
+      context: ../ui
       dockerfile: Dockerfile
     container_name: cirx-frontend
     ports:
       - "3000:3000"
     volumes:
-      - ./ui:/app
+      - ../ui:/app
       - /app/node_modules
     environment:
       - NUXT_PUBLIC_IROH_ENABLED=true
@@ -84,7 +84,7 @@ services:
       - POSTGRES_PASSWORD=cirx_password
     volumes:
       - postgres-data:/var/lib/postgresql/data
-      - ./backend/database/e2e-setup.sql:/docker-entrypoint-initdb.d/init.sql
+      - ../testing/data/e2e-setup.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "5432:5432"
     networks:

@@ -1,5 +1,5 @@
 {
-  "indexed_at": "2025-08-26T15:03:26.559614",
+  "indexed_at": "2025-08-26T15:05:46.235075",
   "root": ".",
   "project_structure": {
     "type": "tree",
@@ -8,7 +8,6 @@
       ".",
       "\u251c\u2500\u2500 _archive/",
       "\u251c\u2500\u2500 backend/ (87 files)",
-      "\u2502   \u251c\u2500\u2500 bin/",
       "\u2502   \u251c\u2500\u2500 database/ (6 files)",
       "\u2502   \u2502   \u2514\u2500\u2500 migrations/ (4 files)",
       "\u2502   \u251c\u2500\u2500 public/ (2 files)",
@@ -437,7 +436,7 @@
   },
   "stats": {
     "total_files": 242,
-    "total_directories": 83,
+    "total_directories": 82,
     "fully_parsed": {
       "javascript": 61,
       "typescript": 10,
@@ -23554,5 +23553,5 @@
       "@reown/appkit/networks"
     ]
   },
-  "staleness_check": 1755637407.430467
+  "staleness_check": 1755637547.163056
 }
