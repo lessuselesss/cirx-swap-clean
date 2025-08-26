@@ -37,9 +37,24 @@
         
         <!-- Status Check Card -->
         <div class="bg-gray-900/95 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-8 mb-6">
-          <h1 class="text-2xl font-bold text-white mb-6 text-center">
+          <h1 class="text-2xl font-bold text-white mb-4 text-center">
             Transaction Status
           </h1>
+          
+          <!-- Timing Notice -->
+          <div class="bg-blue-900/30 border border-blue-600/30 rounded-xl p-4 mb-6">
+            <div class="flex items-start gap-3">
+              <div class="w-5 h-5 mt-0.5 text-blue-400">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <div class="text-sm text-blue-200">
+                <div class="font-medium mb-1">Transaction Processing Time</div>
+                <div class="text-blue-300">Transactions typically take <strong>2-5 minutes</strong> to complete. Payment verification and CIRX transfers are processed automatically in the background.</div>
+              </div>
+            </div>
+          </div>
 
           <!-- Swap ID Input -->
           <div class="mb-6">
@@ -54,11 +69,11 @@
                 class="flex-1 px-4 py-3 bg-gray-800/70 border border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-circular-primary focus:border-transparent"
               />
               <button
-                @click="console.log('🔘 Check Status button clicked'); checkStatus()"
-                :disabled="!swapId || loading"
+                @click="console.log('🔘 Check Status button clicked'); handleCheckStatus()"
+                :disabled="!swapId || loading || isRateLimited"
                 class="px-6 py-3 bg-circular-primary hover:bg-circular-primary/80 disabled:bg-gray-600 disabled:opacity-50 text-white font-medium rounded-xl transition-colors"
               >
-                {{ loading ? 'Checking...' : 'Check Status' }}
+                {{ getCheckButtonText() }}
               </button>
             </div>
           </div>
@@ -66,8 +81,10 @@
           <!-- Last Swap ID -->
           <div v-if="lastSwapId && !swapId" class="mb-4">
             <button
-              @click="swapId = lastSwapId; checkStatus()"
-              class="text-sm text-circular-primary hover:text-circular-primary/80 underline"
+              @click="swapId = lastSwapId; handleCheckStatus()"
+              :disabled="isRateLimited"
+              :class="isRateLimited ? 'text-gray-500 cursor-not-allowed' : 'text-circular-primary hover:text-circular-primary/80'"
+              class="text-sm underline"
             >
               Check status of last swap: {{ lastSwapId.slice(0, 8) }}...
             </button>
@@ -118,12 +135,17 @@
               <!-- Refresh Button -->
               <div class="pt-4">
                 <button
-                  @click="console.log('🔄 Refresh Status button clicked'); checkStatus()"
-                  :disabled="loading"
+                  @click="console.log('🔄 Refresh Status button clicked'); handleRefreshStatus()"
+                  :disabled="loading || isRateLimited"
                   class="px-4 py-2 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white text-sm rounded-lg transition-colors"
                 >
-                  {{ loading ? 'Refreshing...' : 'Refresh Status' }}
+                  {{ getRefreshButtonText() }}
                 </button>
+                
+                <!-- Rate limit notice -->
+                <div v-if="rateLimitCooldown > 0" class="mt-2 text-xs text-gray-400">
+                  Please wait {{ rateLimitCooldown }}s before refreshing again
+                </div>
               </div>
             </div>
           </div>
@@ -197,7 +219,7 @@ definePageMeta({
 })
 
 // Backend API integration
-const { getTransactionStatus, isLoading, lastError } = useBackendApi()
+const { getTransactionStatus } = useBackendApi()
 
 // Component state
 const swapId = ref('')
@@ -205,6 +227,39 @@ const status = ref(null)
 const error = ref(null)
 const loading = ref(false)
 const lastSwapId = ref(null)
+
+// Rate limiting state
+const lastRequestTime = ref(0)
+const rateLimitCooldown = ref(0)
+const isRateLimited = ref(false)
+const RATE_LIMIT_DELAY = 10000 // 10 seconds between requests
+
+// Rate limiting logic
+const startCooldown = () => {
+  lastRequestTime.value = Date.now()
+  isRateLimited.value = true
+  
+  const updateCooldown = () => {
+    const elapsed = Date.now() - lastRequestTime.value
+    const remaining = Math.max(0, RATE_LIMIT_DELAY - elapsed)
+    
+    if (remaining > 0) {
+      rateLimitCooldown.value = Math.ceil(remaining / 1000)
+      setTimeout(updateCooldown, 1000)
+    } else {
+      rateLimitCooldown.value = 0
+      isRateLimited.value = false
+    }
+  }
+  
+  updateCooldown()
+}
+
+// Check if rate limited
+const canMakeRequest = () => {
+  const elapsed = Date.now() - lastRequestTime.value
+  return elapsed >= RATE_LIMIT_DELAY
+}
 
 // Load last swap ID from localStorage
 onMounted(() => {
@@ -214,11 +269,44 @@ onMounted(() => {
   const route = useRoute()
   if (route.query.swapId) {
     swapId.value = route.query.swapId
+    // Allow initial load without rate limiting
     checkStatus()
   }
 })
 
-// Check transaction status
+// Rate-limited handlers
+const handleCheckStatus = () => {
+  if (!canMakeRequest()) {
+    console.log('⏱️ Request rate limited')
+    return
+  }
+  startCooldown()
+  checkStatus()
+}
+
+const handleRefreshStatus = () => {
+  if (!canMakeRequest()) {
+    console.log('⏱️ Refresh rate limited')
+    return
+  }
+  startCooldown()
+  checkStatus()
+}
+
+// Button text helpers
+const getCheckButtonText = () => {
+  if (loading.value) return 'Checking...'
+  if (isRateLimited.value && rateLimitCooldown.value > 0) return `Wait ${rateLimitCooldown.value}s`
+  return 'Check Status'
+}
+
+const getRefreshButtonText = () => {
+  if (loading.value) return 'Refreshing...'
+  if (isRateLimited.value && rateLimitCooldown.value > 0) return `Wait ${rateLimitCooldown.value}s`
+  return 'Refresh Status'
+}
+
+// Check transaction status (internal method)
 const checkStatus = async () => {
   console.log('🔍 Status check initiated for swapId:', swapId.value)
   
