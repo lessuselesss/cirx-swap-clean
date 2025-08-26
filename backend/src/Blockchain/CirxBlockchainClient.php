@@ -250,7 +250,8 @@ class CirxBlockchainClient extends AbstractBlockchainClient
             // Try hexadecimal payload format for amount
             // Convert amount to wei (18 decimals) and then to hex
             $amountWei = bcmul($amount, bcpow('10', $this->cirxDecimals));
-            $payload = '0x' . dechex($amountWei);
+            // Convert BC math result to hex - handle large numbers properly
+            $payload = '0x' . $this->bcToHex($amountWei);
             
             // Calculate TxID as sha256 hash - try different approaches based on SDK patterns
             $fromClean = str_replace('0x', '', $this->cirxWalletAddress);
@@ -661,6 +662,29 @@ class CirxBlockchainClient extends AbstractBlockchainClient
         return $this->cirxApi->getVersion();
     }
     
+    /**
+     * Convert BC Math arbitrary precision number to hexadecimal
+     * Handles large numbers that dechex() cannot process
+     * @param string $number BC Math number as string
+     * @return string Hexadecimal representation without 0x prefix
+     */
+    private function bcToHex(string $number): string
+    {
+        // Handle zero case
+        if (bccomp($number, '0', 0) === 0) {
+            return '0';
+        }
+
+        $hex = '';
+        while (bccomp($number, '0', 0) > 0) {
+            $remainder = bcmod($number, '16');
+            $hex = dechex((int)$remainder) . $hex;
+            $number = bcdiv($number, '16', 0);
+        }
+
+        return $hex;
+    }
+
     /**
      * Get blockchain address based on environment
      * @return string Blockchain address for current environment
