@@ -14,10 +14,10 @@
             </div>
             <div class="flex items-center gap-2 sm:gap-4">
               <NuxtLink 
-                to="/history" 
+                to="/transactions" 
                 class="px-3 py-2 text-gray-400 hover:text-white transition-colors text-sm font-medium"
               >
-                History
+                Transactions
               </NuxtLink>
                 <ReownWalletButton />
             </div>

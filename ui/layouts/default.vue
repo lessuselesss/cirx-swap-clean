@@ -15,9 +15,6 @@
             <NuxtLink to="/swap" class="nav-link">
               Swap
             </NuxtLink>
-            <NuxtLink to="/pool" class="nav-link">
-              Pool
-            </NuxtLink>
             <button class="connect-wallet-btn" @click="handleConnectWallet">
               Connect Wallet
             </button>
