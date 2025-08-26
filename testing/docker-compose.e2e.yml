@@ -13,7 +13,7 @@ services:
       - "5433:5432"
     volumes:
       - postgres_e2e_data:/var/lib/postgresql/data
-      - ./backend/database/e2e-setup.sql:/docker-entrypoint-initdb.d/01-setup.sql
+      - ./data/e2e-setup.sql:/docker-entrypoint-initdb.d/01-setup.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U cirx_test -d cirx_e2e_test"]
       interval: 10s
@@ -41,8 +41,8 @@ services:
   # Backend API service
   backend-e2e:
     build:
-      context: ./backend
-      dockerfile: Dockerfile.e2e
+      context: ../backend
+      dockerfile: ../testing/docker/backend.e2e.Dockerfile
     environment:
       - APP_ENV=e2e_testing
       - APP_DEBUG=true
@@ -92,8 +92,8 @@ services:
       redis-e2e:
         condition: service_healthy
     volumes:
-      - ./backend:/app
-      - ./backend/storage/logs:/app/storage/logs
+      - ../backend:/app
+      - ../backend/storage/logs:/app/storage/logs
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/api/v1/health"]
       interval: 30s
@@ -106,8 +106,8 @@ services:
   # Frontend application
   frontend-e2e:
     build:
-      context: ./ui
-      dockerfile: Dockerfile.e2e
+      context: ../ui
+      dockerfile: ../testing/docker/frontend.e2e.Dockerfile
     environment:
       - NODE_ENV=test
       - NUXT_API_BASE_URL=http://backend-e2e:8080
@@ -120,7 +120,7 @@ services:
       backend-e2e:
         condition: service_healthy
     volumes:
-      - ./ui:/app
+      - ../ui:/app
       - /app/node_modules
       - /app/.nuxt
     healthcheck:
@@ -135,8 +135,8 @@ services:
   # Playwright test runner
   playwright-e2e:
     build:
-      context: ./ui
-      dockerfile: Dockerfile.playwright
+      context: ../ui
+      dockerfile: ../testing/docker/playwright.Dockerfile
     environment:
       - NODE_ENV=test
       - BASE_URL=http://frontend-e2e:3000
@@ -148,10 +148,10 @@ services:
       backend-e2e:
         condition: service_healthy
     volumes:
-      - ./ui:/app
+      - ../ui:/app
       - playwright_cache:/ms-playwright
-      - ./ui/test-results:/app/test-results
-      - ./ui/playwright-report:/app/playwright-report
+      - ../ui/test-results:/app/test-results
+      - ../ui/playwright-report:/app/playwright-report
     networks:
       - e2e-network
     profiles:
@@ -160,8 +160,8 @@ services:
   # PHPUnit backend test runner
   phpunit-e2e:
     build:
-      context: ./backend
-      dockerfile: Dockerfile.e2e
+      context: ../backend
+      dockerfile: ../testing/docker/backend.e2e.Dockerfile
     environment:
       - APP_ENV=e2e_testing
       - E2E_TESTING_ENABLED=true
@@ -178,9 +178,9 @@ services:
       redis-e2e:
         condition: service_healthy
     volumes:
-      - ./backend:/app
-      - ./backend/reports:/app/reports
-    command: php vendor/bin/phpunit --configuration=phpunit.e2e.xml --testdox
+      - ../backend:/app
+      - ../backend/reports:/app/reports
+    command: php vendor/bin/phpunit --configuration=../testing/phpunit.e2e.xml --testdox
     networks:
       - e2e-network
     profiles:
@@ -192,7 +192,7 @@ services:
     ports:
       - "8080:80"
     volumes:
-      - ./docker/nginx/e2e.conf:/etc/nginx/conf.d/default.conf
+      - ../docker/nginx/e2e.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - frontend-e2e
       - backend-e2e
@@ -205,7 +205,7 @@ services:
     ports:
       - "9091:9090"
     volumes:
-      - ./docker/prometheus/e2e.yml:/etc/prometheus/prometheus.yml
+      - ../docker/prometheus/e2e.yml:/etc/prometheus/prometheus.yml
       - prometheus_e2e_data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
@@ -226,8 +226,8 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     volumes:
       - grafana_e2e_data:/var/lib/grafana
-      - ./docker/grafana/dashboards:/etc/grafana/provisioning/dashboards
-      - ./docker/grafana/datasources:/etc/grafana/provisioning/datasources
+      - ../docker/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ../docker/grafana/datasources:/etc/grafana/provisioning/datasources
     networks:
       - e2e-network
     profiles:

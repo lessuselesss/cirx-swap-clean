@@ -38,7 +38,7 @@ RUN mkdir -p storage/logs storage/testing \
     && chown -R www-data:www-data storage
 
 # Copy E2E environment file
-COPY .env.e2e .env
+COPY ../testing/data/.env.e2e .env
 
 # Generate application key if needed
 RUN php artisan key:generate --force

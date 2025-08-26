@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.0/phpunit.xsd"
-         bootstrap="tests/bootstrap.php"
+         bootstrap="../backend/tests/bootstrap.php"
          cacheDirectory=".phpunit.cache"
          executionOrder="depends,defects"
          beStrictAboutOutputDuringTests="false"
@@ -13,7 +13,7 @@
     
     <testsuites>
         <testsuite name="E2E">
-            <directory suffix="Test.php">tests/E2E</directory>
+            <directory suffix="Test.php">../backend/tests/E2E</directory>
         </testsuite>
     </testsuites>
     
@@ -25,10 +25,10 @@
 
     <source>
         <include>
-            <directory suffix=".php">src</directory>
+            <directory suffix=".php">../backend/src</directory>
         </include>
         <exclude>
-            <directory>src/Database/migrations</directory>
+            <directory>../backend/src/Database/migrations</directory>
         </exclude>
     </source>
 
