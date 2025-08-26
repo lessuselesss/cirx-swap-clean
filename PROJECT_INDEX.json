@@ -1,5 +1,5 @@
 {
-  "indexed_at": "2025-08-26T15:07:00.347768",
+  "indexed_at": "2025-08-26T15:08:29.764838",
   "root": ".",
   "project_structure": {
     "type": "tree",
@@ -55,7 +55,7 @@
       "\u2502   \u251c\u2500\u2500 integration/",
       "\u2502   \u251c\u2500\u2500 scripts/ (6 files)",
       "\u2502   \u2514\u2500\u2500 README.md",
-      "\u251c\u2500\u2500 ui/ (118 files)",
+      "\u251c\u2500\u2500 ui/ (117 files)",
       "\u2502   \u251c\u2500\u2500 assets/ (1 files)",
       "\u2502   \u2502   \u2514\u2500\u2500 css/ (1 files)",
       "\u2502   \u251c\u2500\u2500 components/ (27 files)",
@@ -435,7 +435,7 @@
     "backend/tests/Unit/Workers": "Test files and test utilities"
   },
   "stats": {
-    "total_files": 242,
+    "total_files": 241,
     "total_directories": 82,
     "fully_parsed": {
       "javascript": 61,
@@ -443,7 +443,7 @@
       "shell": 7
     },
     "listed_only": {
-      "json": 10,
+      "json": 9,
       "shell": 1,
       "php": 86,
       "vue": 45,
@@ -497,10 +497,6 @@
       "purpose": "Configuration"
     },
     "ui/package.json": {
-      "language": "json",
-      "parsed": false
-    },
-    "ui/PROJECT_INDEX.json": {
       "language": "json",
       "parsed": false
     },
@@ -2462,8 +2458,8 @@
             "constructor": {
               "signature": "(message, status, code, requestId, endpoint, originalError)",
               "called_by": [
-                "po",
-                "CE"
+                "CE",
+                "po"
               ]
             },
             "__init__": "(message, status, code, requestId, endpoint, originalError)"
@@ -2474,8 +2470,8 @@
             "constructor": {
               "signature": "(message, status, code, requestId, endpoint, originalError)",
               "called_by": [
-                "po",
-                "CE"
+                "CE",
+                "po"
               ]
             },
             "__init__": "(message, status, code, requestId, endpoint, originalError)"
@@ -23553,5 +23549,5 @@
       "@reown/appkit/networks"
     ]
   },
-  "staleness_check": 1755637621.236515
+  "staleness_check": 1755637710.679745
 }
