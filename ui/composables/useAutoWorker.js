@@ -139,7 +139,7 @@ export const useAutoWorker = () => {
     // Only start auto-processing on swap and status pages
     try {
       const route = useRoute()
-      const autoStartPages = ['/swap', '/status', '/']
+      const autoStartPages = ['/swap', '/transactions', '/']
       
       if (autoStartPages.some(page => route.path.startsWith(page))) {
         // Small delay to let page load

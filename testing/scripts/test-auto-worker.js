@@ -81,7 +81,7 @@ async function runTest() {
   console.log('🎉 Auto-Worker Test Complete!');
   console.log('\n📝 Summary:');
   console.log('- Frontend auto-processing system is ready for FTP deployment');
-  console.log('- Workers will run automatically every 30 seconds on swap/status pages');
+  console.log('- Workers will run automatically every 30 seconds on swap/transactions pages');
   console.log('- No background services or cron jobs required');
   console.log('- Manual worker dashboard available at: http://localhost:8080/workers.html');
 }

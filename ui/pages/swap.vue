@@ -20,7 +20,7 @@
           <div class="flex items-center gap-4">
             <!-- Status Tracking Link -->
             <NuxtLink 
-              to="/status" 
+              to="/transactions" 
               class="px-3 py-2 text-sm text-gray-300 hover:text-white transition-colors rounded-lg hover:bg-gray-800/50"
             >
               Transactions
@@ -2096,7 +2096,7 @@ const handleSwap = async () => {
       
       if (confirm(message)) {
         // Navigate to status page
-        await navigateTo(`/status?swapId=${result.swapId}`)
+        await navigateTo(`/transactions?swapId=${result.swapId}`)
       }
       
       // Reset form
