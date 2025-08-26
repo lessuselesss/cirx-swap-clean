@@ -55,10 +55,10 @@
     <!-- TradingView Chart -->
     <div class="flex-1 px-6 pb-2 min-h-0">
       <div class="chart-container w-full h-full relative rounded-lg overflow-hidden">
-        <TVChart 
+        <Chart 
           :options="chartOptions"
           :key="chartKey"
-          class="w-full h-full"
+          :style="{ height: '100%', width: '100%' }"
         />
         
         <!-- CIRX Price Overlay -->
@@ -166,9 +166,9 @@ const selectedInterval = ref('1D')
 
 // Map CIRX pairs to closest TradingView symbols for display
 const tradingViewSymbolMap = {
-  'USDT/CIRX': 'COINBASE:ETHUSD', // Show ETH as reference since CIRX not available
-  'USDC/CIRX': 'COINBASE:USDCUSD', // Show USDC reference
-  'ETH/CIRX': 'COINBASE:ETHUSD' // Show ETH reference
+  'USDT/CIRX': 'BINANCE:BTCUSDT', // Show BTC as reference since CIRX not available
+  'USDC/CIRX': 'BINANCE:ETHUSDC', // Show ETH/USDC reference
+  'ETH/CIRX': 'BINANCE:ETHUSDT' // Show ETH reference
 }
 
 // Display computed - shows the actual CIRX pair name
@@ -178,42 +178,43 @@ const displaySymbol = computed(() => selectedSymbol.value.replace('/', ' / '))
 const chartKey = computed(() => `${selectedSymbol.value}-${selectedInterval.value}`)
 
 // Get the reference TradingView symbol for the selected CIRX pair
-const tradingViewSymbol = computed(() => tradingViewSymbolMap[selectedSymbol.value] || 'COINBASE:ETHUSD')
+const tradingViewSymbol = computed(() => tradingViewSymbolMap[selectedSymbol.value] || 'BINANCE:BTCUSDT')
 
-// TradingView Chart Options - use reference symbol but display CIRX pair info
+// TradingView Chart Options - using nuxt-tradingview module setup
 const chartOptions = computed(() => ({
+  // Symbol and interval
   symbol: tradingViewSymbol.value,
   interval: selectedInterval.value,
+  
+  // Appearance
   theme: 'dark',
-  style: '1', // Candle style
-  locale: 'en',
-  toolbar_bg: '#0a0b1e',
-  enable_publishing: false,
-  backgroundColor: '#0a0b1e',
-  gridColor: '#334155',
-  hide_top_toolbar: false,
-  hide_legend: false,
-  save_image: false,
-  container_id: 'tradingview_chart',
   autosize: true,
-  studies: [],
-  // Professional styling
-  overrides: {
-    'paneProperties.background': '#0a0b1e',
-    'paneProperties.gridProperties.color': 'rgba(99, 102, 241, 0.12)',
-    'scalesProperties.textColor': '#8b949e',
-    'scalesProperties.lineColor': 'rgba(99, 102, 241, 0.3)',
-    // Candle colors
-    'mainSeriesProperties.candleStyle.upColor': '#10b981',
-    'mainSeriesProperties.candleStyle.downColor': '#ef4444',
-    'mainSeriesProperties.candleStyle.drawWick': true,
-    'mainSeriesProperties.candleStyle.drawBorder': true,
-    'mainSeriesProperties.candleStyle.borderColor': '#374151',
-    'mainSeriesProperties.candleStyle.borderUpColor': '#10b981',
-    'mainSeriesProperties.candleStyle.borderDownColor': '#ef4444',
-    'mainSeriesProperties.candleStyle.wickUpColor': '#10b981',
-    'mainSeriesProperties.candleStyle.wickDownColor': '#ef4444'
-  }
+  
+  // Enable features
+  studies_overrides: {},
+  
+  // Basic settings that work well for crypto trading
+  timezone: 'Etc/UTC',
+  locale: 'en',
+  
+  // Disable some features for cleaner look
+  disabled_features: [
+    'use_localstorage_for_settings',
+    'volume_force_overlay'
+  ],
+  
+  // Enable useful features  
+  enabled_features: [
+    'study_templates'
+  ],
+  
+  // Custom styling for dark theme
+  loading_screen: { 
+    backgroundColor: '#1f2937'
+  },
+  
+  // Toolbar styling
+  toolbar_bg: '#111827'
 }))
 
 // Current CIRX pair price for display

@@ -26,11 +26,12 @@ export default defineNuxtConfig({
     // '@nuxt/ui' // Temporarily disabled - causing build issues
     'nuxt-icon',
     'unplugin-icons/nuxt',
-    'floating-vue/nuxt'
+    'floating-vue/nuxt',
+    'nuxt-tradingview'
   ],
 
   // Configure unplugin-icons
-  icons: {
+  icon: {
     // Enable auto-install of icon collections
     autoInstall: true
   },
