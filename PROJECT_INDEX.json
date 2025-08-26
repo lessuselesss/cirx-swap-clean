@@ -1,5 +1,5 @@
 {
-  "indexed_at": "2025-08-26T15:05:46.235075",
+  "indexed_at": "2025-08-26T15:07:00.347768",
   "root": ".",
   "project_structure": {
     "type": "tree",
@@ -23553,5 +23553,5 @@
       "@reown/appkit/networks"
     ]
   },
-  "staleness_check": 1755637547.163056
+  "staleness_check": 1755637621.236515
 }
