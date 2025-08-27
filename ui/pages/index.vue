@@ -19,7 +19,7 @@
               >
                 Transactions
               </NuxtLink>
-                <ReownWalletButton />
+                <WalletButton />
             </div>
           </div>
         </div>

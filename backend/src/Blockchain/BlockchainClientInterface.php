@@ -2,7 +2,7 @@
 
 namespace App\Blockchain;
 
-use App\Blockchain\Exceptions\BlockchainException;
+use App\Exceptions\BlockchainException;
 
 /**
  * Blockchain Client Interface

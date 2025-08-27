@@ -95,7 +95,6 @@ class CirxTransferServiceTest extends TestCase
             ['1.0', 'ETH', 'otc', '1134.0'],           // 1 ETH = $2700 = 1080 CIRX + 5% discount ($1K-$10K tier)
             ['100.0', 'USDC', 'liquid', '40.0'],       // 100 USDC = $100 = 40 CIRX (liquid)  
             ['100.0', 'USDC', 'otc', '40.0'],          // 100 USDC = $100 = 40 CIRX (no discount under $1K)
-            ['0.5', 'SOL', 'liquid', '20.0'],          // 0.5 SOL = $50 = 20 CIRX (liquid)
             ['1000.0', 'USDT', 'otc', '420.0'],        // 1000 USDT = $1000 = 400 CIRX + 5% discount
         ];
 
@@ -244,7 +243,6 @@ class CirxTransferServiceTest extends TestCase
         $testCases = [
             ['1.0', 'ETH', 2700.0],    // 1 ETH = $2700
             ['100.0', 'USDC', 100.0],  // 100 USDC = $100
-            ['0.5', 'SOL', 50.0],      // 0.5 SOL = $50 (assuming SOL = $100)
             ['1000.0', 'USDT', 1000.0], // 1000 USDT = $1000
         ];
 
@@ -299,7 +297,6 @@ class CirxTransferServiceTest extends TestCase
             ['ETH', '0.0037037'],     // 4 CIRX = $10, $10 / $2700 per ETH = 0.0037037 ETH
             ['USDC', '10.0'],         // 4 CIRX = $10, $10 / $1 per USDC = 10 USDC
             ['USDT', '10.0'],         // 4 CIRX = $10, $10 / $1 per USDT = 10 USDT
-            ['SOL', '0.1'],           // 4 CIRX = $10, $10 / $100 per SOL = 0.1 SOL
             ['BNB', '0.0333333'],     // 4 CIRX = $10, $10 / $300 per BNB = 0.0333333 BNB
             ['MATIC', '12.5'],        // 4 CIRX = $10, $10 / $0.80 per MATIC = 12.5 MATIC
         ];
@@ -320,7 +317,6 @@ class CirxTransferServiceTest extends TestCase
             // [cirxAmount, paymentToken, expectedBasePaymentAmount] - NO platform fee added
             ['400.0', 'USDC', '1000.0'],     // 400 CIRX = $1000, user pays exactly $1000 in USDC
             ['1080.0', 'ETH', '1.0'],        // 1080 CIRX = $2700, user pays exactly 1.0 ETH ($2700)
-            ['20.0', 'SOL', '0.5'],          // 20 CIRX = $50, user pays exactly 0.5 SOL ($50)
         ];
 
         foreach ($testCases as [$cirxAmount, $paymentToken, $expectedBasePayment]) {

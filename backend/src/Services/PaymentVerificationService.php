@@ -482,7 +482,7 @@ class PaymentVerificationService
                 return PaymentVerificationResult::failure('', 'Missing payment transaction ID');
             }
 
-            // Validate transaction hash format using HashUtils
+            // Validate transaction hash format using HashUtils (flexible prefix handling)
             if (!(\App\Utils\HashUtils::validateTransactionHash($paymentTxId, false))) {
                 $error = \App\Utils\HashUtils::getValidationError($paymentTxId);
                 return PaymentVerificationResult::failure('', 'Invalid transaction hash: ' . $error);

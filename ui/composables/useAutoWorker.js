@@ -35,7 +35,7 @@ export const useAutoWorker = () => {
       
       console.log('🔧 Auto-processing transactions...')
       
-      const response = await fetch(`${apiConfig.public.apiBaseUrl}/v1/workers/process`, {
+      const response = await fetch(`${apiConfig.public.apiBaseUrl}/workers/process`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

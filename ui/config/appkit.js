@@ -1,6 +1,5 @@
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
-import { SolanaAdapter } from '@reown/appkit-adapter-solana'
-import { mainnet, arbitrum, sepolia, base, optimism, polygon, solana, solanaTestnet, solanaDevnet } from '@reown/appkit/networks'
+import { mainnet, arbitrum, sepolia, base, optimism, polygon } from '@reown/appkit/networks'
 
 // Project ID from Reown Cloud
 export const projectId = '2585d3b6fd8a214ece0e26b344957169'
@@ -27,15 +26,8 @@ export const evmNetworks = isDevelopment
       sepolia   // Testnet available but not default
     ]
 
-// Solana networks
-export const solanaNetworks = [
-  solana,
-  solanaTestnet,
-  solanaDevnet
-]
-
-// All supported networks (for AppKit)
-export const networks = [...evmNetworks, ...solanaNetworks]
+// All supported networks (for AppKit) - EVM only
+export const networks = evmNetworks
 
 // Application metadata - use dynamic URL to avoid mismatch warnings
 const getAppUrl = () => {
@@ -60,12 +52,7 @@ export const wagmiAdapter = new WagmiAdapter({
   ssr: false
 })
 
-// Initialize Solana Adapter with explicit options to prevent auto-connection
-export const solanaAdapter = new SolanaAdapter({
-  networks: solanaNetworks,
-  autoConnect: false,
-  autoConnectPhantom: false
-})
+// Solana adapter removed - EVM only
 
 // Export Wagmi config for use in plugins
 export const wagmiConfig = wagmiAdapter.wagmiConfig

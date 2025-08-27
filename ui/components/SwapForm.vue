@@ -589,9 +589,10 @@ const handleSwap = async () => {
             actions: [{
               label: 'View Transaction',
               handler: () => {
+                // Use the same logic as server-side BlockchainExplorerService
                 const config = useRuntimeConfig()
-                const isTestnet = config.public.testnetMode === true || config.public.testnetMode === 'true'
-                const baseUrl = isTestnet ? 'https://sepolia.etherscan.io/tx/' : 'https://etherscan.io/tx/'
+                const network = config.public.ethereumNetwork || 'mainnet'
+                const baseUrl = network === 'sepolia' ? 'https://sepolia.etherscan.io/tx/' : 'https://etherscan.io/tx/'
                 window.open(`${baseUrl}${txHash}`, '_blank')
               },
               primary: false

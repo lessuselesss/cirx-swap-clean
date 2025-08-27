@@ -48,15 +48,15 @@ class HashUtils
         // Trim whitespace
         $hash = trim($hash);
 
-        // Check prefix requirement
-        if ($requirePrefix) {
-            if (!str_starts_with($hash, self::VALID_HASH_PREFIX)) {
-                return false;
-            }
-            $hashWithoutPrefix = substr($hash, 2);
-        } else {
-            $hashWithoutPrefix = $hash;
+        // Auto-detect and handle prefix more elegantly
+        $hasPrefix = str_starts_with($hash, self::VALID_HASH_PREFIX);
+        
+        if ($requirePrefix && !$hasPrefix) {
+            return false;
         }
+
+        // Extract hash without prefix regardless of requirement
+        $hashWithoutPrefix = $hasPrefix ? substr($hash, 2) : $hash;
 
         // Check length constraints
         $length = strlen($hashWithoutPrefix);

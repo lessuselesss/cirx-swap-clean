@@ -64,6 +64,13 @@ class SwapRequestValidator
             $errors['paymentToken'] = 'Unsupported payment token';
         }
 
+        // Validate senderAddress (optional but must be valid if provided)
+        if (isset($data['senderAddress']) && !empty($data['senderAddress'])) {
+            if (!$this->isValidAddress($data['senderAddress'])) {
+                $errors['senderAddress'] = 'Invalid sender address format';
+            }
+        }
+
         return [
             'valid' => empty($errors),
             'errors' => $errors

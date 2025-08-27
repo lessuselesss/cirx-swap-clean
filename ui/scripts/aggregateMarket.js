@@ -18,12 +18,29 @@
 *******************************************************************************/
 
 export class AggregateMarket {
+    static instance = null
     intervalId = null
     
     // Simple cache with timestamp
     _cache = null
     _cacheTimestamp = 0
     _cacheTimeout = 30000 // 30 seconds cache
+
+    // Singleton pattern - ensure only one instance exists
+    constructor() {
+        if (AggregateMarket.instance) {
+            return AggregateMarket.instance
+        }
+        AggregateMarket.instance = this
+    }
+
+    // Static method to get singleton instance
+    static getInstance() {
+        if (!AggregateMarket.instance) {
+            AggregateMarket.instance = new AggregateMarket()
+        }
+        return AggregateMarket.instance
+    }
   
     /*
      * helper function use abbreviation for values K,M,B,T

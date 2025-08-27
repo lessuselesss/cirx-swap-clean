@@ -37,12 +37,15 @@
           <!-- Ethereum Payment -->
           <div class="text-left">
             <div class="text-xs text-gray-400 mb-1">Payment</div>
+            <div class="text-xs text-gray-500 mb-1 font-mono">
+              From: {{ formatAddress(getPaymentFromAddress(tx)) }}
+            </div>
             <div class="text-white font-mono text-sm mb-1">
               {{ formatAmount(tx.payment.amount) }} {{ tx.payment.token }}
             </div>
             <div v-if="tx.payment.tx_hash" class="flex items-center space-x-1">
               <a 
-                :href="getEtherscanUrl(tx.payment.tx_hash, tx.payment.chain)" 
+                :href="tx.payment.etherscan_url" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 :class="[
@@ -69,14 +72,17 @@
           </div>
 
           <!-- CIRX Transfer -->
-          <div class="text-left">
+          <div class="text-right">
             <div class="text-xs text-gray-400 mb-1">CIRX Transfer</div>
+            <div class="text-xs text-gray-500 mb-1 font-mono">
+              To: {{ formatAddress(tx.cirx.recipient) }}
+            </div>
             <div class="text-white font-mono text-sm mb-1">
               {{ tx.cirx.amount }} CIRX
             </div>
-            <div v-if="tx.cirx.tx_hash" class="flex items-center space-x-1">
+            <div v-if="tx.cirx.tx_hash" class="flex items-center justify-end space-x-1">
               <a 
-                :href="getCircularExplorerUrl(tx.cirx.tx_hash)" 
+                :href="tx.cirx.circular_explorer_url" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 :class="[
@@ -92,7 +98,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
               </svg>
             </div>
-            <div v-else class="text-gray-500 text-xs">
+            <div v-else class="text-gray-500 text-xs text-right">
               {{ tx.status === 'completed' ? 'Processing...' : 'Pending' }}
             </div>
           </div>
@@ -171,6 +177,40 @@ const formatAmount = (amount) => {
   return num.toString()
 }
 
+const formatAddress = (address) => {
+  if (!address) return 'N/A'
+  return `${address.slice(0, 6)}...${address.slice(-4)}`
+}
+
+const getPaymentFromAddress = (tx) => {
+  // Return the sender address if available, otherwise show placeholder
+  return tx.payment.sender_address || 'Unknown'
+}
+
+const getPaymentToAddress = (tx) => {
+  // Get the payment destination address from runtime config
+  const config = useRuntimeConfig()
+  
+  // Map payment token and chain to the appropriate deposit address
+  const chain = tx.payment.chain?.toLowerCase() || 'ethereum'
+  const token = tx.payment.token?.toLowerCase() || 'eth'
+  
+  if (chain === 'polygon' || chain === 'matic') {
+    return config.public.polygonDepositAddress
+  } else if (chain === 'bsc' || chain === 'binance-smart-chain' || chain === 'binance') {
+    return config.public.bscDepositAddress
+  } else {
+    // Ethereum mainnet/testnet
+    if (token === 'usdc') {
+      return config.public.usdcDepositAddress
+    } else if (token === 'usdt') {
+      return config.public.usdtDepositAddress  
+    } else {
+      return config.public.ethDepositAddress
+    }
+  }
+}
+
 const formatDate = (dateString) => {
   if (!dateString) return ''
   const date = new Date(dateString)
@@ -182,23 +222,7 @@ const formatDate = (dateString) => {
   })
 }
 
-const getEtherscanUrl = (txHash, chain = 'ethereum') => {
-  const config = useRuntimeConfig()
-  const isTestnet = config.public.testnetMode === true || config.public.testnetMode === 'true'
-  const network = config.public.ethereumNetwork || 'mainnet'
-  
-  // Use environment-driven network configuration
-  if (isTestnet || network === 'sepolia') {
-    return `https://sepolia.etherscan.io/tx/${txHash}`
-  } else {
-    return `https://etherscan.io/tx/${txHash}`
-  }
-}
-
-const getCircularExplorerUrl = (txHash) => {
-  // Use sandbox explorer for now
-  return `https://sandbox-explorer.circular.net/tx/${txHash}`
-}
+// URL generation functions removed - now using server-provided URLs from API
 
 const getStatusClass = (status) => {
   const statusClasses = {

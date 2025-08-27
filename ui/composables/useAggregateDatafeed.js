@@ -29,8 +29,8 @@ export const useAggregateDatafeed = () => {
     }
   }
 
-  // Initialize AggregateMarket instance for multi-exchange data
-  const aggregateMarket = new AggregateMarket()
+  // Use singleton instance for multi-exchange data (shares cache with preloading)
+  const aggregateMarket = AggregateMarket.getInstance()
 
   /**
    * Create custom datafeed object

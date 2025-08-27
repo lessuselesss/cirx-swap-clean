@@ -165,9 +165,9 @@ class DebugController
                     'account' => 'Account_Info'
                 ],
                 'sandbox' => [
-                    'balance' => 'Sandbox_Account_Balance',
-                    'transaction' => 'Sandbox_Transaction',
-                    'account' => 'Sandbox_Account_Info'
+                    'balance' => 'Account',
+                    'transaction' => 'Transaction',
+                    'account' => 'Account_Info'
                 ],
                 'mainnet' => [
                     'balance' => 'Account',

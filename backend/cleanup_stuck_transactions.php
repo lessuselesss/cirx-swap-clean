@@ -10,7 +10,7 @@ $capsule = new Capsule;
 
 $capsule->addConnection([
     'driver' => 'sqlite',
-    'database' => __DIR__ . '/database/database.sqlite',
+    'database' => __DIR__ . '/storage/database.sqlite',
     'prefix' => '',
 ]);
 

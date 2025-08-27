@@ -3,6 +3,7 @@
 namespace App\Utils;
 
 use App\Blockchain\EthereumBlockchainClient;
+use App\Utils\EthereumMathUtils;
 use InvalidArgumentException;
 use RuntimeException;
 
@@ -32,10 +33,10 @@ class BlockchainTestUtils
         try {
             if ($token === 'ETH') {
                 $balance = $this->client->getNativeBalance($walletAddress);
-                return bccomp($balance, $amount, 18) >= 0;
+                return EthereumMathUtils::compareAmounts($balance, $amount, 'ETH') >= 0;
             } else {
                 $tokenBalance = $this->client->getTokenBalance($this->getTokenContract($token), $walletAddress);
-                return bccomp($tokenBalance, $amount, 18) >= 0;
+                return EthereumMathUtils::compareAmounts($tokenBalance, $amount, $token) >= 0;
             }
         } catch (\Exception $e) {
             return false;
@@ -145,7 +146,7 @@ class BlockchainTestUtils
         // Check amount for ETH transactions
         if (isset($expectedParams['value'])) {
             $actualValue = $this->weiToEth($transaction['value']);
-            if (bccomp($actualValue, $expectedParams['value'], 18) !== 0) {
+            if (EthereumMathUtils::compareAmounts($actualValue, $expectedParams['value'], 'ETH') !== 0) {
                 $errors[] = "Amount mismatch: expected {$expectedParams['value']} ETH, got {$actualValue} ETH";
             }
         }
@@ -209,7 +210,7 @@ class BlockchainTestUtils
      */
     public function weiToEth(string $wei): string
     {
-        return bcdiv($wei, '1000000000000000000', 18);
+        return EthereumMathUtils::convertFromSmallestUnit($wei, 'ETH');
     }
     
     /**
@@ -217,7 +218,7 @@ class BlockchainTestUtils
      */
     public function ethToWei(string $eth): string
     {
-        return bcmul($eth, '1000000000000000000', 0);
+        return EthereumMathUtils::convertToSmallestUnit($eth, 'ETH');
     }
     
     /**
@@ -269,7 +270,7 @@ class BlockchainTestUtils
             }
             
             $balanceEth = $this->weiToEth($balance);
-            $needsFunding = bccomp($balanceEth, '0.01', 18) < 0;
+            $needsFunding = EthereumMathUtils::compareAmounts($balanceEth, '0.01', 'ETH') < 0;
             
             $recommendations[] = [
                 'index' => $index,

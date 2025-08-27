@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Models\Transaction;
 use App\Services\LoggerService;
+use App\Services\EthereumExplorerService;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
@@ -243,16 +244,19 @@ class TransactionStatusController
      */
     private function buildTableRow(Transaction $transaction): array
     {
-        // Generate Etherscan URL for payment transaction
+        // Generate blockchain explorer URLs using centralized service
         $etherscanUrl = null;
         if ($transaction->payment_tx_id && $transaction->payment_chain) {
-            $etherscanUrl = $this->getEtherscanUrl($transaction->payment_tx_id, $transaction->payment_chain);
+            $etherscanUrl = EthereumExplorerService::getTransactionUrl(
+                $transaction->payment_tx_id, 
+                $transaction->payment_chain
+            );
         }
 
         // Generate Circular explorer URL for CIRX transaction
         $circularExplorerUrl = null;
         if ($transaction->cirx_transfer_tx_id) {
-            $circularExplorerUrl = $this->getCircularExplorerUrl($transaction->cirx_transfer_tx_id);
+            $circularExplorerUrl = EthereumExplorerService::getCircularExplorerUrl($transaction->cirx_transfer_tx_id);
         }
 
         // Calculate CIRX amount (with platform fee deducted)
@@ -268,6 +272,7 @@ class TransactionStatusController
             'payment' => [
                 'tx_hash' => $transaction->payment_tx_id,
                 'chain' => $transaction->payment_chain,
+                'sender_address' => $transaction->sender_address,
                 'amount' => $transaction->amount_paid,
                 'token' => $transaction->payment_token,
                 'etherscan_url' => $etherscanUrl
@@ -286,55 +291,7 @@ class TransactionStatusController
         ];
     }
 
-    /**
-     * Get Etherscan URL for a transaction hash
-     */
-    private function getEtherscanUrl(string $txHash, string $chain): string
-    {
-        // For Ethereum chains, determine the correct network based on environment
-        $chainKey = strtolower($chain);
-        if (in_array($chainKey, ['ethereum', 'eth'])) {
-            // Check environment to determine mainnet vs testnet
-            $network = $_ENV['ETHEREUM_NETWORK'] ?? 'mainnet';
-            $chainKey = $network; // Use the actual network (sepolia, mainnet, etc.)
-        }
-
-        $baseUrls = [
-            'mainnet' => 'https://etherscan.io/tx/',
-            'sepolia' => 'https://sepolia.etherscan.io/tx/',
-            'goerli' => 'https://goerli.etherscan.io/tx/',
-            'polygon' => 'https://polygonscan.com/tx/',
-            'matic' => 'https://polygonscan.com/tx/',
-            'bsc' => 'https://bscscan.com/tx/',
-            'binance' => 'https://bscscan.com/tx/',
-            'arbitrum' => 'https://arbiscan.io/tx/',
-            'optimism' => 'https://optimistic.etherscan.io/tx/',
-            'avalanche' => 'https://snowtrace.io/tx/',
-            'avax' => 'https://snowtrace.io/tx/'
-        ];
-
-        $baseUrl = $baseUrls[$chainKey] ?? $baseUrls['mainnet']; // Default to mainnet
-
-        return $baseUrl . $txHash;
-    }
-
-    /**
-     * Get Circular Protocol explorer URL for a transaction hash
-     */
-    private function getCircularExplorerUrl(string $txHash): string
-    {
-        // Determine environment for correct explorer
-        $environment = $_ENV['APP_ENV'] ?? 'development';
-        
-        switch ($environment) {
-            case 'production':
-                return "https://explorer.circular.net/tx/{$txHash}";
-            case 'staging':
-                return "https://staging-explorer.circular.net/tx/{$txHash}";
-            default:
-                return "https://sandbox-explorer.circular.net/tx/{$txHash}";
-        }
-    }
+    // URL generation methods removed - now using BlockchainExplorerService
 
     /**
      * Get user-friendly status display name
@@ -367,7 +324,6 @@ class TransactionStatusController
             'ETH' => 2700.0,   // $2,700 per ETH
             'USDC' => 1.0,     // $1 per USDC
             'USDT' => 1.0,     // $1 per USDT
-            'SOL' => 100.0,    // $100 per SOL
             'BNB' => 300.0,    // $300 per BNB
             'MATIC' => 0.80,   // $0.80 per MATIC
         ];

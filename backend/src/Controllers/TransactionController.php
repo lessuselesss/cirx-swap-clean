@@ -47,6 +47,7 @@ class TransactionController
                 'id' => $swapId,
                 'payment_tx_id' => $data['txId'],
                 'payment_chain' => $data['paymentChain'],
+                'sender_address' => $data['senderAddress'] ?? null,
                 'cirx_recipient_address' => $data['cirxRecipientAddress'],
                 'amount_paid' => $data['amountPaid'],
                 'payment_token' => $data['paymentToken'],

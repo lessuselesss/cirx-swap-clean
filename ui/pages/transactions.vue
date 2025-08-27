@@ -346,7 +346,7 @@ const testBackendConnection = async () => {
   console.log('🧪 Testing backend connection...')
   try {
     const config = useRuntimeConfig()
-    const apiUrl = `${config.public.apiBaseUrl}/v1/health`
+    const apiUrl = `${config.public.apiBaseUrl}/health`
     console.log('📡 Testing URL:', apiUrl)
     
     const response = await fetch(apiUrl)
@@ -354,7 +354,7 @@ const testBackendConnection = async () => {
     console.log('✅ Backend health check:', data)
     
     // Test transaction status endpoint with dummy ID
-    const statusUrl = `${config.public.apiBaseUrl}/v1/transactions/test-123/status`
+    const statusUrl = `${config.public.apiBaseUrl}/transactions/test-123/status`
     console.log('📡 Testing status URL:', statusUrl)
     
     const statusResponse = await fetch(statusUrl)

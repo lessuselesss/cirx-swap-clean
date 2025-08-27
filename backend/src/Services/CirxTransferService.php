@@ -9,6 +9,9 @@ use App\Blockchain\CircularProtocolClient;
 use App\Exceptions\BlockchainException;
 use App\Services\IrohServiceBridge;
 use App\Utils\EthereumMathUtils;
+use App\Services\TelegramNotificationService;
+use App\Services\LoggerService;
+use GuzzleHttp\Client;
 
 /**
  * CIRX Transfer Service
@@ -372,7 +375,13 @@ class CirxTransferService
 
             // Check CIRX wallet balance
             $walletBalance = $cirxClient->getCirxBalance($cirxClient->getCirxWalletAddress());
+            $minThreshold = floatval($_ENV['CIRX_BALANCE_ALERT_THRESHOLD'] ?? 50);
+            
+            // Check if balance is insufficient for the transfer
             if (EthereumMathUtils::compareAmounts($walletBalance, $amount, 'ETH') < 0) {
+                // Send critical Telegram alert about insufficient balance
+                $this->sendCirxBalanceAlert($amount, $walletBalance, $recipientAddress);
+                
                 return [
                     'success' => false,
                     'error' => "Insufficient CIRX balance. Required: {$amount}, Available: {$walletBalance}",
@@ -380,6 +389,12 @@ class CirxTransferService
                     'gasUsed' => 0,
                     'blockNumber' => 0
                 ];
+            }
+            
+            // Check if balance is below alert threshold after this transfer
+            $balanceAfterTransfer = floatval($walletBalance) - floatval($amount);
+            if ($balanceAfterTransfer < $minThreshold) {
+                $this->sendLowBalanceAlert($balanceAfterTransfer, $minThreshold, $amount, $recipientAddress);
             }
 
             // Execute the CIRX transfer
@@ -521,6 +536,91 @@ class CirxTransferService
         } catch (\Exception $e) {
             // Don't fail the transfer if broadcasting fails
             error_log("Failed to broadcast transfer completion: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Send Telegram alert for insufficient CIRX balance
+     */
+    private function sendCirxBalanceAlert(string $requiredAmount, string $availableBalance, string $recipientAddress): void
+    {
+        try {
+            // Only send alerts if Telegram is configured
+            $botToken = $_ENV['TELEGRAM_BOT_TOKEN'] ?? null;
+            $chatId = $_ENV['TELEGRAM_CHAT_ID'] ?? null;
+            
+            if (!$botToken || !$chatId) {
+                return; // Telegram not configured, skip alert
+            }
+
+            // Create Telegram service
+            $telegramService = new TelegramNotificationService(
+                new Client(['timeout' => 10]),
+                LoggerService::getLogger('cirx-transfer'),
+                $botToken,
+                $chatId
+            );
+
+            // Send critical alert
+            $telegramService->sendCriticalAlert(
+                'CIRX Wallet Insufficient Balance',
+                'CIRX transfer blocked due to insufficient wallet balance',
+                [
+                    'required_amount' => $requiredAmount . ' CIRX',
+                    'available_balance' => $availableBalance . ' CIRX',
+                    'deficit' => (floatval($requiredAmount) - floatval($availableBalance)) . ' CIRX',
+                    'recipient_address' => $recipientAddress,
+                    'wallet_address' => $this->cirxWalletAddress ?? 'Not configured',
+                    'action_required' => 'Fund CIRX wallet or adjust transfer amounts'
+                ]
+            );
+
+        } catch (\Exception $e) {
+            // Don't fail the transfer if Telegram alert fails
+            error_log("Failed to send CIRX balance Telegram alert: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Send low balance alert when balance drops below threshold
+     */
+    private function sendLowBalanceAlert(float $balanceAfterTransfer, float $threshold, string $transferAmount, string $recipientAddress): void
+    {
+        try {
+            // Only send alerts if Telegram is configured
+            $botToken = $_ENV['TELEGRAM_BOT_TOKEN'] ?? null;
+            $chatId = $_ENV['TELEGRAM_CHAT_ID'] ?? null;
+            
+            if (!$botToken || !$chatId) {
+                return; // Telegram not configured, skip alert
+            }
+
+            // Create Telegram service
+            $telegramService = new TelegramNotificationService(
+                new Client(['timeout' => 10]),
+                LoggerService::getLogger('cirx-transfer'),
+                $botToken,
+                $chatId
+            );
+
+            // Send warning alert (not critical since transfer can still proceed)
+            $telegramService->sendErrorNotification(
+                'cirx_balance_low',
+                'CIRX wallet balance dropped below configured threshold',
+                [
+                    'balance_after_transfer' => $balanceAfterTransfer . ' CIRX',
+                    'configured_threshold' => $threshold . ' CIRX',
+                    'transfer_amount' => $transferAmount . ' CIRX',
+                    'recipient_address' => $recipientAddress,
+                    'wallet_address' => $this->cirxWalletAddress ?? 'Not configured',
+                    'action_required' => 'Consider refunding CIRX wallet to maintain operational buffer'
+                ],
+                'warning'
+            );
+
+        } catch (\Exception $e) {
+            // Don't fail the transfer if Telegram alert fails
+            error_log("Failed to send CIRX low balance Telegram alert: " . $e->getMessage());
         }
     }
 }

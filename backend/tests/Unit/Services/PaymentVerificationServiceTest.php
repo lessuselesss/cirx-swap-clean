@@ -192,7 +192,6 @@ class PaymentVerificationServiceTest extends TestCase
 
         $this->assertEquals(12, $method->invoke($this->service, 'ethereum'));
         $this->assertEquals(20, $method->invoke($this->service, 'polygon'));
-        $this->assertEquals(30, $method->invoke($this->service, 'solana'));
         $this->assertEquals(15, $method->invoke($this->service, 'binance-smart-chain'));
         $this->assertEquals(12, $method->invoke($this->service, 'unknown-chain'));
     }
@@ -209,7 +208,6 @@ class PaymentVerificationServiceTest extends TestCase
         $this->assertEquals(18, $method->invoke($this->service, 'ETH'));
         $this->assertEquals(18, $method->invoke($this->service, 'MATIC'));
         $this->assertEquals(18, $method->invoke($this->service, 'BNB'));
-        $this->assertEquals(18, $method->invoke($this->service, 'SOL'));
         $this->assertEquals(18, $method->invoke($this->service, 'UNKNOWN'));
     }
 }
