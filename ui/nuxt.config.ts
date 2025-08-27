@@ -26,8 +26,8 @@ export default defineNuxtConfig({
     // '@nuxt/ui' // Temporarily disabled - causing build issues
     'nuxt-icon',
     'unplugin-icons/nuxt',
-    'floating-vue/nuxt'
-    // 'nuxt-tradingview' // Removed - not installed and causing deployment failures
+    'floating-vue/nuxt',
+    'nuxt-tradingview'
   ],
 
   // Configure unplugin-icons
