@@ -1,17 +1,17 @@
 import { createAppKit } from '@reown/appkit/vue'
 import { defineNuxtPlugin } from 'nuxt/app'
-import { wagmiAdapter, solanaAdapter, networks, projectId, metadata } from '~/config/appkit.js'
+import { wagmiAdapter, networks, projectId, metadata } from '~/config/appkit.js'
+import { useWalletStore } from '~/stores/wallet.js'
 
 // Debug logging for adapter state
 console.log('🔧 Adapters imported:', {
-  wagmiNetworks: networks.filter(n => n.id && typeof n.id === 'string' && !n.id.includes('solana')).length,
-  solanaNetworks: networks.filter(n => n.id && typeof n.id === 'string' && n.id.includes('solana')).length
+  wagmiNetworks: networks.length,
+  evmOnly: true
 })
 
-// Store adapters globally for debugging
+// Store adapter globally for debugging
 if (typeof window !== 'undefined') {
   window.__wagmiAdapter = wagmiAdapter
-  window.__solanaAdapter = solanaAdapter
 }
 
 export default defineNuxtPlugin(() => {
@@ -20,9 +20,9 @@ export default defineNuxtPlugin(() => {
     console.log('Project ID:', projectId)
     console.log('Networks configured:', networks.length)
     
-    // Create the AppKit instance with corrected configuration
+    // Create the AppKit instance with proper configuration
     const appKit = createAppKit({
-      adapters: [wagmiAdapter, solanaAdapter],
+      adapters: [wagmiAdapter],
       networks,
       projectId,
       metadata,
@@ -33,52 +33,52 @@ export default defineNuxtPlugin(() => {
         onramp: false,
         swaps: false
       },
+      // Only allow MetaMask wallet
+      includeWalletIds: [
+        'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96', // MetaMask
+      ],
       themeMode: 'dark',
       themeVariables: {
         '--w3m-accent': '#00D4FF'
-      },
-      // Prevent auto-connection attempts
-      autoConnect: false,
-      defaultChain: 'ethereum'
+      }
     })
     
     // Make AppKit instance globally accessible
     if (typeof window !== 'undefined') {
       window.$appKit = appKit
       
-      // Listen for custom events from components
-      window.addEventListener('openWalletModal', () => {
-        appKit.open()
-      })
-      
-      // Add disconnect functionality
-      window.$disconnect = async () => {
+      // Keep disconnect helper but don't override AppKit's native disconnect
+      window.forceDisconnectWallet = async () => {
         try {
-          await appKit.disconnect()
-          // Also clear any cached connections
-          localStorage.removeItem('wagmi.wallet')
+          const { disconnect } = await import('@wagmi/core')
+          // Use the wagmiAdapter's config directly
+          await disconnect(wagmiAdapter.wagmiConfig)
+          console.log('✅ Disconnected')
+          // Clear storage and reload
           localStorage.removeItem('wagmi.store')
+          localStorage.removeItem('wagmi.recentConnectorId') 
+          localStorage.removeItem('@w3m/connected_connector')
           window.location.reload()
-          console.log('✅ Wallet disconnected and page refreshed')
         } catch (error) {
-          console.error('❌ Error disconnecting wallet:', error)
-          // Force disconnect by clearing storage and refreshing
+          console.error('Disconnect error:', error)
+          // Force disconnect by clearing everything
           localStorage.clear()
           window.location.reload()
         }
       }
       
-      // Debug AppKit state changes and force balance refresh
+      // Subscribe to account changes for state sync
       appKit.subscribeAccount((account) => {
-        console.log('🔍 AppKit Account State:', {
-          ...account,
-          balanceSymbol: account.balanceSymbol,
-          balance: account.balance,
-          profileName: account.profileName
-        })
+        console.log('🔍 AppKit Account State:', account)
         
-        // Store AppKit account state for debugging
-        window.__appKitAccountState = account
+        // Update wallet store with AppKit state
+        try {
+          const walletStore = useWalletStore()
+          walletStore.updateAccount(account)
+          console.log('✅ Wallet store updated with account state')
+        } catch (error) {
+          console.error('❌ Failed to update wallet store:', error)
+        }
         
         // Force balance refresh when account changes
         if (account.isConnected && account.address) {
@@ -103,6 +103,15 @@ export default defineNuxtPlugin(() => {
       
       appKit.subscribeNetwork((network) => {
         console.log('🔍 AppKit Network State:', network)
+        
+        // Update wallet store with network state
+        try {
+          const walletStore = useWalletStore()
+          walletStore.updateNetwork(network)
+          console.log('✅ Wallet store updated with network state')
+        } catch (error) {
+          console.error('❌ Failed to update wallet store:', error)
+        }
       })
       
       // Force sync AppKit with any existing Wagmi connection

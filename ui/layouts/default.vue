@@ -16,7 +16,7 @@
               Swap
             </NuxtLink>
             <button class="connect-wallet-btn" @click="handleConnectWallet">
-              Connect Wallet
+              Connect
             </button>
           </div>
         </nav>

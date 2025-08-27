@@ -716,8 +716,6 @@ import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 // Import Reown AppKit Vue hooks
 // AppKit hooks removed - using global instance instead
 import { parseEther, parseUnits } from 'viem'
-import { sendTransaction, writeContract } from '@wagmi/core'
-import { wagmiConfig } from '~/config/appkit.js'
 // Import components
 import WalletButton from '~/components/WalletButton.vue'
 import ConnectionToast from '~/components/ConnectionToast.vue'
@@ -1989,15 +1987,23 @@ const handleSwap = async () => {
       // Simulate transaction delay
       await new Promise(resolve => setTimeout(resolve, 2000))
     } else if (inputToken.value === 'ETH') {
-      // Send ETH transaction using MetaMask/wallet
+      // Send ETH transaction using AppKit's wallet connection
       try {
-        // Using wagmi's sendTransaction which returns the transaction hash
-        const tx = await sendTransaction(wagmiConfig, {
-          to: depositAddress,
-          value: parseEther(totalPaymentNeeded)
+        // Use AppKit's native wallet connection via window.ethereum
+        if (!window.ethereum || !window.$appKit) {
+          throw new Error('AppKit or Ethereum provider not available')
+        }
+        
+        // Simple ETH transaction using window.ethereum (standard EIP-1193)
+        const tx = await window.ethereum.request({
+          method: 'eth_sendTransaction',
+          params: [{
+            from: address.value,
+            to: depositAddress,
+            value: '0x' + parseEther(totalPaymentNeeded).toString(16)
+          }]
         })
         
-        // The transaction hash is returned directly
         transactionHash = tx
         console.log('✅ ETH transaction sent:', transactionHash)
       } catch (error) {
@@ -2031,23 +2037,25 @@ const handleSwap = async () => {
         const tokenAmount = parseUnits(totalPaymentNeeded, decimals)
         
         try {
-          // writeContract returns the transaction hash
-          const tx = await writeContract(wagmiConfig, {
-            address: tokenAddress,
-            abi: [
-              {
-                name: 'transfer',
-                type: 'function',
-                stateMutability: 'nonpayable',
-                inputs: [
-                  { name: 'to', type: 'address' },
-                  { name: 'amount', type: 'uint256' }
-                ],
-                outputs: [{ name: '', type: 'bool' }]
-              }
-            ],
-            functionName: 'transfer',
-            args: [depositAddress, tokenAmount]
+          // Use AppKit with manual ERC20 transfer encoding
+          if (!window.ethereum || !window.$appKit) {
+            throw new Error('AppKit or Ethereum provider not available')
+          }
+
+          // Encode ERC20 transfer function call manually
+          // transfer(address,uint256) = 0xa9059cbb
+          const transferSelector = '0xa9059cbb'
+          const paddedAddress = depositAddress.slice(2).padStart(64, '0')
+          const paddedAmount = tokenAmount.toString(16).padStart(64, '0')
+          const transferData = transferSelector + paddedAddress + paddedAmount
+          
+          const tx = await window.ethereum.request({
+            method: 'eth_sendTransaction',
+            params: [{
+              from: address.value,
+              to: tokenAddress,
+              data: transferData
+            }]
           })
           
           transactionHash = tx
