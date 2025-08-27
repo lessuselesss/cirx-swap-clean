@@ -7,7 +7,6 @@ class SwapRequestValidator
     private array $supportedChains = [
         'ethereum',
         'polygon',
-        'solana',
         'binance-smart-chain'
     ];
 
@@ -16,8 +15,7 @@ class SwapRequestValidator
         'USDC',
         'USDT',
         'BNB',
-        'MATIC',
-        'SOL'
+        'MATIC'
     ];
 
     /**
@@ -74,19 +72,16 @@ class SwapRequestValidator
 
     /**
      * Validate transaction ID format
+     * Only supports Ethereum-style 0x-prefixed transaction hashes
      */
     private function isValidTxId(string $txId): bool
     {
-        // Basic validation for hex string starting with 0x
-        // Ethereum-like transactions: 0x followed by 64 hex characters
-        // Solana transactions: base58 string
-        
         if (str_starts_with($txId, '0x')) {
-            // Ethereum-like transaction hash
-            return preg_match('/^0x[a-fA-F0-9]{64}$/', $txId) === 1;
+            // Use HashUtils for comprehensive validation (prevents bogus patterns)
+            return \App\Utils\HashUtils::validateTransactionHash($txId, true);
         } else {
-            // Solana transaction signature (base58)
-            return preg_match('/^[1-9A-HJ-NP-Za-km-z]{87,88}$/', $txId) === 1;
+            // Non-0x hashes not supported (removes security bypass)
+            return false;
         }
     }
 
@@ -108,8 +103,8 @@ class SwapRequestValidator
             }
             return false;
         } else {
-            // Solana address (base58)
-            return preg_match('/^[1-9A-HJ-NP-Za-km-z]{32,44}$/', $address) === 1;
+            // Non-0x addresses not supported
+            return false;
         }
     }
 

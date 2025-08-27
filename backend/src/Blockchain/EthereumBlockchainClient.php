@@ -2,7 +2,9 @@
 
 namespace App\Blockchain;
 
-use App\Blockchain\Exceptions\BlockchainException;
+use App\Exceptions\BlockchainException;
+use App\Utils\HashUtils;
+use App\Utils\EthereumMathUtils;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -12,7 +14,7 @@ use Psr\Log\LoggerInterface;
  * Handles payment verification, balance checking, and transaction reading.
  * Transaction sending capabilities removed - backend only monitors client-side chains.
  */
-class EthereumBlockchainClient extends AbstractBlockchainClient
+class EthereumBlockchainClient extends AbstractEVMClient
 {
     private int $chainId;
     private string $networkName;
@@ -72,7 +74,7 @@ class EthereumBlockchainClient extends AbstractBlockchainClient
     public function getBlockNumber(): int
     {
         $response = $this->rpcCall('eth_blockNumber');
-        return (int)$this->hexToDec($response['result']);
+        return (int)HashUtils::hexToDec($response['result']);
     }
 
     /**
@@ -80,7 +82,7 @@ class EthereumBlockchainClient extends AbstractBlockchainClient
      */
     public function getBlock(int $blockNumber): ?array
     {
-        $blockHex = $this->decToHex((string)$blockNumber);
+        $blockHex = HashUtils::decToHex((string)$blockNumber);
         $response = $this->rpcCall('eth_getBlockByNumber', [$blockHex, true]);
         return $response['result'];
     }
@@ -103,7 +105,7 @@ class EthereumBlockchainClient extends AbstractBlockchainClient
             'latest'
         ]);
 
-        $balance = $this->hexToDec($response['result']);
+        $balance = HashUtils::hexToDec($response['result']);
         
         // Get token decimals to format properly
         $decimals = $this->getTokenDecimals($tokenAddress);
@@ -116,8 +118,8 @@ class EthereumBlockchainClient extends AbstractBlockchainClient
     public function getNativeBalance(string $walletAddress): string
     {
         $response = $this->rpcCall('eth_getBalance', [$walletAddress, 'latest']);
-        $balanceWei = $this->hexToDec($response['result']);
-        return $this->weiToEther($balanceWei);
+        $balanceWei = HashUtils::hexToDec($response['result']);
+        return EthereumMathUtils::convertFromSmallestUnit($balanceWei, 'ETH');
     }
 
     // Transaction sending methods removed - read-only client for payment verification only
@@ -161,7 +163,7 @@ class EthereumBlockchainClient extends AbstractBlockchainClient
                 'latest'
             ]);
 
-            return (int)$this->hexToDec($response['result']);
+            return (int)HashUtils::hexToDec($response['result']);
         } catch (\Exception $e) {
             $this->logger->warning("Failed to get token decimals, using default", [
                 'token_address' => $tokenAddress,
@@ -199,7 +201,7 @@ class EthereumBlockchainClient extends AbstractBlockchainClient
                 isset($log['topics'][1]) && strtolower('0x' . substr($log['topics'][1], -40)) === strtolower($fromAddress) &&
                 isset($log['topics'][2]) && strtolower('0x' . substr($log['topics'][2], -40)) === strtolower($toAddress)
             ) {
-                $transferredAmount = $this->hexToDec($log['data']);
+                $transferredAmount = HashUtils::hexToDec($log['data']);
                 $decimals = $this->getTokenDecimals($tokenAddress);
                 $formattedAmount = $this->parseTokenAmount($transferredAmount, $decimals);
 
@@ -226,7 +228,7 @@ class EthereumBlockchainClient extends AbstractBlockchainClient
         }
 
         $currentBlock = $this->getBlockNumber();
-        $txBlock = (int)$this->hexToDec($tx['blockNumber']);
+        $txBlock = (int)HashUtils::hexToDec($tx['blockNumber']);
         
         return max(0, $currentBlock - $txBlock + 1);
     }

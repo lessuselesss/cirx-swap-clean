@@ -5,7 +5,8 @@ namespace App\Services;
 use App\Models\Transaction;
 use App\Exceptions\PaymentVerificationException;
 use App\Blockchain\BlockchainClientFactory;
-use App\Blockchain\Exceptions\BlockchainException;
+use App\Exceptions\BlockchainException;
+use App\Utils\EthereumMathUtils;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 
@@ -189,7 +190,7 @@ class PaymentVerificationService
 
         // Check amount
         $actualAmount = $this->parseAmount($transactionData, $token);
-        if (bccomp($actualAmount, $expectedAmount, 8) < 0) {
+        if (EthereumMathUtils::compareAmounts($actualAmount, $expectedAmount, $token) < 0) {
             return PaymentVerificationResult::failure(
                 $txHash,
                 "Insufficient payment amount. Expected: {$expectedAmount}, Got: {$actualAmount}"
@@ -216,10 +217,10 @@ class PaymentVerificationService
      */
     private function parseAmount(array $transactionData, string $token): string
     {
-        if ($token === 'ETH' || $token === 'MATIC' || $token === 'BNB') {
-            // Native token - use value field
+        if ($token === 'ETH') {
+            // Native ETH - convert wei to ETH using EthereumMathUtils
             $weiValue = $transactionData['value'] ?? '0';
-            return bcdiv($weiValue, '1000000000000000000', 18); // Convert wei to ETH
+            return EthereumMathUtils::convertFromSmallestUnit($weiValue, 'ETH');
         } else {
             // ERC20 token - parse from logs
             $amount = $this->parseERC20Amount($transactionData, $token);
@@ -239,11 +240,11 @@ class PaymentVerificationService
             if (isset($log['topics'][0]) && 
                 $log['topics'][0] === '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef') {
                 
-                // Parse amount from log data
-                $amount = hexdec($log['data'] ?? '0x0');
-                $decimals = $this->getTokenDecimals($token);
+                // Parse amount from log data using HashUtils
+                $amount = \App\Utils\HashUtils::hexToDec($log['data'] ?? '0x0');
                 
-                return bcdiv((string)$amount, bcpow('10', (string)$decimals), 18);
+                // Convert from smallest unit using EthereumMathUtils
+                return EthereumMathUtils::convertFromSmallestUnit((string)$amount, $token);
             }
         }
 
@@ -251,15 +252,17 @@ class PaymentVerificationService
     }
 
     /**
-     * Get token decimals for proper amount parsing
+     * Get token decimals using EthereumMathUtils
+     * @deprecated Use EthereumMathUtils::getTokenDecimals() directly
      */
     private function getTokenDecimals(string $token): int
     {
-        return match (strtoupper($token)) {
-            'USDC', 'USDT' => 6,
-            'ETH', 'MATIC', 'BNB', 'SOL' => 18,
-            default => 18
-        };
+        try {
+            return EthereumMathUtils::getTokenDecimals($token);
+        } catch (\InvalidArgumentException $e) {
+            // Fallback for unsupported tokens (should not happen with current supported tokens)
+            return 18;
+        }
     }
 
     /**
@@ -270,7 +273,6 @@ class PaymentVerificationService
         return match (strtolower($chain)) {
             'ethereum' => 12,
             'polygon' => 20,
-            'solana' => 30,
             'binance-smart-chain' => 15,
             default => 12
         };
@@ -355,7 +357,7 @@ class PaymentVerificationService
 
             // Verify amount
             $actualAmount = $this->extractAmountFromTransaction($transaction, $receipt, $token, $chain, $client);
-            if (bccomp($actualAmount, $expectedAmount, 8) < 0) {
+            if (EthereumMathUtils::compareAmounts($actualAmount, $expectedAmount, $token) < 0) {
                 return PaymentVerificationResult::failure(
                     $txHash,
                     "Insufficient payment amount. Expected: {$expectedAmount}, Got: {$actualAmount}"
@@ -399,15 +401,12 @@ class PaymentVerificationService
         string $chain,
         $client
     ): string {
-        if ($token === 'ETH' || $token === 'MATIC' || $token === 'BNB') {
-            // Native token - use value field
+        if ($token === 'ETH') {
+            // Native ETH - convert wei to ETH
             $weiValue = $transaction['value'] ?? '0';
-            $decimals = match ($token) {
-                'ETH', 'MATIC', 'BNB' => 18,
-                default => 18
-            };
+            $weiDecimal = ltrim($weiValue, '0x') ? \App\Utils\HashUtils::hexToDec($weiValue) : '0';
             
-            return bcdiv(ltrim($weiValue, '0x') ? (string)hexdec($weiValue) : '0', bcpow('10', (string)$decimals), 18);
+            return EthereumMathUtils::convertFromSmallestUnit($weiDecimal, 'ETH');
         } else {
             // ERC20 token - parse from logs
             return $this->parseERC20AmountFromReceipt($receipt, $token);
@@ -428,10 +427,10 @@ class PaymentVerificationService
                 
                 // Parse amount from log data
                 $amount = ltrim($log['data'] ?? '0x0', '0x');
-                $amount = $amount ? (string)hexdec($amount) : '0';
-                $decimals = $this->getTokenDecimals($token);
+                $amount = $amount ? \App\Utils\HashUtils::hexToDec('0x' . $amount) : '0';
                 
-                return bcdiv($amount, bcpow('10', (string)$decimals), 18);
+                // Convert from smallest unit using EthereumMathUtils
+                return EthereumMathUtils::convertFromSmallestUnit($amount, $token);
             }
         }
 
@@ -481,6 +480,12 @@ class PaymentVerificationService
 
             if (empty($paymentTxId)) {
                 return PaymentVerificationResult::failure('', 'Missing payment transaction ID');
+            }
+
+            // Validate transaction hash format using HashUtils
+            if (!(\App\Utils\HashUtils::validateTransactionHash($paymentTxId, false))) {
+                $error = \App\Utils\HashUtils::getValidationError($paymentTxId);
+                return PaymentVerificationResult::failure('', 'Invalid transaction hash: ' . $error);
             }
 
             // Call the main verification method

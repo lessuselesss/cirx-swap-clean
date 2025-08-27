@@ -2,17 +2,23 @@
 
 namespace App\Blockchain;
 
-use App\Blockchain\Exceptions\BlockchainException;
+use App\Exceptions\BlockchainException;
+use App\Utils\EthereumMathUtils;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Psr\Log\LoggerInterface;
 
 /**
- * Abstract Blockchain Client
+ * Abstract EVM Client - RPC-Based Implementation
  * 
- * Provides common functionality for all blockchain clients
+ * Provides common RPC functionality for EVM-compatible blockchain clients.
+ * This class is specifically designed for JSON-RPC based interactions with
+ * Ethereum and other EVM-compatible chains.
+ * 
+ * Architecture: Focused inheritance for EVM/RPC clients only
+ * Non-EVM protocols like Circular Protocol should NOT inherit from this class.
  */
-abstract class AbstractBlockchainClient implements BlockchainClientInterface
+abstract class AbstractEVMClient implements BlockchainClientInterface
 {
     protected Client $httpClient;
     protected LoggerInterface $logger;
@@ -156,55 +162,42 @@ abstract class AbstractBlockchainClient implements BlockchainClientInterface
     }
 
     /**
-     * Convert hex string to decimal string
+     * Get network name - must be implemented by concrete RPC clients
      */
-    protected function hexToDec(string $hex): string
-    {
-        if (str_starts_with($hex, '0x')) {
-            $hex = substr($hex, 2);
-        }
-        return (string)hexdec($hex);
-    }
+    abstract public function getNetworkName(): string;
 
     /**
-     * Convert decimal to hex string
+     * RPC-specific utility methods using delegation to shared services
      */
-    protected function decToHex(string $dec): string
-    {
-        return '0x' . dechex((int)$dec);
-    }
-
-    /**
-     * Convert Wei to Ether (or similar 18-decimal conversion)
-     */
-    protected function weiToEther(string $wei): string
-    {
-        return bcdiv($wei, '1000000000000000000', 18);
-    }
 
     /**
      * Convert Ether to Wei (or similar 18-decimal conversion)
+     * Delegates to EthereumMathUtils for consistency
      */
     protected function etherToWei(string $ether): string
     {
-        return bcmul($ether, '1000000000000000000', 0);
+        return EthereumMathUtils::convertToSmallestUnit($ether, 'ETH');
     }
 
     /**
      * Parse token amount considering decimals
+     * Delegates to EthereumMathUtils for consistent precision handling
      */
     protected function parseTokenAmount(string $rawAmount, int $decimals): string
     {
-        $divisor = bcpow('10', (string)$decimals, 0);
-        return bcdiv($rawAmount, $divisor, $decimals);
+        // Map decimals to token type for EthereumMathUtils
+        $token = ($decimals === 18) ? 'ETH' : (($decimals === 6) ? 'USDC' : 'ETH');
+        return EthereumMathUtils::convertFromSmallestUnit($rawAmount, $token);
     }
 
     /**
      * Format token amount for transaction (considering decimals)
+     * Delegates to EthereumMathUtils for consistent precision handling
      */
     protected function formatTokenAmount(string $amount, int $decimals): string
     {
-        $multiplier = bcpow('10', (string)$decimals, 0);
-        return bcmul($amount, $multiplier, 0);
+        // Map decimals to token type for EthereumMathUtils
+        $token = ($decimals === 18) ? 'ETH' : (($decimals === 6) ? 'USDC' : 'ETH');
+        return EthereumMathUtils::convertToSmallestUnit($amount, $token);
     }
 }

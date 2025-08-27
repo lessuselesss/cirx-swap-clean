@@ -5,9 +5,10 @@ namespace App\Services;
 use App\Models\Transaction;
 use App\Exceptions\CirxTransferException;
 use App\Blockchain\BlockchainClientFactory;
-use App\Blockchain\CirxBlockchainClient;
-use App\Blockchain\Exceptions\BlockchainException;
+use App\Blockchain\CircularProtocolClient;
+use App\Exceptions\BlockchainException;
 use App\Services\IrohServiceBridge;
+use App\Utils\EthereumMathUtils;
 
 /**
  * CIRX Transfer Service
@@ -21,7 +22,7 @@ class CirxTransferService
     private ?string $cirxWalletAddress;
     private ?string $cirxWalletPrivateKey;
     private BlockchainClientFactory $blockchainFactory;
-    private ?CirxBlockchainClient $cirxClient;
+    private ?CircularProtocolClient $cirxClient;
     private bool $testMode;
     private ?IrohServiceBridge $irohBridge;
 
@@ -32,7 +33,6 @@ class CirxTransferService
             'ETH' => 2700.0,   // $2,700 per ETH
             'USDC' => 1.0,     // $1 per USDC
             'USDT' => 1.0,     // $1 per USDT
-            'SOL' => 100.0,    // $100 per SOL
             'BNB' => 300.0,    // $300 per BNB
             'MATIC' => 0.80,   // $0.80 per MATIC
         ];
@@ -372,7 +372,7 @@ class CirxTransferService
 
             // Check CIRX wallet balance
             $walletBalance = $cirxClient->getCirxBalance($cirxClient->getCirxWalletAddress());
-            if (bccomp($walletBalance, $amount, 18) < 0) {
+            if (EthereumMathUtils::compareAmounts($walletBalance, $amount, 'ETH') < 0) {
                 return [
                     'success' => false,
                     'error' => "Insufficient CIRX balance. Required: {$amount}, Available: {$walletBalance}",
@@ -408,7 +408,7 @@ class CirxTransferService
             $blockNumber = 0;
             
             if ($transaction && isset($transaction['blockNumber'])) {
-                $blockNumber = (int)hexdec(ltrim($transaction['blockNumber'], '0x'));
+                $blockNumber = (int)\App\Utils\HashUtils::hexToDec($transaction['blockNumber']);
             }
 
             return [
@@ -441,7 +441,7 @@ class CirxTransferService
     /**
      * Get CIRX blockchain client (lazy initialization)
      */
-    private function getCirxClient(): CirxBlockchainClient
+    private function getCirxClient(): CircularProtocolClient
     {
         if ($this->cirxClient === null) {
             $this->cirxClient = $this->blockchainFactory->getCirxClient();

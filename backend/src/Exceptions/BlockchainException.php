@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Blockchain\Exceptions;
+namespace App\Exceptions;
 
 use Exception;
 

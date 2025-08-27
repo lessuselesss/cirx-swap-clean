@@ -2,7 +2,7 @@
 
 namespace App\Blockchain;
 
-use App\Blockchain\Exceptions\BlockchainException;
+use App\Exceptions\BlockchainException;
 use App\Services\LoggerService;
 use Psr\Log\LoggerInterface;
 
@@ -40,7 +40,7 @@ class BlockchainClientFactory
     /**
      * Get CIRX blockchain client
      */
-    public function getCirxClient(): CirxBlockchainClient
+    public function getCirxClient(): CircularProtocolClient
     {
         if (!isset($this->clients['cirx'])) {
             $this->clients['cirx'] = $this->createCirxClient();
@@ -91,16 +91,23 @@ class BlockchainClientFactory
     /**
      * Create CIRX blockchain client
      */
-    private function createCirxClient(): CirxBlockchainClient
+    /**
+     * Create CIRX client using NAG-based architecture (no RPC inheritance)
+     */
+    private function createCirxClient(): CircularProtocolClient
     {
         $config = $this->getCirxConfig();
+        
+        // Determine environment from RPC URL for NAG selection
+        $environment = (isset($config['rpc_url']) && str_contains($config['rpc_url'], 'mainnet')) 
+            ? 'mainnet' 
+            : 'testnet';
 
-        return new CirxBlockchainClient(
-            rpcUrl: $config['rpc_url'],
+        return new CircularProtocolClient(
+            environment: $environment,
             cirxWalletAddress: $config['wallet_address'],
             cirxPrivateKey: $config['private_key'] ?? null,
             cirxDecimals: $config['decimals'] ?? 18,
-            backupRpcUrl: $config['backup_rpc_url'] ?? null,
             logger: $this->logger
         );
     }

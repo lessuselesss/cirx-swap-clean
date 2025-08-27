@@ -3,17 +3,17 @@
 namespace Tests\Unit\Blockchain;
 
 use PHPUnit\Framework\TestCase;
-use App\Blockchain\CirxBlockchainClient;
+use App\Blockchain\CircularProtocolClient;
 use CircularProtocol\Api\CircularProtocolAPI;
 
 /**
- * Unit tests for CirxBlockchainClient with CircularProtocolAPI integration
+ * Unit tests for CircularProtocolClient with CircularProtocolAPI integration
  * 
- * @covers \App\Blockchain\CirxBlockchainClient
+ * @covers \App\Blockchain\CircularProtocolClient
  */
-class CirxBlockchainClientTest extends TestCase
+class CircularProtocolClientTest extends TestCase
 {
-    private CirxBlockchainClient $client;
+    private CircularProtocolClient $client;
     private CircularProtocolAPI $mockApi;
     private string $testAddress = 'cc8c6c8cf85a1b9cb8a4ce92e36e5b0c1b0f8b7e5c3a7e8c1e9b8c4e3f2d1a0b';
     private string $testPrivateKey = 'a1b2c3d4e5f6789012345678901234567890123456789012345678901234567890';
@@ -28,7 +28,7 @@ class CirxBlockchainClientTest extends TestCase
         $this->mockApi = $this->createMock(CircularProtocolAPI::class);
         
         // Create client with mock dependencies  
-        $this->client = new CirxBlockchainClient(
+        $this->client = new CircularProtocolClient(
             'https://nag.circularlabs.io/NAG.php?cep=', // rpcUrl
             $this->testAddress, // cirxWalletAddress
             'cirx_contract_address_123456789abcdef', // cirxContractAddress 
@@ -42,26 +42,26 @@ class CirxBlockchainClientTest extends TestCase
 
     public function testConstructorSetsCorrectNAGURL(): void
     {
-        $testnetClient = new CirxBlockchainClient(
+        $testnetClient = new CircularProtocolClient(
             'https://nag.circularlabs.io/NAG.php?cep=',
             $this->testAddress,
             'test_contract_address',
             'test_private_key'
         );
         
-        $this->assertInstanceOf(CirxBlockchainClient::class, $testnetClient);
+        $this->assertInstanceOf(CircularProtocolClient::class, $testnetClient);
     }
 
     public function testConstructorSetsMainnetNAGURL(): void
     {
-        $mainnetClient = new CirxBlockchainClient(
+        $mainnetClient = new CircularProtocolClient(
             'https://nag.circularlabs.io/NAG_Mainnet.php?cep=',
             $this->testAddress,
             'test_contract_address',
             'test_private_key'
         );
         
-        $this->assertInstanceOf(CirxBlockchainClient::class, $mainnetClient);
+        $this->assertInstanceOf(CircularProtocolClient::class, $mainnetClient);
     }
 
     /*---------------------------------------------------------------------------
@@ -80,7 +80,7 @@ class CirxBlockchainClientTest extends TestCase
         ];
         
         // Test that getBalance works with the API integration
-        $this->assertInstanceOf(CirxBlockchainClient::class, $this->client);
+        $this->assertInstanceOf(CircularProtocolClient::class, $this->client);
     }
 
     public function testTransferTokensValidatesParameters(): void
@@ -250,14 +250,14 @@ class CirxBlockchainClientTest extends TestCase
         $this->assertArrayHasKey('walletAddress', $keys);
         
         // Test that we can create a client with generated keys
-        $clientWithGeneratedKeys = new CirxBlockchainClient(
+        $clientWithGeneratedKeys = new CircularProtocolClient(
             'https://nag.circularlabs.io/NAG.php?cep=',
             $keys['walletAddress'],
             'test_contract_address',
             $keys['privateKey']
         );
         
-        $this->assertInstanceOf(CirxBlockchainClient::class, $clientWithGeneratedKeys);
+        $this->assertInstanceOf(CircularProtocolClient::class, $clientWithGeneratedKeys);
     }
 
     /*---------------------------------------------------------------------------
@@ -329,8 +329,8 @@ class CirxBlockchainClientTest extends TestCase
         ];
         
         foreach ($environments as $env => $url) {
-            $client = new CirxBlockchainClient($url, $this->testAddress, 'test_contract', 'test_private_key');
-            $this->assertInstanceOf(CirxBlockchainClient::class, $client);
+            $client = new CircularProtocolClient($url, $this->testAddress, 'test_contract', 'test_private_key');
+            $this->assertInstanceOf(CircularProtocolClient::class, $client);
         }
     }
 
@@ -345,18 +345,18 @@ class CirxBlockchainClientTest extends TestCase
         ];
         
         // Valid private key should work
-        $client = new CirxBlockchainClient(
+        $client = new CircularProtocolClient(
             'https://nag.circularlabs.io/NAG.php?cep=',
             $this->testAddress,
             'test_contract',
             $validPrivateKey
         );
-        $this->assertInstanceOf(CirxBlockchainClient::class, $client);
+        $this->assertInstanceOf(CircularProtocolClient::class, $client);
         
         // Invalid private keys should be handled gracefully
         foreach ($invalidPrivateKeys as $invalidKey) {
             try {
-                $client = new CirxBlockchainClient(
+                $client = new CircularProtocolClient(
                     'https://nag.circularlabs.io/NAG.php?cep=',
                     $this->testAddress,
                     'test_contract',
@@ -364,7 +364,7 @@ class CirxBlockchainClientTest extends TestCase
                 );
                 
                 // If no exception is thrown, that's also acceptable
-                $this->assertInstanceOf(CirxBlockchainClient::class, $client);
+                $this->assertInstanceOf(CircularProtocolClient::class, $client);
                 
             } catch (\Exception $e) {
                 // Exception is acceptable for invalid private keys
