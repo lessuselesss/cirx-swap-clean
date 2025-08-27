@@ -3,9 +3,20 @@
     <!-- Chart Header -->
     <div class="flex items-center justify-between p-6 pb-4 flex-shrink-0 border-b border-cyan-500/10">
       <div class="flex items-center gap-4">
-        <div class="relative w-10 h-10 bg-gradient-to-br from-cyan-500/20 to-blue-600/20 rounded-xl flex items-center justify-center border border-cyan-500/30 shadow-lg shadow-cyan-500/10">
-          <span class="text-cyan-400 font-bold text-lg">C</span>
-          <div class="absolute inset-0 bg-gradient-to-br from-cyan-400/10 to-transparent rounded-xl"></div>
+        <div class="relative w-10 h-10 bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-xl border border-slate-600/30 flex items-center justify-center">
+          <!-- CIRX Token (behind when inactive) -->
+          <img 
+            src="/cirx-icon.svg" 
+            alt="CIRX" 
+            :class="['absolute w-6 h-6 transition-all duration-200', selectedSymbol === 'CIRX/USDT' ? 'opacity-100 z-10 left-2' : 'opacity-80 z-0 left-0']"
+          />
+          
+          <!-- USDT Token (behind when inactive) -->
+          <img 
+            src="/usdt-icon.svg" 
+            alt="USDT" 
+            :class="['absolute w-6 h-6 transition-all duration-200', selectedSymbol === 'USDT/CIRX' ? 'opacity-100 z-10 right-2' : 'opacity-80 z-0 right-0']"
+          />
         </div>
         <div>
           <h3 class="text-xl font-bold bg-gradient-to-r from-white via-cyan-100 to-cyan-200 bg-clip-text text-transparent">
@@ -13,31 +24,36 @@
           </h3>
           <p class="text-sm text-gray-400 font-medium">Circular Protocol</p>
         </div>
-        <!-- Chart Info -->
-        <div class="flex items-center gap-2 ml-4">
-          <div class="text-xs text-gray-500 bg-slate-800/40 px-2 py-1 rounded-md border border-slate-600/30">
-            {{ getDataSourceLabel(selectedDataSource) }}
-          </div>
-        </div>
-        <div class="flex gap-3 ml-6">
+        <div class="flex gap-3 ml-auto">
           <select 
             v-model="selectedDataSource" 
-            class="bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-cyan-500/30 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-200 backdrop-blur-sm hover:border-cyan-400/50"
+            class="bg-slate-800/60 border border-slate-600/40 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-slate-400 focus:border-slate-400 transition-all duration-200 hover:border-slate-500/60 hover:bg-slate-800/80"
           >
-            <option value="aggregate" class="bg-slate-900">🔄 Aggregate (Multi-Exchange)</option>
-            <option value="bitmart" class="bg-slate-900">🚀 BitMart (Fast)</option>
+            <option value="aggregate" class="bg-slate-900">🔄 Aggregate</option>
+            <option value="bitmart" class="bg-slate-900">🚀 BitMart</option>
             <option value="xt" class="bg-slate-900">⚡ XT Exchange</option>
             <option value="lbank" class="bg-slate-900">📈 LBank</option>
           </select>
-          <select 
-            v-model="selectedSymbol" 
-            class="bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-cyan-500/30 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-200 backdrop-blur-sm hover:border-cyan-400/50"
+          <!-- Token Pair Toggle -->
+          <button
+            @click="toggleSymbolPair"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg bg-slate-800/50 border border-slate-600/30 hover:border-slate-500/50 transition-all duration-200"
           >
-            <option value="CIRX/USDT" class="bg-slate-900">CIRX/USDT</option>
-          </select>
+            <!-- CIRX Token -->
+            <div :class="['flex items-center gap-2 transition-all duration-200', selectedSymbol === 'CIRX/USDT' ? 'opacity-100' : 'opacity-40']">
+              <img src="/cirx-icon.svg" alt="CIRX" class="w-5 h-5" />
+              <span :class="['font-medium', selectedSymbol === 'CIRX/USDT' ? 'text-white' : 'text-gray-400']">CIRX</span>
+            </div>
+            
+            <!-- USDT Token -->
+            <div :class="['flex items-center gap-2 transition-all duration-200', selectedSymbol === 'USDT/CIRX' ? 'opacity-100' : 'opacity-40']">
+              <img src="/usdt-icon.svg" alt="USDT" class="w-5 h-5" />
+              <span :class="['font-medium', selectedSymbol === 'USDT/CIRX' ? 'text-white' : 'text-gray-400']">USDT</span>
+            </div>
+          </button>
           <select 
             v-model="selectedInterval" 
-            class="bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-cyan-500/30 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-200 backdrop-blur-sm hover:border-cyan-400/50"
+            class="bg-slate-800/60 border border-slate-600/40 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-slate-400 focus:border-slate-400 transition-all duration-200 hover:border-slate-500/60 hover:bg-slate-800/80"
           >
             <option value="1" class="bg-slate-900">1m</option>
             <option value="5" class="bg-slate-900">5m</option>
@@ -60,7 +76,7 @@
     </div>
 
     <!-- TradingView Chart -->
-    <div class="flex-1 px-6 pb-2 min-h-0">
+    <div class="flex-1 px-2 pb-2 min-h-0 -mt-2">
       <div class="chart-container w-full h-full relative rounded-lg overflow-hidden">
         <!-- Chart Loading State -->
         <div
@@ -81,8 +97,9 @@
         <Chart 
           :options="chartOptions"
           :key="chartKey"
-          :style="{ height: '100%', width: '100%' }"
+          :style="{ height: '100%', width: '100%', border: 'none', outline: 'none' }"
           @ready="onChartReady"
+          @error="onChartError"
         />
         
         <!-- CIRX Price Overlay -->
@@ -170,6 +187,8 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { useSingleExchangeDatafeed } from '~/composables/useSingleExchangeDatafeed.js'
+import { useAggregatePriceFeed } from '~/composables/useAggregatePriceFeed.js'
+import { useAggregateDatafeed } from '~/composables/useAggregateDatafeed.js'
 
 // Use aggregate price feed for multi-exchange data
 const {
@@ -187,7 +206,15 @@ defineEmits(['close'])
 const selectedDataSource = ref('bitmart') // Default to fastest single exchange
 const selectedSymbol = ref('CIRX/USDT')
 const selectedInterval = ref('1D')
+
+// Toggle function for symbol pair
+const toggleSymbolPair = () => {
+  selectedSymbol.value = selectedSymbol.value === 'CIRX/USDT' ? 'USDT/CIRX' : 'CIRX/USDT'
+}
 const chartLoading = ref(true)
+
+// Chart loading timeout to prevent infinite loading
+let chartLoadingTimeout = null
 
 // Display computed - shows the actual CIRX pair name
 const displaySymbol = computed(() => selectedSymbol.value.replace('/', ' / '))
@@ -212,6 +239,20 @@ const chartOptions = computed(() => ({
   theme: 'dark',
   autosize: true,
   
+  // Force dark background colors and simple line styling
+  overrides: {
+    "paneProperties.background": "#000306",
+    "paneProperties.backgroundType": "solid",
+    // Force line chart style - correct TradingView property
+    "mainSeriesProperties.style": 2, // 0=bars, 1=candles, 2=line, 3=area, 4=baseline
+    "mainSeriesProperties.lineStyle.color": "#06B6D4",
+    "mainSeriesProperties.lineStyle.linewidth": 2,
+    "mainSeriesProperties.lineStyle.priceSource": "close",
+    "scalesProperties.backgroundColor": "#000306",
+    "scalesProperties.lineColor": "rgba(6, 182, 212, 0.2)",
+    "scalesProperties.textColor": "#9CA3AF"
+  },
+  
   // Enable features
   studies_overrides: {},
   
@@ -219,15 +260,23 @@ const chartOptions = computed(() => ({
   timezone: 'Etc/UTC',
   locale: 'en',
   
-  // Disable some features for cleaner look
+  // Disable features for faster, simpler line chart
   disabled_features: [
     'use_localstorage_for_settings',
-    'volume_force_overlay'
+    'volume_force_overlay',
+    'volume_chart',
+    'study_templates',
+    'header_widget',
+    'timeframes_toolbar',
+    'edit_buttons_in_legend',
+    'context_menus',
+    'control_bar',
+    'left_toolbar'
   ],
   
-  // Enable useful features  
+  // Minimal enabled features for simple line chart
   enabled_features: [
-    'study_templates'
+    'hide_left_toolbar_by_default'
   ],
   
   // Custom styling for dark theme
@@ -239,12 +288,18 @@ const chartOptions = computed(() => ({
   toolbar_bg: '#111827'
 }))
 
-// Current CIRX/USDT price for display
+// Current pair price for display (handles both CIRX/USDT and USDT/CIRX)
 const currentPairPrice = computed(() => {
   if (!liveCirxPrice.value || liveCirxPrice.value <= 0) return null
   
-  // CIRX/USDT means CIRX price in USDT (which is the USD price)
-  const pairValue = liveCirxPrice.value
+  let pairValue
+  if (selectedSymbol.value === 'CIRX/USDT') {
+    // CIRX/USDT means CIRX price in USDT (which is the USD price)
+    pairValue = liveCirxPrice.value
+  } else {
+    // USDT/CIRX means how many USDT you get for 1 CIRX (inverted)
+    pairValue = 1 / liveCirxPrice.value
+  }
   
   // Format based on price magnitude for better readability
   if (pairValue >= 1) {
@@ -262,14 +317,44 @@ const totalSupply = ref('1T CIRX')
 
 // Chart event handlers
 const onChartReady = () => {
+  console.log('🎯 Chart ready event triggered')
+  if (chartLoadingTimeout) {
+    clearTimeout(chartLoadingTimeout)
+    chartLoadingTimeout = null
+  }
   chartLoading.value = false
+}
+
+// Add error handler for chart failures
+const onChartError = (error) => {
+  console.error('❌ Chart initialization failed:', error)
+  if (chartLoadingTimeout) {
+    clearTimeout(chartLoadingTimeout)
+    chartLoadingTimeout = null
+  }
+  chartLoading.value = false // Stop loading even on error
+}
+
+// Set up chart loading timeout when chartLoading becomes true
+const setupChartTimeout = () => {
+  if (chartLoadingTimeout) {
+    clearTimeout(chartLoadingTimeout)
+  }
+  
+  chartLoadingTimeout = setTimeout(() => {
+    if (chartLoading.value) {
+      console.warn('⏰ Chart loading timeout - forcing completion after 15 seconds')
+      chartLoading.value = false
+    }
+    chartLoadingTimeout = null
+  }, 15000) // 15 second timeout
 }
 
 // Helper function for data source labels
 const getDataSourceLabel = (source) => {
   const labels = {
     'aggregate': 'Real CIRX Market Data (Multi-Exchange)',
-    'bitmart': 'BitMart CIRX Data (Fast)',
+    'bitmart': 'BitMart CIRX Data',
     'xt': 'XT Exchange CIRX Data',
     'lbank': 'LBank CIRX Data'
   }
@@ -279,12 +364,16 @@ const getDataSourceLabel = (source) => {
 // Watch for changes to update chart
 watch([selectedDataSource, selectedSymbol, selectedInterval], () => {
   chartLoading.value = true
+  setupChartTimeout() // Set up timeout for loading
   console.log('Chart updated:', { 
     dataSource: selectedDataSource.value,
     symbol: selectedSymbol.value, 
     interval: selectedInterval.value 
   })
 })
+
+// Initial timeout setup
+setupChartTimeout()
 </script>
 
 <style scoped>
@@ -329,6 +418,57 @@ watch([selectedDataSource, selectedSymbol, selectedInterval], () => {
 :deep(.tradingview-widget-container) {
   background: transparent !important;
   border-radius: 0.5rem;
+}
+
+/* Aggressive removal of white borders/outlines from TradingView chart */
+:deep(.tradingview-widget-container iframe) {
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+:deep(.tradingview-widget-container canvas) {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Target all possible TradingView elements that might have white borders */
+:deep(.tv-lightweight-charts) {
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+}
+
+:deep([class*="tv-"]) {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+:deep([class*="chart"]) {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+:deep([class*="trading"]) {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove any white div backgrounds inside the chart */
+:deep(.tradingview-widget-container div) {
+  border: none !important;
+  outline: none !important;
+}
+
+/* Override any inline styles that might add borders */
+:deep(*) {
+  border-color: transparent !important;
+  outline-color: transparent !important;
 }
 
 /* Gradient border matching swap form - normal state */
