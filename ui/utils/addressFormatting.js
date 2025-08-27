@@ -1,85 +1,96 @@
 /**
- * Address formatting utilities for blockchain addresses
- * Consolidates duplicate formatting logic across the codebase
+ * Address formatting and validation utilities
  */
 
 /**
- * Format blockchain addresses for display
- * @param {string} address - Full blockchain address
- * @param {object} options - Formatting options
- * @returns {string} Formatted address
- */
-export function formatAddress(address, options = {}) {
-  if (!address) return ''
-  
-  const { 
-    startChars = 6, 
-    endChars = 4, 
-    separator = '...' 
-  } = options
-  
-  if (address.length <= startChars + endChars + separator.length) {
-    return address
-  }
-  
-  return `${address.slice(0, startChars)}${separator}${address.slice(-endChars)}`
-}
-
-/**
- * Validate Ethereum address format
- * @param {string} address - Address to validate
- * @returns {boolean} Is valid Ethereum address
+ * Validate if a string is a valid Ethereum address
+ * @param {string} address - The address to validate
+ * @returns {boolean} - True if valid Ethereum address
  */
 export function isValidEthereumAddress(address) {
-  if (!address) return false
+  if (!address || typeof address !== 'string') return false
+  // Check if it's a valid hex string starting with 0x and 40 hex characters
   return /^0x[a-fA-F0-9]{40}$/.test(address)
 }
 
 /**
- * Validate Solana address format
- * @param {string} address - Address to validate  
- * @returns {boolean} Is valid Solana address
+ * Validate if a string is a valid Solana address
+ * @param {string} address - The address to validate
+ * @returns {boolean} - True if valid Solana address
  */
 export function isValidSolanaAddress(address) {
-  if (!address) return false
+  if (!address || typeof address !== 'string') return false
+  // Solana addresses are base58 encoded, 32-44 characters
   return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address)
 }
 
 /**
- * Validate Circular chain address format
- * @param {string} address - Address to validate
- * @returns {boolean} Is valid Circular address
+ * Validate if a string is a valid Circular Protocol address
+ * @param {string} address - The address to validate
+ * @returns {boolean} - True if valid Circular address
  */
 export function isValidCircularAddress(address) {
-  if (!address) return false
-  return /^0x[a-fA-F0-9]{64}$/.test(address)
+  if (!address || typeof address !== 'string') return false
+  // Circular addresses are Ethereum-compatible (0x + 40 hex chars)
+  return isValidEthereumAddress(address)
 }
 
 /**
- * Get address type based on format
- * @param {string} address - Address to check
- * @returns {string|null} 'ethereum', 'solana', 'circular', or null
+ * Determine the type of address
+ * @param {string} address - The address to analyze
+ * @returns {string|null} - Address type: 'ethereum', 'solana', 'circular', or null if invalid
  */
 export function getAddressType(address) {
-  if (isValidCircularAddress(address)) return 'circular'
-  if (isValidEthereumAddress(address)) return 'ethereum'
-  if (isValidSolanaAddress(address)) return 'solana'
+  if (!address || typeof address !== 'string') return null
+  
+  // Check for Circular Protocol address first (same format as Ethereum)
+  if (isValidCircularAddress(address)) {
+    return 'circular'
+  }
+  
+  // Check for Ethereum address
+  if (isValidEthereumAddress(address)) {
+    return 'ethereum'
+  }
+  
+  // Check for Solana address
+  if (isValidSolanaAddress(address)) {
+    return 'solana'
+  }
+  
   return null
 }
 
 /**
- * Format address with blockchain-specific formatting
- * @param {string} address - Address to format
- * @param {object} options - Formatting options
- * @returns {string} Formatted address with type context
+ * Format address for display (truncate middle)
+ * @param {string} address - The address to format
+ * @param {number} prefixLength - Number of characters to show at start
+ * @param {number} suffixLength - Number of characters to show at end
+ * @returns {string} - Formatted address
  */
-export function formatAddressWithType(address, options = {}) {
-  const type = getAddressType(address)
-  const formatted = formatAddress(address, options)
-  
-  if (options.showType && type) {
-    return `${formatted} (${type})`
+export function formatAddress(address, prefixLength = 6, suffixLength = 4) {
+  if (!address || address.length <= prefixLength + suffixLength) {
+    return address || ''
   }
   
-  return formatted
+  return `${address.slice(0, prefixLength)}...${address.slice(-suffixLength)}`
+}
+
+/**
+ * Check if address is valid for a specific chain
+ * @param {string} address - The address to validate
+ * @param {string} chain - The chain type ('ethereum', 'solana', 'circular')
+ * @returns {boolean} - True if valid for the specified chain
+ */
+export function isValidAddressForChain(address, chain) {
+  switch (chain?.toLowerCase()) {
+    case 'ethereum':
+      return isValidEthereumAddress(address)
+    case 'solana':
+      return isValidSolanaAddress(address)
+    case 'circular':
+      return isValidCircularAddress(address)
+    default:
+      return false
+  }
 }

@@ -124,7 +124,6 @@
                     <label class="text-sm font-medium text-white">Sell</label>
                     <span v-if="inputToken" class="balance-display pr-3" @click="setMaxAmount" @dblclick="forceRefreshBalance">
                       Balance: {{ inputBalance ? formatBalance(fullPrecisionInputBalance) : '-' }} {{ getTokenSymbol(inputToken) }}
-                      <span v-if="isBalanceLoading" class="ml-1 text-xs">🔄</span>
                     </span>
                     <span v-else class="balance-display pr-3">
                       Balance: -
@@ -714,9 +713,8 @@
 <script setup>
 // Import Vue composables
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
-// Import official Wagmi Vue hooks
-import { useAccount, useBalance } from '@wagmi/vue'
-import { useAppKit } from '@reown/appkit/vue'
+// Import Reown AppKit Vue hooks
+// AppKit hooks removed - using global instance instead
 import { parseEther, parseUnits } from 'viem'
 import { sendTransaction, writeContract } from '@wagmi/core'
 import { wagmiConfig } from '~/config/appkit.js'
@@ -730,7 +728,7 @@ import { getTokenPrices } from '~/services/priceService.js'
 // Import chart data preloading composable
 import { useAggregatePriceFeed } from '~/composables/useAggregatePriceFeed.js'
 import { AggregateMarket } from '~/scripts/aggregateMarket.js'
-import { isValidCircularAddress, isValidEthereumAddress, isValidSolanaAddress } from '~/utils/addressFormatting.js'
+// Address validation functions can be added here if needed
 // Import backend API integration
 import { useBackendApi } from '~/composables/useBackendApi.js'
 // Import real-time transaction updates via IROH
@@ -749,11 +747,14 @@ definePageMeta({
   layout: 'default'
 })
 
-// Official Wagmi Vue hooks
-const { address, isConnected, connector } = useAccount()
-const { data: balance, isLoading: isBalanceLoading } = useBalance({ 
-  address: address 
-})
+// Use wallet store for reactive state synced with AppKit
+import { useWalletStore } from '~/stores/wallet.js'
+import { storeToRefs } from 'pinia'
+import { isValidEthereumAddress, isValidSolanaAddress, getAddressType } from '~/utils/addressFormatting.js'
+
+const walletStore = useWalletStore()
+const { isConnected, activeWallet } = storeToRefs(walletStore)
+const address = computed(() => activeWallet.value?.address)
 
 // Token contract addresses for balance fetching
 const tokenAddresses = {
@@ -761,18 +762,16 @@ const tokenAddresses = {
   'USDT': '0xdAC17F958D2ee523a2206206994597C13D831ec7', // USDT on mainnet
 }
 
-// Additional balance hooks for ERC20 tokens
-const { data: usdcBalance, isLoading: isUsdcLoading } = useBalance({
-  address: address,
-  token: tokenAddresses.USDC
-})
+// Balance fetching will be handled using provider when needed
 
-const { data: usdtBalance, isLoading: isUsdtLoading } = useBalance({
-  address: address,
-  token: tokenAddresses.USDT
-})
-
-const { open } = useAppKit()
+// Use global AppKit instance for opening modal
+const open = () => {
+  if (typeof window !== 'undefined' && window.$appKit) {
+    window.$appKit.open()
+  } else {
+    console.log('AppKit not available yet')
+  }
+}
 
 // Backend API integration
 const {
@@ -874,17 +873,10 @@ const isButtonShowingDots = computed(() => {
   )
 })
 
-// Format ETH balance with full decimal precision using official Wagmi data
+// Format ETH balance - will be implemented with provider when needed
 const formattedEthBalance = computed(() => {
-  if (!balance.value) return '0.000000000000000000'
-  
-  // balance.value contains { formatted, value, decimals, symbol }
-  const amount = parseFloat(balance.value.formatted)
-  
-  if (isNaN(amount)) return '0.000000000000000000'
-  
-  // Show all 18 decimal places for Ethereum tokens
-  return amount.toFixed(18)
+  // TODO: Implement balance fetching using AppKit provider
+  return '0.000000000000000000'
 })
 
 // Connection state management
@@ -920,17 +912,12 @@ watch([isConnected, address], ([connected, addr], [prevConnected, prevAddr]) => 
   }
 }, { immediate: false })
 
-// Watch for balance updates
-watch(() => [isConnected.value, address.value, balance.value], 
-  ([connected, addr, bal]) => {
-    console.log('🔍 BALANCE WATCH: Wagmi state changed:')
+// Watch for connection updates
+watch(() => [isConnected.value, address.value], 
+  ([connected, addr]) => {
+    console.log('🔍 CONNECTION WATCH: AppKit state changed:')
     console.log('  - Connected:', connected)
     console.log('  - Address:', addr ? addr.slice(0, 6) + '...' + addr.slice(-4) : 'none')
-    console.log('  - Balance object:', bal)
-    console.log('  - Formatted balance:', bal?.formatted)
-    console.log('  - Balance symbol:', bal?.symbol)
-    console.log('  - Is loading:', isBalanceLoading.value)
-    console.log('  - Computed full precision:', formattedEthBalance.value)
     console.log('  - Timestamp:', new Date().toISOString())
   }, 
   { immediate: true }
@@ -946,27 +933,49 @@ const inputToken = ref('')
 const loading = ref(false)
 const loadingText = ref('')
 const quote = ref(null)
-const showChart = ref(true)
+const showChart = ref(false)
 const showStaking = ref(false)
 
-// Background preload chart data for instant loading
-console.log('🚀 Starting background chart data preload...')
-const { 
-  currentPrice, 
-  isLoading: chartDataLoading, 
-  error: chartDataError 
-} = useAggregatePriceFeed()
+// Chart data preloading variables (will be initialized after page load)
+let chartPreloadStarted = false
+const chartDataLoading = ref(false)
+const chartDataError = ref(null)
+let aggregateMarketInstance = null
 
-// Also preload aggregate market data for TradingView chart
-const aggregateMarketInstance = new AggregateMarket()
-
-// Start preloading market data immediately in background
-setTimeout(() => {
-  console.log('📊 Preloading TradingView chart data in background...')
-  aggregateMarketInstance.getMarketData('CIRX', 'USDT').catch(e => {
-    console.log('Background preload failed (non-critical):', e.message)
-  })
-}, 100) // Small delay to not block initial render
+// Chart preloading function - called after swap page loads
+const startChartPreloading = async () => {
+  if (chartPreloadStarted) return
+  chartPreloadStarted = true
+  
+  console.log('🚀 Starting background chart data preload after swap page loaded...')
+  
+  try {
+    // Initialize price feed composable
+    const { 
+      currentPrice, 
+      isLoading, 
+      error 
+    } = useAggregatePriceFeed()
+    
+    // Use singleton instance (shares cache with chart datafeeds)
+    aggregateMarketInstance = AggregateMarket.getInstance()
+    
+    // Start preloading TradingView chart data in background (non-blocking)
+    setTimeout(() => {
+      console.log('📊 Preloading TradingView chart data in background...')
+      aggregateMarketInstance.getMarketData('CIRX', 'USDT').catch(e => {
+        console.log('Background preload failed (non-critical):', e.message)
+        chartDataError.value = e.message
+      }).finally(() => {
+        chartDataLoading.value = false
+      })
+    }, 1000) // 1 second delay to ensure swap page is fully rendered
+    
+  } catch (error) {
+    console.warn('Chart preloading initialization failed:', error)
+    chartDataError.value = error.message
+  }
+}
 
 
 // Focus handler for address input
@@ -1124,9 +1133,9 @@ const inputBalance = computed(() => {
     case 'ETH':
       return formattedEthBalance.value
     case 'USDC':
-      return formatTokenBalance(usdcBalance.value)
     case 'USDT':
-      return formatTokenBalance(usdtBalance.value)
+      // TODO: Implement token balance fetching using AppKit provider
+      return '0.000000000000000000'
     default:
       return '0.000000000000000000'
   }
@@ -1159,30 +1168,16 @@ const shortAddress = computed(() => {
   return `${address.value.slice(0, 6)}...${address.value.slice(-4)}`
 })
 
-// Connected wallet type (using Wagmi hooks)
+// Connected wallet type - simplified since connector is not available
 const connectedWallet = computed(() => {
-  if (!connector.value) return null
-  return connector.value.name?.toLowerCase() === 'phantom' ? 'phantom' : 'ethereum'
+  return isConnected.value ? 'ethereum' : null
 })
 
-// Wallet icon logic (same as in WalletButton)
+// Wallet icon logic - simplified fallback
 const walletIcon = computed(() => {
-  // Try to get icon from Wagmi connector
-  if (connector.value?.icon) {
-    return connector.value.icon
-  }
-  
-  // Fallback to common wallet icons from CDN
-  if (!connector.value) return null
-  const name = connector.value.name?.toLowerCase()
-  const iconMap = {
-    'metamask': 'https://raw.githubusercontent.com/MetaMask/brand-resources/master/SVG/metamask-fox.svg',
-    'coinbase': 'https://avatars.githubusercontent.com/u/18060234?s=280&v=4',
-    'walletconnect': 'https://avatars.githubusercontent.com/u/37784886?s=280&v=4',
-    'phantom': 'https://avatars.githubusercontent.com/u/78782331?s=280&v=4'
-  }
-  
-  return iconMap[name] || null
+  // Default to MetaMask icon when connected
+  if (!isConnected.value) return null
+  return '/icons/wallets/metamask-fox.svg'
 })
 
 // Check if dropdown should be positioned to the left to prevent overflow
@@ -1799,7 +1794,6 @@ const handleSwap = async () => {
   console.log('🔥 HANDLESWAP CALLED IN SWAP.VUE!', {
     isConnected: isConnected.value,
     address: address.value,
-    connector: connector.value,
     recipientAddress: recipientAddress.value,
     inputAmount: inputAmount.value,
   })
@@ -1807,7 +1801,12 @@ const handleSwap = async () => {
   // PRIORITY: Handle wallet connection states FIRST (before input validation)
   if (!isConnected.value && (!recipientAddress.value || recipientAddress.value.trim() === '')) {
     console.log('🔥 State 1: Connect - Opening wallet modal')
-    open() // Open AppKit modal
+    if (process.client && window?.$appKit) {
+      console.log('✅ Opening AppKit modal via global instance')
+      window.$appKit.open()
+    } else {
+      console.error('❌ AppKit not available on window')
+    }
     return
   }
   
@@ -2547,6 +2546,9 @@ onMounted(async () => {
   
   // Fetch network configuration for dynamic placeholder
   await fetchNetworkConfig()
+  
+  // Start chart data preloading after swap page is fully loaded
+  await startChartPreloading()
   
   const handleClickOutside = (event) => {
     if (showTokenDropdown.value && !event.target.closest('.token-dropdown-container')) {
