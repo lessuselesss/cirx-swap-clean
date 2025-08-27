@@ -360,7 +360,7 @@ definePageMeta({
 
 // Configuration
 const config = useRuntimeConfig()
-const apiBaseUrl = computed(() => config.public.apiBaseUrl || 'http://localhost:8080')
+const apiBaseUrl = computed(() => config.public.apiBaseUrl || 'http://localhost:8080/api/v1')
 
 // Reactive state
 const healthStatus = reactive({

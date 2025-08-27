@@ -818,9 +818,9 @@ const dynamicPlaceholder = computed(() => {
 const fetchNetworkConfig = async () => {
   try {
     const config = useRuntimeConfig()
-    const apiBaseUrl = config.public.apiBaseUrl || 'http://localhost:8080/api'
+    const apiBaseUrl = config.public.apiBaseUrl || 'http://localhost:8080/api/v1'
     
-    const response = await fetch(`${apiBaseUrl}/v1/config/circular-network`)
+    const response = await fetch(`${apiBaseUrl}/config/circular-network`)
     if (response.ok) {
       const data = await response.json()
       networkConfig.value = data
@@ -1746,12 +1746,12 @@ const formatAmount = (amount) => {
 const checkBackendHealth = async () => {
   try {
     const config = useRuntimeConfig()
-    const apiBaseUrl = config.public.apiBaseUrl || 'http://localhost:8080/api'
+    const apiBaseUrl = config.public.apiBaseUrl || 'http://localhost:8080/api/v1'
     
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), 3000) // 3 second timeout
     
-    const response = await fetch(`${apiBaseUrl}/v1/health`, {
+    const response = await fetch(`${apiBaseUrl}/health`, {
       signal: controller.signal,
       method: 'GET',
       headers: {
@@ -2278,10 +2278,10 @@ const fetchCirxBalanceForAddress = async (address) => {
     
     // Get runtime config for API base URL
     const config = useRuntimeConfig()
-    const apiBaseUrl = config.public.apiBaseUrl || 'http://localhost:8080/api'
+    const apiBaseUrl = config.public.apiBaseUrl || 'http://localhost:8080/api/v1'
     
     // Call our backend API to get CIRX balance
-    const response = await fetch(`${apiBaseUrl}/v1/cirx/balance/${address}`, {
+    const response = await fetch(`${apiBaseUrl}/cirx/balance/${address}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

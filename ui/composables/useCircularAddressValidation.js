@@ -20,9 +20,9 @@ export const useCircularAddressValidation = () => {
 
     try {
       const config = useRuntimeConfig()
-      const apiBaseUrl = config.public.apiBaseUrl || 'http://localhost:8080/api'
+      const apiBaseUrl = config.public.apiBaseUrl || 'http://localhost:8080/api/v1'
       
-      const response = await fetch(`${apiBaseUrl}/v1/config/circular-network`)
+      const response = await fetch(`${apiBaseUrl}/config/circular-network`)
       if (!response.ok) {
         throw new Error(`Config API error: ${response.status}`)
       }

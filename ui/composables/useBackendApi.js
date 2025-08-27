@@ -67,7 +67,7 @@ export function useBackendApi() {
       }
       
       // Make API request
-      const fullUrl = `${API_BASE_URL}/v1/transactions/initiate-swap`
+      const fullUrl = `${API_BASE_URL}/transactions/initiate-swap`
       console.log('🔥 Making API request to:', fullUrl)
       console.log('🔥 Swap data:', swapData)
       
@@ -108,7 +108,7 @@ export function useBackendApi() {
         throw new Error('Swap ID is required')
       }
       
-      const response = await fetch(`${API_BASE_URL}/v1/transactions/${swapId}/status`, {
+      const response = await fetch(`${API_BASE_URL}/transactions/${swapId}/status`, {
         method: 'GET',
         headers: getHeaders()
       })
@@ -151,7 +151,7 @@ export function useBackendApi() {
         throw new Error('Address is required')
       }
       
-      const response = await fetch(`${API_BASE_URL}/v1/balance/${address}`, {
+      const response = await fetch(`${API_BASE_URL}/balance/${address}`, {
         method: 'GET',
         headers: getHeaders()
       })

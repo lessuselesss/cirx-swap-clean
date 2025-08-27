@@ -135,7 +135,7 @@ export function useTransactionStatus() {
 
     const pollStatus = async () => {
       try {
-        const response = await apiCall(`/api/v1/transactions/${transactionId}/status`, 'GET')
+        const response = await apiCall(`/transactions/${transactionId}/status`, 'GET')
         
         if (response.success) {
           const statusData = response.data

@@ -724,7 +724,7 @@ const currentChainConfig = computed(() => {
 })
 
 const apiBaseUrl = computed(() => {
-  return config.value?.public?.apiBaseUrl || 'http://localhost:8080'
+  return config.value?.public?.apiBaseUrl || 'http://localhost:8080/api/v1'
 })
 
 // Transaction validation computed properties
@@ -964,7 +964,7 @@ const testRpcBalance = async () => {
     addLog('info', `Test Address: ${testAddress}`)
     
     // Use backend proxy to avoid CORS issues
-    const backendUrl = config?.public?.apiBaseUrl || 'http://localhost:8080'
+    const backendUrl = config?.public?.apiBaseUrl || 'http://localhost:8080/api/v1'
     const proxyUrl = `${backendUrl}/api/v1/debug/nag-balance`
     
     const requestBody = {

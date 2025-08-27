@@ -435,7 +435,7 @@ export function useSwapService() {
         }
 
         // Step 2: Call backend API to initiate swap processing
-        const response = await $fetch('http://localhost:8080/api/v1/transactions/initiate-swap', {
+        const response = await $fetch(`${runtimeConfig.public.apiBaseUrl}/transactions/initiate-swap`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -537,7 +537,7 @@ export function useSwapService() {
         }
 
         // Step 2: Call backend API to initiate swap processing
-        const response = await $fetch('http://localhost:8080/api/v1/transactions/initiate-swap', {
+        const response = await $fetch(`${runtimeConfig.public.apiBaseUrl}/transactions/initiate-swap`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'

@@ -379,7 +379,8 @@ const refreshPage = () => {
 const testTelegramConnection = async () => {
   telegramLoading.value.connection = true
   try {
-    const response = await fetch('http://localhost:8080/api/v1/telegram/test/connection')
+    const config = useRuntimeConfig()
+    const response = await fetch(`${config.public.apiBaseUrl}/telegram/test/connection`)
     const data = await response.json()
     
     const status = data.success ? '✅ Connected' : '❌ Failed'
@@ -394,7 +395,8 @@ const testTelegramConnection = async () => {
 const sendTestError = async () => {
   telegramLoading.value.error = true
   try {
-    const response = await fetch('http://localhost:8080/api/v1/telegram/test/error', {
+    const config = useRuntimeConfig()
+    const response = await fetch(`${config.public.apiBaseUrl}/telegram/test/error`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -417,7 +419,8 @@ const sendTestError = async () => {
 const testRateLimit = async () => {
   telegramLoading.value.rateLimit = true
   try {
-    const response = await fetch('http://localhost:8080/api/v1/telegram/test/multiple', {
+    const config = useRuntimeConfig()
+    const response = await fetch(`${config.public.apiBaseUrl}/telegram/test/multiple`, {
       method: 'POST'
     })
     const data = await response.json()
@@ -435,7 +438,8 @@ const testRateLimit = async () => {
 const processTransactions = async () => {
   workersLoading.value.process = true
   try {
-    const response = await fetch('http://localhost:8080/api/v1/workers/process', {
+    const config = useRuntimeConfig()
+    const response = await fetch(`${config.public.apiBaseUrl}/workers/process`, {
       method: 'POST'
     })
     const data = await response.json()
@@ -452,7 +456,8 @@ const processTransactions = async () => {
 const getWorkerStats = async () => {
   workersLoading.value.stats = true
   try {
-    const response = await fetch('http://localhost:8080/api/v1/workers/stats')
+    const config = useRuntimeConfig()
+    const response = await fetch(`${config.public.apiBaseUrl}/workers/stats`)
     const data = await response.json()
     
     const status = data.success ? '📊 Stats Retrieved' : '❌ Stats Failed'
@@ -467,7 +472,8 @@ const getWorkerStats = async () => {
 const checkWorkerHealth = async () => {
   workersLoading.value.health = true
   try {
-    const response = await fetch('http://localhost:8080/api/v1/workers/health')
+    const config = useRuntimeConfig()
+    const response = await fetch(`${config.public.apiBaseUrl}/workers/health`)
     const data = await response.json()
     
     const status = data.success ? '💚 Workers Healthy' : '❌ Health Check Failed'

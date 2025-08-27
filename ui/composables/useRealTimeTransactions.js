@@ -102,7 +102,7 @@ export const useRealTimeTransactions = () => {
             }
 
             // Fetch from backend with IROH integration
-            const response = await $fetch(`/api/v1/transactions/${transactionId}/status/realtime`)
+            const response = await $fetch(`/transactions/${transactionId}/status/realtime`)
             
             if (response.success) {
                 const transaction = response.data

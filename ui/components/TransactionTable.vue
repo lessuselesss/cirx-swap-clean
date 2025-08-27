@@ -134,7 +134,7 @@ const fetchTransactions = async () => {
   loading.value = true
   try {
     const config = useRuntimeConfig()
-    const response = await fetch(`${config.public.apiBaseUrl}/v1/transactions/table?limit=20`)
+    const response = await fetch(`${config.public.apiBaseUrl}/transactions/table?limit=20`)
     
     if (response.ok) {
       const data = await response.json()

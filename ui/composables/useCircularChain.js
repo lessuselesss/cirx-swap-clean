@@ -88,7 +88,7 @@ export const useCircularChain = (toastCallback = null) => {
   const fetchBalanceFromNAG = async (address) => {
     try {
       const { $fetch } = useNuxtApp()
-      const response = await $fetch('/api/v1/debug/nag-balance', {
+      const response = await $fetch('/debug/nag-balance', {
         method: 'POST',
         body: {
           nagUrl: 'https://nag.circularlabs.io/NAG.php?cep=',
