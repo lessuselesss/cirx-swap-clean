@@ -19,6 +19,11 @@
 
 export class AggregateMarket {
     intervalId = null
+    
+    // Simple cache with timestamp
+    _cache = null
+    _cacheTimestamp = 0
+    _cacheTimeout = 30000 // 30 seconds cache
   
     /*
      * helper function use abbreviation for values K,M,B,T
@@ -182,6 +187,13 @@ export class AggregateMarket {
      */
   
     async getMarketData(token, pair) {
+      // Check cache first
+      const now = Date.now()
+      if (this._cache && (now - this._cacheTimestamp) < this._cacheTimeout) {
+        console.log('🎯 Using cached market data')
+        return this._cache
+      }
+
       var URL_Circul = `https://nag.circularlabs.io/GetCirculatingSupply.php?Asset=CIRX`
       var URL_bitmart = `https://nag.circularlabs.io/CProxy.php?url=https://api-cloud.bitmart.com/spot/quotation/v3/ticker?symbol=${token.toUpperCase()}_${pair.toUpperCase()}`
       var URL_xt = `https://nag.circularlabs.io/CProxy.php?url=https://sapi.xt.com/v4/public/ticker/24h?symbol=${token.toLowerCase()}_${pair.toLowerCase()}`
@@ -196,26 +208,38 @@ export class AggregateMarket {
       let circSupply = 0
   
       try {
-        // Fetch data from all APIs concurrently
+        // Create timeout promises for each API call
+        const timeoutMs = 5000 // 5 second timeout instead of default
+        
+        const fetchWithTimeout = (url, timeout = timeoutMs) => {
+          return Promise.race([
+            fetch(url),
+            new Promise((_, reject) => 
+              setTimeout(() => reject(new Error(`Timeout: ${url}`)), timeout)
+            )
+          ])
+        }
+        
+        // Fetch data from all APIs concurrently with timeouts
         const [circulatingSupply, bitmartResponse, xtResponse, lbankResponse] =
-          await Promise.all([
-            fetch(URL_Circul),
-            fetch(URL_bitmart),
-            fetch(URL_xt),
-            fetch(URL_lbank)
+          await Promise.allSettled([
+            fetchWithTimeout(URL_Circul),
+            fetchWithTimeout(URL_bitmart),
+            fetchWithTimeout(URL_xt),
+            fetchWithTimeout(URL_lbank)
           ])
   
         // Handle Circular response
-        if (circulatingSupply.ok) {
-          const CircularData = await circulatingSupply.json()
+        if (circulatingSupply.status === 'fulfilled' && circulatingSupply.value.ok) {
+          const CircularData = await circulatingSupply.value.json()
           circSupply = parseInt(CircularData.circulatingSupply)
         } else {
-          console.log(`Circulating Supply Error`)
+          console.log(`Circulating Supply Error:`, circulatingSupply.reason?.message || 'Failed')
         }
   
         // Handle BitMart response
-        if (bitmartResponse.ok) {
-          const bitmartData = await bitmartResponse.json()
+        if (bitmartResponse.status === 'fulfilled' && bitmartResponse.value.ok) {
+          const bitmartData = await bitmartResponse.value.json()
           if (bitmartData.data) {
             const bitmartLast = parseFloat(bitmartData.data.last)
             const bitmartFluc = parseFloat(bitmartData.data.fluctuation) * 100.0 // Convert fluctuation to percentage
@@ -234,12 +258,12 @@ export class AggregateMarket {
             )
           }
         } else {
-          console.log(`BitMart HTTP error! Status: ${bitmartResponse.status}`)
+          console.log(`BitMart Error:`, bitmartResponse.reason?.message || 'Failed to fetch')
         }
   
         // Handle XT response
-        if (xtResponse.ok) {
-          const xtData = await xtResponse.json()
+        if (xtResponse.status === 'fulfilled' && xtResponse.value.ok) {
+          const xtData = await xtResponse.value.json()
           if (xtData.result && xtData.result[0]) {
             const xtLast = parseFloat(xtData.result[0].c) // Assuming result is an array
             const xtFluc = parseFloat(xtData.result[0].cr) * 100.0 // Convert fluctuation to percentage
@@ -256,12 +280,12 @@ export class AggregateMarket {
             console.log(`Unexpected XT data format: ${JSON.stringify(xtData)}`)
           }
         } else {
-          console.log(`XT HTTP error! Status: ${xtResponse.status}`)
+          console.log(`XT Error:`, xtResponse.reason?.message || 'Failed to fetch')
         }
   
         // Handle LBank response
-        if (lbankResponse.ok) {
-          const lbankData = await lbankResponse.json()
+        if (lbankResponse.status === 'fulfilled' && lbankResponse.value.ok) {
+          const lbankData = await lbankResponse.value.json()
           if (lbankData.data && lbankData.data[0] && lbankData.data[0].ticker) {
             const lbankTicker = lbankData.data[0].ticker
             const lbankLast = parseFloat(lbankTicker.latest)
@@ -280,7 +304,7 @@ export class AggregateMarket {
             )
           }
         } else {
-          console.log(`LBank HTTP error! Status: ${lbankResponse.status}`)
+          console.log(`LBank Error:`, lbankResponse.reason?.message || 'Failed to fetch')
         }
   
         // Ensure at least one valid response was processed
@@ -310,6 +334,11 @@ export class AggregateMarket {
           totalVolumeCIRX: totalFormattedVolC,
           totalVolumeUSDT: totalFormattedVolU
         }
+  
+        // Cache the result
+        this._cache = result
+        this._cacheTimestamp = Date.now()
+        console.log('💾 Cached fresh market data')
   
         return result
       } catch (error) {

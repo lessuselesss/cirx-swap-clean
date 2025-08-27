@@ -16,10 +16,19 @@
         <!-- Chart Info -->
         <div class="flex items-center gap-2 ml-4">
           <div class="text-xs text-gray-500 bg-slate-800/40 px-2 py-1 rounded-md border border-slate-600/30">
-            Real CIRX Market Data
+            {{ getDataSourceLabel(selectedDataSource) }}
           </div>
         </div>
         <div class="flex gap-3 ml-6">
+          <select 
+            v-model="selectedDataSource" 
+            class="bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-cyan-500/30 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-200 backdrop-blur-sm hover:border-cyan-400/50"
+          >
+            <option value="aggregate" class="bg-slate-900">🔄 Aggregate (Multi-Exchange)</option>
+            <option value="bitmart" class="bg-slate-900">🚀 BitMart (Fast)</option>
+            <option value="xt" class="bg-slate-900">⚡ XT Exchange</option>
+            <option value="lbank" class="bg-slate-900">📈 LBank</option>
+          </select>
           <select 
             v-model="selectedSymbol" 
             class="bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-cyan-500/30 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-200 backdrop-blur-sm hover:border-cyan-400/50"
@@ -53,10 +62,27 @@
     <!-- TradingView Chart -->
     <div class="flex-1 px-6 pb-2 min-h-0">
       <div class="chart-container w-full h-full relative rounded-lg overflow-hidden">
+        <!-- Chart Loading State -->
+        <div
+          v-if="chartLoading"
+          class="absolute inset-0 z-10 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center rounded-lg"
+        >
+          <div class="text-center">
+            <div class="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-full border border-cyan-500/30 mb-4">
+              <svg class="animate-spin w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+              </svg>
+            </div>
+            <div class="text-sm text-cyan-300 font-medium mb-1">Loading Chart Data...</div>
+            <div class="text-xs text-gray-400">Fetching real-time market data</div>
+          </div>
+        </div>
+        
         <Chart 
           :options="chartOptions"
           :key="chartKey"
           :style="{ height: '100%', width: '100%' }"
+          @ready="onChartReady"
         />
         
         <!-- CIRX Price Overlay -->
@@ -143,6 +169,7 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
+import { useSingleExchangeDatafeed } from '~/composables/useSingleExchangeDatafeed.js'
 
 // Use aggregate price feed for multi-exchange data
 const {
@@ -157,24 +184,29 @@ const {
 defineEmits(['close'])
 
 // Chart state - CIRX/USDT only
+const selectedDataSource = ref('bitmart') // Default to fastest single exchange
 const selectedSymbol = ref('CIRX/USDT')
 const selectedInterval = ref('1D')
+const chartLoading = ref(true)
 
 // Display computed - shows the actual CIRX pair name
 const displaySymbol = computed(() => selectedSymbol.value.replace('/', ' / '))
 
 // Chart key for reactivity
-const chartKey = computed(() => `${selectedSymbol.value}-${selectedInterval.value}`)
+const chartKey = computed(() => `${selectedDataSource.value}-${selectedSymbol.value}-${selectedInterval.value}`)
 
-// Import the aggregate datafeed
+// Import both datafeeds
 const { createDatafeed } = useAggregateDatafeed()
+const { createSingleExchangeDatafeed } = useSingleExchangeDatafeed()
 
-// TradingView Chart Options - using aggregate datafeed
+// TradingView Chart Options - dynamic datafeed based on selection
 const chartOptions = computed(() => ({
-  // Symbol and interval - now using aggregated CIRX data
+  // Symbol and interval
   symbol: selectedSymbol.value,
   interval: selectedInterval.value,
-  datafeed: createDatafeed(), // Use aggregate datafeed with multi-exchange data
+  datafeed: selectedDataSource.value === 'aggregate' 
+    ? createDatafeed() // Multi-exchange aggregate data
+    : createSingleExchangeDatafeed(selectedDataSource.value), // Single exchange data
   
   // Appearance
   theme: 'dark',
@@ -228,9 +260,27 @@ const volume24h = computed(() => marketStats.value.volume24h)
 const circulatingSupply = computed(() => marketStats.value.circulatingSupply)
 const totalSupply = ref('1T CIRX')
 
+// Chart event handlers
+const onChartReady = () => {
+  chartLoading.value = false
+}
+
+// Helper function for data source labels
+const getDataSourceLabel = (source) => {
+  const labels = {
+    'aggregate': 'Real CIRX Market Data (Multi-Exchange)',
+    'bitmart': 'BitMart CIRX Data (Fast)',
+    'xt': 'XT Exchange CIRX Data',
+    'lbank': 'LBank CIRX Data'
+  }
+  return labels[source] || 'CIRX Market Data'
+}
+
 // Watch for changes to update chart
-watch([selectedSymbol, selectedInterval], () => {
+watch([selectedDataSource, selectedSymbol, selectedInterval], () => {
+  chartLoading.value = true
   console.log('Chart updated:', { 
+    dataSource: selectedDataSource.value,
     symbol: selectedSymbol.value, 
     interval: selectedInterval.value 
   })

@@ -727,6 +727,9 @@ import OtcDiscountDropdown from '~/components/OtcDiscountDropdown.vue'
 import CirxPriceChart from '~/components/CirxPriceChart.vue'
 import CirxStakingPanel from '~/components/CirxStakingPanel.vue'
 import { getTokenPrices } from '~/services/priceService.js'
+// Import chart data preloading composable
+import { useAggregatePriceFeed } from '~/composables/useAggregatePriceFeed.js'
+import { AggregateMarket } from '~/scripts/aggregateMarket.js'
 import { isValidCircularAddress, isValidEthereumAddress, isValidSolanaAddress } from '~/utils/addressFormatting.js'
 // Import backend API integration
 import { useBackendApi } from '~/composables/useBackendApi.js'
@@ -945,6 +948,25 @@ const loadingText = ref('')
 const quote = ref(null)
 const showChart = ref(true)
 const showStaking = ref(false)
+
+// Background preload chart data for instant loading
+console.log('🚀 Starting background chart data preload...')
+const { 
+  currentPrice, 
+  isLoading: chartDataLoading, 
+  error: chartDataError 
+} = useAggregatePriceFeed()
+
+// Also preload aggregate market data for TradingView chart
+const aggregateMarketInstance = new AggregateMarket()
+
+// Start preloading market data immediately in background
+setTimeout(() => {
+  console.log('📊 Preloading TradingView chart data in background...')
+  aggregateMarketInstance.getMarketData('CIRX', 'USDT').catch(e => {
+    console.log('Background preload failed (non-critical):', e.message)
+  })
+}, 100) // Small delay to not block initial render
 
 
 // Focus handler for address input
