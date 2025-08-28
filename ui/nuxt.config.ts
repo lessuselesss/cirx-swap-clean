@@ -13,7 +13,16 @@ export default defineNuxtConfig({
   
   // Configure for static generation
   nitro: {
-    preset: 'static'
+    preset: 'static',
+    // Disable app manifest to avoid 403 errors
+    experimental: {
+      appManifest: false
+    }
+  },
+  
+  // Disable app manifest
+  experimental: {
+    appManifest: false
   },
   
   // Disable SSR for Web3 compatibility
