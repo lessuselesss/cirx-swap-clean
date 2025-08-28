@@ -41,9 +41,9 @@ jobs:
         working-directory: ./ui
         run: npm ci --prefer-offline --no-audit
 
-      - name: Build frontend
+      - name: Generate static frontend
         working-directory: ./ui
-        run: npm run build
+        run: npm run generate
 
       - name: FTP Deploy
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
