@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Services\TransactionMonitoringService;
+use App\Services\TransactionReadinessService;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
@@ -16,14 +17,17 @@ use Carbon\Carbon;
 class MonitoringController
 {
     private TransactionMonitoringService $monitoringService;
+    private TransactionReadinessService $readinessService;
     private LoggerInterface $logger;
     
     public function __construct(
         TransactionMonitoringService $monitoringService,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        ?TransactionReadinessService $readinessService = null
     ) {
         $this->monitoringService = $monitoringService;
         $this->logger = $logger;
+        $this->readinessService = $readinessService ?? new TransactionReadinessService();
     }
     
     /**
@@ -219,6 +223,49 @@ class MonitoringController
             $response->getBody()->write("# Error generating metrics\n");
             return $response
                 ->withHeader('Content-Type', 'text/plain')
+                ->withStatus(500);
+        }
+    }
+    
+    /**
+     * Comprehensive transaction readiness check
+     * GET /api/v1/health/transaction-ready
+     * 
+     * Validates ALL systems required for transaction processing.
+     * If this returns transaction_ready=true, the backend can guarantee
+     * it can handle transactions from payment verification to CIRX delivery.
+     */
+    public function transactionReady(Request $request, Response $response): Response
+    {
+        try {
+            $readinessReport = $this->readinessService->assessTransactionReadiness();
+            
+            // Set appropriate HTTP status based on readiness
+            $statusCode = $readinessReport['transaction_ready'] ? 200 : 503;
+            
+            $response->getBody()->write(json_encode($readinessReport, JSON_PRETTY_PRINT));
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus($statusCode);
+                
+        } catch (\Exception $e) {
+            $this->logger->error('Transaction readiness check failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            $errorResponse = [
+                'transaction_ready' => false,
+                'status' => 'error',
+                'message' => 'Transaction readiness check failed',
+                'error' => $e->getMessage(),
+                'timestamp' => Carbon::now()->toISOString()
+            ];
+            
+            $response->getBody()->write(json_encode($errorResponse, JSON_PRETTY_PRINT));
+            
+            return $response
+                ->withHeader('Content-Type', 'application/json')
                 ->withStatus(500);
         }
     }

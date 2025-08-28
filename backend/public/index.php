@@ -12,6 +12,7 @@ use App\Controllers\ConfigController;
 use App\Controllers\WorkerController;
 use App\Controllers\AdminController;
 use App\Controllers\IrohTransactionController;
+use App\Controllers\MonitoringController;
 use App\Middleware\ApiKeyAuthMiddleware;
 use App\Middleware\RateLimitMiddleware;
 use App\Middleware\CorsMiddleware;
@@ -151,6 +152,14 @@ $app->group('/v1', function ($group) {
         
         $response->getBody()->write(json_encode($healthStatus));
         return $response->withHeader('Content-Type', 'application/json');
+    });
+
+    // Transaction readiness check - validates ALL systems for transaction processing
+    $group->get('/health/transaction-ready', function (Request $request, Response $response) {
+        $logger = \App\Services\LoggerService::getLogger('monitoring');
+        $monitoringService = new \App\Services\TransactionMonitoringService($logger);
+        $controller = new MonitoringController($monitoringService, $logger);
+        return $controller->transactionReady($request, $response);
     });
 
     // Security status endpoint (protected)

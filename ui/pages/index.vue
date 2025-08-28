@@ -112,8 +112,8 @@
                 <div class="input-section input-section-top">
                   <div class="input-header">
                     <label class="text-sm font-medium text-white">Sell</label>
-                    <span v-if="inputToken" class="balance-display pr-3" @click="setMaxAmount" @dblclick="forceRefreshBalance">
-                      Balance: {{ inputBalance ? formatBalance(fullPrecisionInputBalance) : '-' }} {{ getTokenSymbol(inputToken) }}
+                    <span v-if="walletStore.selectedToken" class="balance-display pr-3" @click="setMaxAmount" @dblclick="forceRefreshBalance">
+                      Balance: {{ walletStore.selectedTokenBalance ? formatBalance(walletStore.selectedTokenBalance) : '-' }} {{ getTokenSymbol(walletStore.selectedToken) }}
                     </span>
                     <span v-else class="balance-display pr-3">
                       Balance: -
@@ -705,6 +705,8 @@
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 // Import Reown AppKit Vue hooks
 // AppKit hooks removed - using global instance instead
+// Import wallet store for global state management
+import { useWalletStore } from '~/stores/wallet'
 import { parseEther, parseUnits } from 'viem'
 // Import components
 import WalletButton from '~/components/WalletButton.vue'
@@ -916,9 +918,12 @@ const activeTab = ref('liquid')
 const inputAmount = ref('')
 const showWalletModal = ref(false)
 const cirxAmount = ref('')
-const inputToken = ref('')
+// inputToken now managed by wallet store - removed local variable
 // Address is always required - no toggle needed
 const loading = ref(false)
+
+// Initialize wallet store
+const walletStore = useWalletStore()
 const loadingText = ref('')
 const quote = ref(null)
 const showChart = ref(false)
@@ -1110,24 +1115,7 @@ const formatTokenBalance = (balanceData) => {
   return amount.toFixed(18)
 }
 
-// Use official Wagmi balance data
-const inputBalance = computed(() => {
-  if (!isConnected.value) {
-    return '0.000000000000000000'
-  }
-  
-  // Return balance based on selected token
-  switch (inputToken.value) {
-    case 'ETH':
-      return formattedEthBalance.value
-    case 'USDC':
-    case 'USDT':
-      // TODO: Implement token balance fetching using AppKit provider
-      return '0.000000000000000000'
-    default:
-      return '0.000000000000000000'
-  }
-})
+// inputBalance logic moved to wallet store - removed orphaned local balance logic
 
 // ETH balance for gas gating (0 when not connected)
 const awaitedEthBalance = computed(() => {
@@ -1145,10 +1133,7 @@ const displayCirxBalance = computed(() => {
   return null // No address or no balance fetched, show "Balance: -"
 })
 
-// Simply use the inputBalance which now has full precision
-const fullPrecisionInputBalance = computed(() => {
-  return inputBalance.value
-})
+// fullPrecisionInputBalance removed - using wallet store's selectedTokenBalance directly
 
 // Short address for display using official Wagmi address
 const shortAddress = computed(() => {
@@ -1663,7 +1648,7 @@ const setMaxAmount = () => {
     } else {
       balance = 0 // Other tokens not implemented yet
     }
-    const maxAmount = inputToken.value === 'ETH' ? balance * 0.95 : balance * 0.99
+    const maxAmount = walletStore.selectedToken === 'ETH' ? balance * 0.95 : balance * 0.99
     inputAmount.value = maxAmount.toFixed(6)
   } else {
     inputAmount.value = '1.0' // Fallback for demo
@@ -1680,8 +1665,8 @@ const forceRefreshBalance = async () => {
 }
 
 const selectToken = (token) => {
-  inputToken.value = token
-  // Token selection handled by Wagmi automatically
+  // Token selection now handled by wallet store
+  walletStore.selectInputToken(token)
   showTokenDropdown.value = false
   // Reset input when token changes
   inputAmount.value = ''
@@ -1692,11 +1677,11 @@ const selectToken = (token) => {
 const autoSelectNativeToken = () => {
   if (connectedWallet.value === 'phantom') {
     // Phantom wallet - select SOL
-    selectToken('SOL')
+    walletStore.selectInputToken('SOL')
     console.log('🪙 Auto-selected SOL for Phantom wallet')
   } else {
     // Ethereum wallets (MetaMask, Coinbase, etc.) - select ETH
-    selectToken('ETH')
+    walletStore.selectInputToken('ETH')
     console.log('🪙 Auto-selected ETH for Ethereum wallet')
   }
 }
@@ -2043,7 +2028,7 @@ const handleSwap = async () => {
         'USDT': tokenAddresses.USDT
       }
       
-      const tokenAddress = tokenContractAddresses[inputToken.value]
+      const tokenAddress = tokenContractAddresses[walletStore.selectedToken]
       
       if (!tokenAddress) {
         // For development, use a mock hash
@@ -2123,7 +2108,7 @@ const handleSwap = async () => {
       'ethereum', // payment chain
       recipientAddress.value, // CIRX recipient address
       totalPaymentNeeded, // actual amount paid (includes platform fee)
-      inputToken.value // payment token
+      walletStore.selectedToken // payment token
     )
     
     console.log('🔥 CALLING BACKEND API with swapData:', swapData)
@@ -2189,7 +2174,7 @@ const handleTierChange = (tier) => {
 
   // When user picks a tier, set the input amount to the minimum USD required for that tier
   // Convert tier.minAmount USD into selected input token units
-  const tokenPriceUsd = livePrices.value[inputToken.value] || 0
+  const tokenPriceUsd = livePrices.value[walletStore.selectedToken] || 0
   if (tokenPriceUsd > 0 && tier?.minAmount) {
     const feeRate = fees.value.otc
     const feeMultiplier = 1 - feeRate / 100
@@ -2240,7 +2225,7 @@ watch([inputAmount, inputToken, activeTab], async () => {
     try {
       // Auto-select tier when in OTC based on current USD
       if (isOTC) {
-        const tokenPriceUsd = livePrices.value[inputToken.value] || 0
+        const tokenPriceUsd = livePrices.value[walletStore.selectedToken] || 0
         const inputVal = parseFloat(inputAmount.value) || 0
         // Use gross USD amount (before fees) for tier selection to prevent tier dropping
         const grossUsdAmount = tokenPriceUsd * inputVal

@@ -10,6 +10,8 @@ export const useWalletStore = defineStore('wallet', () => {
   const isConnected = ref(false)
   const address = ref(null)
   const chainId = ref(null)
+  const balances = ref({}) // Token balances from AppKit
+  const selectedToken = ref('ETH') // Currently selected input token
   
   // Update functions to be called by AppKit plugin
   const updateAccount = (accountInfo) => {
@@ -20,6 +22,27 @@ export const useWalletStore = defineStore('wallet', () => {
   const updateNetwork = (networkInfo) => {
     chainId.value = networkInfo?.chainId || null
   }
+
+  const updateBalances = (balanceData) => {
+    balances.value = balanceData || {}
+  }
+
+  // Token selection management
+  const selectInputToken = (token) => {
+    selectedToken.value = token
+  }
+
+  // Get balance for currently selected token
+  const selectedTokenBalance = computed(() => {
+    if (!isConnected.value) return '0.000000000000000000'
+    
+    const tokenBalance = balances.value[selectedToken.value]
+    if (!tokenBalance) return '0.000000000000000000'
+    
+    // Format balance to 18 decimals for consistency
+    const amount = parseFloat(tokenBalance.formatted || '0')
+    return isNaN(amount) ? '0.000000000000000000' : amount.toFixed(18)
+  })
 
   // Computed properties for compatibility
   const activeWallet = computed(() => ({
@@ -37,12 +60,24 @@ export const useWalletStore = defineStore('wallet', () => {
   }))
 
   return {
+    // Connection state
     isConnected: readonly(isConnected),
+    address: readonly(address),
     activeWallet: readonly(activeWallet),
     activeChain: readonly(activeChain),
     ethereumWallet: readonly(ethereumWallet),
-    // Expose update functions for AppKit plugin
+    
+    // Token selection and balances
+    selectedToken: readonly(selectedToken),
+    selectedTokenBalance: readonly(selectedTokenBalance),
+    balances: readonly(balances),
+    
+    // Actions
+    selectInputToken,
+    
+    // Update functions for AppKit plugin
     updateAccount,
-    updateNetwork
+    updateNetwork,
+    updateBalances
   }
 })

@@ -11,14 +11,14 @@
         :disabled="loading"
       >
         <img 
-          :src="getTokenLogo(selectedToken)" 
-          :alt="selectedToken"
+          :src="getTokenLogo(walletStore.selectedToken)" 
+          :alt="walletStore.selectedToken"
           class="w-5 h-5 rounded-full"
           @error="handleImageError"
         />
         
         <span class="font-medium text-white text-sm">
-          {{ getTokenSymbol(selectedToken) }}
+          {{ getTokenSymbol(walletStore.selectedToken) }}
         </span>
         
         <svg 
@@ -44,7 +44,7 @@
           @click="selectToken(token.symbol)"
           :class="[
             'w-full flex items-center gap-2 px-3 py-2 hover:bg-gray-700 transition-colors first:rounded-t-xl last:rounded-b-xl',
-            token.symbol === selectedToken ? 'bg-gray-700' : ''
+            token.symbol === walletStore.selectedToken ? 'bg-gray-700' : ''
           ]"
         >
           <img 
@@ -60,7 +60,7 @@
           
           <!-- Checkmark for selected token -->
           <svg 
-            v-if="token.symbol === selectedToken"
+            v-if="token.symbol === walletStore.selectedToken"
             class="w-4 h-4 text-circular-primary ml-auto"
             viewBox="0 0 24 24" 
             fill="none"
@@ -75,12 +75,9 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useWalletStore } from '~/stores/wallet'
 
 const props = defineProps({
-  selectedToken: {
-    type: String,
-    required: true
-  },
   activeTab: {
     type: String,
     required: true
@@ -91,12 +88,12 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['select'])
+const walletStore = useWalletStore()
 
-// Available tokens based on context
+// Available tokens based on connected wallet chain
 const availableTokens = computed(() => {
-  // In a real implementation, this would come from the wallet store
-  // or be determined by the connected wallet type
+  // TODO: Get available tokens from AppKit based on connected chain
+  // For now, return static list for Ethereum mainnet
   return [
     {
       symbol: 'ETH',
@@ -128,7 +125,8 @@ const getTokenSymbol = (tokenSymbol) => {
 }
 
 const selectToken = (tokenSymbol) => {
-  emit('select', tokenSymbol)
+  // Update the global wallet store instead of emitting to parent
+  walletStore.selectInputToken(tokenSymbol)
 }
 
 const handleImageError = (event) => {
