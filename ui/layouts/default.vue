@@ -6,7 +6,7 @@
         <nav class="nav">
           <NuxtLink to="/" class="logo flex items-center gap-2">
             <img 
-              src="/buy/circular-logo.svg" 
+              src="/circular-logo.svg" 
               alt="Circular Protocol" 
               class="h-8 w-auto"
             />

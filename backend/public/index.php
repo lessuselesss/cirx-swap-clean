@@ -19,6 +19,7 @@ use App\Middleware\CorsMiddleware;
 use App\Middleware\LoggingMiddleware;
 use App\Services\HealthCheckService;
 use App\Services\LoggerService;
+use App\Services\TransactionReadinessService;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Dotenv\Dotenv;
 use Psr\Http\Message\ServerRequestInterface;
@@ -125,24 +126,41 @@ $app->get('/', function (Request $request, Response $response) {
 });
 
 // Routes
-$app->group('/v1', function ($group) {
-    // Quick health check
+$app->group('/api/v1', function ($group) {
+    // Comprehensive health check with transaction readiness
     $group->get('/health', function (Request $request, Response $response) {
-        $healthService = new HealthCheckService();
-        $quickStatus = $healthService->getQuickStatus();
-        
-        $data = array_merge($quickStatus, [
-            'version' => '1.0.0',
-            'environment' => $_ENV['APP_ENV'] ?? 'development',
-            'security' => [
-                'api_key_required' => (bool) ($_ENV['API_KEY_REQUIRED'] ?? true),
-                'rate_limiting' => (bool) ($_ENV['RATE_LIMIT_ENABLED'] ?? true),
-                'cors_enabled' => true
-            ]
-        ]);
-        
-        $response->getBody()->write(json_encode($data));
-        return $response->withHeader('Content-Type', 'application/json');
+        try {
+            $logger = \App\Services\LoggerService::getLogger('monitoring');
+            $readinessService = new \App\Services\TransactionReadinessService();
+            
+            // Get comprehensive transaction readiness data
+            $transactionData = $readinessService->assessTransactionReadiness();
+            
+            // Merge with basic health metadata
+            $data = array_merge($transactionData, [
+                'version' => '1.0.0',
+                'environment' => $_ENV['APP_ENV'] ?? 'development',
+                'security' => [
+                    'api_key_required' => (bool) ($_ENV['API_KEY_REQUIRED'] ?? true),
+                    'rate_limiting' => (bool) ($_ENV['RATE_LIMIT_ENABLED'] ?? true),
+                    'cors_enabled' => true
+                ]
+            ]);
+            
+            $response->getBody()->write(json_encode($data));
+            return $response->withHeader('Content-Type', 'application/json');
+        } catch (Exception $e) {
+            $data = [
+                'transaction_ready' => false,
+                'status' => 'error',
+                'message' => 'Health check failed: ' . $e->getMessage(),
+                'timestamp' => date('c'),
+                'version' => '1.0.0',
+                'environment' => $_ENV['APP_ENV'] ?? 'development'
+            ];
+            $response->getBody()->write(json_encode($data));
+            return $response->withStatus(500)->withHeader('Content-Type', 'application/json');
+        }
     });
 
     // Comprehensive health check

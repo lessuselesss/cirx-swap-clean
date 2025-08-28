@@ -9,7 +9,7 @@
       :class="{ 'ring-2 ring-circular-primary/50': isOpen }"
     >
       <img 
-        src="/buy/cirx-icon.svg" 
+        src="/cirx-icon.svg" 
         alt="CIRX"
         class="rounded-full"
         style="width: 16px; height: 16px;"

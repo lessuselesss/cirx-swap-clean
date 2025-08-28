@@ -6,14 +6,14 @@
         <div class="relative w-10 h-10 bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-xl border border-slate-600/30 flex items-center justify-center">
           <!-- CIRX Token (behind when inactive) -->
           <img 
-            src="/buy/cirx-icon.svg" 
+            src="/cirx-icon.svg" 
             alt="CIRX" 
             :class="['absolute w-6 h-6 transition-all duration-200', selectedSymbol === 'CIRX/USDT' ? 'opacity-100 z-10 left-2' : 'opacity-80 z-0 left-0']"
           />
           
           <!-- USDT Token (behind when inactive) -->
           <img 
-            src="/buy/usdt-icon.svg" 
+            src="/usdt-icon.svg" 
             alt="USDT" 
             :class="['absolute w-6 h-6 transition-all duration-200', selectedSymbol === 'USDT/CIRX' ? 'opacity-100 z-10 right-2' : 'opacity-80 z-0 right-0']"
           />
@@ -41,13 +41,13 @@
           >
             <!-- CIRX Token -->
             <div :class="['flex items-center gap-2 transition-all duration-200', selectedSymbol === 'CIRX/USDT' ? 'opacity-100' : 'opacity-40']">
-              <img src="/buy/cirx-icon.svg" alt="CIRX" class="w-5 h-5" />
+              <img src="/cirx-icon.svg" alt="CIRX" class="w-5 h-5" />
               <span :class="['font-medium', selectedSymbol === 'CIRX/USDT' ? 'text-white' : 'text-gray-400']">CIRX</span>
             </div>
             
             <!-- USDT Token -->
             <div :class="['flex items-center gap-2 transition-all duration-200', selectedSymbol === 'USDT/CIRX' ? 'opacity-100' : 'opacity-40']">
-              <img src="/buy/usdt-icon.svg" alt="USDT" class="w-5 h-5" />
+              <img src="/usdt-icon.svg" alt="USDT" class="w-5 h-5" />
               <span :class="['font-medium', selectedSymbol === 'USDT/CIRX' ? 'text-white' : 'text-gray-400']">USDT</span>
             </div>
           </button>

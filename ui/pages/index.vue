@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen relative overflow-hidden bg-figma-base">
     <!-- Space Background -->
-    <div key="static-background" class="absolute inset-0 bg-cover bg-center bg-no-repeat bg-fixed z-0" style="background-image: url('/buy/background.png')"></div>
+    <div key="static-background" class="absolute inset-0 bg-cover bg-center bg-no-repeat bg-fixed z-0" style="background-image: url('/background.png')"></div>
     <!-- Gradient overlay: darkest at top, lightest at bottom -->
     <div key="static-gradient" class="absolute inset-0 z-10" style="background: linear-gradient(to bottom, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.70) 50%, transparent 100%);"></div>
     <header class="sticky top-0 z-50 relative">
@@ -10,7 +10,7 @@
           <!-- Logo Section -->
           <div class="flex items-center gap-4">
             <img 
-              src="/buy/images/logo/SVG/color-logo-white-svg.svg" 
+              src="/images/logo/SVG/color-logo-white-svg.svg" 
               alt="Circular Protocol" 
               class="h-8 w-auto drop-shadow-lg"
             />
@@ -75,7 +75,7 @@
             >
               <div class="flex items-center gap-1 sm:gap-2">
                 <!-- Liquid Swap Icon -->
-                <img src="/buy/buy_liquid.svg" alt="Liquid" class="w-3 h-2.5 flex-shrink-0" />
+                <img src="/buy_liquid.svg" alt="Liquid" class="w-3 h-2.5 flex-shrink-0" />
                 <span class="text-xs sm:text-sm text-center leading-tight">
                   <span class="block md:inline">Buy</span>
                   <span class="block md:inline"> Liquid</span>
@@ -93,7 +93,7 @@
             >
               <div class="flex items-center gap-1 sm:gap-2">
                 <!-- OTC Contract Icon -->
-                <img src="/buy/buy_otc_purple.svg" alt="OTC" class="w-3 h-3.5 flex-shrink-0" />
+                <img src="/buy_otc_purple.svg" alt="OTC" class="w-3 h-3.5 flex-shrink-0" />
                 <span class="text-xs sm:text-sm text-center leading-tight">
                   <span class="block md:inline">Vested</span>
                   <span class="block md:inline"> OTC</span>
@@ -542,7 +542,7 @@
         <!-- White Circular Logo centered at bottom -->
         <div class="mt-8 flex justify-center">
           <img 
-            src="/buy/images/logo/PNG/abstract-icon-white-png.png" 
+            src="/images/logo/PNG/abstract-icon-white-png.png" 
             alt="Circular Protocol" 
             class="h-16 w-16 opacity-60 hover:opacity-80 transition-opacity cursor-pointer"
             @click="$router.push('/')"
@@ -677,7 +677,7 @@
           >
             <div class="w-48 h-48 rounded-2xl overflow-hidden bg-transparent group-hover:bg-gray-800 flex items-center justify-center flex-shrink-0 transition-colors duration-300">
               <img 
-                src="/buy/neroicon.svg" 
+                src="/neroicon.svg" 
                 alt="Nero Wallet"
                 class="w-36 h-36 object-contain"
               />
@@ -738,7 +738,6 @@ definePageMeta({
 })
 
 // Use wallet store for reactive state synced with AppKit
-import { useWalletStore } from '~/stores/wallet.js'
 import { storeToRefs } from 'pinia'
 import { isValidEthereumAddress, isValidSolanaAddress, getAddressType } from '~/utils/addressFormatting.js'
 
@@ -918,12 +917,12 @@ const activeTab = ref('liquid')
 const inputAmount = ref('')
 const showWalletModal = ref(false)
 const cirxAmount = ref('')
-// inputToken now managed by wallet store - removed local variable
+// inputToken now managed by wallet store
+const inputToken = computed(() => walletStore.selectedToken)
 // Address is always required - no toggle needed
 const loading = ref(false)
 
-// Initialize wallet store
-const walletStore = useWalletStore()
+// Initialize loading state
 const loadingText = ref('')
 const quote = ref(null)
 const showChart = ref(false)
@@ -1741,7 +1740,7 @@ const checkBackendHealth = async () => {
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), 5000) // 5 second timeout for comprehensive checks
     
-    const response = await fetch(`${apiBaseUrl}/health.php`, {
+    const response = await fetch(`${apiBaseUrl}/health`, {
       signal: controller.signal,
       method: 'GET',
       headers: {

@@ -66,7 +66,7 @@
           @keydown.space.prevent="handleTokenClick"
         >
           <img 
-            src="/buy/cirx-icon.svg" 
+            src="/cirx-icon.svg" 
             alt="CIRX"
             class="w-5 h-5 rounded-full flex-shrink-0"
             @error="handleImageError"
