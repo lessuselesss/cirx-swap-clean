@@ -1754,7 +1754,7 @@ const checkBackendHealth = async () => {
     const apiBaseUrl = config.public.apiBaseUrl || 'http://localhost:8080/api/v1'
     
     const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 3000) // 3 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 5000) // 5 second timeout for comprehensive checks
     
     const response = await fetch(`${apiBaseUrl}/health.php`, {
       signal: controller.signal,
@@ -1768,8 +1768,31 @@ const checkBackendHealth = async () => {
     
     if (response.ok) {
       const data = await response.json()
-      isBackendConnected.value = data.status === 'success'
+      // Use comprehensive transaction_ready check instead of basic status
+      const wasConnected = isBackendConnected.value
+      isBackendConnected.value = data.transaction_ready === true
+      
+      // Log health check details for debugging
+      console.log('🏥 Backend health check:', {
+        status: data.status,
+        transaction_ready: data.transaction_ready,
+        health_score: data.health_score,
+        was_connected: wasConnected,
+        now_connected: isBackendConnected.value
+      })
+      
+      // Log any failed health checks for troubleshooting
+      if (!data.transaction_ready && data.checks) {
+        const failedChecks = Object.entries(data.checks)
+          .filter(([key, check]) => check.status === 'error')
+          .map(([key, check]) => `${key}: ${check.error || 'unknown error'}`)
+        
+        if (failedChecks.length > 0) {
+          console.warn('⚠️ Backend not transaction-ready. Failed checks:', failedChecks)
+        }
+      }
     } else {
+      console.error(`❌ Backend health endpoint returned ${response.status}`)
       isBackendConnected.value = false
     }
   } catch (error) {
@@ -1937,6 +1960,19 @@ const handleSwap = async () => {
   
   try {
     loading.value = true
+    
+    // CRITICAL PRE-FLIGHT CHECK: Ensure backend is transaction-ready before any blockchain action
+    loadingText.value = 'Verifying backend transaction readiness...'
+    
+    // Force a health check before proceeding with any blockchain transaction
+    console.log('🛡️ CRITICAL PRE-FLIGHT: Checking backend transaction readiness...')
+    await checkBackendHealth()
+    
+    if (!isBackendConnected.value) {
+      throw new Error('Backend is not ready to process transactions. Please wait and try again.')
+    }
+    
+    console.log('✅ CRITICAL PRE-FLIGHT: Backend is transaction-ready, proceeding with blockchain transaction')
     
     const depositAddress = getDepositAddress(inputToken.value, 'ethereum')
     const isOTC = activeTab.value === 'otc'
