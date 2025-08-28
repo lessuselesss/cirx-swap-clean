@@ -79,8 +79,8 @@ export default defineNuxtConfig({
       testnetMode: process.env.NUXT_PUBLIC_TESTNET_MODE === 'true',
       ethereumNetwork: process.env.NUXT_PUBLIC_ETHEREUM_NETWORK || 'mainnet',
       ethereumChainId: process.env.NUXT_PUBLIC_ETHEREUM_CHAIN_ID || '1',
-      // Backend API configuration
-      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'https://circularprotocol.io/buy/api/public/v1',
+      // Backend API configuration  
+      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'https://circularprotocol.io/buy/api/v1',
       apiKey: process.env.NUXT_PUBLIC_API_KEY || '',
       // IROH networking configuration
       irohEnabled: process.env.NUXT_PUBLIC_IROH_ENABLED === 'true',

@@ -1,0 +1,6 @@
+RewriteEngine On
+
+# Redirect all requests to public/ subdirectory
+# This makes /api/v1/health work instead of /api/public/v1/health
+RewriteCond %{REQUEST_URI} !^/public/
+RewriteRule ^(.*)$ public/$1 [L]
