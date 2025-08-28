@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen relative overflow-hidden bg-figma-base">
     <!-- Space Background -->
-    <div key="static-background" class="absolute inset-0 bg-cover bg-center bg-no-repeat bg-fixed z-0" style="background-image: url('/background.png')"></div>
+    <div key="static-background" class="absolute inset-0 bg-cover bg-center bg-no-repeat bg-fixed z-0" style="background-image: url('/buy/background.png')"></div>
     <!-- Gradient overlay: darkest at top, lightest at bottom -->
     <div key="static-gradient" class="absolute inset-0 z-10" style="background: linear-gradient(to bottom, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.70) 50%, transparent 100%);"></div>
     <header class="sticky top-0 z-50 relative">
