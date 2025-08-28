@@ -54,7 +54,7 @@ env:
   BACKEND_LOCAL_DIR: './backend'
   FRONTEND_LOCAL_DIR: './ui'
   
-  # FTP remote directories (customize these)
+  # FTP remote directories (production paths)
   BACKEND_REMOTE_DIR: '/api'
   FRONTEND_REMOTE_DIR: '/'
   
