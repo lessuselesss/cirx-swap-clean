@@ -1,0 +1,424 @@
+name: Deploy to FTP Server
+
+# ====================================
+# TRIGGER CONFIGURATION
+# ====================================
+on:
+  # Trigger on push to main branch
+  push:
+    branches:
+      - main
+      # - master            # Uncomment if your default branch is 'master'
+      # - production        # Uncomment for production branch
+      # - staging          # Uncomment for staging branch
+  
+  # Manual trigger from GitHub Actions tab
+  workflow_dispatch:
+    inputs:
+      deploy_environment:
+        description: 'Environment to deploy to'
+        required: false
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+          - development
+      
+      dry_run:
+        description: 'Perform a dry run (no actual upload)'
+        required: false
+        default: false
+        type: boolean
+
+  # Uncomment to run on pull request (for testing)
+  # pull_request:
+  #   branches:
+  #     - main
+
+  # Uncomment to run on schedule (cron)
+  # schedule:
+  #   - cron: '0 2 * * *'  # Daily at 2 AM UTC
+
+# ====================================
+# ENVIRONMENT VARIABLES
+# ====================================
+env:
+  # PHP version for backend build
+  PHP_VERSION: '8.2'
+  
+  # Node version for frontend build
+  NODE_VERSION: '18'
+  
+  # Deployment paths
+  BACKEND_LOCAL_DIR: './backend'
+  FRONTEND_LOCAL_DIR: './ui'
+  
+  # FTP remote directories (customize these)
+  BACKEND_REMOTE_DIR: '/api'
+  FRONTEND_REMOTE_DIR: '/'
+  
+  # Build output directory for frontend
+  FRONTEND_BUILD_DIR: './ui/.output/public'
+  
+  # Uncomment to enable debug logging
+  # DEBUG: true
+
+# ====================================
+# JOBS
+# ====================================
+jobs:
+  # ====================================
+  # JOB 1: Build Backend
+  # ====================================
+  build-backend:
+    name: Build Backend API
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Checkout repository code
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # fetch-depth: 0     # Uncomment for full history
+          # submodules: true   # Uncomment if using git submodules
+          # lfs: true         # Uncomment if using Git LFS
+      
+      # Setup PHP environment
+      - name: 🐘 Setup PHP ${{ env.PHP_VERSION }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: mbstring, xml, ctype, iconv, intl, pdo, pdo_mysql, dom, filter, gd, json, mbstring, pdo
+          tools: composer:v2
+          coverage: none         # Set to 'xdebug' or 'pcov' if needed
+          # ini-values: post_max_size=256M, upload_max_filesize=256M
+      
+      # Cache Composer dependencies
+      - name: 📦 Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.BACKEND_LOCAL_DIR }}/vendor
+          key: composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            composer-
+      
+      # Install backend dependencies
+      - name: 📚 Install backend dependencies
+        working-directory: ${{ env.BACKEND_LOCAL_DIR }}
+        run: |
+          composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+          # composer install --no-interaction --prefer-dist --optimize-autoloader  # Use this to include dev dependencies
+      
+      # Create .env file from secrets
+      - name: 🔐 Create backend .env file
+        working-directory: ${{ env.BACKEND_LOCAL_DIR }}
+        run: |
+          cat > .env << EOF
+          # Application Settings
+          APP_NAME="${{ secrets.APP_NAME || 'CIRX_OTC' }}"
+          APP_ENV="${{ secrets.APP_ENV || 'production' }}"
+          APP_DEBUG="${{ secrets.APP_DEBUG || 'false' }}"
+          APP_URL="${{ secrets.APP_URL || 'https://yoursite.com' }}"
+          
+          # Database Configuration
+          DB_CONNECTION="${{ secrets.DB_CONNECTION || 'mysql' }}"
+          DB_HOST="${{ secrets.DB_HOST }}"
+          DB_PORT="${{ secrets.DB_PORT || '3306' }}"
+          DB_DATABASE="${{ secrets.DB_DATABASE }}"
+          DB_USERNAME="${{ secrets.DB_USERNAME }}"
+          DB_PASSWORD="${{ secrets.DB_PASSWORD }}"
+          
+          # API Keys
+          API_KEY="${{ secrets.API_KEY }}"
+          CIRCULAR_API_KEY="${{ secrets.CIRCULAR_API_KEY }}"
+          CIRCULAR_API_URL="${{ secrets.CIRCULAR_API_URL }}"
+          
+          # Additional Secrets
+          TELEGRAM_BOT_TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          TELEGRAM_CHAT_ID="${{ secrets.TELEGRAM_CHAT_ID }}"
+          EOF
+      
+      # Run database migrations (optional)
+      # - name: 🗄️ Run database migrations
+      #   working-directory: ${{ env.BACKEND_LOCAL_DIR }}
+      #   run: php migrate.php
+      
+      # Run tests (optional but recommended)
+      # - name: 🧪 Run backend tests
+      #   working-directory: ${{ env.BACKEND_LOCAL_DIR }}
+      #   run: vendor/bin/phpunit --no-coverage
+      
+      # Optimize backend for production
+      - name: ⚡ Optimize backend for production
+        working-directory: ${{ env.BACKEND_LOCAL_DIR }}
+        run: |
+          # Clear and optimize caches if using Laravel/Symfony
+          # php artisan config:cache
+          # php artisan route:cache
+          # php artisan view:cache
+          
+          # Remove development files
+          rm -rf tests/ phpunit.xml .phpunit.result.cache
+          
+          # Set production permissions
+          find . -type f -name "*.php" -exec chmod 644 {} \;
+          find . -type d -exec chmod 755 {} \;
+      
+      # Upload backend artifact (for deployment job)
+      - name: 📤 Upload backend artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: backend-build
+          path: ${{ env.BACKEND_LOCAL_DIR }}
+          retention-days: 1
+
+  # ====================================
+  # JOB 2: Build Frontend
+  # ====================================
+  build-frontend:
+    name: Build Frontend (Nuxt)
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Checkout repository
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+      
+      # Setup Node.js
+      - name: 📗 Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ${{ env.FRONTEND_LOCAL_DIR }}/package-lock.json
+      
+      # Install frontend dependencies
+      - name: 📚 Install frontend dependencies
+        working-directory: ${{ env.FRONTEND_LOCAL_DIR }}
+        run: |
+          npm ci --prefer-offline --no-audit
+          # npm install  # Use this instead if you don't have package-lock.json
+      
+      # Create frontend .env file
+      - name: 🔐 Create frontend .env file
+        working-directory: ${{ env.FRONTEND_LOCAL_DIR }}
+        run: |
+          cat > .env << EOF
+          # API Configuration
+          NUXT_PUBLIC_API_BASE="${{ secrets.FRONTEND_API_URL || 'https://yoursite.com/api' }}"
+          NUXT_PUBLIC_API_VERSION="${{ secrets.API_VERSION || 'v1' }}"
+          
+          # Web3 Configuration
+          NUXT_PUBLIC_WALLET_CONNECT_PROJECT_ID="${{ secrets.WALLET_CONNECT_PROJECT_ID }}"
+          NUXT_PUBLIC_ALCHEMY_KEY="${{ secrets.ALCHEMY_KEY }}"
+          
+          # Feature Flags
+          NUXT_PUBLIC_ENABLE_TESTNET="${{ secrets.ENABLE_TESTNET || 'false' }}"
+          EOF
+      
+      # Build frontend
+      - name: 🔨 Build frontend for production
+        working-directory: ${{ env.FRONTEND_LOCAL_DIR }}
+        run: |
+          npm run build
+          # npm run generate  # Use this for static site generation
+      
+      # Run frontend tests (optional)
+      # - name: 🧪 Run frontend tests
+      #   working-directory: ${{ env.FRONTEND_LOCAL_DIR }}
+      #   run: npm run test
+      
+      # Upload frontend artifact
+      - name: 📤 Upload frontend artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: frontend-build
+          path: ${{ env.FRONTEND_BUILD_DIR }}
+          retention-days: 1
+
+  # ====================================
+  # JOB 3: Deploy to FTP
+  # ====================================
+  deploy-ftp:
+    name: Deploy to FTP Server
+    runs-on: ubuntu-latest
+    needs: [build-backend, build-frontend]
+    
+    # Environment protection rules (optional)
+    # environment:
+    #   name: production
+    #   url: ${{ secrets.SITE_URL }}
+    
+    steps:
+      # Download backend artifact
+      - name: 📥 Download backend build
+        uses: actions/download-artifact@v3
+        with:
+          name: backend-build
+          path: ./backend-deploy
+      
+      # Download frontend artifact
+      - name: 📥 Download frontend build
+        uses: actions/download-artifact@v3
+        with:
+          name: frontend-build
+          path: ./frontend-deploy
+      
+      # Deploy Backend via FTP
+      - name: 🚀 Deploy Backend to FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          # FTP server credentials (REQUIRED - set in GitHub Secrets)
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          
+          # FTP server port (default: 21)
+          port: ${{ secrets.FTP_PORT || 21 }}
+          
+          # Protocol to use
+          protocol: ${{ secrets.FTP_PROTOCOL || 'ftp' }}  # Options: ftp, ftps, ftps-legacy
+          
+          # Local directory to upload from
+          local-dir: ./backend-deploy/
+          
+          # Remote directory to upload to
+          server-dir: ${{ env.BACKEND_REMOTE_DIR }}/
+          
+          # Dry run mode (test without uploading)
+          dry-run: ${{ github.event.inputs.dry_run || false }}
+          
+          # Security options
+          # dangerous-clean-slate: false  # WARNING: Deletes ALL files on server before upload
+          
+          # Exclude files/folders from upload
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/.env.example
+            **/tests/**
+            **/test/**
+            **/*.test.js
+            **/*.test.ts
+            **/README.md
+            **/CLAUDE.md
+            **/.vscode/**
+            **/.idea/**
+            **/composer.lock
+            **/package-lock.json
+          
+          # Include only specific files (uncomment to use)
+          # include: |
+          #   **/*.php
+          #   **/*.js
+          #   **/*.css
+          #   **/*.html
+          
+          # Logging level (options: minimal, standard, verbose)
+          log-level: standard
+          
+          # Timeout settings (in milliseconds)
+          timeout: 120000  # 2 minutes
+      
+      # Deploy Frontend via FTP
+      - name: 🚀 Deploy Frontend to FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: ${{ secrets.FTP_PORT || 21 }}
+          protocol: ${{ secrets.FTP_PROTOCOL || 'ftp' }}
+          local-dir: ./frontend-deploy/
+          server-dir: ${{ env.FRONTEND_REMOTE_DIR }}/
+          dry-run: ${{ github.event.inputs.dry_run || false }}
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/.env*
+            **/README.md
+          log-level: standard
+          timeout: 120000
+      
+      # Send notification on success (optional)
+      - name: 📨 Send success notification
+        if: success()
+        run: |
+          echo "✅ Deployment successful!"
+          # Add Slack, Discord, or email notification here
+          
+          # Example: Send to Telegram
+          # curl -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+          #   -d "chat_id=${{ secrets.TELEGRAM_CHAT_ID }}" \
+          #   -d "text=✅ Deployment successful to FTP server!"
+      
+      # Send notification on failure (optional)
+      - name: 📨 Send failure notification
+        if: failure()
+        run: |
+          echo "❌ Deployment failed!"
+          # Add notification here
+
+  # ====================================
+  # JOB 4: Post-Deployment Tasks (Optional)
+  # ====================================
+  post-deploy:
+    name: Post-Deployment Tasks
+    runs-on: ubuntu-latest
+    needs: deploy-ftp
+    if: success()
+    
+    steps:
+      # Verify deployment
+      - name: 🔍 Verify deployment
+        run: |
+          # Check if API is responding
+          response=$(curl -s -o /dev/null -w "%{http_code}" "${{ secrets.SITE_URL }}/api/v1/health")
+          if [ "$response" = "200" ]; then
+            echo "✅ API is responding correctly"
+          else
+            echo "❌ API returned HTTP $response"
+            exit 1
+          fi
+      
+      # Clear CDN cache (if using Cloudflare)
+      # - name: 🔄 Purge Cloudflare cache
+      #   run: |
+      #     curl -X POST "https://api.cloudflare.com/client/v4/zones/${{ secrets.CLOUDFLARE_ZONE_ID }}/purge_cache" \
+      #       -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+      #       -H "Content-Type: application/json" \
+      #       --data '{"purge_everything":true}'
+      
+      # Trigger external monitoring
+      # - name: 📊 Trigger monitoring check
+      #   run: |
+      #     curl -X POST "${{ secrets.MONITORING_WEBHOOK_URL }}"
+
+# ====================================
+# ADVANCED CONFIGURATION OPTIONS
+# ====================================
+
+# Concurrency control (prevent multiple deployments)
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false  # Set to true to cancel in-progress deployments
+
+# Job timeout
+# defaults:
+#   run:
+#     timeout-minutes: 30
+
+# Matrix strategy for multiple environments
+# strategy:
+#   matrix:
+#     environment: [staging, production]
+#     include:
+#       - environment: staging
+#         ftp_server: ${{ secrets.STAGING_FTP_SERVER }}
+#         remote_dir: /staging
+#       - environment: production
+#         ftp_server: ${{ secrets.PRODUCTION_FTP_SERVER }}
+#         remote_dir: /public_html
