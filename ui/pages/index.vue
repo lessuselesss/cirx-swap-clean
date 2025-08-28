@@ -1766,7 +1766,7 @@ const checkBackendHealth = async () => {
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), 3000) // 3 second timeout
     
-    const response = await fetch(`${apiBaseUrl}/health`, {
+    const response = await fetch(`${apiBaseUrl}/health.php`, {
       signal: controller.signal,
       method: 'GET',
       headers: {
@@ -1778,7 +1778,7 @@ const checkBackendHealth = async () => {
     
     if (response.ok) {
       const data = await response.json()
-      isBackendConnected.value = data.status === 'healthy'
+      isBackendConnected.value = data.status === 'success'
     } else {
       isBackendConnected.value = false
     }
