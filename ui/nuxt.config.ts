@@ -43,6 +43,7 @@ export default defineNuxtConfig({
 
   // App configuration
   app: {
+    baseURL: '/buy/',
     buildAssetsDir: '/_nuxt/',
     head: {
       title: 'Circular CIRX OTC Platform',
