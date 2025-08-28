@@ -6,7 +6,7 @@
       v-if="!isConnected"
       @click="handleClick"
       :class="[
-        'flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all duration-300 border relative gradient-border',
+        'group flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all duration-300 border relative gradient-border',
         'border-transparent shadow-lg hover:shadow-xl backdrop-blur-sm cursor-pointer'
       ]"
       style="background-color: transparent; color: #01DA9D;"
@@ -19,8 +19,8 @@
       </div>
 
       <!-- Button Text -->
-      <span class="whitespace-nowrap">
-        Connect Wallet
+      <span class="whitespace-nowrap wallet-text">
+        Connect
       </span>
     </button>
 
@@ -63,7 +63,7 @@ const buttonText = computed(() => {
   if (isConnected.value && address.value) {
     return `${address.value.slice(0, 6)}...${address.value.slice(-4)}`
   }
-  return 'Connect Wallet'
+  return 'Connect'
 })
 
 // Click handler - just open AppKit modal
@@ -73,3 +73,32 @@ const handleClick = () => {
   }
 }
 </script>
+
+<style scoped>
+/* Wallet text - white by default, animated gradient on hover */
+.wallet-text {
+  color: #01DA9D;
+  transition: all 0.3s ease;
+}
+
+.group:hover .wallet-text {
+  background: linear-gradient(45deg, #00ff88, #00d9ff, #8b5cf6, #a855f7, #00ff88);
+  background-size: 400% 400%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: text-gradient-cycle 3s ease infinite;
+}
+
+@keyframes text-gradient-cycle {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+</style>

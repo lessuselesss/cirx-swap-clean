@@ -10,7 +10,7 @@
           <!-- Logo Section -->
           <div class="flex items-center gap-4">
             <img 
-              src="/images/logo/SVG/color-logo-white-svg.svg" 
+              src="/buy/images/logo/SVG/color-logo-white-svg.svg" 
               alt="Circular Protocol" 
               class="h-8 w-auto drop-shadow-lg"
             />
@@ -85,7 +85,7 @@
             >
               <div class="flex items-center gap-1 sm:gap-2">
                 <!-- Liquid Swap Icon -->
-                <img src="/buy_liquid.svg" alt="Liquid" class="w-3 h-2.5 flex-shrink-0" />
+                <img src="/buy/buy_liquid.svg" alt="Liquid" class="w-3 h-2.5 flex-shrink-0" />
                 <span class="text-xs sm:text-sm text-center leading-tight">
                   <span class="block md:inline">Buy</span>
                   <span class="block md:inline"> Liquid</span>
@@ -103,7 +103,7 @@
             >
               <div class="flex items-center gap-1 sm:gap-2">
                 <!-- OTC Contract Icon -->
-                <img src="/buy_otc_purple.svg" alt="OTC" class="w-3 h-3.5 flex-shrink-0" />
+                <img src="/buy/buy_otc_purple.svg" alt="OTC" class="w-3 h-3.5 flex-shrink-0" />
                 <span class="text-xs sm:text-sm text-center leading-tight">
                   <span class="block md:inline">Vested</span>
                   <span class="block md:inline"> OTC</span>
@@ -552,7 +552,7 @@
         <!-- White Circular Logo centered at bottom -->
         <div class="mt-8 flex justify-center">
           <img 
-            src="/images/logo/PNG/abstract-icon-white-png.png" 
+            src="/buy/images/logo/PNG/abstract-icon-white-png.png" 
             alt="Circular Protocol" 
             class="h-16 w-16 opacity-60 hover:opacity-80 transition-opacity cursor-pointer"
             @click="$router.push('/')"
@@ -687,7 +687,7 @@
           >
             <div class="w-48 h-48 rounded-2xl overflow-hidden bg-transparent group-hover:bg-gray-800 flex items-center justify-center flex-shrink-0 transition-colors duration-300">
               <img 
-                src="/neroicon.svg" 
+                src="/buy/neroicon.svg" 
                 alt="Nero Wallet"
                 class="w-36 h-36 object-contain"
               />
@@ -1511,7 +1511,7 @@ const getTokenLogo = (token) => {
     'USDT': 'https://assets.coingecko.com/coins/images/325/small/Tether.png',
     'SOL': 'https://assets.coingecko.com/coins/images/4128/small/solana.png',
     'USDC_SOL': 'https://assets.coingecko.com/coins/images/6319/small/USD_Coin_icon.png',
-    'CIRX': '/cirx-icon.svg'
+    'CIRX': '/buy/cirx-icon.svg'
   }
   
   return logoMap[token] || 'https://assets.coingecko.com/coins/images/279/small/ethereum.png'
