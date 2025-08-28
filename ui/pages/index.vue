@@ -26,16 +26,6 @@
               Transactions
             </NuxtLink>
             
-            <!-- Token Balance Display -->
-            <div v-if="isConnected && inputBalance && inputToken" class="flex items-center gap-2 px-4 py-2 rounded-xl">
-              <img 
-                :src="getTokenLogo(inputToken)" 
-                :alt="inputToken"
-                class="w-4 h-4 rounded-full"
-              />
-              <span class="text-sm font-medium text-white drop-shadow-md">{{ formatBalance(inputBalance) }} {{ getTokenSymbol(inputToken) }}</span>
-            </div>
-
             <!-- Wallet Button -->
             <WalletButton />
           </div>
