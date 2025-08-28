@@ -113,9 +113,9 @@ $app->get('/', function (Request $request, Response $response) {
         'version' => '1.0.0',
         'status' => 'running',
         'endpoints' => [
-            'health' => '/api/v1/health',
-            'transactions' => '/api/v1/transactions/*',
-            'debug' => '/api/v1/debug/*'
+            'health' => '/v1/health',
+            'transactions' => '/v1/transactions/*',
+            'debug' => '/v1/debug/*'
         ],
         'timestamp' => date('c')
     ];
@@ -124,7 +124,7 @@ $app->get('/', function (Request $request, Response $response) {
 });
 
 // Routes
-$app->group('/api/v1', function ($group) {
+$app->group('/v1', function ($group) {
     // Quick health check
     $group->get('/health', function (Request $request, Response $response) {
         $healthService = new HealthCheckService();
