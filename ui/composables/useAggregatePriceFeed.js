@@ -4,7 +4,7 @@
  * Data Sources: BitMart, XT, LBank
  */
 
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, getCurrentInstance } from 'vue'
 import { AggregateMarket } from '../scripts/aggregateMarket.js'
 
 /**
@@ -134,14 +134,18 @@ export function useAggregatePriceFeed() {
     return (now - updatedTime) < (UPDATE_INTERVAL * 2) // Fresh if updated within 2 intervals
   })
   
-  // Lifecycle
-  onMounted(() => {
-    startPriceUpdates()
-  })
-  
-  onBeforeUnmount(() => {
-    stopPriceUpdates()
-  })
+  // Lifecycle - only register hooks if we're in a proper component context
+  const currentInstance = getCurrentInstance()
+  if (currentInstance && typeof window !== 'undefined') {
+    // Only register lifecycle hooks when we're client-side and in component context
+    onMounted(() => {
+      startPriceUpdates()
+    })
+    
+    onBeforeUnmount(() => {
+      stopPriceUpdates()
+    })
+  }
   
   return {
     // State

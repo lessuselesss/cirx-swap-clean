@@ -185,18 +185,20 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useSingleExchangeDatafeed } from '~/composables/useSingleExchangeDatafeed.js'
 import { useAggregatePriceFeed } from '~/composables/useAggregatePriceFeed.js'
 import { useAggregateDatafeed } from '~/composables/useAggregateDatafeed.js'
 
-// Use aggregate price feed for multi-exchange data
+// Use aggregate price feed for multi-exchange data with manual lifecycle management
 const {
   currentPrice: liveCirxPrice,
   isLoading: priceLoading,
   error: priceError,
   formattedPrice,
-  marketStats
+  marketStats,
+  startPriceUpdates,
+  stopPriceUpdates
 } = useAggregatePriceFeed()
 
 // Props and emits
@@ -374,6 +376,15 @@ watch([selectedDataSource, selectedSymbol, selectedInterval], () => {
 
 // Initial timeout setup
 setupChartTimeout()
+
+// Manual lifecycle management for price feed
+onMounted(() => {
+  startPriceUpdates()
+})
+
+onBeforeUnmount(() => {
+  stopPriceUpdates()
+})
 </script>
 
 <style scoped>
