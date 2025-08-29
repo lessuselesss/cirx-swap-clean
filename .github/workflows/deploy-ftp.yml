@@ -206,23 +206,30 @@ jobs:
         run: |
           cat > .env << EOF
           # API Configuration
-          NUXT_PUBLIC_API_BASE="${{ secrets.FRONTEND_API_URL || 'https://yoursite.com/api' }}"
-          NUXT_PUBLIC_API_VERSION="${{ secrets.API_VERSION || 'v1' }}"
+          NUXT_PUBLIC_API_BASE_URL="${{ secrets.NUXT_PUBLIC_API_BASE_URL || 'https://yoursite.com/api/v1' }}"
+          
+          # Network Configuration
+          NUXT_PUBLIC_TESTNET_MODE="${{ secrets.NUXT_PUBLIC_TESTNET_MODE || 'false' }}"
+          NUXT_PUBLIC_ETHEREUM_NETWORK="${{ secrets.NUXT_PUBLIC_ETHEREUM_NETWORK || 'mainnet' }}"
+          NUXT_PUBLIC_ETHEREUM_CHAIN_ID="${{ secrets.NUXT_PUBLIC_ETHEREUM_CHAIN_ID || '1' }}"
           
           # Web3 Configuration
-          NUXT_PUBLIC_WALLET_CONNECT_PROJECT_ID="${{ secrets.WALLET_CONNECT_PROJECT_ID }}"
-          NUXT_PUBLIC_ALCHEMY_KEY="${{ secrets.ALCHEMY_KEY }}"
+          NUXT_PUBLIC_REOWN_PROJECT_ID="${{ secrets.NUXT_PUBLIC_REOWN_PROJECT_ID || '2585d3b6fd8a214ece0e26b344957169' }}"
           
-          # Feature Flags
-          NUXT_PUBLIC_ENABLE_TESTNET="${{ secrets.ENABLE_TESTNET || 'false' }}"
+          # Platform Wallet Addresses
+          NUXT_PUBLIC_ETH_DEPOSIT_ADDRESS="${{ secrets.NUXT_PUBLIC_ETH_DEPOSIT_ADDRESS || '0x834244d016f29d6acb42c1b054a88e2e9b1c9228' }}"
+          NUXT_PUBLIC_USDC_DEPOSIT_ADDRESS="${{ secrets.NUXT_PUBLIC_USDC_DEPOSIT_ADDRESS || '0x834244d016f29d6acb42c1b054a88e2e9b1c9228' }}"
+          NUXT_PUBLIC_USDT_DEPOSIT_ADDRESS="${{ secrets.NUXT_PUBLIC_USDT_DEPOSIT_ADDRESS || '0x834244d016f29d6acb42c1b054a88e2e9b1c9228' }}"
+          
+          # Debug Mode
+          NUXT_PUBLIC_DEBUG_MODE="${{ secrets.NUXT_PUBLIC_DEBUG_MODE || 'false' }}"
           EOF
       
       # Build frontend
       - name: 🔨 Build frontend for production
         working-directory: ${{ env.FRONTEND_LOCAL_DIR }}
         run: |
-          npm run build
-          # npm run generate  # Use this for static site generation
+          npm run generate  # Generate static site for FTP deployment
       
       # Run frontend tests (optional)
       # - name: 🧪 Run frontend tests
