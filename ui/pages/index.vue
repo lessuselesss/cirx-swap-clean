@@ -891,8 +891,8 @@ const connectionToast = ref({ show: false, type: 'success', title: '', message: 
 const lastConnectedWalletIcon = ref(null) // Store icon when connected
 
 // Watch for connection state changes with toast notifications - defensive approach
-watch([isConnected, address], ([connected, addr], [prevConnected, prevAddr] = []) => {
-  // Skip if any values are undefined
+watch([() => isConnected || false, () => address || null], ([connected, addr], [prevConnected, prevAddr] = [false, null]) => {
+  // Skip if values haven't actually changed or are still initializing
   if (connected === undefined || addr === undefined) return
   console.log('🔍 CONNECTION WATCH: State changed:', { connected, addr, prevConnected, prevAddr })
   
