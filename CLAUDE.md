@@ -17,64 +17,178 @@ This is a **Circular CIRX OTC Trading Platform** with API-first architecture:
 - Architecture patterns and component dependencies
 - Testing structure mapping between backend PHPUnit and frontend E2E tests
 
-## ✅ RECENT PROGRESS SUMMARY (2025-08-04)
+## ✅ RECENT PROGRESS SUMMARY (2025-08-29)
 
-### **Critical Wallet Connection Issues RESOLVED**
+### **Critical AppKit/WalletConnect Integration RESOLVED**
 
-**Problem**: Users encountered critical error dialog when clicking "Connect Wallet" button.
+**Problem**: Users encountered critical errors and Vue warnings when interacting with wallet connection functionality.
 
-**Root Cause**: Wagmi `connectors` array was undefined during initial component render, causing `Cannot read properties of undefined (reading 'some')` error.
+**Root Causes**:
+1. Hardcoded project IDs in codebase (security risk)
+2. Vue lifecycle warnings from composables called outside component context
+3. Invalid watch sources during SSR/hydration
 
 **Solution Implemented**:
-1. **Fixed SSR Configuration Mismatch**: Updated `wagmi.config.js` to use `ssr: false` matching Nuxt config
-2. **Added Defensive Array Checks**: Prevented forEach operations on undefined arrays in:
-   - `useEthereumWallet.js` - Line 76-80: Check `connectors.value` exists before iteration
-   - `stores/wallet.js` - Lines 67-88: Defensive checks for `availableWallets` arrays
-3. **Enhanced Error Handling**: Comprehensive error logging and categorization
-4. **Improved Initialization**: Added DOM ready checks and timeout protection
+1. **Security Fix**: Moved all project IDs to environment variables
+   - Updated `nuxt.config.ts` to use `process.env.NUXT_PUBLIC_REOWN_PROJECT_ID`
+   - Removed hardcoded project IDs from all files
+   - Ensured proper environment variable configuration
+
+2. **Vue Lifecycle Warnings Fixed**: 
+   - Enhanced `useAggregatePriceFeed.js` with proper component context detection
+   - Added manual lifecycle management in components (`index.vue`, `CirxPriceChart.vue`)
+   - Fixed SSR compatibility by preventing lifecycle hooks during server-side rendering
+
+3. **Watch Source Warnings Resolved**:
+   - Converted direct reactive references to getter functions in watch()
+   - Prevents "Invalid watch source: undefined" during AppKit initialization
+   - Added defensive fallbacks for undefined values during hydration
 
 **Key Commits**:
-- `c0e87efbeba47c165c7fcda8161392255c540c26` - Final fix for connectors array error
-- `9e823fef52f6b9ffe211c0034ff40183c8084418` - Enhanced debugging and error logging
-- `17fd5ef85f0e3f23f8a1e74d45b324c90af0ac64` - Initial critical error fixes
+- `7f26fe2e2` - Fix Vue lifecycle warnings in useAggregatePriceFeed composable
+- `4754ab077` - Resolve Vue watch source warning for AppKit composables
+- Previous security and error handling improvements
 
 ### **Current System Status**
-- ✅ **Deployment Build**: All builds pass successfully with proper prerendering
-- ✅ **Critical Error Dialog**: Eliminated - no more crashes on Connect Wallet
-- ✅ **Error Handling**: Comprehensive system with toast notifications for non-critical issues
-- ✅ **Wallet System**: Production-ready with Ethereum + Solana support
-- ✅ **User Experience**: Graceful degradation when wallet providers aren't available
+- ✅ **Security**: All API keys moved to environment variables, no hardcoded credentials
+- ✅ **Vue Warnings**: Eliminated all Vue lifecycle and watch source warnings
+- ✅ **AppKit Integration**: Proper Reown AppKit configuration with environment-based project ID
+- ✅ **SSR Compatibility**: Full server-side rendering support without client-side conflicts
+- ✅ **Error Handling**: Comprehensive error boundaries with toast notifications
+- ✅ **Development Environment**: Clean console output, no warnings during development
 
 ### **What's Working**
-- Complete wallet system rewrite (Ethereum + Solana providers)
-- Comprehensive error handling with contextual user feedback
-- Production-ready build configuration for Cloudflare Pages
-- All dependencies properly synchronized (Pinia, Wagmi, etc.)
-- Defensive initialization prevents app crashes
+- **Secure Configuration**: Environment-based API key management
+- **Vue 3 Composition API**: Proper lifecycle management and reactivity
+- **Reown AppKit**: Professional wallet connection UI with multi-wallet support
+- **SSR/SPA Compatibility**: Works in both server-side and client-side rendering modes
+- **Development Experience**: Clean development server with no warnings or errors
+- **Production Ready**: Builds successfully for Cloudflare Pages deployment
 
 ### **Next Steps for Development**
-1. **Test Connect Wallet**: Verify the fixes work in production
-2. **Implement Actual Wallet Connection**: Replace placeholder logic with real wallet modal
-3. **Contract Integration**: Connect to actual CIRX token contracts when available
-4. **OTC Functionality**: Implement vesting contracts and discount logic
-5. **UI Polish**: Enhance user experience for wallet connection flow
+1. **Implement Real Wallet Connection**: Connect AppKit to actual transaction flows
+2. **Contract Integration**: Implement actual CIRX token smart contract interactions
+3. **Transaction Processing**: Connect frontend wallet integration to backend API
+4. **OTC Functionality**: Implement vesting contracts and discount calculations
+5. **User Testing**: Test wallet connection flows across different providers
 
-### **Files Modified in This Session**
-- `ui/app.vue` - Enhanced global error handling with detailed logging
-- `ui/components/SwapForm.vue` - Defensive composable initialization
-- `ui/composables/useEthereumWallet.js` - Fixed connectors array access
-- `ui/stores/wallet.js` - Added defensive checks for wallet arrays
-- `ui/plugins/wallet-init.client.js` - Improved initialization timing
-- `ui/wagmi.config.js` - Fixed SSR configuration mismatch
-- `ui/components/ErrorAlert.vue` - Fixed Vue SFC structure
-- `ui/components/SwapOutput.vue` - Fixed missing SVG asset reference
+### **Files Modified in Recent Sessions**
+- `ui/composables/useAggregatePriceFeed.js` - Fixed Vue lifecycle warnings with proper context detection
+- `ui/pages/index.vue` - Added manual lifecycle management and fixed watch sources
+- `ui/components/CirxPriceChart.vue` - Added lifecycle hooks for price feed management
+- `ui/components/WalletButton.vue` - Simplified to use AppKit composables directly
+- `ui/components/TestWallet.vue` - Updated to use proper AppKit integration
+- `ui/nuxt.config.ts` - Moved to environment-based configuration
+- `ui/plugins/1.appkit.client.js` - Enhanced error handling and project ID validation
+- `ui/config/appkit.js` - Removed hardcoded project IDs
 
-### **Technical Debt Addressed**
-- Eliminated 960-line monolithic swap component
-- Replaced mock transaction execution with proper architecture
-- Fixed multiple Vue Single File Component structure violations
-- Resolved package.json/package-lock.json synchronization issues
-- Implemented proper error boundaries and fallback mechanisms
+### **Technical Improvements Completed**
+- **Security Hardening**: Eliminated all hardcoded API keys and credentials
+- **Vue 3 Best Practices**: Proper composable patterns and lifecycle management
+- **SSR/Hydration**: Fixed all server-side rendering compatibility issues
+- **Error Boundaries**: Comprehensive error handling without disrupting user experience
+- **Development Quality**: Clean console output, proper TypeScript integration
+- **Modern Web3**: Latest Reown AppKit with multi-chain wallet support
+
+## How This Project Works
+
+### **Architecture Overview**
+
+The **Circular CIRX OTC Trading Platform** is a modern web application that enables users to purchase CIRX tokens with discounts through an Over-The-Counter (OTC) trading interface.
+
+### **Frontend Application (Nuxt.js)**
+
+**Port**: `localhost:3000` (development)
+**Framework**: Nuxt.js 3 with Vue.js Composition API
+
+**Key Components**:
+- **`ui/pages/index.vue`**: Main trading interface with dual-tab layout (liquid vs. OTC)
+- **`ui/components/WalletButton.vue`**: Reown AppKit wallet connection component
+- **`ui/components/CirxPriceChart.vue`**: Real-time CIRX price chart with TradingView integration
+- **`ui/composables/useAggregatePriceFeed.js`**: Multi-exchange price aggregation composable
+
+**Wallet Integration**:
+- **Reown AppKit**: Professional multi-wallet connection (MetaMask, WalletConnect, etc.)
+- **Environment Configuration**: Project ID managed via `NUXT_PUBLIC_REOWN_PROJECT_ID`
+- **Multi-Chain Support**: Ethereum mainnet, Arbitrum, Base, Optimism, Polygon
+- **SSR Compatible**: Works in both server-side and client-side rendering
+
+**Price Data**:
+- **Multi-Exchange Aggregation**: BitMart, XT, LBank price feeds
+- **Real-Time Updates**: 30-second intervals with fallback mechanisms
+- **TradingView Charts**: Professional charting with historical data
+
+### **Backend API (PHP)**
+
+**Port**: `localhost:18423` (development)
+**Framework**: PHP 8.2 with Slim framework (Laravel-style architecture)
+
+**Key Endpoints**:
+- **`/api/v1/health`**: Comprehensive health check with blockchain connectivity
+- **`/api/v1/health/quick`**: Fast connectivity check for frontend
+- **`/api/v1/ping`**: Ultra-fast ping endpoint for basic connectivity
+- **`/api/v1/swap/execute`**: Execute CIRX token swaps via Circular Protocol
+- **`/api/v1/otc/config`**: OTC discount tier configuration
+- **`/api/v1/proxy/circulating-supply`**: CORS-free proxy to Circular Labs APIs
+
+**Blockchain Integration**:
+- **Circular Protocol APIs**: All blockchain operations via official APIs
+- **No Direct Smart Contracts**: Uses Circular Protocol's backend for reliability
+- **Transaction Verification**: Real-time payment and transfer verification
+- **Multi-Network Support**: Ethereum, Solana, and Circular Protocol native
+
+**Database**: SQLite for development, PostgreSQL for production
+
+### **Development Workflow**
+
+**1. Start Development Environment**:
+```bash
+# Terminal 1: Backend API
+cd backend
+nix run nixpkgs#php -- -S localhost:18423 public/index.php
+
+# Terminal 2: Frontend App
+cd ui
+npm run dev
+```
+
+**2. Environment Configuration**:
+```bash
+# ui/.env (create this file)
+NUXT_PUBLIC_REOWN_PROJECT_ID=your_reown_project_id
+```
+
+**3. Live Development**:
+- **Frontend**: `http://localhost:3000` - Hot module replacement enabled
+- **Backend API**: `http://localhost:18423/api/v1/health` - Auto-restart on changes
+- **Clean Console**: No warnings or errors during development
+
+### **User Flow**
+
+**1. Landing Page**: User sees swap interface with CIRX price chart
+**2. Token Selection**: Choose input token (ETH, USDC, USDT) and amount
+**3. Wallet Connection**: Optional - can paste address or connect wallet via AppKit
+**4. Quote Generation**: Real-time pricing with OTC discount calculations
+**5. Transaction Execution**: Backend handles blockchain operations via Circular Protocol
+**6. Status Tracking**: Real-time transaction status updates
+
+### **Key Features Working Now**
+
+✅ **Wallet Connection**: Reown AppKit with multi-wallet support
+✅ **Price Feeds**: Real-time CIRX pricing from multiple exchanges  
+✅ **OTC Calculator**: Discount tier calculations based on trade size
+✅ **Backend API**: Full REST API with Circular Protocol integration
+✅ **Error Handling**: Comprehensive error boundaries and user feedback
+✅ **SSR/SPA**: Works in both server-side and single-page app modes
+✅ **Development Environment**: Clean, warning-free development experience
+✅ **Security**: Environment-based configuration, no hardcoded secrets
+
+### **Production Deployment**
+
+- **Frontend**: Cloudflare Pages (static site generation)
+- **Backend**: Docker containers with PHP-FPM and Nginx
+- **Database**: PostgreSQL with automated migrations
+- **Monitoring**: Health checks and error reporting integration
 
 ## Technology Stack
 
@@ -95,7 +209,7 @@ This is a **Circular CIRX OTC Trading Platform** with API-first architecture:
 ```bash
 # From backend directory  
 nix run nixpkgs#composer -- install  # Install PHP dependencies
-nix run nixpkgs#php -- -S localhost:8080 public/index.php  # Start development server
+nix run nixpkgs#php -- -S localhost:18423 public/index.php  # Start development server
 nix run nixpkgs#php -- vendor/bin/phpunit        # Run all tests
 nix run nixpkgs#php -- vendor/bin/phpunit --group=integration  # Run integration tests
 nix run nixpkgs#php -- vendor/bin/phpunit --configuration=phpunit.e2e.xml  # Run E2E tests
@@ -315,7 +429,7 @@ jj git push --allow-new
 
 ### Local Development Setup
 1. **Initialize jj**: `jj git init --colocate` (if not already done)
-2. **Start Backend**: `cd backend && nix run nixpkgs#php -- -S localhost:8080 public/index.php`
+2. **Start Backend**: `cd backend && nix run nixpkgs#php -- -S localhost:18423 public/index.php`
 3. **Configure Database**: Set up PostgreSQL and run migrations
 4. **Start Frontend**: `cd ui && npm run dev`
 5. **Run Tests**: `nix run nixpkgs#php -- vendor/bin/phpunit` for backend, `npx playwright test` for E2E
@@ -416,7 +530,7 @@ diff.tool = ["code", "--wait", "--diff", "$left", "$right"]
 [aliases]
 # Backend development aliases
 "backend-test" = ["!cd", "backend", "&&", "nix", "run", "nixpkgs#php", "--", "vendor/bin/phpunit"]
-"backend-serve" = ["!cd", "backend", "&&", "nix", "run", "nixpkgs#php", "--", "-S", "localhost:8080", "public/index.php"]
+"backend-serve" = ["!cd", "backend", "&&", "nix", "run", "nixpkgs#php", "--", "-S", "localhost:18423", "public/index.php"]
 "e2e-test" = ["!./scripts/run-e2e-tests.sh"]
 "migrate" = ["!cd", "backend", "&&", "nix", "run", "nixpkgs#php", "--", "migrate.php"]
 

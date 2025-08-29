@@ -16,6 +16,37 @@
 
 # Frontend
 
+## **CRITICAL: Centralize Wallet Connection State Management**
+
+- [ ] **Fix disconnected wallet connection logic across components**
+  - **Problem**: AppKit integration is centralized but UI components aren't using it
+  - **Current Issue**: `index.vue` has inline button logic, `SwapActionButton.vue` expects `walletConnected` prop
+  - **Solution**: Connect all components to centralized AppKit state
+
+- [ ] **Update SwapActionButton component to use AppKit directly**
+  - Remove `walletConnected` prop requirement 
+  - Import `useAppKitAccount` and use `isConnected` directly
+  - Create computed ref for backwards compatibility with `useSwapButtonState` composable
+  - Ensure all 8 button states work: connect, enter address, enter amount, validation, purchase, etc.
+
+- [ ] **Replace inline button logic in index.vue with SwapActionButton component**
+  - Remove duplicate button text logic from template (`v-else-if` chains)
+  - Remove duplicate action logic from `handleSwap()` function  
+  - Use centralized `SwapActionButton` component that handles all states
+  - Pass required props: `activeTab`, `inputAmount`, `recipientAddress`, etc.
+
+- [ ] **Verify all 8 button states work correctly with centralized logic**
+  - State 1: No connection, no address → "Connect" 
+  - State 2: No connection, has address → "Connect Wallet"
+  - State 3: Connected, no address → "Enter Address"
+  - State 4: No amount entered → "Enter an amount"
+  - State 5: Invalid/error address → "Get CIRX Wallet" 
+  - State 6: Connected + valid address + amount → "Buy [Liquid/Vested] CIRX"
+  - State 7: Address validating → "..." (loading states)
+  - State 8: Purchase processing → Loading with custom text
+
+## **Other Frontend Issues**
+
 - [ ] cookie page no longer matches the design of this project please update it.
 
 - [ ] chart price in the top right takes a very very long time to load the price. the entire chart get's loaded many seconds before the price is rendered??
