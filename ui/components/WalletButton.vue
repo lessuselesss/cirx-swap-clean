@@ -24,53 +24,33 @@
       </span>
     </button>
 
-    <!-- AppKit's native button when connected -->
-    <w3m-button v-if="isConnected" />
+    <!-- AppKit's native button when connected - temporarily commented out -->
+    <!-- <w3m-button v-if="isConnected" /> -->
+    <button v-if="isConnected" @click="handleClick" class="px-4 py-2 bg-blue-500 text-white rounded">
+      {{ buttonText }}
+    </button>
   </div>
 </template>
 
 <script setup>
-import { computed, ref, onMounted } from 'vue'
+import { computed } from 'vue'
+import { useAppKit, useAppKitAccount } from '@reown/appkit/vue'
 
-// Track connection state
-const isConnected = ref(false)
-const address = ref(null)
-
-// Update state from AppKit when component mounts
-onMounted(() => {
-  if (process.client && window?.$appKit) {
-    // Subscribe to AppKit state changes
-    window.$appKit.subscribeAccount((account) => {
-      isConnected.value = account?.isConnected || false
-      address.value = account?.address || null
-    })
-    
-    // Get initial state if available
-    try {
-      const state = window.$appKit.getState?.()
-      if (state?.account) {
-        isConnected.value = state.account.isConnected || false
-        address.value = state.account.address || null
-      }
-    } catch (error) {
-      // Ignore if getState doesn't exist
-    }
-  }
-})
+// Use AppKit composables directly - no global window references
+const { open } = useAppKit()
+const { address, isConnected } = useAppKitAccount()
 
 // Format address for display when connected
 const buttonText = computed(() => {
-  if (isConnected.value && address.value) {
-    return `${address.value.slice(0, 6)}...${address.value.slice(-4)}`
+  if (isConnected && address) {
+    return `${address.slice(0, 6)}...${address.slice(-4)}`
   }
   return 'Connect'
 })
 
-// Click handler - just open AppKit modal
+// Click handler - use AppKit composable
 const handleClick = () => {
-  if (process.client && window?.$appKit) {
-    window.$appKit.open()
-  }
+  open()
 }
 </script>
 

@@ -10,35 +10,21 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
+import { useAppKit, useAppKitAccount } from '@reown/appkit/vue'
 
-const isConnected = ref(false)
+// Use AppKit composables directly
+const { open } = useAppKit()
+const { isConnected } = useAppKitAccount()
+
 const error = ref('')
 
 // Test basic AppKit functionality
 const openModal = () => {
   try {
-    if (typeof window !== 'undefined' && window.$appKit) {
-      window.$appKit.open()
-    } else {
-      error.value = 'AppKit not available on window'
-    }
+    open()
   } catch (err) {
     error.value = err.message
   }
 }
-
-onMounted(() => {
-  try {
-    // Try to import AppKit hooks
-    import('@reown/appkit/vue').then(({ useAppKitAccount }) => {
-      const { isConnected: connected } = useAppKitAccount()
-      isConnected.value = connected.value
-    }).catch(err => {
-      error.value = 'Failed to import AppKit: ' + err.message
-    })
-  } catch (err) {
-    error.value = 'Error in onMounted: ' + err.message
-  }
-})
 </script>

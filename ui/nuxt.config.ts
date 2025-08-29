@@ -79,8 +79,8 @@ export default defineNuxtConfig({
     // Private keys (only available on server-side)
     // Public keys (exposed to client-side)
     public: {
-      walletConnectProjectId: process.env.WALLETCONNECT_PROJECT_ID || '2585d3b6fd8a214ece0e26b344957169',
-      reownProjectId: '2585d3b6fd8a214ece0e26b344957169',
+      walletConnectProjectId: process.env.NUXT_PUBLIC_REOWN_PROJECT_ID,
+      reownProjectId: process.env.NUXT_PUBLIC_REOWN_PROJECT_ID,
       appName: 'Circular CIRX OTC Platform',
       appDescription: 'Circular CIRX OTC Trading Platform - Buy CIRX tokens with instant delivery or OTC discounts up to 12%',
       appUrl: process.env.APP_URL || 'https://circular.io',
