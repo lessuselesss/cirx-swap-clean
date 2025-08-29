@@ -32,9 +32,9 @@ A comprehensive OTC (Over-The-Counter) trading platform for CIRX tokens built on
    composer install
    cp .env.example .env
    # Configure your .env file
-   php -S localhost:8080 public/index.php
+   php -S localhost:18423 public/index.php
    ```
-   Backend API available at: http://localhost:8080
+   Backend API available at: http://localhost:18423
 
 4. **Start the indexer** (optional):
    ```bash
@@ -129,7 +129,7 @@ npm run test         # Run tests
 ```bash
 cd backend/
 composer install     # Install dependencies
-php -S localhost:8080 public/index.php  # Development server
+php -S localhost:18423 public/index.php  # Development server
 php vendor/bin/phpunit                   # Run tests
 ```
 
@@ -197,7 +197,7 @@ NUXT_PUBLIC_ETHEREUM_NETWORK=sepolia
 NUXT_PUBLIC_ETHEREUM_CHAIN_ID=11155111
 
 # Backend API
-NUXT_PUBLIC_API_BASE_URL=http://localhost:8080/api/v1
+NUXT_PUBLIC_API_BASE_URL=http://localhost:18423/api/v1
 
 # Development Features
 NUXT_PUBLIC_DEBUG_MODE=true
@@ -212,7 +212,7 @@ NUXT_PUBLIC_REOWN_PROJECT_ID=your-reown-project-id-here
 # Application
 APP_ENV=development
 APP_DEBUG=true
-APP_URL=http://localhost:8080
+APP_URL=http://localhost:18423
 
 # Database (Development)
 DB_CONNECTION=sqlite
@@ -274,7 +274,7 @@ npm run build
 ```bash
 cd backend/
 docker build -t cirx-backend .
-docker run -p 8080:8080 cirx-backend
+docker run -p 8080:18423 cirx-backend
 ```
 
 ### Blockchain Indexer
@@ -329,7 +329,7 @@ export LOG_LEVEL=debug
 npm run dev -- --debug
 
 # Backend debug
-php -S localhost:8080 public/index.php (with APP_DEBUG=true)
+php -S localhost:18423 public/index.php (with APP_DEBUG=true)
 ```
 
 ## 📚 Documentation

@@ -8,200 +8,49 @@ let priceCache = {}
 let lastFetch = 0
 
 /**
- * Fetch real CIRX/USDT price from exchanges where it trades
- * CIRX trades against USDT on multiple exchanges
+ * Fetch real CIRX/USDT price via backend API
+ * Uses aggregated exchange data from backend to avoid CORS issues
  */
 const fetchCIRXPrice = async () => {
-  // Try multiple exchanges in order of preference for CIRX/USDT pair
-  const exchanges = [
-    // Gate.io API - Primary source for CIRX/USDT
-    {
-      name: 'gate.io',
-      url: 'https://api.gateio.ws/api/v4/spot/tickers?currency_pair=CIRX_USDT',
-      parser: (data) => {
-        if (Array.isArray(data) && data[0]?.last) {
-          return parseFloat(data[0].last)
-        }
-        return null
-      }
-    },
-    // MEXC API - Backup exchange for CIRX/USDT
-    {
-      name: 'mexc',
-      url: 'https://api.mexc.com/api/v3/ticker/24hr?symbol=CIRXUSDT',
-      parser: (data) => {
-        if (data?.lastPrice) {
-          return parseFloat(data.lastPrice)
-        }
-        return null
-      }
-    },
-    // KuCoin API - Another backup for CIRX/USDT
-    {
-      name: 'kucoin',
-      url: 'https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=CIRX-USDT',
-      parser: (data) => {
-        if (data?.data?.price) {
-          return parseFloat(data.data.price)
-        }
-        return null
-      }
-    },
-    // CoinGecko backup (if CIRX gets listed there)
-    {
-      name: 'coingecko',
-      url: 'https://api.coingecko.com/api/v3/simple/price?ids=circular-protocol&vs_currencies=usd',
-      parser: (data) => {
-        if (data?.['circular-protocol']?.usd) {
-          return parseFloat(data['circular-protocol'].usd)
-        }
-        return null
-      }
-    }
-  ]
-
-  const prices = []
-  
-  for (const exchange of exchanges) {
-    try {
-      console.log(`🔄 Fetching CIRX/USDT price from ${exchange.name}...`)
-      
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 8000) // 8 second timeout
-      
-      const response = await fetch(exchange.url, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'User-Agent': 'CircularProtocol/1.0',
-          'Cache-Control': 'no-cache'
-        },
-        signal: controller.signal,
-        mode: 'cors' // Explicitly set CORS mode
-      })
-      
-      clearTimeout(timeoutId)
-      
-      if (!response.ok) {
-        console.warn(`❌ HTTP ${response.status} from ${exchange.name}:`, response.statusText)
-        continue
-      }
-      
-      const data = await response.json()
-      console.log(`📊 Raw data from ${exchange.name}:`, JSON.stringify(data).substring(0, 200) + '...')
-      
-      const price = exchange.parser(data)
+  try {
+    console.log('🔄 Fetching CIRX/USDT price from backend aggregator...')
+    
+    // Use our existing aggregateMarket backend integration
+    const { AggregateMarket } = await import('../scripts/aggregateMarket.js')
+    const market = AggregateMarket.getInstance()
+    
+    const marketData = await market.getMarketData('CIRX', 'USDT')
+    
+    if (marketData && marketData.averagePrice) {
+      const price = parseFloat(marketData.averagePrice)
       
       if (price && typeof price === 'number' && !isNaN(price) && price > 0 && price < 100) {
-        console.log(`✅ CIRX/USDT price from ${exchange.name}: $${price}`)
-        prices.push({ 
-          exchange: exchange.name, 
-          price,
-          timestamp: Date.now(),
-          source: 'CIRX/USDT'
-        })
+        console.log(`✅ CIRX/USDT price from backend aggregator: $${price}`)
+        return price
       } else {
-        console.warn(`❌ Invalid price from ${exchange.name}:`, price)
+        console.warn(`❌ Invalid price from backend aggregator:`, price)
       }
-      
-    } catch (error) {
-      console.warn(`❌ Failed to fetch CIRX from ${exchange.name}:`, error.message)
-      
-      // Log specific error types for debugging
-      if (error.name === 'AbortError') {
-        console.warn(`⏱️ Timeout fetching from ${exchange.name}`)
-      } else if (error.message.includes('CORS')) {
-        console.warn(`🚫 CORS issue with ${exchange.name}`)
-      } else if (error.message.includes('network')) {
-        console.warn(`🌐 Network error with ${exchange.name}`)
-      }
+    } else {
+      console.warn('❌ No market data from backend aggregator')
     }
+    
+  } catch (error) {
+    console.warn('❌ Failed to fetch CIRX from backend aggregator:', error.message)
   }
   
-  if (prices.length > 0) {
-    // Sort prices for statistical analysis
-    const sortedPrices = prices.map(p => p.price).sort((a, b) => a - b)
-    
-    // Use statistical approach based on number of sources
-    let finalPrice
-    
-    if (prices.length >= 3) {
-      // Use median with outlier detection for 3+ sources
-      const median = sortedPrices[Math.floor(sortedPrices.length / 2)]
-      const mean = sortedPrices.reduce((a, b) => a + b, 0) / sortedPrices.length
-      
-      // If median and mean are close (within 10%), use median
-      if (Math.abs(median - mean) / mean < 0.1) {
-        finalPrice = median
-        console.log(`📊 Using median CIRX/USDT price: $${finalPrice} from ${prices.length} exchanges (median ≈ mean)`)
-      } else {
-        // Remove outliers and recalculate
-        const threshold = mean * 0.2 // 20% threshold
-        const filteredPrices = sortedPrices.filter(p => Math.abs(p - mean) <= threshold)
-        finalPrice = filteredPrices.reduce((a, b) => a + b, 0) / filteredPrices.length
-        console.log(`📊 Using filtered mean CIRX/USDT price: $${finalPrice} from ${filteredPrices.length}/${prices.length} exchanges (outliers removed)`)
-      }
-      
-    } else if (prices.length === 2) {
-      // Average two sources with validation
-      const [price1, price2] = sortedPrices
-      const minPrice = Math.min(price1, price2)
-      
-      // Prevent division by zero
-      if (minPrice <= 0) {
-        console.error('Invalid prices for comparison:', { price1, price2 })
-        finalPrice = prices[0].price // Use first price as fallback
-        console.log(`📊 Using fallback price due to invalid comparison: $${finalPrice}`)
-      } else {
-        const diff = Math.abs(price1 - price2) / minPrice
-        
-        // Validate diff result
-        if (!isFinite(diff)) {
-          console.error('Invalid price difference calculation:', { price1, price2, minPrice, diff })
-          finalPrice = prices[0].price
-          console.log(`📊 Using first price due to calculation error: $${finalPrice}`)
-        } else if (diff < 0.05) { // Less than 5% difference
-          finalPrice = (price1 + price2) / 2
-          console.log(`📊 Using average CIRX/USDT price: $${finalPrice} from 2 exchanges (${diff.toFixed(2)}% difference)`)
-        } else {
-          // Large difference - use the more recent/reliable source (Gate.io first in list)
-          const gatePrice = prices.find(p => p.exchange === 'gate.io')
-          finalPrice = gatePrice ? gatePrice.price : prices[0].price
-          console.log(`📊 Using primary source CIRX/USDT price: $${finalPrice} (${diff.toFixed(2)}% spread detected)`)
-        }
-      }
-      
-    } else {
-      // Single source
-      finalPrice = prices[0].price
-      console.log(`📊 Using single-source CIRX/USDT price: $${finalPrice} from ${prices[0].exchange}`)
-    }
-    
-    // Final validation
-    if (finalPrice > 0 && finalPrice < 100 && !isNaN(finalPrice)) {
-      console.log(`✅ Final CIRX/USDT price: $${finalPrice} (${prices.map(p => `${p.exchange}:$${p.price}`).join(', ')})`)
-      return finalPrice
-    } else {
-      console.error(`❌ Invalid aggregated price: ${finalPrice}`)
-    }
-  }
-  
-  // Fallback to conservative estimate if all exchanges fail or price is invalid
-  console.warn('⚠️ Using fallback CIRX/USDT price - all exchanges failed or returned invalid data')
-  console.warn('💡 This could be due to:')
-  console.warn('   - CORS restrictions in browser environment')
-  console.warn('   - Exchange API rate limits or downtime') 
-  console.warn('   - Network connectivity issues')
-  console.warn('   - Invalid API responses')
-  
-  return 0.15 // Conservative fallback: $0.15 USDT per CIRX token
+  // Fallback to conservative estimate if backend fails
+  console.warn('⚠️ Using fallback CIRX/USDT price - backend aggregator failed')
+  return 0.004 // Conservative fallback: $0.004 USDT per CIRX token (typical trading range)
 }
 
 /**
  * CoinGecko price API for major tokens
+ * CoinGecko has permissive CORS and usually works in browsers
  */
 const fetchCoinGeckoPrices = async () => {
   try {
+    console.log('🔄 Fetching major token prices from CoinGecko...')
+    
     const response = await fetch(
       'https://api.coingecko.com/api/v3/simple/price?ids=ethereum,solana,tether,usd-coin&vs_currencies=usd',
       {
@@ -216,6 +65,7 @@ const fetchCoinGeckoPrices = async () => {
     }
     
     const data = await response.json()
+    console.log('✅ Major token prices from CoinGecko:', data)
     
     return {
       ETH: data.ethereum?.usd || 0,
@@ -225,7 +75,15 @@ const fetchCoinGeckoPrices = async () => {
     }
   } catch (error) {
     console.warn('CoinGecko price fetch failed:', error.message)
-    return null
+    console.log('📊 Using fallback prices for major tokens')
+    
+    // Fallback to conservative estimates if CoinGecko fails
+    return {
+      ETH: 2500,   // Conservative ETH price in USD
+      SOL: 100,    // Conservative SOL price in USD  
+      USDC: 1.0,   // USDC should be ~$1 USD
+      USDT: 1.0    // USDT should be ~$1 USD
+    }
   }
 }
 

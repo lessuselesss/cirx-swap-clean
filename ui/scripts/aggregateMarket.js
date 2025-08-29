@@ -62,7 +62,7 @@ export class AggregateMarket {
      */
   
     async getBitMartData(token, pair) {
-      const URL_bitmart = `https://nag.circularlabs.io/CProxy.php?url=https://api-cloud.bitmart.com/spot/quotation/v3/ticker?symbol=${token.toUpperCase()}_${pair.toUpperCase()}`
+      const URL_bitmart = `http://localhost:18423/api/v1/proxy/circular-labs?endpoint=CProxy.php&url=${encodeURIComponent(`https://api-cloud.bitmart.com/spot/quotation/v3/ticker?symbol=${token.toUpperCase()}_${pair.toUpperCase()}`)}`
   
       try {
         const response = await fetch(URL_bitmart)
@@ -109,7 +109,7 @@ export class AggregateMarket {
      */
   
     async getXTData(token, pair) {
-      const URL_xt = `https://nag.circularlabs.io/CProxy.php?url=https://sapi.xt.com/v4/public/ticker/24h?symbol=${token.toLowerCase()}_${pair.toLowerCase()}`
+      const URL_xt = `http://localhost:18423/api/v1/proxy/circular-labs?endpoint=CProxy.php&url=${encodeURIComponent(`https://sapi.xt.com/v4/public/ticker/24h?symbol=${token.toLowerCase()}_${pair.toLowerCase()}`)}`
   
       try {
         const response = await fetch(URL_xt)
@@ -156,7 +156,7 @@ export class AggregateMarket {
      */
   
     async getLBankData(token, pair) {
-      const URL_lbank = `https://nag.circularlabs.io/CProxy.php?url=https://api.lbkex.com/v2/ticker.do?symbol=${token.toLowerCase()}_${pair.toLowerCase()}`
+      const URL_lbank = `http://localhost:18423/api/v1/proxy/circular-labs?endpoint=CProxy.php&url=${encodeURIComponent(`https://api.lbkex.com/v2/ticker.do?symbol=${token.toLowerCase()}_${pair.toLowerCase()}`)}`
   
       try {
         const response = await fetch(URL_lbank)
@@ -211,10 +211,10 @@ export class AggregateMarket {
         return this._cache
       }
 
-      var URL_Circul = `https://nag.circularlabs.io/GetCirculatingSupply.php?Asset=CIRX`
-      var URL_bitmart = `https://nag.circularlabs.io/CProxy.php?url=https://api-cloud.bitmart.com/spot/quotation/v3/ticker?symbol=${token.toUpperCase()}_${pair.toUpperCase()}`
-      var URL_xt = `https://nag.circularlabs.io/CProxy.php?url=https://sapi.xt.com/v4/public/ticker/24h?symbol=${token.toLowerCase()}_${pair.toLowerCase()}`
-      var URL_lbank = `https://nag.circularlabs.io/CProxy.php?url=https://api.lbkex.com/v2/ticker.do?symbol=${token.toLowerCase()}_${pair.toLowerCase()}`
+      const URL_Circul = `http://localhost:18423/api/v1/proxy/circulating-supply`
+      const URL_bitmart = `http://localhost:18423/api/v1/proxy/circular-labs?endpoint=CProxy.php&url=${encodeURIComponent(`https://api-cloud.bitmart.com/spot/quotation/v3/ticker?symbol=${token.toUpperCase()}_${pair.toUpperCase()}`)}`
+      const URL_xt = `http://localhost:18423/api/v1/proxy/circular-labs?endpoint=CProxy.php&url=${encodeURIComponent(`https://sapi.xt.com/v4/public/ticker/24h?symbol=${token.toLowerCase()}_${pair.toLowerCase()}`)}`
+      const URL_lbank = `http://localhost:18423/api/v1/proxy/circular-labs?endpoint=CProxy.php&url=${encodeURIComponent(`https://api.lbkex.com/v2/ticker.do?symbol=${token.toLowerCase()}_${pair.toLowerCase()}`)}`
   
       // Initialize variables to store the cumulative data
       let totalLast = 0

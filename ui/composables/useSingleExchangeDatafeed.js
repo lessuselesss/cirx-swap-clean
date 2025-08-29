@@ -138,7 +138,7 @@ async function fetchSingleExchangeData(exchange, symbol, pair) {
     
     switch (exchange.toLowerCase()) {
       case 'bitmart':
-        url = `https://nag.circularlabs.io/CProxy.php?url=https://api-cloud.bitmart.com/spot/quotation/v3/ticker?symbol=${symbol.toUpperCase()}_${pair.toUpperCase()}`
+        url = `http://localhost:18423/api/v1/proxy/circular-labs?endpoint=CProxy.php&url=${encodeURIComponent(`https://api-cloud.bitmart.com/spot/quotation/v3/ticker?symbol=${symbol.toUpperCase()}_${pair.toUpperCase()}`)}`
         response = await fetchWithTimeout(url)
         if (response.ok) {
           data = await response.json()
@@ -153,7 +153,7 @@ async function fetchSingleExchangeData(exchange, symbol, pair) {
         break
         
       case 'xt':
-        url = `https://nag.circularlabs.io/CProxy.php?url=https://sapi.xt.com/v4/public/ticker/24h?symbol=${symbol.toLowerCase()}_${pair.toLowerCase()}`
+        url = `http://localhost:18423/api/v1/proxy/circular-labs?endpoint=CProxy.php&url=${encodeURIComponent(`https://sapi.xt.com/v4/public/ticker/24h?symbol=${symbol.toLowerCase()}_${pair.toLowerCase()}`)}`
         response = await fetchWithTimeout(url)
         if (response.ok) {
           data = await response.json()
@@ -168,7 +168,7 @@ async function fetchSingleExchangeData(exchange, symbol, pair) {
         break
         
       case 'lbank':
-        url = `https://nag.circularlabs.io/CProxy.php?url=https://api.lbkex.com/v2/ticker.do?symbol=${symbol.toLowerCase()}_${pair.toLowerCase()}`
+        url = `http://localhost:18423/api/v1/proxy/circular-labs?endpoint=CProxy.php&url=${encodeURIComponent(`https://api.lbkex.com/v2/ticker.do?symbol=${symbol.toLowerCase()}_${pair.toLowerCase()}`)}`
         response = await fetchWithTimeout(url)
         if (response.ok) {
           data = await response.json()

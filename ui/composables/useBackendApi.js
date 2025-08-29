@@ -8,7 +8,7 @@ export function useBackendApi() {
   const runtimeConfig = useRuntimeConfig()
   
   // Configuration
-  const API_BASE_URL = runtimeConfig.public.apiBaseUrl || 'http://localhost:8080/api'
+  const API_BASE_URL = runtimeConfig.public.apiBaseUrl || 'http://localhost:18423/api'
   const API_KEY = runtimeConfig.public.apiKey || null
   
   // Deposit wallet addresses for different chains/tokens

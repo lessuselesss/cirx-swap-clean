@@ -20,7 +20,7 @@ export const useCircularAddressValidation = () => {
 
     try {
       const config = useRuntimeConfig()
-      const apiBaseUrl = config.public.apiBaseUrl || 'http://localhost:8080/api/v1'
+      const apiBaseUrl = config.public.apiBaseUrl || 'http://localhost:18423/api/v1'
       
       const response = await fetch(`${apiBaseUrl}/config/circular-network`)
       if (!response.ok) {
@@ -44,7 +44,7 @@ export const useCircularAddressValidation = () => {
         network: 'testnet',
         environment: 'development',
         blockchain_id: '8a20baa40c45dc5055aeb26197c203e576ef389d9acb171bd62da11dc5ad72b2',
-        nag_url: 'https://nag.circularlabs.io/NAG.php?cep=',
+        nag_url: '/api/v1/proxy/circular-labs?endpoint=NAG.php&cep=',
         chain_name: 'Circular SandBox'
       }
     }

@@ -91,7 +91,7 @@ export const useCircularChain = (toastCallback = null) => {
       const response = await $fetch('/debug/nag-balance', {
         method: 'POST',
         body: {
-          nagUrl: 'https://nag.circularlabs.io/NAG.php?cep=',
+          nagUrl: '/api/v1/proxy/circular-labs?endpoint=NAG.php&cep=',
           endpoint: 'GetWalletBalance_',
           address: address
         }
