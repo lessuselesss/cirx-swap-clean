@@ -163,6 +163,49 @@ $app->group('/api/v1', function ($group) {
         }
     });
 
+    // Ultra-fast ping endpoint for frontend connectivity (no checks, just connection test)
+    $group->get('/ping', function (Request $request, Response $response) {
+        $data = [
+            'transaction_ready' => true, // Always true for basic connectivity
+            'status' => 'ready',
+            'timestamp' => date('c'),
+            'ping' => true
+        ];
+        
+        $response->getBody()->write(json_encode($data));
+        return $response->withHeader('Content-Type', 'application/json');
+    });
+
+    // Quick health check for frontend connectivity (lightweight, fast response)
+    $group->get('/health/quick', function (Request $request, Response $response) {
+        try {
+            // Just basic checks - no blockchain calls or heavy operations
+            $isWalletConfigured = !empty($_ENV['CIRX_WALLET_ADDRESS']) && !empty($_ENV['CIRX_WALLET_PRIVATE_KEY']);
+            
+            $data = [
+                'transaction_ready' => $isWalletConfigured, // Simple check based on wallet config
+                'status' => $isWalletConfigured ? 'ready' : 'not_ready',
+                'timestamp' => date('c'),
+                'version' => '1.0.0',
+                'environment' => $_ENV['APP_ENV'] ?? 'development',
+                'quick_check' => true
+            ];
+            
+            $response->getBody()->write(json_encode($data));
+            return $response->withHeader('Content-Type', 'application/json');
+        } catch (Exception $e) {
+            $data = [
+                'transaction_ready' => false,
+                'status' => 'error',
+                'message' => 'Quick health check failed: ' . $e->getMessage(),
+                'timestamp' => date('c'),
+                'quick_check' => true
+            ];
+            $response->getBody()->write(json_encode($data));
+            return $response->withStatus(500)->withHeader('Content-Type', 'application/json');
+        }
+    });
+
     // Comprehensive health check
     $group->get('/health/detailed', function (Request $request, Response $response) {
         $healthService = new HealthCheckService();
@@ -313,6 +356,123 @@ $app->group('/api/v1', function ($group) {
     $group->get('/debug/cirx-recipient-override', function (Request $request, Response $response) {
         $controller = new DebugController();
         return $controller->getCirxRecipientOverride($request, $response);
+    });
+
+    // Proxy endpoints for Circular Labs APIs (to avoid CORS issues)
+    $group->get('/proxy/circulating-supply', function (Request $request, Response $response) {
+        try {
+            $url = 'https://nag.circularlabs.io/GetCirculatingSupply.php?Asset=CIRX';
+            
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+            curl_setopt($ch, CURLOPT_USERAGENT, 'CIRX-OTC-Backend/1.0');
+            
+            $data = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $error = curl_error($ch);
+            curl_close($ch);
+            
+            if ($error) {
+                throw new Exception("cURL error: " . $error);
+            }
+            
+            if ($httpCode !== 200) {
+                throw new Exception("HTTP error: " . $httpCode);
+            }
+            
+            $response->getBody()->write($data);
+            return $response
+                ->withHeader('Content-Type', 'text/plain')
+                ->withHeader('Cache-Control', 'max-age=30') // Cache for 30 seconds
+                ->withStatus(200);
+                
+        } catch (Exception $e) {
+            $errorData = [
+                'success' => false,
+                'error' => 'Failed to fetch circulating supply: ' . $e->getMessage(),
+                'timestamp' => date('c')
+            ];
+            $response->getBody()->write(json_encode($errorData));
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(502);
+        }
+    });
+    
+    $group->get('/proxy/circular-labs', function (Request $request, Response $response) {
+        try {
+            // Get the target endpoint from query parameters
+            $endpoint = $request->getQueryParams()['endpoint'] ?? '';
+            
+            // Whitelist of allowed Circular Labs endpoints
+            $allowedEndpoints = [
+                'GetCirculatingSupply.php',
+                'CProxy.php',
+                'NAG.php'
+            ];
+            
+            // Validate endpoint
+            $endpointFile = basename($endpoint);
+            if (!in_array($endpointFile, $allowedEndpoints)) {
+                throw new Exception('Invalid endpoint');
+            }
+            
+            // Build URL with all query parameters except 'endpoint'
+            $params = $request->getQueryParams();
+            unset($params['endpoint']);
+            
+            $url = 'https://nag.circularlabs.io/' . $endpoint;
+            if (!empty($params)) {
+                $url .= (strpos($endpoint, '?') !== false ? '&' : '?') . http_build_query($params);
+            }
+            
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+            curl_setopt($ch, CURLOPT_USERAGENT, 'CIRX-OTC-Backend/1.0');
+            
+            $data = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+            $error = curl_error($ch);
+            curl_close($ch);
+            
+            if ($error) {
+                throw new Exception("cURL error: " . $error);
+            }
+            
+            if ($httpCode !== 200) {
+                throw new Exception("HTTP error: " . $httpCode);
+            }
+            
+            // Determine appropriate content type
+            $responseContentType = 'application/json';
+            if (strpos($contentType, 'text/plain') !== false || strpos($endpoint, 'GetCirculatingSupply') !== false) {
+                $responseContentType = 'text/plain';
+            }
+            
+            $response->getBody()->write($data);
+            return $response
+                ->withHeader('Content-Type', $responseContentType)
+                ->withHeader('Cache-Control', 'max-age=30')
+                ->withStatus(200);
+                
+        } catch (Exception $e) {
+            $errorData = [
+                'success' => false,
+                'error' => 'Proxy request failed: ' . $e->getMessage(),
+                'timestamp' => date('c')
+            ];
+            $response->getBody()->write(json_encode($errorData));
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(502);
+        }
     });
 
     // Demo/Testing endpoints (only in development)

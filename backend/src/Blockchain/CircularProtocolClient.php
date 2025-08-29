@@ -164,7 +164,8 @@ class CircularProtocolClient implements BlockchainClientInterface
             $response = $this->cirxApi->getBlockCount($this->getBlockchainId());
             
             if (is_object($response)) {
-                return (int)($response->Response ?? $response->result ?? 0);
+                $value = $response->Response ?? $response->result ?? 0;
+                return is_numeric($value) ? (int)$value : 0;
             }
             
             if (is_array($response)) {

@@ -165,7 +165,7 @@ export class AggregateMarket {
           const data = await response.json()
           const lbankTicker = data.data[0].ticker
           const lbankLast = parseFloat(lbankTicker.latest)
-          const lbankFluc = parseFloat(lbankTicker.change) * 100.0 // Convert fluctuation to percentage
+          const lbankFluc = parseFloat(lbankTicker.change) // LBank already returns percentage
           const lbankVolC = parseFloat(lbankTicker.vol)
           const lbankVolU = parseFloat(lbankTicker.turnover)
   
@@ -306,12 +306,12 @@ export class AggregateMarket {
           if (lbankData.data && lbankData.data[0] && lbankData.data[0].ticker) {
             const lbankTicker = lbankData.data[0].ticker
             const lbankLast = parseFloat(lbankTicker.latest)
-            const lbankFluc = parseFloat(lbankTicker.change) * 100.0 // Convert fluctuation to percentage
+            const lbankFluc = parseFloat(lbankTicker.change) // LBank already returns percentage
             const lbankVolC = parseFloat(lbankTicker.vol)
             const lbankVolU = parseFloat(lbankTicker.turnover)
   
             totalLast += lbankLast || 0
-            totalFluc += lbankFluc / 100 || 0
+            totalFluc += lbankFluc || 0
             totalVolC += lbankVolC || 0
             totalVolU += lbankVolU || 0
             count++

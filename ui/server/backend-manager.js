@@ -10,15 +10,27 @@ let isBackendStarting = false
 async function checkBackendHealth() {
   try {
     const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 1000)
+    const timeoutId = setTimeout(() => controller.abort(), 3000) // Increased timeout
     
-    const response = await fetch('http://localhost:18423/api/v1/health', {
+    // Use ping endpoint for faster response
+    const response = await fetch('http://localhost:18423/api/v1/ping', {
       signal: controller.signal
     })
     
     clearTimeout(timeoutId)
-    return response.ok
-  } catch {
+    
+    if (response.ok) {
+      const data = await response.json()
+      // Check that it's a proper backend response
+      if (data && data.ping === true) {
+        return true
+      }
+    }
+    
+    return false
+  } catch (error) {
+    // Be more specific about the error for debugging
+    console.log(`Backend health check failed: ${error.name} - ${error.message}`)
     return false
   }
 }
