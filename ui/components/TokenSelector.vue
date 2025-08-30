@@ -11,14 +11,14 @@
         :disabled="loading"
       >
         <img 
-          :src="getTokenLogo(walletStore.selectedToken)" 
-          :alt="walletStore.selectedToken"
+          :src="getTokenLogo(selectedToken)" 
+          :alt="selectedToken"
           class="w-5 h-5 rounded-full"
           @error="handleImageError"
         />
         
         <span class="font-medium text-white text-sm">
-          {{ getTokenSymbol(walletStore.selectedToken) }}
+          {{ getTokenSymbol(selectedToken) }}
         </span>
         
         <svg 
@@ -44,7 +44,7 @@
           @click="selectToken(token.symbol)"
           :class="[
             'w-full flex items-center gap-2 px-3 py-2 hover:bg-gray-700 transition-colors first:rounded-t-xl last:rounded-b-xl',
-            token.symbol === walletStore.selectedToken ? 'bg-gray-700' : ''
+            token.symbol === selectedToken ? 'bg-gray-700' : ''
           ]"
         >
           <img 
@@ -60,7 +60,7 @@
           
           <!-- Checkmark for selected token -->
           <svg 
-            v-if="token.symbol === walletStore.selectedToken"
+            v-if="token.symbol === selectedToken"
             class="w-4 h-4 text-circular-primary ml-auto"
             viewBox="0 0 24 24" 
             fill="none"
@@ -75,7 +75,6 @@
 
 <script setup>
 import { computed } from 'vue'
-import { useWalletStore } from '~/stores/wallet'
 
 const props = defineProps({
   activeTab: {
@@ -85,10 +84,14 @@ const props = defineProps({
   loading: {
     type: Boolean,
     default: false
+  },
+  selectedToken: {
+    type: String,
+    default: 'ETH'
   }
 })
 
-const walletStore = useWalletStore()
+const emit = defineEmits(['tokenSelected'])
 
 // Available tokens based on connected wallet chain
 const availableTokens = computed(() => {
@@ -125,8 +128,8 @@ const getTokenSymbol = (tokenSymbol) => {
 }
 
 const selectToken = (tokenSymbol) => {
-  // Update the global wallet store instead of emitting to parent
-  walletStore.selectInputToken(tokenSymbol)
+  // Emit token selection to parent component
+  emit('tokenSelected', tokenSymbol)
 }
 
 const handleImageError = (event) => {

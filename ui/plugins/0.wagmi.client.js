@@ -53,5 +53,8 @@ export default defineNuxtPlugin((nuxtApp) => {
     config: wagmiAdapter.wagmiConfig
   })
   
+  // Make wagmi adapter available to other plugins (like AppKit)
+  nuxtApp.provide('wagmiAdapter', wagmiAdapter)
+  
   console.log('✅ Wagmi + VueQuery plugins initialized')
 })

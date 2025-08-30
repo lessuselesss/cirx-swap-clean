@@ -38,7 +38,7 @@
           :selected-token="token"
           :active-tab="activeTab"
           :loading="loading"
-          @select="$emit('update:token', $event)"
+          @token-selected="$emit('update:token', $event)"
         />
       </div>
     </div>
@@ -46,7 +46,7 @@
 </template>
 
 <script setup>
-import { useNumberInput } from '~/composables/useNumberInput'
+import { useNumberInput } from '~/composables/useRFormattedNumbers.js'
 import { watch } from 'vue'
 
 const props = defineProps({

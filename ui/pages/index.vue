@@ -113,7 +113,7 @@
                   <div class="input-header">
                     <label class="text-sm font-medium text-white">Sell</label>
                     <span v-if="inputToken" class="balance-display pr-3" @click="setMaxAmount" @dblclick="forceRefreshBalance">
-                      Balance: {{ ethBalanceData?.formatted ? formatBalance(ethBalanceData.formatted) : '-' }} {{ getTokenSymbol(inputToken) }}
+                      Balance: {{ currentTokenBalanceFormatted }} {{ getTokenSymbol(inputToken) }}
                     </span>
                     <span v-else class="balance-display pr-3">
                       Balance: -
@@ -181,38 +181,21 @@
                         v-if="showTokenDropdown"
                         class="token-dropdown-simple"
                       >
-                        <template v-if="connectedWallet === 'phantom'">
-                          <button
-                            v-for="token in [{ value: 'SOL', label: 'SOL' }, { value: 'USDC_SOL', label: 'USDC' }]"
-                            :key="token.value"
-                            type="button"
-                            @click="selectToken(token.value)"
-                            class="token-option"
-                          >
-                            <img 
-                              :src="getTokenLogo(token.value)" 
-                              :alt="token.label"
-                              class="token-icon"
-                            />
-                            <span class="token-symbol">{{ token.label }}</span>
-                          </button>
-                        </template>
-                        <template v-else>
-                          <button
-                            v-for="token in [{ value: 'ETH', label: 'ETH' }, { value: 'USDC', label: 'USDC' }, { value: 'USDT', label: 'USDT' }]"
-                            :key="token.value"
-                            type="button"
-                            @click="selectToken(token.value)"
-                            class="token-option"
-                          >
-                            <img 
-                              :src="getTokenLogo(token.value)" 
-                              :alt="token.label"
-                              class="token-icon"
-                            />
-                            <span class="token-symbol">{{ token.label }}</span>
-                          </button>
-                        </template>
+                        <!-- Ethereum tokens only - removed Phantom/Solana support -->
+                        <button
+                          v-for="token in [{ value: 'ETH', label: 'ETH' }, { value: 'USDC', label: 'USDC' }, { value: 'USDT', label: 'USDT' }]"
+                          :key="token.value"
+                          type="button"
+                          @click="selectToken(token.value)"
+                          class="token-option"
+                        >
+                          <img 
+                            :src="getTokenLogo(token.value)" 
+                            :alt="token.label"
+                            class="token-icon"
+                          />
+                          <span class="token-symbol">{{ token.label }}</span>
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -481,11 +464,12 @@
               @click="handleSwap"
             >
               <!-- Backend error overlay - shows on top of all other states -->
-              <span v-if="!isBackendConnected" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+              <!-- Show connecting only when ping hasn't succeeded yet (staggered approach) -->
+              <span v-if="!isBackendPingOk" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
                 <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" style="animation: pulse 2s infinite;">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
                 </svg>
-                Error: Connect to Backend
+                Connecting...
               </span>
               <!-- Normal CTA states (hidden when backend is disconnected) -->
               <span v-else-if="loading">{{ loadingText || 'Processing...' }}</span>
@@ -713,17 +697,16 @@ import ConnectionToast from '~/components/ConnectionToast.vue'
 import OtcDiscountDropdown from '~/components/OtcDiscountDropdown.vue'
 import CirxPriceChart from '~/components/CirxPriceChart.vue'
 import CirxStakingPanel from '~/components/CirxStakingPanel.vue'
-import { getTokenPrices } from '~/services/priceService.js'
-// Import chart data preloading composable
-import { useAggregatePriceFeed } from '~/composables/useAggregatePriceFeed.js'
-import { AggregateMarket } from '~/scripts/aggregateMarket.js'
+// Import unified price aggregator (replaces getTokenPrices and useAggregatePriceFeed)
+import { getTokenPrices, useAggregatePriceFeed } from '~/composables/useRPriceData.js'
+import { AggregateMarket } from '~/composables/useRPriceData.js'
 // Address validation functions can be added here if needed
 // Import backend API integration
-import { useBackendApi } from '~/composables/useBackendApi.js'
+import { useBackendApi } from '~/composables/useRBackendAPIs.js'
 // Import real-time transaction updates via IROH
-import { useRealTimeTransactions } from '~/composables/useRealTimeTransactions.js'
+import { useRealTimeTransactions } from '~/composables/useIrohNetwork.js'
 // Import Circular address validation
-import { useCircularAddressValidation } from '~/composables/useCircularAddressValidation.js'
+import { useCircularAddressValidation } from '~/composables/useRPreFlightValidation.js'
 // Import safe toast utility
 import { safeToast } from '~/utils/toast.js'
 // Extension detection disabled
@@ -739,9 +722,10 @@ definePageMeta({
 // Use AppKit hooks directly for state
 import { isValidEthereumAddress, isValidSolanaAddress, getAddressType } from '~/utils/addressFormatting.js'
 
-// Use AppKit hooks directly
-const { address, isConnected } = useAppKitAccount()
-const { open: openAppKit } = useAppKit()
+// Use AppKit hooks with fallback values (will be initialized in onMounted)
+const address = ref(null)
+const isConnected = ref(false)
+let openAppKit = () => console.warn('AppKit not initialized yet')
 
 // Forward declare functions that will be defined later
 let handleClickOutside, handleGlobalEnter
@@ -761,15 +745,61 @@ const { data: ethBalanceData } = useBalance({
   watch: true
 })
 
-// Wallet state now handled directly by AppKit hooks
-
 // Token contract addresses for balance fetching
 const tokenAddresses = {
   'USDC': '0xA0b86a33E6Ba476C4db6B0EbB18B9E7D8e4a8563', // USDC on mainnet
   'USDT': '0xdAC17F958D2ee523a2206206994597C13D831ec7', // USDT on mainnet
 }
 
-// Balance fetching will be handled using provider when needed
+// Use Wagmi balance hooks for ERC20 tokens
+const { data: usdcBalanceData } = useBalance({
+  address: address,
+  token: tokenAddresses.USDC,
+  watch: true
+})
+
+const { data: usdtBalanceData } = useBalance({
+  address: address,
+  token: tokenAddresses.USDT,
+  watch: true
+})
+
+// Computed property to get the correct balance based on selected token
+const currentTokenBalance = computed(() => {
+  // Add defensive checks for SSR compatibility
+  if (typeof window === 'undefined') return null
+  if (!isConnected?.value) return null
+  if (!inputToken?.value) return null
+
+  switch (inputToken.value) {
+    case 'ETH':
+      return ethBalanceData?.value || null
+    case 'USDC':
+      return usdcBalanceData?.value || null
+    case 'USDT':
+      return usdtBalanceData?.value || null
+    default:
+      return null
+  }
+})
+
+// Formatted balance display
+const currentTokenBalanceFormatted = computed(() => {
+  // Add defensive checks for SSR compatibility
+  if (typeof window === 'undefined') return '-'
+  
+  const balance = currentTokenBalance.value
+  if (!balance?.formatted) {
+    return '-'
+  }
+  
+  try {
+    return formatBalance(balance.formatted)
+  } catch (error) {
+    console.warn('Balance formatting error:', error)
+    return '-'
+  }
+})
 
 // Use AppKit composable for opening modal
 const open = () => {
@@ -903,7 +933,7 @@ watch([() => isConnected || false, () => address || null], ([connected, addr], [
       show: true,
       type: 'success',
       title: 'Wallet Connected',
-      message: `Connected to ${addr?.slice(0, 6)}...${addr?.slice(-4)}`,
+      message: `Connected to ${addr && typeof addr === 'string' ? addr.slice(0, 6) + '...' + addr.slice(-4) : (addr?.value && typeof addr.value === 'string' ? addr.value.slice(0, 6) + '...' + addr.value.slice(-4) : 'wallet')}`,
       walletIcon: walletIcon.value
     }
   } else if (!connected && prevConnected) {
@@ -926,7 +956,17 @@ watch(() => [isConnected, address],
   ([connected, addr]) => {
     console.log('🔍 CONNECTION WATCH: AppKit state changed:')
     console.log('  - Connected:', connected)
-    console.log('  - Address:', addr ? addr.slice(0, 6) + '...' + addr.slice(-4) : 'none')
+    
+    // Handle addr properly - it could be a ref, string, or null
+    let addressStr = null
+    if (addr) {
+      // If addr is a ref object, get its value
+      addressStr = typeof addr === 'object' && addr.value !== undefined ? addr.value : addr
+    }
+    
+    console.log('  - Address:', addressStr && typeof addressStr === 'string' 
+      ? addressStr.slice(0, 6) + '...' + addressStr.slice(-4) 
+      : 'none')
     console.log('  - Timestamp:', new Date().toISOString())
   }, 
   { immediate: true }
@@ -954,11 +994,14 @@ const chartDataLoading = ref(false)
 const chartDataError = ref(null)
 let aggregateMarketInstance = null
 
-// Price feed composable - accessible at component level for lifecycle management
-const { 
-  currentPrice: cirxPrice, 
-  isLoading: priceLoading, 
+// Use unified price aggregator for all price data
+const {
+  currentPrice: cirxPrice,
+  isLoading: priceLoading,
   error: priceError,
+  formattedPrice,
+  marketStats,
+  fetchAggregatedData: refreshPrice,
   startPriceUpdates,
   stopPriceUpdates
 } = useAggregatePriceFeed()
@@ -1004,9 +1047,12 @@ const showTokenDropdown = ref(false)
 // Track whether user has clicked "Enter Address" button
 const hasClickedEnterAddress = ref(false)
 
-// Backend connectivity state
-const isBackendConnected = ref(true)
+// Backend connectivity state with staggered health checks
+const isBackendConnected = ref(false) // Start as false until first successful health check
+const isBackendPingOk = ref(false) // Quick ping status for immediate CTA enablement
 const backendHealthCheckInterval = ref(null)
+const backendHealthCheckController = ref(null)
+const currentHealthCheckId = ref(0) // Race condition prevention
 // Track address validation state
 const addressValidationState = ref('idle') // 'idle', 'validating', 'valid', 'invalid'
 // Modal state for State 6
@@ -1080,8 +1126,9 @@ const startPriceCountdown = () => {
 const refreshPrices = async () => {
   try {
     isPriceRefreshing.value = true
+    // Keep the original logic that fetches LIVE prices for all tokens
     const prices = await getTokenPrices()
-    // Update tracked tokens if present
+    // Update tracked tokens if present - PRESERVE LIVE DATA
     livePrices.value = {
       ETH: prices.ETH ?? livePrices.value.ETH,
       USDC: prices.USDC ?? livePrices.value.USDC,
@@ -1159,7 +1206,16 @@ const displayCirxBalance = computed(() => {
 // Short address for display using official Wagmi address
 const shortAddress = computed(() => {
   if (!address) return ''
-  return `${address.slice(0, 6)}...${address.slice(-4)}`
+  
+  // Handle address properly - it could be a ref, string, or null
+  let addressStr = null
+  if (address) {
+    // If address is a ref object, get its value
+    addressStr = typeof address === 'object' && address.value !== undefined ? address.value : address
+  }
+  
+  if (!addressStr || typeof addressStr !== 'string') return ''
+  return `${addressStr.slice(0, 6)}...${addressStr.slice(-4)}`
 })
 
 // Connected wallet type - simplified since connector is not available
@@ -1505,8 +1561,6 @@ const getTokenLogo = (token) => {
     'ETH': 'https://assets.coingecko.com/coins/images/279/small/ethereum.png',
     'USDC': 'https://assets.coingecko.com/coins/images/6319/small/USD_Coin_icon.png',
     'USDT': 'https://assets.coingecko.com/coins/images/325/small/Tether.png',
-    'SOL': 'https://assets.coingecko.com/coins/images/4128/small/solana.png',
-    'USDC_SOL': 'https://assets.coingecko.com/coins/images/6319/small/USD_Coin_icon.png',
     'CIRX': '/buy/cirx-icon.svg'
   }
   
@@ -1518,8 +1572,6 @@ const getTokenSymbol = (token) => {
     'ETH': 'ETH',
     'USDC': 'USDC',
     'USDT': 'USDT',
-    'SOL': 'SOL',
-    'USDC_SOL': 'USDC',
     'CIRX': 'CIRX'
   }
   
@@ -1661,15 +1713,11 @@ const handleCirxAmountChange = (value) => {
 }
 
 const setMaxAmount = () => {
-  if (isConnected) {
-    // Set to 95% of balance to account for gas fees
-    let balance = 0
-    if (inputToken.value === 'ETH') {
-      balance = parseFloat(formattedEthBalance.value || '0')
-    } else {
-      balance = 0 // Other tokens not implemented yet
-    }
-    const maxAmount = walletStore.selectedToken === 'ETH' ? balance * 0.95 : balance * 0.99
+  if (isConnected.value && currentTokenBalance.value?.formatted) {
+    const balance = parseFloat(currentTokenBalance.value.formatted || '0')
+    
+    // Set to 95% of balance for ETH to account for gas fees, 99% for tokens
+    const maxAmount = inputToken.value === 'ETH' ? balance * 0.95 : balance * 0.99
     inputAmount.value = maxAmount.toFixed(6)
   } else {
     inputAmount.value = '1.0' // Fallback for demo
@@ -1686,8 +1734,8 @@ const forceRefreshBalance = async () => {
 }
 
 const selectToken = (token) => {
-  // Token selection now handled by wallet store
-  walletStore.selectInputToken(token)
+  // Token selection now handled locally
+  inputToken.value = token
   showTokenDropdown.value = false
   // Reset input when token changes
   inputAmount.value = ''
@@ -1696,15 +1744,9 @@ const selectToken = (token) => {
 
 // Auto-select native token based on connected wallet
 const autoSelectNativeToken = () => {
-  if (connectedWallet.value === 'phantom') {
-    // Phantom wallet - select SOL
-    walletStore.selectInputToken('SOL')
-    console.log('🪙 Auto-selected SOL for Phantom wallet')
-  } else {
-    // Ethereum wallets (MetaMask, Coinbase, etc.) - select ETH
-    walletStore.selectInputToken('ETH')
-    console.log('🪙 Auto-selected ETH for Ethereum wallet')
-  }
+  // Always select ETH for Ethereum-focused OTC platform
+  inputToken.value = 'ETH'
+  console.log('🪙 Auto-selected ETH for Ethereum wallet')
 }
 
 
@@ -1753,58 +1795,138 @@ const formatAmount = (amount) => {
 }
 
 
-// Backend health check
-const checkBackendHealth = async () => {
+// Quick ping check for immediate CTA enablement
+const checkBackendPing = async (checkId) => {
   try {
     const config = useRuntimeConfig()
     const apiBaseUrl = config.public.apiBaseUrl || 'http://localhost:18423/api/v1'
     
+    console.log('⚡ Starting ping check with ID:', checkId, 'Current:', currentHealthCheckId.value)
+    console.log('⚡ Ping URL:', `${apiBaseUrl}/ping`)
+    
     const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 5000) // 5 second timeout for quick health checks
+    const timeoutId = setTimeout(() => controller.abort(), 10000) // Increased to 10s timeout for development
     
     const response = await fetch(`${apiBaseUrl}/ping`, {
       signal: controller.signal,
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
+      headers: { 'Content-Type': 'application/json' }
     })
     
     clearTimeout(timeoutId)
     
+    // TEMP: Disable race condition check for debugging
+    // if (currentHealthCheckId.value !== checkId) {
+    //   console.log('⚡ Ping success ignored - race condition detected. Current:', currentHealthCheckId.value, 'Response:', checkId)
+    //   return
+    // }
+    
     if (response.ok) {
       const data = await response.json()
-      // Use comprehensive transaction_ready check instead of basic status
+      console.log('⚡ Quick ping response:', data)
+      isBackendPingOk.value = data.ping === true
+      console.log('⚡ Quick ping result:', data.ping ? 'OK' : 'Failed')
+      console.log('⚡ isBackendPingOk set to:', isBackendPingOk.value)
+      
+      // If ping succeeds, start comprehensive health check
+      if (data.ping === true) {
+        checkBackendHealth(checkId)
+      }
+    } else {
+      isBackendPingOk.value = false
+      isBackendConnected.value = false
+    }
+  } catch (error) {
+    // TEMP: Disable race condition check for debugging
+    // if (currentHealthCheckId.value !== checkId) {
+    //   console.log('⚡ Ping error ignored - race condition detected')
+    //   return
+    // }
+    
+    if (error.name !== 'AbortError') {
+      console.log('⚡ Ping failed with error:', error.message)
+      console.log('⚡ Full error details:', error)
+      console.log('⚡ Error name:', error.name)
+      console.log('⚡ Error stack:', error.stack)
+    }
+    console.log('⚡ Setting isBackendPingOk to false due to error:', error.name)
+    isBackendPingOk.value = false
+    isBackendConnected.value = false
+  }
+}
+
+// Comprehensive health check for transaction readiness
+const checkBackendHealth = async (checkId) => {
+  try {
+    const config = useRuntimeConfig()
+    const apiBaseUrl = config.public.apiBaseUrl || 'http://localhost:18423/api/v1'
+    
+    console.log('🏥 Comprehensive health check...')
+    
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 8000) // Longer timeout for health
+    
+    const response = await fetch(`${apiBaseUrl}/health`, {
+      signal: controller.signal,
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' }
+    })
+    
+    clearTimeout(timeoutId)
+    
+    // Check if this result is still valid (no race condition)
+    if (currentHealthCheckId.value !== checkId) return
+    
+    if (response.ok) {
+      const data = await response.json()
       const wasConnected = isBackendConnected.value
       isBackendConnected.value = data.transaction_ready === true
       
-      // Log health check details for debugging
-      console.log('🏥 Backend health check:', {
-        status: data.status,
+      console.log('🏥 Health check result:', {
         transaction_ready: data.transaction_ready,
-        health_score: data.health_score,
         was_connected: wasConnected,
         now_connected: isBackendConnected.value
       })
       
-      // Log any failed health checks for troubleshooting
+      // Log failed checks for debugging
       if (!data.transaction_ready && data.checks) {
         const failedChecks = Object.entries(data.checks)
           .filter(([key, check]) => check.status === 'error')
           .map(([key, check]) => `${key}: ${check.error || 'unknown error'}`)
         
         if (failedChecks.length > 0) {
-          console.warn('⚠️ Backend not transaction-ready. Failed checks:', failedChecks)
+          console.warn('⚠️ Backend not transaction-ready:', failedChecks)
         }
       }
     } else {
-      console.error(`❌ Backend health endpoint returned ${response.status}`)
+      console.error(`❌ Health endpoint returned ${response.status}`)
       isBackendConnected.value = false
     }
   } catch (error) {
-    console.error('Backend health check failed:', error)
+    if (currentHealthCheckId.value !== checkId) return
+    
+    if (error.name !== 'AbortError') {
+      console.error('❌ Health check failed:', error.message || error)
+    }
     isBackendConnected.value = false
   }
+}
+
+// Staggered health check orchestrator
+const performStaggeredHealthCheck = async () => {
+  // Cancel any existing health check
+  if (backendHealthCheckController.value) {
+    backendHealthCheckController.value.abort()
+    backendHealthCheckController.value = null
+  }
+  
+  // Increment check ID to prevent race conditions
+  const checkId = ++currentHealthCheckId.value
+  
+  console.log(`🔍 Starting staggered health check #${checkId}`)
+  
+  // Start with quick ping (let individual functions handle their own state)
+  await checkBackendPing(checkId)
 }
 
 const handleSwap = async () => {
@@ -2126,7 +2248,7 @@ const handleSwap = async () => {
       'ethereum', // payment chain
       recipientAddress.value, // CIRX recipient address
       totalPaymentNeeded, // actual amount paid (includes platform fee)
-      walletStore.selectedToken // payment token
+      inputToken.value // payment token
     )
     
     console.log('🔥 CALLING BACKEND API with swapData:', swapData)
@@ -2193,7 +2315,7 @@ const handleTierChange = (tier) => {
 
   // When user picks a tier, set the input amount to the minimum USD required for that tier
   // Convert tier.minAmount USD into selected input token units
-  const tokenPriceUsd = livePrices.value[walletStore.selectedToken] || 0
+  const tokenPriceUsd = livePrices.value[inputToken.value] || 0
   if (tokenPriceUsd > 0 && tier?.minAmount) {
     const feeRate = fees.value.otc
     const feeMultiplier = 1 - feeRate / 100
@@ -2244,7 +2366,7 @@ watch([inputAmount, inputToken, activeTab], async () => {
     try {
       // Auto-select tier when in OTC based on current USD
       if (isOTC) {
-        const tokenPriceUsd = livePrices.value[walletStore.selectedToken] || 0
+        const tokenPriceUsd = livePrices.value[inputToken.value] || 0
         const inputVal = parseFloat(inputAmount.value) || 0
         // Use gross USD amount (before fees) for tier selection to prevent tier dropping
         const grossUsdAmount = tokenPriceUsd * inputVal
@@ -2569,15 +2691,71 @@ const handleChainAdded = () => {
   }
 }
 
+// Global health check singleton to prevent duplicates
+const globalHealthCheckKey = '__cirx_health_check_active__'
+
 // Close dropdown and slider when clicking outside
 onMounted(async () => {
-  // Start backend health check immediately
-  await checkBackendHealth()
+  // Prevent duplicate health check intervals using global singleton  
+  if (typeof window !== 'undefined' && window[globalHealthCheckKey]) {
+    console.log('⏸️ Health check already active globally, skipping duplicate')
+    return
+  }
   
-  // Set up periodic health check every 10 seconds
+  // Initialize AppKit safely in onMounted
+  try {
+    const accountKit = useAppKitAccount()
+    address.value = accountKit.address.value
+    isConnected.value = accountKit.isConnected.value
+    
+    // Watch for changes
+    watch(accountKit.address, (newAddress) => {
+      address.value = newAddress
+    })
+    watch(accountKit.isConnected, (newConnected) => {
+      isConnected.value = newConnected
+    })
+    
+    const appKit = useAppKit()
+    openAppKit = appKit.open
+    console.log('✅ AppKit initialized successfully')
+  } catch (error) {
+    console.warn('AppKit initialization failed, using fallbacks:', error.message)
+  }
+
+  // Mark as active globally
+  if (typeof window !== 'undefined') {
+    window[globalHealthCheckKey] = true
+    console.log('🚀 Health check starting...')
+    
+    // TEMP: Very visible test that component is mounting
+    setTimeout(() => {
+      alert('🔬 DEBUG: Vue component mounted and executing!')
+    }, 1000)
+  }
+  
+  // Start staggered health check immediately
+  await performStaggeredHealthCheck()
+  
+  // TEMP DEBUG: Test reactive variable directly
+  setTimeout(() => {
+    console.log('🔬 DEBUG: Force setting isBackendPingOk to true for testing...')
+    isBackendPingOk.value = true
+    console.log('🔬 DEBUG: isBackendPingOk is now:', isBackendPingOk.value)
+  }, 5000)
+  
+  // Set up periodic staggered health check every 10 seconds
   backendHealthCheckInterval.value = setInterval(() => {
-    checkBackendHealth()
+    performStaggeredHealthCheck()
   }, 10000)
+  
+  // Fallback: Force a health check after 3 seconds if ping still hasn't succeeded
+  setTimeout(() => {
+    if (!isBackendPingOk.value) {
+      console.log('🆘 Fallback health check triggered - ping still failed after 3s')
+      performStaggeredHealthCheck()
+    }
+  }, 3000)
   
   // Fetch OTC configuration on component mount
   await fetchOtcConfig()
@@ -2670,6 +2848,17 @@ onMounted(async () => {
 onUnmounted(() => {
   if (countdownTimer) clearInterval(countdownTimer)
   if (backendHealthCheckInterval.value) clearInterval(backendHealthCheckInterval.value)
+  if (backendHealthCheckController.value) {
+    backendHealthCheckController.value.abort()
+    backendHealthCheckController.value = null
+  }
+  
+  // Reset global health check singleton flag
+  if (typeof window !== 'undefined') {
+    delete window[globalHealthCheckKey]
+    console.log('🔄 Global health check singleton reset on unmount')
+  }
+  
   // Stop price updates when component unmounts
   stopPriceUpdates()
 })

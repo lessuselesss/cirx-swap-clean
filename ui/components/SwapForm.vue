@@ -85,7 +85,7 @@
           :loading="loading"
           :loading-text="loadingText"
           :active-tab="activeTab"
-          :wallet-connected="walletStore.isConnected"
+          :wallet-connected="isWalletConnected"
           :quote="quote"
           :input-amount="inputAmount"
           :input-balance="inputBalance"
@@ -158,25 +158,14 @@
 <script setup>
 import { ref, computed, watch, inject, onBeforeUnmount, nextTick } from 'vue'
 import { validateWalletAddress } from '../utils/validation.js'
+import { useAppKit, useAppKitAccount } from '@reown/appkit/vue'
 
-// Composables and stores with defensive initialization
-let walletStore, contracts, swapLogic, errorHandler
+// AppKit integration
+const { open: openAppKit } = useAppKit()
+const { address: walletAddress, isConnected: isWalletConnected } = useAppKitAccount()
 
-try {
-  walletStore = useWalletStore()
-  console.log('✅ WalletStore initialized in SwapForm')
-} catch (error) {
-  console.error('❌ Failed to initialize walletStore in SwapForm:', error)
-  // Create a mock store to prevent crashes
-  walletStore = {
-    isConnected: ref(false),
-    isConnecting: ref(false),
-    activeWallet: ref(null),
-    connectWallet: () => Promise.reject(new Error('Wallet store not available')),
-    clearError: () => {},
-    setSelectedToken: () => {} // Mock for testing
-  }
-}
+// Composables with defensive initialization  
+let contracts, swapLogic, errorHandler
 
 try {
   contracts = useBackendApi()
@@ -249,13 +238,13 @@ const { otcConfig, discountTiers } = useOtcConfig()
 
 // Computed properties
 const inputBalance = computed(() => {
-  if (!walletStore.isConnected) return '0.0'
+  if (!isWalletConnected.value) return '0.0'
   
-  // Validate wallet supports the selected token
+  // Get token balance via backend API
   try {
-    walletStore.validateWalletForToken(inputToken.value)
     return contracts.getTokenBalance(inputToken.value)
   } catch (err) {
+    console.warn('Failed to get token balance:', err)
     return '0.0'
   }
 })
@@ -345,11 +334,11 @@ watch(() => [cirxAmount.value, lastUpdatedField.value], ([newCirxAmount, field])
 const canPurchase = computed(() => {
   const hasAmount = inputAmount.value && parseFloat(inputAmount.value) > 0
   const notLoading = !loading.value
-  const hasWallet = walletStore.isConnected
+  const hasWallet = isWalletConnected.value
   const hasValidRecipient = recipientAddress.value && !recipientAddressError.value
   
   // Balance validation - only check if wallet is connected
-  const hasSufficientBalance = !walletStore.isConnected || (() => {
+  const hasSufficientBalance = !isWalletConnected.value || (() => {
     const inputAmountNum = parseFloat(inputAmount.value) || 0
     const balanceNum = parseFloat(inputBalance.value) || 0
     
@@ -402,8 +391,8 @@ const handleConnectWallet = async () => {
   try {
     error.value = null
     
-    // Open centralized wallet modal
-    try { useWalletStore().openWalletModal() } catch {}
+    // Open AppKit wallet modal
+    openAppKit()
     // Optional: keep a small hint
     toast?.info('Select a wallet to connect.', { title: 'Connect Wallet', autoTimeoutMs: 3000 })
     
@@ -447,7 +436,7 @@ const handleEnterAmount = () => {
 
 const handleSwap = async () => {
   console.log('🔥 handleSwap called!', {
-    walletConnected: walletStore.isConnected,
+    walletConnected: isWalletConnected.value,
     recipientAddress: recipientAddress.value,
     recipientAddressError: recipientAddressError.value,
     canPurchase: canPurchase.value,
@@ -455,17 +444,17 @@ const handleSwap = async () => {
   })
   
   // Handle the four CTA states based on wallet connection and address input
-  if (!walletStore.isConnected && !recipientAddress.value) {
+  if (!isWalletConnected.value && !recipientAddress.value) {
     // State 1: "Connect" - No wallet + no address
     return handleConnectWallet()
   }
   
-  if (!walletStore.isConnected && recipientAddress.value) {
+  if (!isWalletConnected.value && recipientAddress.value) {
     // State 2: "Connect Wallet" - Has address but no wallet
     return handleConnectWallet()
   }
   
-  if (walletStore.isConnected && !recipientAddress.value) {
+  if (isWalletConnected.value && !recipientAddress.value) {
     // State 3: "Enter Address" - Has wallet but no address
     console.log('🎯 Enter Address clicked - attempting to focus CIRX address input')
     await nextTick()
@@ -482,7 +471,7 @@ const handleSwap = async () => {
     return
   }
   
-  if (walletStore.isConnected && recipientAddress.value && recipientAddressError.value) {
+  if (isWalletConnected.value && recipientAddress.value && recipientAddressError.value) {
     // State 4: "Enter a Valid Address" - Has wallet + invalid address
     await nextTick()
     if (recipientAddressInputRef.value) {
@@ -503,7 +492,7 @@ const handleSwap = async () => {
       inputAmount.value,
       inputToken.value,
       recipientAddress.value,
-      walletStore.isConnected
+      isWalletConnected.value
     )
 
     if (!validation.isValid) {
@@ -511,8 +500,8 @@ const handleSwap = async () => {
     }
 
     // Get recipient address
-    const recipient = walletStore.isConnected 
-      ? walletStore.activeWallet.address 
+    const recipient = isWalletConnected.value 
+      ? walletAddress.value 
       : recipientAddress.value
 
     // Validate quote
@@ -530,7 +519,7 @@ const handleSwap = async () => {
     
     // Step 3: Execute MetaMask transaction
     let txHash
-    if (!walletStore.isConnected) {
+    if (!isWalletConnected.value) {
       throw new Error('Wallet not connected. Please connect your wallet first.')
     }
 
@@ -543,8 +532,12 @@ const handleSwap = async () => {
         data: '0x', // Simple transfer, no data needed
       }
 
-      // Request transaction through wallet
-      txHash = await walletStore.ethereumWallet?.walletClient?.sendTransaction(txParams)
+      // Request transaction through AppKit wagmi integration
+      // TODO: Implement proper wagmi sendTransaction integration
+      txHash = await window.ethereum?.request({
+        method: 'eth_sendTransaction',
+        params: [txParams]
+      })
       
       if (!txHash) {
         throw new Error('Transaction was rejected or failed')
@@ -682,8 +675,7 @@ watch([activeTab, inputToken], () => {
   // Reset to input field priority when tab/token changes
   lastUpdatedField.value = 'input'
   
-  // Sync selected token to wallet store for header balance display
-  try { useWalletStore().setSelectedToken(inputToken.value) } catch {}
+  // Token selection is now handled locally - no need to sync to global store
   
   // Handle tier selection based on tab
   if (activeTab.value === 'otc') {
@@ -711,32 +703,8 @@ watch([activeTab, inputToken], () => {
   }
 })
 
-// Watch for token changes to validate wallet compatibility
-watch([inputToken, () => walletStore.activeChain], () => {
-  if (walletStore.isConnected) {
-    try {
-      walletStore.validateWalletForToken(inputToken.value)
-      error.value = null
-    } catch (err) {
-      const processedError = errorHandler.handleError(err, {
-        description: 'Token validation'
-      })
-      
-      // Show as toast for validation errors
-      toast?.warning(processedError.userMessage, {
-        title: 'Token Not Supported',
-        autoTimeoutMs: 4000
-      })
-      
-      // Auto-switch to compatible token
-      if (walletStore.activeChain === 'solana' && ['ETH', 'USDC', 'USDT'].includes(inputToken.value)) {
-        inputToken.value = 'SOL'
-      } else if (walletStore.activeChain === 'ethereum' && inputToken.value === 'SOL') {
-        inputToken.value = 'ETH'
-      }
-    }
-  }
-})
+// TODO: Implement token validation with AppKit network detection
+// For now, assume Ethereum mainnet tokens are supported
 
 // Cleanup debounce timers to prevent memory leaks and focus issues
 onBeforeUnmount(() => {

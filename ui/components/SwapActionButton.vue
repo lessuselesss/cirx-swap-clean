@@ -24,7 +24,7 @@
 
 <script setup>
 import { toRefs } from 'vue'
-import { useSwapButtonState } from '~/composables/useSwapButtonState'
+import { useSwapButtonState } from '~/composables/useRCallToAction.js'
 
 const props = defineProps({
   canPurchase: { type: Boolean, required: true },

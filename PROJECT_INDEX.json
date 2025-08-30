@@ -1,29 +1,30 @@
 {
-  "indexed_at": "2025-08-27T08:49:31.789355",
+  "indexed_at": "2025-08-29T13:33:00.799184",
   "root": ".",
   "project_structure": {
     "type": "tree",
     "root": ".",
     "tree": [
       ".",
-      "\u251c\u2500\u2500 backend/ (4735 files)",
-      "\u2502   \u251c\u2500\u2500 database/ (6 files)",
-      "\u2502   \u2502   \u2514\u2500\u2500 migrations/ (4 files)",
-      "\u2502   \u251c\u2500\u2500 public/ (2 files)",
-      "\u2502   \u251c\u2500\u2500 src/ (44 files)",
+      "\u251c\u2500\u2500 backend/ (4769 files)",
+      "\u2502   \u251c\u2500\u2500 database/ (9 files)",
+      "\u2502   \u2502   \u2514\u2500\u2500 migrations/ (5 files)",
+      "\u2502   \u251c\u2500\u2500 logs/",
+      "\u2502   \u251c\u2500\u2500 public/ (6 files)",
+      "\u2502   \u251c\u2500\u2500 src/ (45 files)",
       "\u2502   \u2502   \u251c\u2500\u2500 Blockchain/ (5 files)",
       "\u2502   \u2502   \u251c\u2500\u2500 Commands/ (1 files)",
       "\u2502   \u2502   \u251c\u2500\u2500 Controllers/ (10 files)",
       "\u2502   \u2502   \u251c\u2500\u2500 Exceptions/ (3 files)",
       "\u2502   \u2502   \u251c\u2500\u2500 Middleware/ (4 files)",
       "\u2502   \u2502   \u251c\u2500\u2500 Models/ (1 files)",
-      "\u2502   \u2502   \u251c\u2500\u2500 Services/ (11 files)",
+      "\u2502   \u2502   \u251c\u2500\u2500 Services/ (12 files)",
       "\u2502   \u2502   \u251c\u2500\u2500 Utils/ (5 files)",
       "\u2502   \u2502   \u251c\u2500\u2500 Validators/ (1 files)",
       "\u2502   \u2502   \u2514\u2500\u2500 Workers/ (3 files)",
       "\u2502   \u251c\u2500\u2500 storage/ (1 files)",
       "\u2502   \u2502   \u2514\u2500\u2500 logs/",
-      "\u2502   \u251c\u2500\u2500 tests/ (33 files)",
+      "\u2502   \u251c\u2500\u2500 tests/ (55 files)",
       "\u2502   \u2502   \u251c\u2500\u2500 E2E/ (7 files)",
       "\u2502   \u2502   \u251c\u2500\u2500 Integration/ (6 files)",
       "\u2502   \u2502   \u2502   \u251c\u2500\u2500 API/ (1 files)",
@@ -41,6 +42,7 @@
       "\u2502   \u2502       \u251c\u2500\u2500 Utils/ (2 files)",
       "\u2502   \u2502       \u251c\u2500\u2500 Validators/ (1 files)",
       "\u2502   \u2502       \u2514\u2500\u2500 Workers/ (2 files)",
+      "\u2502   \u251c\u2500\u2500 tmp/",
       "\u2502   \u251c\u2500\u2500 vendor/ (4638 files)",
       "\u2502   \u2502   \u251c\u2500\u2500 bin/",
       "\u2502   \u2502   \u251c\u2500\u2500 brick/ (16 files)",
@@ -535,20 +537,21 @@
       "\u2502   \u2502   \u2514\u2500\u2500 frontend/ (6 files)",
       "\u2502   \u251c\u2500\u2500 scripts/ (7 files)",
       "\u2502   \u2514\u2500\u2500 README.md",
-      "\u251c\u2500\u2500 ui/ (79666 files)",
+      "\u251c\u2500\u2500 ui/ (79349 files)",
       "\u2502   \u251c\u2500\u2500 assets/ (1 files)",
       "\u2502   \u2502   \u2514\u2500\u2500 css/ (1 files)",
       "\u2502   \u251c\u2500\u2500 components/ (26 files)",
       "\u2502   \u2502   \u2514\u2500\u2500 __tests__/ (2 files)",
-      "\u2502   \u251c\u2500\u2500 composables/ (19 files)",
-      "\u2502   \u251c\u2500\u2500 config/ (2 files)",
+      "\u2502   \u251c\u2500\u2500 composables/ (10 files)",
+      "\u2502   \u251c\u2500\u2500 config/ (1 files)",
       "\u2502   \u251c\u2500\u2500 layouts/ (1 files)",
       "\u2502   \u251c\u2500\u2500 middleware/ (1 files)",
+      "\u2502   \u251c\u2500\u2500 modules/",
       "\u2502   \u251c\u2500\u2500 pages/ (3 files)",
       "\u2502   \u251c\u2500\u2500 playwright-report/ (14 files)",
       "\u2502   \u2502   \u2514\u2500\u2500 trace/ (13 files)",
       "\u2502   \u2502       \u2514\u2500\u2500 assets/ (2 files)",
-      "\u2502   \u251c\u2500\u2500 plugins/ (2 files)",
+      "\u2502   \u251c\u2500\u2500 plugins/ (3 files)",
       "\u2502   \u251c\u2500\u2500 public/ (2 files)",
       "\u2502   \u2502   \u251c\u2500\u2500 icons/",
       "\u2502   \u2502   \u2502   \u2514\u2500\u2500 wallets/",
@@ -557,9 +560,10 @@
       "\u2502   \u2502   \u2502       \u251c\u2500\u2500 PNG/",
       "\u2502   \u2502   \u2502       \u2514\u2500\u2500 SVG/",
       "\u2502   \u2502   \u2514\u2500\u2500 swap/ (1 files)",
-      "\u2502   \u251c\u2500\u2500 scripts/ (2 files)",
-      "\u2502   \u251c\u2500\u2500 services/ (2 files)",
-      "\u2502   \u251c\u2500\u2500 stores/ (1 files)",
+      "\u2502   \u251c\u2500\u2500 scripts/ (1 files)",
+      "\u2502   \u251c\u2500\u2500 server/ (2 files)",
+      "\u2502   \u2502   \u2514\u2500\u2500 plugins/ (1 files)",
+      "\u2502   \u251c\u2500\u2500 services/ (1 files)",
       "\u2502   \u251c\u2500\u2500 test/ (1 files)",
       "\u2502   \u251c\u2500\u2500 utils/ (5 files)",
       "\u2502   \u2502   \u2514\u2500\u2500 __tests__/ (1 files)",
@@ -572,8 +576,10 @@
   "documentation_map": {
     "TODO.md": {
       "sections": [
+        "Testing & Code Quality",
         "Frontend",
-        "backend"
+        "**CRITICAL: Centralize Wallet Connection State Management**",
+        "**Other Frontend Issues**"
       ],
       "architecture_hints": []
     },
@@ -596,29 +602,13 @@
       "sections": [
         "CLAUDE.md",
         "Project Overview",
-        "\u2705 RECENT PROGRESS SUMMARY (2025-08-04)",
-        "**Critical Wallet Connection Issues RESOLVED**",
+        "\u2705 RECENT PROGRESS SUMMARY (2025-08-29)",
+        "**Critical AppKit/WalletConnect Integration RESOLVED**",
         "**Current System Status**",
         "**What's Working**",
         "**Next Steps for Development**",
-        "**Files Modified in This Session**",
-        "**Technical Debt Addressed**",
-        "Technology Stack"
-      ],
-      "architecture_hints": []
-    },
-    "CODEBASE_DUPLICATION_ANALYSIS.md": {
-      "sections": [
-        "Codebase Duplication Analysis Report",
-        "Executive Summary",
-        "\ud83d\udd34 CRITICAL DUPLICATIONS (Fix Immediately)",
-        "1. Hash Conversion & Validation Logic",
-        "2. Etherscan/Explorer URL Generation",
-        "3. BC Math Token Calculations  ",
-        "\ud83d\udfe1 HIGH IMPACT DUPLICATIONS (Fix Soon)",
-        "4. Transaction Status Retrieval Logic",
-        "5. Retry Logic Implementation",
-        "6. RPC Call Patterns"
+        "**Files Modified in Recent Sessions**",
+        "**Technical Improvements Completed**"
       ],
       "architecture_hints": []
     },
@@ -634,6 +624,21 @@
         "Test CIRX Transfer (\ud83c\udfaf WORKING!)",
         "\ud83c\udfc6 Breakthrough Technical Solution",
         "Working Transaction Parameters"
+      ],
+      "architecture_hints": []
+    },
+    "backend/TRANSACTION_READINESS.md": {
+      "sections": [
+        "Transaction Readiness Health Check System",
+        "Endpoint",
+        "Purpose",
+        "Response Format",
+        "Success Response (HTTP 200)",
+        "Failure Response (HTTP 503)",
+        "Health Checks Performed",
+        "1. Database Connectivity & Write Capability",
+        "2. Circular Protocol API Connectivity & Authentication",
+        "3. Payment Verification Service Availability"
       ],
       "architecture_hints": []
     },
@@ -681,7 +686,8 @@
     }
   },
   "directory_purposes": {
-    "ui": "API routes and endpoints",
+    "backend": "Test files and test utilities",
+    "ui": "Test files and test utilities",
     "test": "Test files and test utilities",
     "scripts": "Build and utility scripts",
     "testing": "Test files and test utilities",
@@ -724,20 +730,21 @@
     "backend/tests/Unit/Validators": "Test files and test utilities"
   },
   "stats": {
-    "total_files": 227,
-    "total_directories": 765,
+    "total_files": 256,
+    "total_directories": 769,
     "fully_parsed": {
+      "python": 2,
+      "shell": 8,
       "typescript": 11,
-      "javascript": 52,
-      "shell": 7
+      "javascript": 42
     },
     "listed_only": {
-      "json": 11,
+      "json": 12,
       "shell": 2,
-      "php": 95,
+      "php": 129,
       "vue": 29,
+      "html": 7,
       "sql": 2,
-      "html": 6,
       "rs": 6,
       "css": 6
     },
@@ -752,12 +759,136 @@
       "language": "json",
       "parsed": false
     },
+    "build_ui_embeddings.py": {
+      "language": "python",
+      "parsed": true,
+      "imports": [
+        "json",
+        "os",
+        "pathlib",
+        "subprocess"
+      ],
+      "functions": {
+        "get_embedding": {
+          "doc": "Get embedding from Ollama using curl",
+          "signature": "(text)",
+          "called_by": [
+            "main",
+            "search_embeddings"
+          ]
+        },
+        "extract_ui_chunks": {
+          "doc": "Extract code chunks from UI directory",
+          "signature": "()",
+          "called_by": [
+            "main"
+          ]
+        },
+        "main": {
+          "calls": [
+            "extract_ui_chunks",
+            "get_embedding"
+          ],
+          "signature": "()"
+        }
+      },
+      "classes": {},
+      "call_graph": {}
+    },
+    "search_ui_embeddings.py": {
+      "language": "python",
+      "parsed": true,
+      "imports": [
+        "json",
+        "sys",
+        "subprocess",
+        "pathlib"
+      ],
+      "functions": {
+        "get_embedding": {
+          "doc": "Get embedding from Ollama",
+          "signature": "(text)",
+          "called_by": [
+            "main",
+            "search_embeddings"
+          ]
+        },
+        "cosine_similarity": {
+          "doc": "Calculate cosine similarity between two vectors",
+          "signature": "(vec1, vec2)",
+          "called_by": [
+            "search_embeddings",
+            "find_duplicates"
+          ]
+        },
+        "search_embeddings": {
+          "doc": "Search for similar code in embeddings",
+          "calls": [
+            "cosine_similarity",
+            "get_embedding"
+          ],
+          "signature": "(query, top_n=10)",
+          "called_by": [
+            "main"
+          ]
+        },
+        "find_duplicates": {
+          "doc": "Find potentially duplicate/redundant code",
+          "calls": [
+            "cosine_similarity"
+          ],
+          "signature": "(threshold=0.85)",
+          "called_by": [
+            "main"
+          ]
+        },
+        "main": {
+          "calls": [
+            "find_duplicates",
+            "search_embeddings"
+          ],
+          "signature": "()"
+        }
+      },
+      "classes": {},
+      "call_graph": {}
+    },
+    "UI_NEURAL_INDEX.json": {
+      "language": "json",
+      "parsed": false
+    },
     "build.sh": {
       "language": "shell",
       "parsed": false
     },
+    "start-dev.sh": {
+      "language": "shell",
+      "parsed": true,
+      "functions": {
+        "check_port": {
+          "doc": "Function to check if port is in use",
+          "signature": "()"
+        },
+        "cleanup": {
+          "doc": "Function to cleanup on exit",
+          "signature": "()",
+          "called_by": [
+            "monitorTransaction"
+          ]
+        }
+      },
+      "variables": [
+        "BACKEND_PID",
+        "FRONTEND_PID"
+      ],
+      "call_graph": {}
+    },
     "package-lock.json": {
       "language": "json",
+      "parsed": false
+    },
+    "backend/show_schema.php": {
+      "language": "php",
       "parsed": false
     },
     "backend/debug.php": {
@@ -768,9 +899,18 @@
       "language": "php",
       "parsed": false
     },
+    "backend/debug_hash_validation.php": {
+      "language": "php",
+      "parsed": false
+    },
     "backend/PROJECT_INDEX.json": {
       "language": "json",
       "parsed": false
+    },
+    "backend/test_transaction_ready.php": {
+      "language": "php",
+      "parsed": false,
+      "purpose": "Test file"
     },
     "backend/migrate.php": {
       "language": "php",
@@ -797,6 +937,10 @@
       "parsed": false
     },
     "backend/analyze_transaction_failures.php": {
+      "language": "php",
+      "parsed": false
+    },
+    "backend/check_transactions.php": {
       "language": "php",
       "parsed": false
     },
@@ -827,6 +971,11 @@
       "language": "typescript",
       "parsed": false,
       "purpose": "Configuration"
+    },
+    "ui/test-page.html": {
+      "language": "html",
+      "parsed": false,
+      "purpose": "Test file"
     },
     "ui/tailwind.config.js": {
       "language": "javascript",
@@ -2057,124 +2206,57 @@
       ],
       "call_graph": {}
     },
-    "ui/services/priceService.js": {
+    "ui/server/backend-manager.js": {
       "language": "javascript",
       "parsed": true,
+      "imports": [
+        "child_process",
+        "fs",
+        "path",
+        "url"
+      ],
       "functions": {
-        "fetchCIRXPrice": {
+        "checkBackendHealth": {
           "signature": "async ()",
           "called_by": [
-            "getTokenPrices",
-            "testCirxFetch"
+            "startBackendProcess",
+            "ensureBackendRunning"
           ]
         },
-        "fetchCoinGeckoPrices": {
-          "signature": "async ()",
-          "called_by": [
-            "getTokenPrices"
-          ]
-        },
-        "getFallbackPrices": {
-          "signature": "()",
-          "called_by": [
-            "getTokenPrices"
-          ]
-        },
-        "getTokenPrices": {
+        "startBackendProcess": {
           "calls": [
-            "fetchCIRXPrice",
-            "fetchCoinGeckoPrices",
-            "getFallbackPrices"
+            "checkBackendHealth",
+            "startBackendProcess"
           ],
           "signature": "async ()",
           "called_by": [
-            "getTokenPrice",
-            "refreshPrices",
-            "getCirxPriceInfo"
+            "startBackendProcess",
+            "ensureBackendRunning"
           ]
         },
-        "getTokenPrice": {
+        "ensureBackendRunning": {
           "calls": [
-            "getTokenPrices"
-          ],
-          "signature": "async (tokenSymbol)",
-          "called_by": [
-            "calculateQuote",
-            "calculateReverseQuote",
-            "validateSwap",
-            "qualifiesForOTC"
-          ]
-        },
-        "getPriceSource": "()",
-        "refreshPrices": {
-          "calls": [
-            "getTokenPrices"
+            "checkBackendHealth",
+            "startBackendProcess"
           ],
           "signature": "async ()"
         },
-        "getCacheInfo": {
-          "signature": "()",
-          "called_by": [
-            "getCirxPriceInfo"
-          ]
-        },
-        "getCirxPriceInfo": {
-          "calls": [
-            "getCacheInfo",
-            "getTokenPrices"
-          ],
-          "signature": "async ()"
-        },
-        "testCirxFetch": {
-          "calls": [
-            "fetchCIRXPrice"
-          ],
-          "signature": "async ()"
-        }
+        "stopBackend": "()"
       },
       "classes": {},
-      "constants": {
-        "PRICE_CACHE_DURATION": "value"
-      },
       "variables": [
-        "priceCache",
-        "lastFetch",
-        "fetchCIRXPrice",
-        "exchanges",
-        "prices",
+        "backendProcess",
+        "isBackendStarting",
         "controller",
         "timeoutId",
         "response",
         "data",
-        "price",
-        "sortedPrices",
-        "median",
-        "mean",
-        "threshold",
-        "filteredPrices",
-        "minPrice",
-        "diff",
-        "gatePrice",
-        "fetchCoinGeckoPrices",
-        "getFallbackPrices",
-        "getTokenPrices",
-        "now",
-        "majorTokenPrices",
-        "cirxPriceInUsdt",
-        "usdtPrice",
-        "cirxPriceInUsd",
-        "allPrices",
-        "fallbackPrices",
-        "getTokenPrice",
-        "getPriceSource",
-        "refreshPrices",
-        "getCacheInfo",
-        "ageMs",
-        "ageMinutes",
-        "getCirxPriceInfo",
-        "cacheInfo",
-        "testCirxFetch",
-        "cirxPrice"
+        "backendPath",
+        "indexPath",
+        "phpCommands",
+        "output",
+        "attempts",
+        "isRunning"
       ],
       "call_graph": {}
     },
@@ -2182,15 +2264,493 @@
       "language": "vue",
       "parsed": false
     },
-    "ui/composables/useOtcConfig.js": {
+    "ui/composables/useRTradingViewLite.js": {
+      "language": "javascript",
+      "parsed": false
+    },
+    "ui/composables/useRBackendAPIs.js": {
       "language": "javascript",
       "parsed": true,
-      "purpose": "Configuration",
       "imports": [
         "vue"
       ],
       "functions": {
+        "useBackendApi": "()",
+        "useAutoWorker": {
+          "calls": [
+            "processTransactions",
+            "stopAutoProcessing"
+          ],
+          "signature": "()"
+        },
+        "processTransactions": {
+          "signature": "async ()",
+          "called_by": [
+            "useAutoWorker",
+            "startAutoProcessing",
+            "triggerManualProcess"
+          ]
+        },
+        "startAutoProcessing": {
+          "calls": [
+            "processTransactions"
+          ],
+          "signature": "()"
+        },
+        "stopAutoProcessing": {
+          "signature": "()",
+          "called_by": [
+            "useAutoWorker"
+          ]
+        },
+        "getWorkerStatus": "()",
+        "triggerManualProcess": {
+          "calls": [
+            "processTransactions"
+          ],
+          "signature": "async ()"
+        },
+        "getHeaders": {
+          "signature": "()",
+          "called_by": [
+            "initiateSwap",
+            "getTransactionStatus",
+            "getCirxBalance"
+          ]
+        },
+        "handleApiResponse": {
+          "signature": "async (response)",
+          "called_by": [
+            "initiateSwap",
+            "getTransactionStatus",
+            "getCirxBalance"
+          ]
+        },
+        "initiateSwap": {
+          "calls": [
+            "getHeaders",
+            "handleApiResponse"
+          ],
+          "signature": "async (swapData)"
+        },
+        "getTransactionStatus": {
+          "calls": [
+            "getHeaders",
+            "handleApiResponse"
+          ],
+          "signature": "async (swapId)"
+        },
+        "getCirxBalance": {
+          "calls": [
+            "getHeaders",
+            "handleApiResponse"
+          ],
+          "signature": "async (address)"
+        },
+        "calculateCirxQuote": "(paymentAmount, paymentToken, isOTC = false)",
+        "getDepositAddress": "(paymentToken, paymentChain = 'ethereum')",
+        "validateCircularAddress": "(address)",
+        "createSwapTransaction": "(paymentTxId, paymentChain, cirxRecipientAddress, amountPaid, paymentToken)"
+      },
+      "classes": {},
+      "constants": {
+        "API_BASE_URL": "value"
+      },
+      "variables": [
+        "useAutoWorker",
+        "isProcessing",
+        "lastProcessed",
+        "processInterval",
+        "errorCount",
+        "maxErrors",
+        "config",
+        "processTransactions",
+        "apiConfig",
+        "response",
+        "result",
+        "totalProcessed",
+        "startAutoProcessing",
+        "backoffInterval",
+        "stopAutoProcessing",
+        "getWorkerStatus",
+        "triggerManualProcess",
+        "route",
+        "autoStartPages",
+        "runtimeConfig",
+        "isLoading",
+        "lastError",
+        "getHeaders",
+        "headers",
+        "handleApiResponse",
+        "errorData",
+        "errorMessage",
+        "initiateSwap",
+        "requiredFields",
+        "missing",
+        "fullUrl",
+        "getTransactionStatus",
+        "data",
+        "getCirxBalance",
+        "calculateCirxQuote",
+        "amount",
+        "tokenPrices",
+        "tokenPrice",
+        "platformFeeCirx",
+        "platformFeeUsd",
+        "usdAmount",
+        "grossCirxAmount",
+        "discountPercentage",
+        "discountMultiplier",
+        "netCirxAmount",
+        "totalPaymentRequired",
+        "getDepositAddress",
+        "tokenAddressMap",
+        "chainAddressMap",
+        "validateCircularAddress",
+        "circularAddressRegex",
+        "createSwapTransaction"
+      ],
+      "interfaces": {
+        "return": {
+          "doc": "Auto Worker Composable"
+        }
+      },
+      "call_graph": {}
+    },
+    "ui/composables/useTransactionData.js": {
+      "language": "javascript",
+      "parsed": true,
+      "imports": [
+        "vue",
+        "./useRBackendAPIs",
+        "~/utils/toast.js"
+      ],
+      "functions": {
+        "useTransactionStatus": "()",
+        "trackTransaction": {
+          "calls": [
+            "startPolling"
+          ],
+          "signature": "(transactionId, options = {})"
+        },
+        "startPolling": {
+          "calls": [
+            "apiCall",
+            "pollStatus",
+            "stopPolling",
+            "updateTransactionStatus"
+          ],
+          "signature": "(transactionId, interval = 3000)",
+          "called_by": [
+            "trackTransaction"
+          ]
+        },
+        "stopPolling": {
+          "signature": "(transactionId)",
+          "called_by": [
+            "startPolling",
+            "removeTransaction",
+            "pollStatus"
+          ]
+        },
+        "updateTransactionStatus": {
+          "calls": [
+            "showPhaseNotification"
+          ],
+          "signature": "(transactionId, statusData)",
+          "called_by": [
+            "startPolling",
+            "pollStatus"
+          ]
+        },
+        "showPhaseNotification": {
+          "calls": [
+            "getNotificationTimeout"
+          ],
+          "signature": "(phase, statusData)",
+          "called_by": [
+            "updateTransactionStatus"
+          ]
+        },
+        "getNotificationTimeout": {
+          "signature": "(phase)",
+          "called_by": [
+            "showPhaseNotification"
+          ]
+        },
+        "getTransaction": "(transactionId)",
+        "removeTransaction": {
+          "calls": [
+            "stopPolling"
+          ],
+          "signature": "(transactionId)"
+        },
+        "useTransactionHistory": "()",
+        "apiCall": {
+          "signature": "async (endpoint, options = {})",
+          "called_by": [
+            "startPolling",
+            "fetchTransactionHistory",
+            "fetchVestingPositions",
+            "fetchUserStats",
+            "pollStatus"
+          ]
+        },
+        "withRetry": {
+          "signature": "async (operation, maxRetries = 3)",
+          "called_by": [
+            "fetchTransactionHistory"
+          ]
+        },
+        "fetchTransactionHistory": {
+          "calls": [
+            "apiCall",
+            "getUserFriendlyError",
+            "withRetry"
+          ],
+          "signature": "async (userAddress, options = {})",
+          "called_by": [
+            "fetchUserData"
+          ]
+        },
+        "getUserFriendlyError": {
+          "signature": "(error)",
+          "called_by": [
+            "fetchTransactionHistory"
+          ]
+        },
+        "fetchVestingPositions": {
+          "calls": [
+            "apiCall"
+          ],
+          "signature": "async (userAddress)",
+          "called_by": [
+            "fetchUserData"
+          ]
+        },
+        "fetchUserStats": {
+          "calls": [
+            "apiCall"
+          ],
+          "signature": "async (userAddress)",
+          "called_by": [
+            "fetchUserData"
+          ]
+        },
+        "fetchUserData": {
+          "calls": [
+            "fetchTransactionHistory",
+            "fetchUserStats",
+            "fetchVestingPositions"
+          ],
+          "signature": "async (userAddress)"
+        },
+        "formatTransaction": {
+          "calls": [
+            "getTokenSymbol"
+          ],
+          "signature": "(tx)"
+        },
+        "formatVestingPosition": "(position)",
+        "getTokenSymbol": {
+          "signature": "(tokenAddress)",
+          "called_by": [
+            "formatTransaction"
+          ]
+        },
+        "formatUserStats": "(stats)",
+        "checkIndexerHealth": {
+          "signature": "async ()",
+          "called_by": [
+            "checkServiceStatus"
+          ]
+        },
+        "checkServiceStatus": {
+          "calls": [
+            "checkIndexerHealth"
+          ],
+          "signature": "async ()"
+        },
+        "pollStatus": {
+          "calls": [
+            "apiCall",
+            "stopPolling",
+            "updateTransactionStatus"
+          ],
+          "signature": "async ()",
+          "called_by": [
+            "startPolling"
+          ]
+        }
+      },
+      "classes": {
+        "for": {
+          "methods": {
+            "constructor": {
+              "signature": "(message, status, code, requestId, endpoint, originalError)",
+              "called_by": [
+                "CE",
+                "po"
+              ]
+            },
+            "__init__": "(message, status, code, requestId, endpoint, originalError)"
+          }
+        },
+        "ApiError": {
+          "methods": {
+            "constructor": {
+              "signature": "(message, status, code, requestId, endpoint, originalError)",
+              "called_by": [
+                "CE",
+                "po"
+              ]
+            },
+            "__init__": "(message, status, code, requestId, endpoint, originalError)"
+          },
+          "extends": "Error",
+          "type": "exception"
+        }
+      },
+      "constants": {
+        "INDEXER_API_BASE": "str"
+      },
+      "variables": [
+        "useTransactionHistory",
+        "isLoading",
+        "error",
+        "transactions",
+        "vestingPositions",
+        "userStats",
+        "apiCall",
+        "controller",
+        "timeoutId",
+        "response",
+        "withRetry",
+        "attempt",
+        "baseDelay",
+        "delay",
+        "fetchTransactionHistory",
+        "queryParams",
+        "endpoint",
+        "data",
+        "userFriendlyError",
+        "getUserFriendlyError",
+        "fetchVestingPositions",
+        "fetchUserStats",
+        "fetchUserData",
+        "formatTransaction",
+        "formatVestingPosition",
+        "getTokenSymbol",
+        "tokenMap",
+        "formatUserStats",
+        "checkIndexerHealth",
+        "serviceStatus",
+        "checkServiceStatus",
+        "isHealthy",
+        "formattedTransactions",
+        "formattedVestingPositions",
+        "formattedUserStats",
+        "hasTransactions",
+        "hasVestingPositions",
+        "hasAnyData",
+        "activePolling",
+        "pollingIntervals",
+        "transactionPhases",
+        "transactionState",
+        "transaction",
+        "pollStatus",
+        "statusData",
+        "intervalId",
+        "previousPhase",
+        "phaseConfig",
+        "toast",
+        "notification",
+        "allTransactions",
+        "activeTransactions"
+      ],
+      "call_graph": {}
+    },
+    "ui/composables/useRFormattedNumbers.js": {
+      "language": "javascript",
+      "parsed": true,
+      "imports": [
+        "vue",
+        "./useRPriceData.js",
+        "viem",
+        "~/stores/wallet"
+      ],
+      "functions": {
+        "useNumberInput": {
+          "calls": [
+            "addCommas",
+            "handleBlur",
+            "handleFocus",
+            "handleInput",
+            "handleKeypress",
+            "handlePaste",
+            "removeCommas"
+          ],
+          "signature": "(initialValue = '', options = {})"
+        },
+        "addCommas": {
+          "signature": "(value)",
+          "called_by": [
+            "useNumberInput",
+            "handleInput",
+            "handleBlur"
+          ]
+        },
+        "removeCommas": {
+          "signature": "(value)",
+          "called_by": [
+            "useNumberInput",
+            "handleInput"
+          ]
+        },
+        "handleInput": {
+          "calls": [
+            "addCommas",
+            "removeCommas"
+          ],
+          "signature": "(inputValue)",
+          "called_by": [
+            "useNumberInput",
+            "handlePaste"
+          ]
+        },
+        "handleFocus": {
+          "signature": "()",
+          "called_by": [
+            "useNumberInput"
+          ]
+        },
+        "handleBlur": {
+          "calls": [
+            "addCommas"
+          ],
+          "signature": "()",
+          "called_by": [
+            "useNumberInput"
+          ]
+        },
+        "handleKeypress": {
+          "signature": "(event)",
+          "called_by": [
+            "useNumberInput"
+          ]
+        },
+        "handlePaste": {
+          "calls": [
+            "handleInput"
+          ],
+          "signature": "(event)",
+          "called_by": [
+            "useNumberInput"
+          ]
+        },
         "useOtcConfig": "()",
+        "useSwapLogic": "()",
+        "useSwapService": "()",
         "fetchConfig": {
           "calls": [
             "validateConfig"
@@ -2235,54 +2795,123 @@
           "called_by": [
             "reconnect"
           ]
-        }
-      },
-      "classes": {},
-      "variables": [
-        "defaultConfig",
-        "otcConfig",
-        "isLoading",
-        "lastUpdated",
-        "error",
-        "discountTiers",
-        "vestingPeriod",
-        "fees",
-        "isEnabled",
-        "minimumOtcAmount",
-        "displayRange",
-        "tiers",
-        "minDiscount",
-        "maxDiscount",
-        "fetchConfig",
-        "response",
-        "config",
-        "validatedConfig",
-        "validateConfig",
-        "validated",
-        "validTiers",
-        "validFees",
-        "resetToDefault",
-        "updateConfig",
-        "validatedUpdates",
-        "getDiscountForAmount",
-        "qualifiesForOtc",
-        "getTierInfo",
-        "discount",
-        "tier",
-        "initialize"
-      ],
-      "call_graph": {}
-    },
-    "ui/composables/useSwapService.js": {
-      "language": "javascript",
-      "parsed": true,
-      "imports": [
-        "vue",
-        "viem",
-        "~/stores/wallet"
-      ],
-      "functions": {
-        "useSwapService": "()",
+        },
+        "safeDiv": {
+          "signature": "(a, b, fallback = 0)",
+          "called_by": [
+            "calculateQuote",
+            "calculateReverseQuote"
+          ]
+        },
+        "safeMul": {
+          "signature": "(a, b, fallback = 0)",
+          "called_by": [
+            "calculateQuote",
+            "calculateReverseQuote"
+          ]
+        },
+        "safePercentage": {
+          "signature": "(value, defaultValue = 0)",
+          "called_by": [
+            "calculateQuote",
+            "calculateReverseQuote"
+          ]
+        },
+        "validateNumber": {
+          "signature": "(value, name = 'value')",
+          "called_by": [
+            "calculateQuote",
+            "calculateReverseQuote"
+          ]
+        },
+        "initializePrices": {
+          "signature": "async ()",
+          "called_by": [
+            "refreshPrices"
+          ]
+        },
+        "calculateDiscount": {
+          "signature": "(usdAmount)",
+          "called_by": [
+            "calculateQuote",
+            "calculateReverseQuote"
+          ]
+        },
+        "normalizeTokenSymbol": {
+          "signature": "(tokenSymbol)",
+          "called_by": [
+            "getTokenPrice"
+          ]
+        },
+        "getTokenPrice": {
+          "calls": [
+            "normalizeTokenSymbol"
+          ],
+          "signature": "(tokenSymbol)",
+          "called_by": [
+            "calculateQuote",
+            "calculateReverseQuote",
+            "validateSwap",
+            "qualifiesForOTC"
+          ]
+        },
+        "refreshPrices": {
+          "calls": [
+            "initializePrices"
+          ],
+          "signature": "async ()"
+        },
+        "calculateQuote": {
+          "calls": [
+            "calculateDiscount",
+            "formatNumber",
+            "getTokenPrice",
+            "safeDiv",
+            "safeMul",
+            "safePercentage",
+            "validateNumber"
+          ],
+          "signature": "(inputAmount, inputToken, isOTC = false, selectedTier = null)",
+          "called_by": [
+            "calculateReverseQuote"
+          ]
+        },
+        "calculateReverseQuote": {
+          "calls": [
+            "calculateDiscount",
+            "calculateQuote",
+            "getTokenPrice",
+            "safeDiv",
+            "safeMul",
+            "safePercentage",
+            "validateNumber"
+          ],
+          "signature": "(cirxAmount, targetToken, isOTC = false, selectedTier = null)"
+        },
+        "validateSwap": {
+          "calls": [
+            "getTokenPrice"
+          ],
+          "signature": "(inputAmount, inputToken, recipientAddress = null, isConnected = false)"
+        },
+        "calculateMaxAmount": "(balance, tokenSymbol)",
+        "formatNumber": {
+          "signature": "(value, decimals = 2)",
+          "called_by": [
+            "formatTokenAmount",
+            "formatCurrency",
+            "calculateQuote"
+          ]
+        },
+        "formatUsd": "(value)",
+        "getAvailableTokens": "(walletChain)",
+        "qualifiesForOTC": {
+          "calls": [
+            "getTokenPrice"
+          ],
+          "signature": "(inputAmount, inputToken)"
+        },
+        "getEstimatedTime": "(isOTC, walletChain)",
         "validateConnection": {
           "signature": "()",
           "called_by": [
@@ -2412,6 +3041,94 @@
         "CONTRACT_CONFIG": "collection"
       },
       "variables": [
+        "rawValue",
+        "displayValue",
+        "cleaned",
+        "parts",
+        "integerPart",
+        "decimalPart",
+        "withCommas",
+        "cleanValue",
+        "char",
+        "pastedText",
+        "defaultConfig",
+        "otcConfig",
+        "isLoading",
+        "lastUpdated",
+        "error",
+        "discountTiers",
+        "vestingPeriod",
+        "fees",
+        "isEnabled",
+        "minimumOtcAmount",
+        "displayRange",
+        "tiers",
+        "minDiscount",
+        "maxDiscount",
+        "fetchConfig",
+        "response",
+        "config",
+        "validatedConfig",
+        "validateConfig",
+        "validated",
+        "validTiers",
+        "validFees",
+        "resetToDefault",
+        "updateConfig",
+        "validatedUpdates",
+        "getDiscountForAmount",
+        "qualifiesForOtc",
+        "getTierInfo",
+        "discount",
+        "tier",
+        "initialize",
+        "safeDiv",
+        "result",
+        "safeMul",
+        "safePercentage",
+        "num",
+        "validateNumber",
+        "tokenPrices",
+        "priceSource",
+        "initializePrices",
+        "livePrices",
+        "calculateDiscount",
+        "normalizeTokenSymbol",
+        "getTokenPrice",
+        "normalizedSymbol",
+        "price",
+        "refreshPrices",
+        "calculateQuote",
+        "inputValue",
+        "inputTokenPrice",
+        "cirxPrice",
+        "totalUsdValue",
+        "feeRate",
+        "feeAmount",
+        "amountAfterFee",
+        "usdAfterFee",
+        "cirxReceived",
+        "multiplier",
+        "exchangeRate",
+        "calculateReverseQuote",
+        "cirxValue",
+        "targetTokenPrice",
+        "usdValue",
+        "discountMultiplier",
+        "feeMultiplier",
+        "denominator",
+        "forwardQuote",
+        "validateSwap",
+        "errors",
+        "calculateMaxAmount",
+        "availableBalance",
+        "reserveAmount",
+        "maxAmount",
+        "formatNumber",
+        "formatUsd",
+        "getAvailableTokens",
+        "qualifiesForOTC",
+        "getEstimatedTime",
         "walletStore",
         "runtimeConfig",
         "isDevelopment",
@@ -2436,13 +3153,9 @@
         "contractAddress",
         "getOTCQuote",
         "baseAmount",
-        "usdValue",
-        "discount",
-        "discountMultiplier",
         "cirxAmount",
         "executeLiquidSwap",
         "paymentAddress",
-        "response",
         "slippageMultiplier",
         "adjustedMinOut",
         "minOutWei",
@@ -2453,386 +3166,34 @@
       ],
       "interfaces": {
         "return": {
-          "doc": "Swap service for backend API integration"
+          "doc": "useNumberInput Composable - Basic version with comma formatting"
         }
       },
       "call_graph": {}
     },
-    "ui/composables/useAutoWorker.js": {
+    "ui/composables/useRCallToAction.js": {
       "language": "javascript",
       "parsed": true,
       "imports": [
         "vue"
       ],
       "functions": {
-        "useAutoWorker": {
-          "calls": [
-            "processTransactions",
-            "stopAutoProcessing"
-          ],
-          "signature": "()"
-        },
-        "processTransactions": {
-          "signature": "async ()",
-          "called_by": [
-            "useAutoWorker",
-            "startAutoProcessing",
-            "triggerManualProcess"
-          ]
-        },
-        "startAutoProcessing": {
-          "calls": [
-            "processTransactions"
-          ],
-          "signature": "()"
-        },
-        "stopAutoProcessing": {
-          "signature": "()",
-          "called_by": [
-            "useAutoWorker"
-          ]
-        },
-        "getWorkerStatus": "()",
-        "triggerManualProcess": {
-          "calls": [
-            "processTransactions"
-          ],
-          "signature": "async ()"
-        }
+        "useSwapButtonState": "({ walletConnected, recipientAddress, recipientAddressError, inputAmount, inputBalance, ethBalance, networkFeeEth, inputToken, activeTab, loading, canPurchase, quote })",
+        "handleButtonClick": "(event, emit)"
       },
       "classes": {},
       "variables": [
-        "useAutoWorker",
-        "isProcessing",
-        "lastProcessed",
-        "processInterval",
-        "errorCount",
-        "maxErrors",
-        "config",
-        "processTransactions",
-        "apiConfig",
-        "response",
-        "result",
-        "totalProcessed",
-        "startAutoProcessing",
-        "backoffInterval",
-        "stopAutoProcessing",
-        "getWorkerStatus",
-        "triggerManualProcess",
-        "route",
-        "autoStartPages"
-      ],
-      "call_graph": {}
-    },
-    "ui/composables/useTransactionHistory.js": {
-      "language": "javascript",
-      "parsed": true,
-      "functions": {
-        "useTransactionHistory": "()",
-        "apiCall": {
-          "signature": "async (endpoint, options = {})",
-          "called_by": [
-            "fetchTransactionHistory",
-            "fetchVestingPositions",
-            "fetchUserStats"
-          ]
-        },
-        "withRetry": {
-          "signature": "async (operation, maxRetries = 3)",
-          "called_by": [
-            "fetchTransactionHistory"
-          ]
-        },
-        "fetchTransactionHistory": {
-          "calls": [
-            "apiCall",
-            "getUserFriendlyError",
-            "withRetry"
-          ],
-          "signature": "async (userAddress, options = {})",
-          "called_by": [
-            "fetchUserData"
-          ]
-        },
-        "getUserFriendlyError": {
-          "signature": "(error)",
-          "called_by": [
-            "fetchTransactionHistory"
-          ]
-        },
-        "fetchVestingPositions": {
-          "calls": [
-            "apiCall"
-          ],
-          "signature": "async (userAddress)",
-          "called_by": [
-            "fetchUserData"
-          ]
-        },
-        "fetchUserStats": {
-          "calls": [
-            "apiCall"
-          ],
-          "signature": "async (userAddress)",
-          "called_by": [
-            "fetchUserData"
-          ]
-        },
-        "fetchUserData": {
-          "calls": [
-            "fetchTransactionHistory",
-            "fetchUserStats",
-            "fetchVestingPositions"
-          ],
-          "signature": "async (userAddress)"
-        },
-        "formatTransaction": {
-          "calls": [
-            "getTokenSymbol"
-          ],
-          "signature": "(tx)"
-        },
-        "formatVestingPosition": "(position)",
-        "getTokenSymbol": {
-          "signature": "(tokenAddress)",
-          "called_by": [
-            "formatTransaction"
-          ]
-        },
-        "formatUserStats": "(stats)",
-        "checkIndexerHealth": {
-          "signature": "async ()",
-          "called_by": [
-            "checkServiceStatus"
-          ]
-        },
-        "checkServiceStatus": {
-          "calls": [
-            "checkIndexerHealth"
-          ],
-          "signature": "async ()"
-        }
-      },
-      "classes": {
-        "for": {
-          "methods": {
-            "constructor": {
-              "signature": "(message, status, code, requestId, endpoint, originalError)",
-              "called_by": [
-                "po",
-                "CE"
-              ]
-            },
-            "__init__": "(message, status, code, requestId, endpoint, originalError)"
-          }
-        },
-        "ApiError": {
-          "methods": {
-            "constructor": {
-              "signature": "(message, status, code, requestId, endpoint, originalError)",
-              "called_by": [
-                "po",
-                "CE"
-              ]
-            },
-            "__init__": "(message, status, code, requestId, endpoint, originalError)"
-          },
-          "extends": "Error",
-          "type": "exception"
-        }
-      },
-      "constants": {
-        "INDEXER_API_BASE": "str"
-      },
-      "variables": [
-        "useTransactionHistory",
-        "isLoading",
-        "error",
-        "transactions",
-        "vestingPositions",
-        "userStats",
-        "apiCall",
-        "controller",
-        "timeoutId",
-        "response",
-        "withRetry",
-        "attempt",
-        "baseDelay",
-        "delay",
-        "fetchTransactionHistory",
-        "queryParams",
-        "endpoint",
-        "data",
-        "userFriendlyError",
-        "getUserFriendlyError",
-        "fetchVestingPositions",
-        "fetchUserStats",
-        "fetchUserData",
-        "formatTransaction",
-        "formatVestingPosition",
-        "getTokenSymbol",
-        "tokenMap",
-        "formatUserStats",
-        "checkIndexerHealth",
-        "serviceStatus",
-        "checkServiceStatus",
-        "isHealthy",
-        "formattedTransactions",
-        "formattedVestingPositions",
-        "formattedUserStats",
-        "hasTransactions",
-        "hasVestingPositions",
-        "hasAnyData"
-      ],
-      "call_graph": {}
-    },
-    "ui/composables/useTransactionStatus.js": {
-      "language": "javascript",
-      "parsed": true,
-      "imports": [
-        "vue",
-        "./useBackendApi",
-        "~/utils/toast.js"
-      ],
-      "functions": {
-        "useTransactionStatus": "()",
-        "trackTransaction": {
-          "calls": [
-            "startPolling"
-          ],
-          "signature": "(transactionId, options = {})"
-        },
-        "startPolling": {
-          "calls": [
-            "pollStatus",
-            "stopPolling",
-            "updateTransactionStatus"
-          ],
-          "signature": "(transactionId, interval = 3000)",
-          "called_by": [
-            "trackTransaction"
-          ]
-        },
-        "stopPolling": {
-          "signature": "(transactionId)",
-          "called_by": [
-            "startPolling",
-            "removeTransaction",
-            "pollStatus"
-          ]
-        },
-        "updateTransactionStatus": {
-          "calls": [
-            "showPhaseNotification"
-          ],
-          "signature": "(transactionId, statusData)",
-          "called_by": [
-            "startPolling",
-            "pollStatus"
-          ]
-        },
-        "showPhaseNotification": {
-          "calls": [
-            "getNotificationTimeout"
-          ],
-          "signature": "(phase, statusData)",
-          "called_by": [
-            "updateTransactionStatus"
-          ]
-        },
-        "getNotificationTimeout": {
-          "signature": "(phase)",
-          "called_by": [
-            "showPhaseNotification"
-          ]
-        },
-        "getTransaction": "(transactionId)",
-        "removeTransaction": {
-          "calls": [
-            "stopPolling"
-          ],
-          "signature": "(transactionId)"
-        },
-        "pollStatus": {
-          "calls": [
-            "stopPolling",
-            "updateTransactionStatus"
-          ],
-          "signature": "async ()",
-          "called_by": [
-            "startPolling"
-          ]
-        }
-      },
-      "classes": {},
-      "variables": [
-        "transactions",
-        "activePolling",
-        "pollingIntervals",
-        "transactionPhases",
-        "transactionState",
-        "transaction",
-        "pollStatus",
-        "response",
-        "statusData",
-        "intervalId",
-        "previousPhase",
-        "phaseConfig",
-        "toast",
-        "notification",
-        "allTransactions",
-        "activeTransactions"
-      ],
-      "call_graph": {}
-    },
-    "ui/composables/useCookieConsent.js": {
-      "language": "javascript",
-      "parsed": true,
-      "functions": {
-        "useCookieConsent": {
-          "calls": [
-            "hasConsent"
-          ],
-          "signature": "()"
-        },
-        "hasConsent": {
-          "signature": "()",
-          "called_by": [
-            "useCookieConsent",
-            "hasAnalyticsConsent",
-            "getConsentDetails"
-          ]
-        },
-        "hasAnalyticsConsent": {
-          "calls": [
-            "hasConsent"
-          ],
-          "signature": "()"
-        },
-        "setConsent": "(level)",
-        "clearConsent": "()",
-        "getConsentDetails": {
-          "calls": [
-            "hasConsent"
-          ],
-          "signature": "()"
-        }
-      },
-      "classes": {},
-      "variables": [
-        "useCookieConsent",
-        "hasConsent",
-        "consent",
-        "consentData",
-        "oneYear",
-        "cookieConsent",
-        "hasAnalyticsConsent",
-        "consentLevel",
-        "setConsent",
-        "expires",
-        "clearConsent",
-        "getConsentDetails",
-        "level"
+        "buttonType",
+        "buttonText",
+        "hasAmount",
+        "amountNum",
+        "tokenBal",
+        "ethBal",
+        "feeEth",
+        "discount",
+        "buttonClasses",
+        "isButtonDisabled",
+        "handleButtonClick"
       ],
       "call_graph": {}
     },
@@ -2927,311 +3288,23 @@
       ],
       "call_graph": {}
     },
-    "ui/composables/useBackendApi.js": {
+    "ui/composables/useRPriceData.js": {
       "language": "javascript",
       "parsed": true,
       "imports": [
         "vue"
       ],
       "functions": {
-        "useBackendApi": "()",
-        "getHeaders": {
-          "signature": "()",
-          "called_by": [
-            "initiateSwap",
-            "getTransactionStatus",
-            "getCirxBalance"
-          ]
-        },
-        "handleApiResponse": {
-          "signature": "async (response)",
-          "called_by": [
-            "initiateSwap",
-            "getTransactionStatus",
-            "getCirxBalance"
-          ]
-        },
-        "initiateSwap": {
+        "useAggregatePriceFeed": {
           "calls": [
-            "getHeaders",
-            "handleApiResponse"
+            "fetchAggregatedData",
+            "getMarketData",
+            "startPriceUpdates",
+            "stopPriceUpdates"
           ],
-          "signature": "async (swapData)"
+          "signature": "()"
         },
-        "getTransactionStatus": {
-          "calls": [
-            "getHeaders",
-            "handleApiResponse"
-          ],
-          "signature": "async (swapId)"
-        },
-        "getCirxBalance": {
-          "calls": [
-            "getHeaders",
-            "handleApiResponse"
-          ],
-          "signature": "async (address)"
-        },
-        "calculateCirxQuote": "(paymentAmount, paymentToken, isOTC = false)",
-        "getDepositAddress": "(paymentToken, paymentChain = 'ethereum')",
-        "validateCircularAddress": "(address)",
-        "createSwapTransaction": "(paymentTxId, paymentChain, cirxRecipientAddress, amountPaid, paymentToken)"
-      },
-      "classes": {},
-      "constants": {
-        "API_BASE_URL": "value"
-      },
-      "variables": [
-        "runtimeConfig",
-        "isLoading",
-        "lastError",
-        "getHeaders",
-        "headers",
-        "handleApiResponse",
-        "errorData",
-        "errorMessage",
-        "initiateSwap",
-        "requiredFields",
-        "missing",
-        "fullUrl",
-        "response",
-        "result",
-        "getTransactionStatus",
-        "data",
-        "getCirxBalance",
-        "calculateCirxQuote",
-        "amount",
-        "tokenPrices",
-        "tokenPrice",
-        "platformFeeCirx",
-        "platformFeeUsd",
-        "usdAmount",
-        "grossCirxAmount",
-        "discountPercentage",
-        "discountMultiplier",
-        "netCirxAmount",
-        "totalPaymentRequired",
-        "getDepositAddress",
-        "tokenAddressMap",
-        "chainAddressMap",
-        "validateCircularAddress",
-        "circularAddressRegex",
-        "createSwapTransaction"
-      ],
-      "interfaces": {
-        "return": {
-          "doc": "Backend API Integration for CIRX OTC Platform"
-        }
-      },
-      "call_graph": {}
-    },
-    "ui/composables/useSwapButtonState.js": {
-      "language": "javascript",
-      "parsed": true,
-      "imports": [
-        "vue"
-      ],
-      "functions": {
-        "useSwapButtonState": "({ walletConnected, recipientAddress, recipientAddressError, inputAmount, inputBalance, ethBalance, networkFeeEth, inputToken, activeTab, loading, canPurchase, quote })",
-        "handleButtonClick": "(event, emit)"
-      },
-      "classes": {},
-      "variables": [
-        "buttonType",
-        "buttonText",
-        "hasAmount",
-        "amountNum",
-        "tokenBal",
-        "ethBal",
-        "feeEth",
-        "discount",
-        "buttonClasses",
-        "isButtonDisabled",
-        "handleButtonClick"
-      ],
-      "call_graph": {}
-    },
-    "ui/composables/useRealTimeTransactions.js": {
-      "language": "javascript",
-      "parsed": true,
-      "imports": [
-        "vue",
-        "./useIrohNetwork"
-      ],
-      "functions": {
-        "return": "()",
-        "useRealTimeTransactions": "()",
-        "subscribeToTransaction": {
-          "calls": [
-            "handleTransactionUpdate"
-          ],
-          "signature": "(transactionId, callback)",
-          "called_by": [
-            "monitorTransaction"
-          ]
-        },
-        "handleTransactionUpdate": {
-          "signature": "(update)",
-          "called_by": [
-            "subscribeToTransaction"
-          ]
-        },
-        "getTransaction": "async (transactionId)",
-        "monitorTransaction": {
-          "calls": [
-            "cleanup",
-            "subscribeToTransaction"
-          ],
-          "signature": "(transactionId, options = {})"
-        },
-        "cleanup": {
-          "signature": "()",
-          "called_by": [
-            "monitorTransaction"
-          ]
-        },
-        "broadcastTransactionEvent": "async (transactionId, eventType, data = {})",
-        "getAllTransactions": "()",
-        "clearCache": "()",
-        "getCachedTransaction": "(transactionId)",
-        "updateCachedTransaction": "(transactionId, updates)",
-        "isMonitoring": "(transactionId)",
-        "getMonitoringStats": "()"
-      },
-      "classes": {},
-      "variables": [
-        "useRealTimeTransactions",
-        "transactions",
-        "subscriptions",
-        "updateListeners",
-        "subscribeToTransaction",
-        "unsubscribe",
-        "listeners",
-        "handleTransactionUpdate",
-        "transactionId",
-        "existingTransaction",
-        "updatedTransaction",
-        "getTransaction",
-        "cached",
-        "response",
-        "transaction",
-        "monitorTransaction",
-        "cleanup",
-        "broadcastTransactionEvent",
-        "event",
-        "getAllTransactions",
-        "clearCache",
-        "getCachedTransaction",
-        "updateCachedTransaction",
-        "existing",
-        "updated",
-        "isMonitoring",
-        "getMonitoringStats"
-      ],
-      "call_graph": {}
-    },
-    "ui/composables/usePriceData.js": {
-      "language": "javascript",
-      "parsed": true,
-      "imports": [
-        "vue"
-      ],
-      "functions": {
         "usePriceData": "()",
-        "fetchCurrentPrice": {
-          "calls": [
-            "fetchPriceFromDEXTools"
-          ],
-          "signature": "async ()",
-          "called_by": [
-            "updatePriceData"
-          ]
-        },
-        "fetchPriceFromDEXTools": {
-          "signature": "async ()",
-          "called_by": [
-            "fetchCurrentPrice"
-          ]
-        },
-        "generateHistoricalData": {
-          "signature": "(currentPriceValue, days = 7)",
-          "called_by": [
-            "updatePriceData"
-          ]
-        },
-        "calculateTradingPairs": "(cirxPriceUSD)",
-        "updatePriceData": {
-          "calls": [
-            "fetchCurrentPrice",
-            "generateHistoricalData"
-          ],
-          "signature": "async ()",
-          "called_by": [
-            "startPriceUpdates"
-          ]
-        },
-        "startPriceUpdates": {
-          "calls": [
-            "updatePriceData"
-          ],
-          "signature": "()",
-          "called_by": [
-            "useAggregatePriceFeed"
-          ]
-        },
-        "stopPriceUpdates": {
-          "signature": "()",
-          "called_by": [
-            "useAggregatePriceFeed"
-          ]
-        }
-      },
-      "classes": {},
-      "constants": {
-        "CIRX_CONTRACT": "str"
-      },
-      "variables": [
-        "currentPrice",
-        "priceHistory",
-        "isLoading",
-        "error",
-        "lastUpdated",
-        "updateTimer",
-        "priceCache",
-        "fetchCurrentPrice",
-        "cacheKey",
-        "cached",
-        "response",
-        "data",
-        "cirxData",
-        "priceData",
-        "fetchPriceFromDEXTools",
-        "generateHistoricalData",
-        "now",
-        "msPerDay",
-        "pointsPerDay",
-        "totalPoints",
-        "price",
-        "i",
-        "time",
-        "volatility",
-        "change",
-        "calculateTradingPairs",
-        "tokenPrices",
-        "updatePriceData",
-        "weekAgo",
-        "startPriceUpdates",
-        "stopPriceUpdates",
-        "tradingPairs",
-        "formattedPrice",
-        "priceForSymbol"
-      ],
-      "call_graph": {}
-    },
-    "ui/composables/useSingleExchangeDatafeed.js": {
-      "language": "javascript",
-      "parsed": true,
-      "functions": {
         "useSingleExchangeDatafeed": {
           "calls": [
             "fetchSingleExchangeData",
@@ -3265,52 +3338,136 @@
             "generateSimpleBars"
           ]
         },
-        "createSingleExchangeDatafeed": {
+        "fetchCIRXPrice": {
           "calls": [
-            "fetchSingleExchangeData",
-            "generateSimpleBars"
+            "getInstance",
+            "getMarketData"
           ],
-          "signature": "(exchange)"
-        },
-        "fetchWithTimeout": {
-          "signature": "(url)",
+          "signature": "async ()",
           "called_by": [
-            "fetchSingleExchangeData"
+            "getTokenPrices",
+            "testCirxFetch"
           ]
-        }
-      },
-      "classes": {},
-      "variables": [
-        "createSingleExchangeDatafeed",
-        "symbols",
-        "symbolInfo",
-        "data",
-        "bars",
-        "updateInterval",
-        "bar",
-        "intervalId",
-        "timeoutMs",
-        "fetchWithTimeout",
-        "ticker",
-        "now",
-        "price",
-        "volume",
-        "resolutionMs",
-        "barsCount",
-        "i",
-        "time",
-        "variation",
-        "randomPrice"
-      ],
-      "call_graph": {}
-    },
-    "ui/composables/useAggregateDatafeed.js": {
-      "language": "javascript",
-      "parsed": true,
-      "imports": [
-        "../scripts/aggregateMarket.js"
-      ],
-      "functions": {
+        },
+        "fetchCoinGeckoPrices": {
+          "signature": "async ()",
+          "called_by": [
+            "getTokenPrices"
+          ]
+        },
+        "getFallbackPrices": {
+          "signature": "()",
+          "called_by": [
+            "getTokenPrices"
+          ]
+        },
+        "getTokenPrices": {
+          "calls": [
+            "fetchCIRXPrice",
+            "fetchCoinGeckoPrices",
+            "getFallbackPrices"
+          ],
+          "signature": "async ()",
+          "called_by": [
+            "getTokenPrice",
+            "refreshPrices",
+            "getCirxPriceInfo"
+          ]
+        },
+        "getTokenPrice": {
+          "calls": [
+            "getTokenPrices"
+          ],
+          "signature": "async (tokenSymbol)",
+          "called_by": [
+            "calculateQuote",
+            "calculateReverseQuote",
+            "validateSwap",
+            "qualifiesForOTC"
+          ]
+        },
+        "getPriceSource": "()",
+        "refreshPrices": {
+          "calls": [
+            "getTokenPrices"
+          ],
+          "signature": "async ()"
+        },
+        "getCacheInfo": {
+          "signature": "()",
+          "called_by": [
+            "getCirxPriceInfo"
+          ]
+        },
+        "getCirxPriceInfo": {
+          "calls": [
+            "getCacheInfo",
+            "getTokenPrices"
+          ],
+          "signature": "async ()"
+        },
+        "testCirxFetch": {
+          "calls": [
+            "fetchCIRXPrice"
+          ],
+          "signature": "async ()"
+        },
+        "fetchAggregatedData": {
+          "calls": [
+            "getMarketData"
+          ],
+          "signature": "async ()",
+          "called_by": [
+            "useAggregatePriceFeed"
+          ]
+        },
+        "startPriceUpdates": {
+          "calls": [
+            "updatePriceData"
+          ],
+          "signature": "()",
+          "called_by": [
+            "useAggregatePriceFeed"
+          ]
+        },
+        "stopPriceUpdates": {
+          "signature": "()",
+          "called_by": [
+            "useAggregatePriceFeed"
+          ]
+        },
+        "fetchCurrentPrice": {
+          "calls": [
+            "fetchPriceFromDEXTools"
+          ],
+          "signature": "async ()",
+          "called_by": [
+            "updatePriceData"
+          ]
+        },
+        "fetchPriceFromDEXTools": {
+          "signature": "async ()",
+          "called_by": [
+            "fetchCurrentPrice"
+          ]
+        },
+        "generateHistoricalData": {
+          "signature": "(currentPriceValue, days = 7)",
+          "called_by": [
+            "updatePriceData"
+          ]
+        },
+        "calculateTradingPairs": "(cirxPriceUSD)",
+        "updatePriceData": {
+          "calls": [
+            "fetchCurrentPrice",
+            "generateHistoricalData"
+          ],
+          "signature": "async ()",
+          "called_by": [
+            "startPriceUpdates"
+          ]
+        },
         "useAggregateDatafeed": {
           "signature": "()",
           "called_by": [
@@ -3331,11 +3488,15 @@
         },
         "startRealtimeUpdates": {
           "calls": [
+            "getMarketData",
             "updateWithRealData"
           ],
           "signature": "(symbolInfo, resolution, callback, subscriberUID)"
         },
         "updateWithRealData": {
+          "calls": [
+            "getMarketData"
+          ],
           "signature": "async ()",
           "called_by": [
             "startRealtimeUpdates"
@@ -3353,30 +3514,171 @@
             "useAggregateDatafeed"
           ],
           "signature": "()"
+        },
+        "createSingleExchangeDatafeed": {
+          "calls": [
+            "fetchSingleExchangeData",
+            "generateSimpleBars"
+          ],
+          "signature": "(exchange)"
+        },
+        "fetchWithTimeout": {
+          "signature": "(url)",
+          "called_by": [
+            "fetchSingleExchangeData"
+          ]
         }
       },
-      "classes": {},
+      "classes": {
+        "AggregateMarket": {
+          "methods": {
+            "constructor": {
+              "signature": "()",
+              "called_by": [
+                "CE",
+                "po"
+              ]
+            },
+            "numToAbbreviation": "(num)",
+            "getBitMartData": "async (token, pair)",
+            "getXTData": "async (token, pair)",
+            "getLBankData": "async (token, pair)",
+            "getMarketData": {
+              "signature": "async (token, pair)",
+              "called_by": [
+                "startRealtimeUpdates",
+                "fetchCIRXPrice",
+                "AggregateMarket.StartFetching",
+                "updateWithRealData",
+                "fetchAggregatedData",
+                "useAggregatePriceFeed"
+              ]
+            },
+            "StartFetching": {
+              "calls": [
+                "getMarketData"
+              ],
+              "signature": "(token, pair, interval, callback)"
+            },
+            "stopFetching": "()",
+            "__init__": "()"
+          },
+          "doc": "Real-time price feed service"
+        }
+      },
       "constants": {
+        "PRICE_CACHE_DURATION": "value",
+        "CIRX_CONTRACT": "str",
         "SUPPORTED_SYMBOLS": "collection"
       },
       "variables": [
-        "useAggregateDatafeed",
+        "priceCache",
+        "lastFetch",
+        "fetchCIRXPrice",
+        "market",
+        "marketData",
+        "price",
+        "fetchCoinGeckoPrices",
+        "response",
+        "data",
+        "getFallbackPrices",
+        "getTokenPrices",
+        "now",
+        "majorTokenPrices",
+        "cirxPriceInUsdt",
+        "usdtPrice",
+        "cirxPriceInUsd",
+        "allPrices",
+        "fallbackPrices",
+        "getTokenPrice",
+        "prices",
+        "getPriceSource",
+        "refreshPrices",
+        "getCacheInfo",
+        "ageMs",
+        "ageMinutes",
+        "getCirxPriceInfo",
+        "cacheInfo",
+        "testCirxFetch",
+        "cirxPrice",
         "aggregateMarket",
+        "currentPrice",
+        "isLoading",
+        "error",
+        "lastUpdated",
+        "marketStats",
+        "updateTimer",
+        "fetchAggregatedData",
+        "fallbackPrice",
+        "startPriceUpdates",
+        "stopPriceUpdates",
+        "formattedPrice",
+        "priceChangeClass",
+        "fluctuation",
+        "isDataFresh",
+        "updatedTime",
+        "currentInstance",
+        "priceHistory",
+        "fetchCurrentPrice",
+        "cacheKey",
+        "cached",
+        "cirxData",
+        "priceData",
+        "fetchPriceFromDEXTools",
+        "generateHistoricalData",
+        "msPerDay",
+        "pointsPerDay",
+        "totalPoints",
+        "i",
+        "time",
+        "volatility",
+        "change",
+        "calculateTradingPairs",
+        "tokenPrices",
+        "updatePriceData",
+        "weekAgo",
+        "tradingPairs",
+        "priceForSymbol",
+        "suffixes",
+        "bitmartLast",
+        "bitmartFluc",
+        "bitmartVolC",
+        "bitmartVolU",
+        "result",
+        "xtLast",
+        "xtFluc",
+        "xtVolC",
+        "xtVolU",
+        "lbankTicker",
+        "lbankLast",
+        "lbankFluc",
+        "lbankVolC",
+        "lbankVolU",
+        "totalLast",
+        "totalFluc",
+        "totalVolC",
+        "totalVolU",
+        "count",
+        "circSupply",
+        "timeoutMs",
+        "fetchWithTimeout",
+        "bitmartData",
+        "xtData",
+        "lbankData",
+        "averageLast",
+        "averageFluc",
+        "totalFormattedVolC",
+        "totalFormattedVolU",
+        "useAggregateDatafeed",
         "createDatafeed",
         "results",
         "query",
         "symbolInfo",
-        "marketData",
-        "currentPrice",
         "bars",
         "generateHistoricalBars",
         "intervalMs",
         "barsCount",
         "basePrice",
-        "i",
-        "time",
-        "volatility",
-        "change",
         "open",
         "close",
         "high",
@@ -3387,201 +3689,25 @@
         "lastPrice",
         "updateInterval",
         "updateWithRealData",
-        "now",
         "variation",
         "bar",
-        "fallbackPrice",
         "getIntervalInMs",
         "intervals",
-        "createAggregateDatafeed"
+        "createAggregateDatafeed",
+        "createSingleExchangeDatafeed",
+        "symbols",
+        "intervalId",
+        "ticker",
+        "resolutionMs",
+        "randomPrice"
       ],
       "call_graph": {}
     },
-    "ui/composables/useSwapLogic.js": {
+    "ui/composables/useRPreFlightValidation.js": {
       "language": "javascript",
       "parsed": true,
       "imports": [
         "vue",
-        "../services/priceService.js"
-      ],
-      "functions": {
-        "useSwapLogic": "()",
-        "safeDiv": {
-          "signature": "(a, b, fallback = 0)",
-          "called_by": [
-            "calculateQuote",
-            "calculateReverseQuote"
-          ]
-        },
-        "safeMul": {
-          "signature": "(a, b, fallback = 0)",
-          "called_by": [
-            "calculateQuote",
-            "calculateReverseQuote"
-          ]
-        },
-        "safePercentage": {
-          "signature": "(value, defaultValue = 0)",
-          "called_by": [
-            "calculateQuote",
-            "calculateReverseQuote"
-          ]
-        },
-        "validateNumber": {
-          "signature": "(value, name = 'value')",
-          "called_by": [
-            "calculateQuote",
-            "calculateReverseQuote"
-          ]
-        },
-        "initializePrices": {
-          "signature": "async ()",
-          "called_by": [
-            "refreshPrices"
-          ]
-        },
-        "calculateDiscount": {
-          "signature": "(usdAmount)",
-          "called_by": [
-            "calculateQuote",
-            "calculateReverseQuote"
-          ]
-        },
-        "normalizeTokenSymbol": {
-          "signature": "(tokenSymbol)",
-          "called_by": [
-            "getTokenPrice"
-          ]
-        },
-        "getTokenPrice": {
-          "calls": [
-            "normalizeTokenSymbol"
-          ],
-          "signature": "(tokenSymbol)",
-          "called_by": [
-            "calculateQuote",
-            "calculateReverseQuote",
-            "validateSwap",
-            "qualifiesForOTC"
-          ]
-        },
-        "refreshPrices": {
-          "calls": [
-            "initializePrices"
-          ],
-          "signature": "async ()"
-        },
-        "calculateQuote": {
-          "calls": [
-            "calculateDiscount",
-            "formatNumber",
-            "getTokenPrice",
-            "safeDiv",
-            "safeMul",
-            "safePercentage",
-            "validateNumber"
-          ],
-          "signature": "(inputAmount, inputToken, isOTC = false, selectedTier = null)",
-          "called_by": [
-            "calculateReverseQuote"
-          ]
-        },
-        "calculateReverseQuote": {
-          "calls": [
-            "calculateDiscount",
-            "calculateQuote",
-            "getTokenPrice",
-            "safeDiv",
-            "safeMul",
-            "safePercentage",
-            "validateNumber"
-          ],
-          "signature": "(cirxAmount, targetToken, isOTC = false, selectedTier = null)"
-        },
-        "validateSwap": {
-          "calls": [
-            "getTokenPrice"
-          ],
-          "signature": "(inputAmount, inputToken, recipientAddress = null, isConnected = false)"
-        },
-        "calculateMaxAmount": "(balance, tokenSymbol)",
-        "formatNumber": {
-          "signature": "(value, decimals = 2)",
-          "called_by": [
-            "formatTokenAmount",
-            "formatCurrency",
-            "calculateQuote"
-          ]
-        },
-        "formatUsd": "(value)",
-        "getAvailableTokens": "(walletChain)",
-        "qualifiesForOTC": {
-          "calls": [
-            "getTokenPrice"
-          ],
-          "signature": "(inputAmount, inputToken)"
-        },
-        "getEstimatedTime": "(isOTC, walletChain)"
-      },
-      "classes": {},
-      "variables": [
-        "safeDiv",
-        "result",
-        "safeMul",
-        "safePercentage",
-        "num",
-        "validateNumber",
-        "tokenPrices",
-        "priceSource",
-        "initializePrices",
-        "livePrices",
-        "fees",
-        "discountTiers",
-        "calculateDiscount",
-        "normalizeTokenSymbol",
-        "getTokenPrice",
-        "normalizedSymbol",
-        "price",
-        "refreshPrices",
-        "calculateQuote",
-        "inputValue",
-        "inputTokenPrice",
-        "cirxPrice",
-        "totalUsdValue",
-        "feeRate",
-        "feeAmount",
-        "amountAfterFee",
-        "usdAfterFee",
-        "cirxReceived",
-        "discount",
-        "multiplier",
-        "exchangeRate",
-        "calculateReverseQuote",
-        "cirxValue",
-        "targetTokenPrice",
-        "usdValue",
-        "discountMultiplier",
-        "feeMultiplier",
-        "denominator",
-        "forwardQuote",
-        "validateSwap",
-        "errors",
-        "calculateMaxAmount",
-        "availableBalance",
-        "reserveAmount",
-        "maxAmount",
-        "formatNumber",
-        "formatUsd",
-        "getAvailableTokens",
-        "qualifiesForOTC",
-        "getEstimatedTime"
-      ],
-      "call_graph": {}
-    },
-    "ui/composables/useCircularAddressValidation.js": {
-      "language": "javascript",
-      "parsed": true,
-      "imports": [
         "vue"
       ],
       "functions": {
@@ -3608,44 +3734,7 @@
         "getCachedValidation": "(address)",
         "clearCache": "()",
         "isValidCircularAddressFormat": "(address)",
-        "isAddressPending": "(address)"
-      },
-      "classes": {},
-      "variables": [
-        "useCircularAddressValidation",
-        "validationCache",
-        "validationPromises",
-        "networkConfig",
-        "getBackendConfig",
-        "config",
-        "apiBaseUrl",
-        "response",
-        "data",
-        "checkAddressExists",
-        "cacheKey",
-        "validationPromise",
-        "result",
-        "performAddressValidation",
-        "walletResponse",
-        "walletData",
-        "balanceResponse",
-        "balanceData",
-        "balance",
-        "getCachedValidation",
-        "clearCache",
-        "isValidCircularAddressFormat",
-        "trimmed",
-        "isAddressPending"
-      ],
-      "call_graph": {}
-    },
-    "ui/composables/useCircularChain.js": {
-      "language": "javascript",
-      "parsed": true,
-      "imports": [
-        "vue"
-      ],
-      "functions": {
+        "isAddressPending": "(address)",
         "useCircularChain": "(toastCallback = null)",
         "showToast": {
           "signature": "(type, title, message)",
@@ -3681,6 +3770,30 @@
         "CIRCULAR_CHAIN_CONFIG": "collection"
       },
       "variables": [
+        "useCircularAddressValidation",
+        "validationCache",
+        "validationPromises",
+        "networkConfig",
+        "getBackendConfig",
+        "config",
+        "apiBaseUrl",
+        "response",
+        "data",
+        "checkAddressExists",
+        "cacheKey",
+        "validationPromise",
+        "result",
+        "performAddressValidation",
+        "walletResponse",
+        "walletData",
+        "balanceResponse",
+        "balanceData",
+        "balance",
+        "getCachedValidation",
+        "clearCache",
+        "isValidCircularAddressFormat",
+        "trimmed",
+        "isAddressPending",
         "useCircularChain",
         "cirxAddress",
         "isCircularChainConnected",
@@ -3692,109 +3805,25 @@
         "showToast",
         "detectCircularChain",
         "fetchCirxBalance",
-        "balance",
         "fetchBalanceFromNAG",
-        "response",
         "formatCirxBalance",
         "getUxGuidance"
       ],
       "call_graph": {}
     },
-    "ui/composables/useNumberInput.js": {
+    "ui/composables/useRToast.js": {
       "language": "javascript",
-      "parsed": true,
-      "imports": [
-        "vue"
-      ],
-      "functions": {
-        "useNumberInput": {
-          "calls": [
-            "addCommas",
-            "handleBlur",
-            "handleFocus",
-            "handleInput",
-            "handleKeypress",
-            "handlePaste",
-            "removeCommas"
-          ],
-          "signature": "(initialValue = '', options = {})"
-        },
-        "addCommas": {
-          "signature": "(value)",
-          "called_by": [
-            "useNumberInput",
-            "handleInput",
-            "handleBlur"
-          ]
-        },
-        "removeCommas": {
-          "signature": "(value)",
-          "called_by": [
-            "useNumberInput",
-            "handleInput"
-          ]
-        },
-        "handleInput": {
-          "calls": [
-            "addCommas",
-            "removeCommas"
-          ],
-          "signature": "(inputValue)",
-          "called_by": [
-            "useNumberInput",
-            "handlePaste"
-          ]
-        },
-        "handleFocus": {
-          "signature": "()",
-          "called_by": [
-            "useNumberInput"
-          ]
-        },
-        "handleBlur": {
-          "calls": [
-            "addCommas"
-          ],
-          "signature": "()",
-          "called_by": [
-            "useNumberInput"
-          ]
-        },
-        "handleKeypress": {
-          "signature": "(event)",
-          "called_by": [
-            "useNumberInput"
-          ]
-        },
-        "handlePaste": {
-          "calls": [
-            "handleInput"
-          ],
-          "signature": "(event)",
-          "called_by": [
-            "useNumberInput"
-          ]
-        }
-      },
-      "classes": {},
-      "variables": [
-        "rawValue",
-        "displayValue",
-        "cleaned",
-        "parts",
-        "integerPart",
-        "decimalPart",
-        "withCommas",
-        "cleanValue",
-        "char",
-        "pastedText"
-      ],
-      "call_graph": {}
+      "parsed": false
     },
     "ui/composables/useIrohNetwork.js": {
       "language": "javascript",
       "parsed": true,
+      "imports": [
+        "vue",
+        "./useIrohNetwork"
+      ],
       "functions": {
+        "return": "()",
         "useIrohNetwork": "()",
         "initialize": {
           "calls": [
@@ -3818,8 +3847,18 @@
           "signature": "async ()"
         },
         "sendToNode": "async (nodeId, payload)",
-        "broadcastToTopic": "async (topic, message)",
-        "subscribeToTransactionUpdates": "(callback)",
+        "broadcastToTopic": {
+          "signature": "async (topic, message)",
+          "called_by": [
+            "broadcastTransactionEvent"
+          ]
+        },
+        "subscribeToTransactionUpdates": {
+          "signature": "(callback)",
+          "called_by": [
+            "subscribeToTransaction"
+          ]
+        },
         "getNetworkStats": {
           "signature": "async ()",
           "called_by": [
@@ -3841,7 +3880,50 @@
             "initialize"
           ],
           "signature": "async ()"
-        }
+        },
+        "useRealTimeTransactions": "()",
+        "subscribeToTransaction": {
+          "calls": [
+            "handleTransactionUpdate",
+            "subscribeToTransactionUpdates"
+          ],
+          "signature": "(transactionId, callback)",
+          "called_by": [
+            "monitorTransaction"
+          ]
+        },
+        "handleTransactionUpdate": {
+          "signature": "(update)",
+          "called_by": [
+            "subscribeToTransaction"
+          ]
+        },
+        "getTransaction": "async (transactionId)",
+        "monitorTransaction": {
+          "calls": [
+            "cleanup",
+            "subscribeToTransaction"
+          ],
+          "signature": "(transactionId, options = {})"
+        },
+        "cleanup": {
+          "signature": "()",
+          "called_by": [
+            "monitorTransaction"
+          ]
+        },
+        "broadcastTransactionEvent": {
+          "calls": [
+            "broadcastToTopic"
+          ],
+          "signature": "async (transactionId, eventType, data = {})"
+        },
+        "getAllTransactions": "()",
+        "clearCache": "()",
+        "getCachedTransaction": "(transactionId)",
+        "updateCachedTransaction": "(transactionId, updates)",
+        "isMonitoring": "(transactionId)",
+        "getMonitoringStats": "()"
       },
       "classes": {},
       "variables": [
@@ -3870,73 +3952,33 @@
         "startNetworkMonitoring",
         "getAllServices",
         "reconnect",
-        "success"
-      ],
-      "call_graph": {}
-    },
-    "ui/composables/useAggregatePriceFeed.js": {
-      "language": "javascript",
-      "parsed": true,
-      "imports": [
-        "vue",
-        "../scripts/aggregateMarket.js"
-      ],
-      "functions": {
-        "useAggregatePriceFeed": {
-          "calls": [
-            "fetchAggregatedData",
-            "startPriceUpdates",
-            "stopPriceUpdates"
-          ],
-          "signature": "()"
-        },
-        "fetchAggregatedData": {
-          "signature": "async ()",
-          "called_by": [
-            "useAggregatePriceFeed",
-            "startPriceUpdates"
-          ]
-        },
-        "startPriceUpdates": {
-          "calls": [
-            "fetchAggregatedData"
-          ],
-          "signature": "()",
-          "called_by": [
-            "useAggregatePriceFeed"
-          ]
-        },
-        "stopPriceUpdates": {
-          "signature": "()",
-          "called_by": [
-            "useAggregatePriceFeed"
-          ]
-        }
-      },
-      "classes": {},
-      "constants": {
-        "UPDATE_INTERVAL": "value"
-      },
-      "variables": [
-        "aggregateMarket",
-        "currentPrice",
-        "isLoading",
-        "error",
-        "lastUpdated",
-        "marketStats",
-        "updateTimer",
-        "fetchAggregatedData",
-        "marketData",
-        "price",
-        "fallbackPrice",
-        "startPriceUpdates",
-        "stopPriceUpdates",
-        "formattedPrice",
-        "priceChangeClass",
-        "fluctuation",
-        "isDataFresh",
-        "now",
-        "updatedTime"
+        "success",
+        "useRealTimeTransactions",
+        "transactions",
+        "subscriptions",
+        "updateListeners",
+        "subscribeToTransaction",
+        "unsubscribe",
+        "listeners",
+        "handleTransactionUpdate",
+        "transactionId",
+        "existingTransaction",
+        "updatedTransaction",
+        "getTransaction",
+        "cached",
+        "transaction",
+        "monitorTransaction",
+        "cleanup",
+        "broadcastTransactionEvent",
+        "event",
+        "getAllTransactions",
+        "clearCache",
+        "getCachedTransaction",
+        "updateCachedTransaction",
+        "existing",
+        "updated",
+        "isMonitoring",
+        "getMonitoringStats"
       ],
       "call_graph": {}
     },
@@ -4045,80 +4087,6 @@
     "ui/test/setup.ts": {
       "language": "typescript",
       "parsed": false
-    },
-    "ui/scripts/aggregateMarket.js": {
-      "language": "javascript",
-      "parsed": true,
-      "functions": {},
-      "classes": {
-        "AggregateMarket": {
-          "methods": {
-            "constructor": {
-              "signature": "()",
-              "called_by": [
-                "po",
-                "CE"
-              ]
-            },
-            "numToAbbreviation": "(num)",
-            "getBitMartData": "async (token, pair)",
-            "getXTData": "async (token, pair)",
-            "getLBankData": "async (token, pair)",
-            "getMarketData": {
-              "signature": "async (token, pair)",
-              "called_by": [
-                "AggregateMarket.StartFetching"
-              ]
-            },
-            "StartFetching": {
-              "calls": [
-                "getMarketData"
-              ],
-              "signature": "(token, pair, interval, callback)"
-            },
-            "stopFetching": "()",
-            "__init__": "()"
-          },
-          "doc": "****************************************************************************"
-        }
-      },
-      "variables": [
-        "suffixes",
-        "i",
-        "response",
-        "data",
-        "bitmartLast",
-        "bitmartFluc",
-        "bitmartVolC",
-        "bitmartVolU",
-        "result",
-        "xtLast",
-        "xtFluc",
-        "xtVolC",
-        "xtVolU",
-        "lbankTicker",
-        "lbankLast",
-        "lbankFluc",
-        "lbankVolC",
-        "lbankVolU",
-        "now",
-        "totalLast",
-        "totalFluc",
-        "totalVolC",
-        "totalVolU",
-        "count",
-        "circSupply",
-        "timeoutMs",
-        "fetchWithTimeout",
-        "bitmartData",
-        "xtData",
-        "lbankData",
-        "averageLast",
-        "averageFluc",
-        "totalFormattedVolC",
-        "totalFormattedVolU"
-      ],
-      "call_graph": {}
     },
     "ui/scripts/cleanup.js": {
       "language": "javascript",
@@ -4237,7 +4205,7 @@
       "language": "vue",
       "parsed": false
     },
-    "ui/pages/swap.vue": {
+    "ui/pages/cookie-consent.vue": {
       "language": "vue",
       "parsed": false
     },
@@ -4246,6 +4214,10 @@
       "parsed": false
     },
     "ui/plugins/0.toast-init.client.js": {
+      "language": "javascript",
+      "parsed": false
+    },
+    "ui/plugins/0.wagmi.client.js": {
       "language": "javascript",
       "parsed": false
     },
@@ -4295,57 +4267,9 @@
       ],
       "call_graph": {}
     },
-    "ui/stores/wallet.js": {
-      "language": "javascript",
-      "parsed": true,
-      "imports": [
-        "pinia",
-        "vue"
-      ],
-      "functions": {
-        "updateAccount": "(accountInfo)",
-        "updateNetwork": "(networkInfo)"
-      },
-      "classes": {},
-      "variables": [
-        "useWalletStore",
-        "isConnected",
-        "address",
-        "chainId",
-        "updateAccount",
-        "updateNetwork",
-        "activeWallet",
-        "activeChain",
-        "ethereumWallet"
-      ],
-      "call_graph": {}
-    },
     "ui/middleware/debug.global.js": {
       "language": "javascript",
       "parsed": false
-    },
-    "ui/config/appkit.js": {
-      "language": "javascript",
-      "parsed": true,
-      "imports": [
-        "@reown/appkit-adapter-wagmi",
-        "@reown/appkit/networks"
-      ],
-      "functions": {
-        "getAppUrl": "()"
-      },
-      "classes": {},
-      "variables": [
-        "projectId",
-        "isDevelopment",
-        "evmNetworks",
-        "networks",
-        "getAppUrl",
-        "metadata",
-        "wagmiAdapter",
-        "wagmiConfig"
-      ],
-      "call_graph": {}
     },
     "ui/config/app.js": {
       "language": "javascript",
@@ -22579,6 +22503,10 @@
       "parsed": false,
       "purpose": "Test file"
     },
+    "ui/server/plugins/backend-autostart.js": {
+      "language": "javascript",
+      "parsed": false
+    },
     "ui/utils/__tests__/utilities.test.js": {
       "language": "javascript",
       "parsed": false,
@@ -22588,11 +22516,116 @@
       "language": "json",
       "parsed": false
     },
+    "backend/tests/debug.php": {
+      "language": "php",
+      "parsed": false
+    },
+    "backend/tests/monitoring-check.php": {
+      "language": "php",
+      "parsed": false
+    },
+    "backend/tests/test_blockchains.php": {
+      "language": "php",
+      "parsed": false,
+      "purpose": "Test file"
+    },
+    "backend/tests/debug_hash_validation.php": {
+      "language": "php",
+      "parsed": false
+    },
+    "backend/tests/test_asset_formats.php": {
+      "language": "php",
+      "parsed": false,
+      "purpose": "Test file"
+    },
+    "backend/tests/test_asset_empty.php": {
+      "language": "php",
+      "parsed": false,
+      "purpose": "Test file"
+    },
+    "backend/tests/test_sandbox_endpoint.php": {
+      "language": "php",
+      "parsed": false,
+      "purpose": "Test file"
+    },
+    "backend/tests/test_proper_wallet.php": {
+      "language": "php",
+      "parsed": false,
+      "purpose": "Test file"
+    },
+    "backend/tests/test_cirx_balance.php": {
+      "language": "php",
+      "parsed": false,
+      "purpose": "Test file"
+    },
+    "backend/tests/test_both_approaches.php": {
+      "language": "php",
+      "parsed": false,
+      "purpose": "Test file"
+    },
+    "backend/tests/debug-server.php": {
+      "language": "php",
+      "parsed": false
+    },
+    "backend/tests/test_balance_address.php": {
+      "language": "php",
+      "parsed": false,
+      "purpose": "Test file"
+    },
+    "backend/tests/test_balance_direct.php": {
+      "language": "php",
+      "parsed": false,
+      "purpose": "Test file"
+    },
+    "backend/tests/cleanup_stuck_transactions.php": {
+      "language": "php",
+      "parsed": false
+    },
+    "backend/tests/fix_bogus_transaction.php": {
+      "language": "php",
+      "parsed": false
+    },
+    "backend/tests/test_asset_list.php": {
+      "language": "php",
+      "parsed": false,
+      "purpose": "Test file"
+    },
     "backend/tests/bootstrap.php": {
       "language": "php",
       "parsed": false
     },
+    "backend/tests/test_cirx_token.php": {
+      "language": "php",
+      "parsed": false,
+      "purpose": "Test file"
+    },
+    "backend/tests/debug_validator.php": {
+      "language": "php",
+      "parsed": false
+    },
+    "backend/tests/update_sender_addresses.php": {
+      "language": "php",
+      "parsed": false
+    },
+    "backend/tests/analyze_transaction_failures.php": {
+      "language": "php",
+      "parsed": false
+    },
+    "backend/tests/check_transactions.php": {
+      "language": "php",
+      "parsed": false
+    },
+    "backend/tests/test_raw_balance.php": {
+      "language": "php",
+      "parsed": false,
+      "purpose": "Test file"
+    },
     "backend/tests/TestCase.php": {
+      "language": "php",
+      "parsed": false,
+      "purpose": "Test file"
+    },
+    "backend/public/api-test.php": {
       "language": "php",
       "parsed": false,
       "purpose": "Test file"
@@ -22602,15 +22635,36 @@
       "parsed": false,
       "purpose": "Application entry point"
     },
+    "backend/public/server-control.php": {
+      "language": "php",
+      "parsed": false
+    },
+    "backend/public/health.php": {
+      "language": "php",
+      "parsed": false
+    },
     "backend/public/workers.html": {
       "language": "html",
       "parsed": false
+    },
+    "backend/public/test.php": {
+      "language": "php",
+      "parsed": false,
+      "purpose": "Test file"
     },
     "backend/database/create_demo_transactions.sql": {
       "language": "sql",
       "parsed": false
     },
+    "backend/database/show_schema.php": {
+      "language": "php",
+      "parsed": false
+    },
     "backend/database/Migrator.php": {
+      "language": "php",
+      "parsed": false
+    },
+    "backend/database/migrate.php": {
       "language": "php",
       "parsed": false
     },
@@ -22781,6 +22835,10 @@
       "language": "php",
       "parsed": false
     },
+    "backend/src/Services/TransactionReadinessService.php": {
+      "language": "php",
+      "parsed": false
+    },
     "backend/src/Services/CirxTransferService.php": {
       "language": "php",
       "parsed": false
@@ -22814,6 +22872,10 @@
       "parsed": false
     },
     "backend/database/migrations/001_create_transactions_table.php": {
+      "language": "php",
+      "parsed": false
+    },
+    "backend/database/migrations/005_add_sender_address_to_transactions.php": {
       "language": "php",
       "parsed": false
     },
@@ -22974,6 +23036,18 @@
     }
   },
   "dependency_graph": {
+    "build_ui_embeddings.py": [
+      "json",
+      "os",
+      "pathlib",
+      "subprocess"
+    ],
+    "search_ui_embeddings.py": [
+      "json",
+      "sys",
+      "subprocess",
+      "pathlib"
+    ],
     "test/check-console.js": [
       "child_process",
       "child_process"
@@ -23002,72 +23076,49 @@
     "ui/utils/validation.js": [
       "ui/utils/addressFormatting.js"
     ],
-    "ui/composables/useOtcConfig.js": [
+    "ui/server/backend-manager.js": [
+      "child_process",
+      "fs",
+      "path",
+      "url"
+    ],
+    "ui/composables/useRBackendAPIs.js": [
       "vue"
     ],
-    "ui/composables/useSwapService.js": [
+    "ui/composables/useTransactionData.js": [
       "vue",
+      "ui/composables/useRBackendAPIs.js",
+      "~/utils/toast.js"
+    ],
+    "ui/composables/useRFormattedNumbers.js": [
+      "vue",
+      "ui/composables/useRPriceData.js",
       "viem",
       "~/stores/wallet"
     ],
-    "ui/composables/useAutoWorker.js": [
+    "ui/composables/useRCallToAction.js": [
       "vue"
-    ],
-    "ui/composables/useTransactionStatus.js": [
-      "vue",
-      "ui/composables/useBackendApi.js",
-      "~/utils/toast.js"
     ],
     "ui/composables/useErrorHandler.js": [
       "vue"
     ],
-    "ui/composables/useBackendApi.js": [
+    "ui/composables/useRPriceData.js": [
       "vue"
     ],
-    "ui/composables/useSwapButtonState.js": [
+    "ui/composables/useRPreFlightValidation.js": [
+      "vue",
       "vue"
     ],
-    "ui/composables/useRealTimeTransactions.js": [
+    "ui/composables/useIrohNetwork.js": [
       "vue",
       "ui/composables/useIrohNetwork.js"
-    ],
-    "ui/composables/usePriceData.js": [
-      "vue"
-    ],
-    "ui/composables/useAggregateDatafeed.js": [
-      "ui/scripts/aggregateMarket.js"
-    ],
-    "ui/composables/useSwapLogic.js": [
-      "vue",
-      "ui/services/priceService.js"
-    ],
-    "ui/composables/useCircularAddressValidation.js": [
-      "vue"
-    ],
-    "ui/composables/useCircularChain.js": [
-      "vue"
-    ],
-    "ui/composables/useNumberInput.js": [
-      "vue"
-    ],
-    "ui/composables/useAggregatePriceFeed.js": [
-      "vue",
-      "ui/scripts/aggregateMarket.js"
     ],
     "ui/scripts/cleanup.js": [
       "fs",
       "child_process",
       "util",
       "path"
-    ],
-    "ui/stores/wallet.js": [
-      "pinia",
-      "vue"
-    ],
-    "ui/config/appkit.js": [
-      "@reown/appkit-adapter-wagmi",
-      "@reown/appkit/networks"
     ]
   },
-  "staleness_check": 1755701377.469011
+  "staleness_check": 1755891187.028064
 }

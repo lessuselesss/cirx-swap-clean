@@ -4,6 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
+
 This is a **Circular CIRX OTC Trading Platform** with API-first architecture:
 - **Backend API** integrating with Circular Protocol for blockchain operations
 - **Nuxt.js frontend** with dual-tab interface (liquid/vested purchases)
@@ -12,7 +13,7 @@ This is a **Circular CIRX OTC Trading Platform** with API-first architecture:
 **Current Status**: Production-ready platform with comprehensive E2E testing framework.
 
 **AI Context**: For comprehensive project understanding, refer to `@PROJECT_INDEX.json` which contains:
-- Complete file structure with 228 tracked files across PHP, Vue, JavaScript, and configuration files
+- Complete file structure with tracked files across PHP, Vue, JavaScript, and configuration files
 - Function signatures and relationships across the entire codebase
 - Architecture patterns and component dependencies
 - Testing structure mapping between backend PHPUnit and frontend E2E tests

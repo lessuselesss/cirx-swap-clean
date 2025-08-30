@@ -122,7 +122,7 @@
 <script setup>
 import { computed, watch } from 'vue'
 import OtcDiscountDropdown from './OtcDiscountDropdown.vue'
-import { useNumberInput } from '~/composables/useNumberInput'
+import { useNumberInput } from '~/composables/useRFormattedNumbers.js'
 
 const props = defineProps({
   cirxAmount: {
