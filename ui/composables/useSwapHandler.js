@@ -1,5 +1,7 @@
 import { computed, ref } from 'vue'
 import { usePriceData } from './usePriceData.js'
+import { useMathUtils } from './useMathUtils.js'
+import { useFormattingUtils } from './useFormattingUtils.js'
 import { parseEther, formatEther, parseUnits, formatUnits, getContract } from 'viem'
 /**
  * Swap business logic composable
@@ -8,36 +10,9 @@ import { parseEther, formatEther, parseUnits, formatUnits, getContract } from 'v
  */
 export function useSwapLogic() {
   
-  // Safe arithmetic utilities to prevent NaN issues
-  const safeDiv = (a, b, fallback = 0) => {
-    if (typeof a !== 'number' || typeof b !== 'number' || isNaN(a) || isNaN(b) || b === 0) {
-      return fallback
-    }
-    const result = a / b
-    return isFinite(result) ? result : fallback
-  }
-  
-  const safeMul = (a, b, fallback = 0) => {
-    if (typeof a !== 'number' || typeof b !== 'number' || isNaN(a) || isNaN(b)) {
-      return fallback
-    }
-    const result = a * b
-    return isFinite(result) ? result : fallback
-  }
-  
-  const safePercentage = (value, defaultValue = 0) => {
-    const num = parseFloat(value)
-    return (isNaN(num) || !isFinite(num)) ? defaultValue : num
-  }
-  
-  const validateNumber = (value, name = 'value') => {
-    const num = parseFloat(value)
-    if (isNaN(num) || !isFinite(num) || num < 0) {
-      console.warn(`Invalid ${name}:`, value)
-      return null
-    }
-    return num
-  }
+  // Import consolidated utilities to eliminate duplication
+  const { safeDiv, safeMul, safePercentage, validateNumber } = useMathUtils()
+  const { formatNumber } = useFormattingUtils()
   
   // Real-time token prices (fetched from live APIs)
   const tokenPrices = ref({
@@ -348,23 +323,7 @@ export function useSwapLogic() {
     return maxAmount.toString()
   }
 
-  /**
-   * Format number for display
-   */
-  const formatNumber = (value, decimals = 2) => {
-    const num = parseFloat(value)
-    if (isNaN(num)) return '0'
-
-    if (num >= 1000000) {
-      return (num / 1000000).toFixed(1) + 'M'
-    } else if (num >= 1000) {
-      return (num / 1000).toFixed(1) + 'K'
-    } else if (num >= 1) {
-      return num.toFixed(decimals)
-    } else {
-      return num.toFixed(6).replace(/\.?0+$/, '')
-    }
-  }
+  // formatNumber now imported from consolidated useFormattingUtils (removed duplicate)
 
   /**
    * Format USD value

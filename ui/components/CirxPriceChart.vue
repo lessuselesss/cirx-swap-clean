@@ -188,7 +188,7 @@
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useSingleExchangeDatafeed } from '~/composables/usePriceData.js'
 import { usePriceData } from '~/composables/usePriceData.js'
-import { useAggregateDatafeed } from '~/composables/useAggregateDatafeed.js'
+import { useAggregateDatafeed } from '~/composables/usePriceData.js'
 
 // Use aggregate price feed for multi-exchange data with manual lifecycle management
 const {

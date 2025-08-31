@@ -25,7 +25,7 @@
 
 <script setup>
 import { toRefs } from 'vue'
-import { useCTAState } from '~/composables/useCTAState'
+import { useCTAState } from '~/composables/useCallToActionState.js'
 
 const props = defineProps({
   // Core state props
