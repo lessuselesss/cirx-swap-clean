@@ -26,8 +26,10 @@
               Transactions
             </NuxtLink>
             
-            <!-- Wallet Button -->
-            <WalletButton />
+            <!-- Wallet functionality removed -->
+            <button disabled class="px-4 py-2 bg-gray-600 text-gray-400 rounded-xl cursor-not-allowed">
+              Wallet Disabled
+            </button>
           </div>
         </div>
       </div>
@@ -113,7 +115,7 @@
                   <div class="input-header">
                     <label class="text-sm font-medium text-white">Sell</label>
                     <span v-if="inputToken" class="balance-display pr-3" @click="setMaxAmount" @dblclick="forceRefreshBalance">
-                      Balance: {{ ethBalanceData?.formatted ? formatBalance(ethBalanceData.formatted) : '-' }} {{ getTokenSymbol(inputToken) }}
+                      Balance: -
                     </span>
                     <span v-else class="balance-display pr-3">
                       Balance: -
@@ -461,48 +463,28 @@
               </div>
             </div>
 
-            <button
-              type="button"
-              :disabled="!isBackendConnected || isButtonShowingDots || loading || quoteLoading || reverseQuoteLoading"
-              :style="{
-                width: '100%',
-                padding: '16px 24px',
-                borderRadius: '12px',
-                fontWeight: '600',
-                fontSize: '18px',
-                backgroundColor: !isBackendConnected ? '#dc2626' : (isButtonShowingDots ? '#374151' : '#0B5443'),
-                color: !isBackendConnected ? '#ffffff' : (isButtonShowingDots ? '#9CA3AF' : '#01DA9D'),
-                cursor: (!isBackendConnected || isButtonShowingDots) ? 'not-allowed' : 'pointer',
-                textAlign: 'center',
-                opacity: (!isBackendConnected || isButtonShowingDots) ? '0.8' : '1',
-                transition: 'all 0.2s ease',
-                border: 'none'
-              }"
+            <!-- Unified CTA Button -->
+            <CallToAction
+              :wallet-connected="isConnected"
+              :recipient-address="recipientAddress"
+              :recipient-address-error="recipientAddressError"
+              :input-amount="inputAmount"
+              :input-balance="inputBalance"
+              :eth-balance="ethBalance"
+              :network-fee-eth="networkFee.eth"
+              :input-token="inputToken"
+              :active-tab="activeTab"
+              :loading="loading || quoteLoading || reverseQuoteLoading || isButtonShowingDots"
+              :loading-text="quoteLoading || reverseQuoteLoading ? (reverseQuoteLoading ? 'Calculating...' : 'Getting Quote...') : (loadingText || 'Processing...')"
+              :can-purchase="canPurchase"
+              :quote="quote"
+              :debug="true"
+              @connect-wallet="handleConnectWallet"
+              @enter-address="handleEnterAddress"
+              @enter-valid-address="handleEnterValidAddress"
+              @enter-amount="handleEnterAmount"
               @click="handleSwap"
-            >
-              <!-- Backend error overlay - shows on top of all other states -->
-              <span v-if="!isBackendConnected" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
-                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" style="animation: pulse 2s infinite;">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-                </svg>
-                Error: Connect to Backend
-              </span>
-              <!-- Normal CTA states (hidden when backend is disconnected) -->
-              <span v-else-if="loading">{{ loadingText || 'Processing...' }}</span>
-              <span v-else-if="quoteLoading || reverseQuoteLoading">
-                {{ reverseQuoteLoading ? 'Calculating...' : 'Getting Quote...' }}
-              </span>
-              <span v-else-if="!isConnected && (!recipientAddress || !recipientAddress.trim())">Connect</span>
-              <span v-else-if="!isConnected && recipientAddress && recipientAddress.trim()">Connect Wallet</span>
-              <span v-else-if="isConnected && (!recipientAddress || !recipientAddress.trim())">Enter Address</span>
-              <span v-else-if="addressValidationState === 'validating'">...</span>
-              <span v-else-if="recipientAddress && (recipientAddress === '0' || (recipientAddress.startsWith && recipientAddress.startsWith('0x') && recipientAddress.length < 66))">...</span>
-              <span v-else-if="recipientAddress && recipientAddress.length === 66 && recipientAddress.startsWith && recipientAddress.startsWith('0x') && addressValidationState === 'idle'">...</span>
-              <span v-else-if="!inputAmount">Enter an amount</span>
-              <span v-else-if="recipientAddress && recipientAddressError">Get CIRX Wallet</span>
-              <span v-else-if="activeTab === 'liquid'">Buy Liquid CIRX</span>
-              <span v-else-if="activeTab !== 'liquid'">Buy Vested CIRX</span>
-            </button>
+            />
           </form>
         </div>
           
@@ -643,60 +625,8 @@
     </div>
 
     <!-- State 6 Confirmation Modal -->
-    <div v-if="showConfirmationModal" class="fixed inset-0 backdrop-blur-sm bg-black/60 flex items-center justify-center z-50">
-      <div class="space-modal rounded-2xl p-3 sm:p-5 md:p-6 w-full max-w-64 sm:max-w-80 md:max-w-md lg:max-w-lg mx-4 shadow-2xl shadow-cyan-500/20 relative gradient-border-animated border border-white/10 overflow-hidden">
-        <!-- Additional star layers for random blinking -->
-        <div class="star-layer-1"></div>
-        <div class="star-layer-2"></div>
-        
-        <h2 class="text-2xl font-bold text-white mb-8 text-center">Wallets</h2>
-        
-        <!-- Wallet Tiles -->
-        <div class="flex flex-col gap-4 mb-8">
-          <a
-            href="https://www.saturnwallet.app"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="flex flex-col items-center gap-3 p-6 rounded-xl transition-colors group"
-          >
-            <div class="w-48 h-48 rounded-2xl overflow-hidden bg-transparent group-hover:bg-gray-800 flex items-center justify-center flex-shrink-0 transition-colors duration-300">
-              <img 
-                src="/saturnicon.svg" 
-                alt="Saturn Wallet"
-                class="w-36 h-36 object-contain"
-              />
-            </div>
-            <span class="wallet-text font-semibold text-lg">Saturn</span>
-          </a>
-
-          <a
-            href="https://www.circularlabs.io/nero"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="flex flex-col items-center gap-3 p-6 rounded-xl transition-colors group"
-          >
-            <div class="w-48 h-48 rounded-2xl overflow-hidden bg-transparent group-hover:bg-gray-800 flex items-center justify-center flex-shrink-0 transition-colors duration-300">
-              <img 
-                src="/neroicon.svg" 
-                alt="Nero Wallet"
-                class="w-36 h-36 object-contain"
-              />
-            </div>
-            <span class="wallet-text font-semibold text-lg">Nero</span>
-          </a>
-        </div>
-        
-        <!-- Close Button - Positioned under Nero wallet -->
-        <button 
-          @click="showConfirmationModal = false"
-          class="close-button-circular absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-10 h-10 sm:w-12 sm:h-12 bg-black border-2 border-white/20 rounded-full flex items-center justify-center text-gray-300 hover:text-white hover:border-white/40 transition-all duration-300 hover:shadow-lg hover:shadow-white/20"
-        >
-          <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
-      </div>
-    </div>
+    <!-- Get Circular Wallet Modal -->
+    <GetCircularWalletModal v-model="showConfirmationModal" />
   </div>
 </template>
 
@@ -704,18 +634,18 @@
 // Import Vue composables
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 // Import Reown AppKit Vue hooks directly
-import { useAppKitAccount, useAppKit } from '@reown/appkit/vue'
-import { useBalance } from '@wagmi/vue'
+// Removed direct Wagmi import - AppKit handles this internally
 import { parseEther, parseUnits } from 'viem'
 // Import components
-import WalletButton from '~/components/WalletButton.vue'
+// WalletButton import removed - wallet functionality disabled
 import ConnectionToast from '~/components/ConnectionToast.vue'
 import OtcDiscountDropdown from '~/components/OtcDiscountDropdown.vue'
 import CirxPriceChart from '~/components/CirxPriceChart.vue'
 import CirxStakingPanel from '~/components/CirxStakingPanel.vue'
-import { getTokenPrices } from '~/services/priceService.js'
-// Import chart data preloading composable
-import { useAggregatePriceFeed } from '~/composables/useAggregatePriceFeed.js'
+import CallToAction from '~/components/CallToAction.vue'
+import GetCircularWalletModal from '~/components/GetCircularWalletModal.vue'
+// Import unified price data composable
+import { usePriceData } from '~/composables/usePriceData.js'
 import { AggregateMarket } from '~/scripts/aggregateMarket.js'
 // Address validation functions can be added here if needed
 // Import backend API integration
@@ -737,11 +667,14 @@ definePageMeta({
 })
 
 // Use AppKit hooks directly for state
-import { isValidEthereumAddress, isValidSolanaAddress, getAddressType } from '~/utils/addressFormatting.js'
+import { useFormattedNumbers } from '~/composables/useFormattedNumbers.js'
 
-// Use AppKit hooks directly
-const { address, isConnected } = useAppKitAccount()
-const { open: openAppKit } = useAppKit()
+// Initialize formatted numbers composable
+const { isValidEthereumAddress, isValidSolanaAddress, getAddressType } = useFormattedNumbers()
+
+// All wallet functionality completely removed
+const address = computed(() => null)
+const isConnected = computed(() => false)
 
 // Forward declare functions that will be defined later
 let handleClickOutside, handleGlobalEnter
@@ -755,11 +688,8 @@ onUnmounted(() => {
   }
 })
 
-// Use Wagmi balance hook directly for ETH balance
-const { data: ethBalanceData } = useBalance({
-  address: address,
-  watch: true
-})
+// Balance is now handled by walletStore
+// Remove custom ethBalanceData implementation
 
 // Wallet state now handled directly by AppKit hooks
 
@@ -773,7 +703,7 @@ const tokenAddresses = {
 
 // Use AppKit composable for opening modal
 const open = () => {
-  openAppKit()
+  console.log('Wallet connection removed')
 }
 
 // Backend API integration
@@ -876,14 +806,14 @@ const isButtonShowingDots = computed(() => {
   )
 })
 
-// Format ETH balance using Wagmi balance data directly
+// Format ETH balance using wallet store balance
 const formattedEthBalance = computed(() => {
-  if (!isConnected || !ethBalanceData.value) {
+  if (!isConnected.value || !null) {
     return '0.000000000000000000'
   }
   
-  // Use Wagmi's formatted balance directly
-  return ethBalanceData.value.formatted
+  // Use wallet store balance
+  return null.formatted || '0.000000000000000000'
 })
 
 // Connection state management
@@ -961,7 +891,7 @@ const {
   error: priceError,
   startPriceUpdates,
   stopPriceUpdates
-} = useAggregatePriceFeed()
+} = usePriceData()
 
 // Chart preloading function - called after swap page loads
 const startChartPreloading = async () => {
@@ -1080,6 +1010,7 @@ const startPriceCountdown = () => {
 const refreshPrices = async () => {
   try {
     isPriceRefreshing.value = true
+    const { getTokenPrices } = usePriceData()
     const prices = await getTokenPrices()
     // Update tracked tokens if present
     livePrices.value = {
@@ -1669,7 +1600,7 @@ const setMaxAmount = () => {
     } else {
       balance = 0 // Other tokens not implemented yet
     }
-    const maxAmount = walletStore.selectedToken === 'ETH' ? balance * 0.95 : balance * 0.99
+    const maxAmount = inputToken === 'ETH' ? balance * 0.95 : balance * 0.99
     inputAmount.value = maxAmount.toFixed(6)
   } else {
     inputAmount.value = '1.0' // Fallback for demo
@@ -1687,7 +1618,7 @@ const forceRefreshBalance = async () => {
 
 const selectToken = (token) => {
   // Token selection now handled by wallet store
-  walletStore.selectInputToken(token)
+  // Token selection functionality removed(token)
   showTokenDropdown.value = false
   // Reset input when token changes
   inputAmount.value = ''
@@ -1698,11 +1629,11 @@ const selectToken = (token) => {
 const autoSelectNativeToken = () => {
   if (connectedWallet.value === 'phantom') {
     // Phantom wallet - select SOL
-    walletStore.selectInputToken('SOL')
+    // Token selection functionality removed('SOL')
     console.log('🪙 Auto-selected SOL for Phantom wallet')
   } else {
     // Ethereum wallets (MetaMask, Coinbase, etc.) - select ETH
-    walletStore.selectInputToken('ETH')
+    // Token selection functionality removed('ETH')
     console.log('🪙 Auto-selected ETH for Ethereum wallet')
   }
 }
@@ -1807,6 +1738,55 @@ const checkBackendHealth = async () => {
   }
 }
 
+// CTA Button Event Handlers
+const handleConnectWallet = async () => {
+  console.log('🔗 handleConnectWallet called - wallet functionality removed')
+  safeToast?.info('Wallet functionality has been removed from this version.', {
+    title: 'Wallet Disabled',
+    autoTimeoutMs: 3000
+  })
+}
+
+const handleEnterAddress = () => {
+  console.log('🎯 handleEnterAddress called - focusing recipient address input')
+  setTimeout(() => {
+    const addressInput = document.querySelector('input[placeholder*="Circular Chain Address"], input[placeholder*="CIRX Wallet Address"]')
+    if (addressInput) {
+      console.log('🎯 Focusing address input from button click')
+      addressInput.focus()
+    } else {
+      console.log('❌ Address input not found in handleEnterAddress')
+    }
+  }, 100)
+}
+
+const handleEnterValidAddress = () => {
+  console.log('🎯 handleEnterValidAddress called - clearing and focusing address input')
+  recipientAddress.value = ''
+  setTimeout(() => {
+    const addressInput = document.querySelector('input[placeholder*="Circular Chain Address"], input[placeholder*="CIRX Wallet Address"]')
+    if (addressInput) {
+      console.log('🎯 Clearing and focusing address input from button click')
+      addressInput.focus()
+    } else {
+      console.log('❌ Address input not found in handleEnterValidAddress')
+    }
+  }, 100)
+}
+
+const handleEnterAmount = () => {
+  console.log('🎯 handleEnterAmount called - focusing amount input')
+  setTimeout(() => {
+    const amountInput = document.querySelector('input[placeholder*="0.0"], input[type="number"]:first-of-type')
+    if (amountInput) {
+      console.log('🎯 Focusing amount input from button click')
+      amountInput.focus()
+    } else {
+      console.log('❌ Amount input not found in handleEnterAmount')
+    }
+  }, 100)
+}
+
 const handleSwap = async () => {
   try {
     console.log('🔥 HANDLESWAP CALLED IN SWAP.VUE!', {
@@ -1820,7 +1800,7 @@ const handleSwap = async () => {
     if (!isConnected && (!recipientAddress.value || recipientAddress.value.trim() === '')) {
       console.log('🔥 State 1: Connect - Opening wallet modal')
       console.log('✅ Opening AppKit modal via composable')
-      openAppKit()
+      console.log('Wallet connection removed')
       return
     }
     
@@ -2126,7 +2106,7 @@ const handleSwap = async () => {
       'ethereum', // payment chain
       recipientAddress.value, // CIRX recipient address
       totalPaymentNeeded, // actual amount paid (includes platform fee)
-      walletStore.selectedToken // payment token
+      inputToken // payment token
     )
     
     console.log('🔥 CALLING BACKEND API with swapData:', swapData)
@@ -2193,7 +2173,7 @@ const handleTierChange = (tier) => {
 
   // When user picks a tier, set the input amount to the minimum USD required for that tier
   // Convert tier.minAmount USD into selected input token units
-  const tokenPriceUsd = livePrices.value[walletStore.selectedToken] || 0
+  const tokenPriceUsd = livePrices.value[inputToken] || 0
   if (tokenPriceUsd > 0 && tier?.minAmount) {
     const feeRate = fees.value.otc
     const feeMultiplier = 1 - feeRate / 100
@@ -2244,7 +2224,7 @@ watch([inputAmount, inputToken, activeTab], async () => {
     try {
       // Auto-select tier when in OTC based on current USD
       if (isOTC) {
-        const tokenPriceUsd = livePrices.value[walletStore.selectedToken] || 0
+        const tokenPriceUsd = livePrices.value[inputToken] || 0
         const inputVal = parseFloat(inputAmount.value) || 0
         // Use gross USD amount (before fees) for tier selection to prevent tier dropping
         const grossUsdAmount = tokenPriceUsd * inputVal
@@ -2712,17 +2692,8 @@ useHead({
 }
 
 .gradient-border:hover {
-  border: 1px solid #ef4444;
-  animation: border-color-cycle 75s ease infinite;
-}
-
-/* Gradient border that's always animated (for modal) */
-.gradient-border-animated {
-  position: relative;
-  border: 1px solid #ef4444;
-  border-radius: 1rem;
-  transition: all 0.3s ease;
-  animation: border-color-cycle 75s ease infinite;
+  border: 1px solid #00ff88;
+  animation: border-color-cycle 24s ease infinite;
 }
 
 @keyframes border-color-cycle {
@@ -2733,198 +2704,7 @@ useHead({
   100% { border-color: #00ff88; }
 }
 
-/* Wallet text - white by default, animated gradient on hover */
-.wallet-text {
-  color: white;
-  transition: all 0.3s ease;
-}
-
-.group:hover .wallet-text {
-  background: linear-gradient(45deg, #00ff88, #00d9ff, #8b5cf6, #a855f7, #00ff88);
-  background-size: 400% 400%;
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: text-gradient-cycle 75s ease infinite;
-}
-
-@keyframes text-gradient-cycle {
-  0% {
-    background-position: 0% 50%;
-  }
-  25% {
-    background-position: 25% 50%;
-  }
-  50% {
-    background-position: 50% 50%;
-  }
-  75% {
-    background-position: 75% 50%;
-  }
-  100% {
-    background-position: 100% 50%;
-  }
-}
-
-/* Space Theme Modal with Particles */
-.space-modal {
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(15, 15, 35, 0.9));
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 
-    0 8px 32px 0 rgba(0, 0, 0, 0.6),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  position: relative;
-  overflow: hidden;
-}
-
-.space-modal::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background-image: 
-    radial-gradient(2px 2px at 20px 30px, rgba(255, 255, 255, 0.8), transparent),
-    radial-gradient(2px 2px at 40px 70px, rgba(200, 200, 255, 0.6), transparent),
-    radial-gradient(1px 1px at 90px 40px, rgba(255, 255, 255, 0.9), transparent),
-    radial-gradient(1px 1px at 130px 80px, rgba(255, 200, 200, 0.5), transparent),
-    radial-gradient(2px 2px at 160px 30px, rgba(255, 255, 255, 0.7), transparent),
-    radial-gradient(1px 1px at 200px 90px, rgba(200, 255, 255, 0.6), transparent),
-    radial-gradient(1px 1px at 240px 50px, rgba(255, 255, 255, 0.8), transparent),
-    radial-gradient(2px 2px at 280px 10px, rgba(255, 255, 255, 0.9), transparent),
-    radial-gradient(1px 1px at 320px 70px, rgba(255, 255, 200, 0.4), transparent),
-    radial-gradient(1px 1px at 360px 20px, rgba(255, 255, 255, 0.7), transparent),
-    radial-gradient(3px 3px at 80px 120px, rgba(255, 255, 255, 0.8), transparent),
-    radial-gradient(1px 1px at 220px 140px, rgba(200, 200, 255, 0.5), transparent),
-    radial-gradient(2px 2px at 300px 100px, rgba(255, 255, 255, 0.6), transparent),
-    radial-gradient(1px 1px at 180px 60px, rgba(255, 200, 255, 0.3), transparent);
-  background-repeat: repeat;
-  background-size: 400px 200px;
-  animation: starsMove 40s linear infinite;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.space-modal::after {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background-image: 
-    radial-gradient(2px 2px at 45px 85px, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.9) 50%, transparent),
-    radial-gradient(1px 1px at 125px 45px, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.7) 50%, transparent),
-    radial-gradient(2px 2px at 245px 125px, rgba(200, 200, 255, 0), rgba(200, 200, 255, 0.8) 50%, transparent),
-    radial-gradient(1px 1px at 315px 65px, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.6) 50%, transparent),
-    radial-gradient(3px 3px at 185px 25px, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.9) 50%, transparent);
-  background-repeat: repeat;
-  background-size: 400px 200px;
-  animation: starsMove 40s linear infinite, randomBlink1 8s ease-in-out infinite;
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* Additional star layers for random blinking */
-.space-modal .star-layer-1 {
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background-image: 
-    radial-gradient(1px 1px at 60px 110px, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.8) 50%, transparent),
-    radial-gradient(2px 2px at 340px 45px, rgba(200, 255, 200, 0), rgba(200, 255, 200, 0.7) 50%, transparent),
-    radial-gradient(1px 1px at 150px 180px, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.6) 50%, transparent);
-  background-repeat: repeat;
-  background-size: 400px 200px;
-  animation: starsMove 40s linear infinite, randomBlink2 12s ease-in-out infinite;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.space-modal .star-layer-2 {
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background-image: 
-    radial-gradient(1px 1px at 275px 155px, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.9) 50%, transparent),
-    radial-gradient(2px 2px at 95px 75px, rgba(255, 200, 255, 0), rgba(255, 200, 255, 0.6) 50%, transparent),
-    radial-gradient(1px 1px at 385px 135px, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.7) 50%, transparent);
-  background-repeat: repeat;
-  background-size: 400px 200px;
-  animation: starsMove 40s linear infinite, randomBlink3 16s ease-in-out infinite;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.space-modal > * {
-  position: relative;
-  z-index: 1;
-}
-
-/* Circular Close Button */
-.close-button-circular {
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(30, 30, 50, 0.8));
-  backdrop-filter: blur(10px);
-  box-shadow: 
-    0 4px 16px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-.close-button-circular:hover {
-  background: linear-gradient(135deg, rgba(20, 20, 20, 0.95), rgba(40, 40, 60, 0.9));
-  transform: translateX(-50%) scale(1.05);
-}
-
-@keyframes starsMove {
-  0% {
-    transform: translateX(0px) translateY(0px) rotate(0deg);
-  }
-  100% {
-    transform: translateX(-400px) translateY(-200px) rotate(90deg);
-  }
-}
-
-@keyframes randomBlink1 {
-  0% { opacity: 0.3; }
-  15% { opacity: 0.8; }
-  20% { opacity: 0.3; }
-  45% { opacity: 0.3; }
-  50% { opacity: 1; }
-  55% { opacity: 0.3; }
-  80% { opacity: 0.3; }
-  85% { opacity: 0.9; }
-  90% { opacity: 0.3; }
-  100% { opacity: 0.3; }
-}
-
-@keyframes randomBlink2 {
-  0% { opacity: 0.4; }
-  25% { opacity: 0.4; }
-  30% { opacity: 0.9; }
-  35% { opacity: 0.4; }
-  65% { opacity: 0.4; }
-  70% { opacity: 1; }
-  75% { opacity: 0.4; }
-  100% { opacity: 0.4; }
-}
-
-@keyframes randomBlink3 {
-  0% { opacity: 0.2; }
-  10% { opacity: 0.7; }
-  15% { opacity: 0.2; }
-  40% { opacity: 0.2; }
-  60% { opacity: 0.2; }
-  65% { opacity: 0.8; }
-  70% { opacity: 0.2; }
-  90% { opacity: 0.2; }
-  95% { opacity: 0.6; }
-  100% { opacity: 0.2; }
-}
+/* Styles for GetCircularWallet modal moved to component */
 
 /* CIRX OTC Connected Swap Fields */
 .swap-container {

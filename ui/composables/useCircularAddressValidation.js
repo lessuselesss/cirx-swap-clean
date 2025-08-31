@@ -6,11 +6,15 @@
  */
 
 import { ref } from 'vue'
+import { useFormattedNumbers } from './useFormattedNumbers.js'
 
 export const useCircularAddressValidation = () => {
   const validationCache = ref(new Map())
   const validationPromises = ref(new Map())
   const networkConfig = ref(null)
+  
+  // Initialize formatted numbers composable
+  const { isValidCircularAddress } = useFormattedNumbers()
 
   // Get backend configuration for network synchronization
   const getBackendConfig = async () => {
@@ -219,18 +223,8 @@ export const useCircularAddressValidation = () => {
    * This defines when the delimiter has "stopped" and validation should occur
    */
   const isValidCircularAddressFormat = (address) => {
-    if (!address || typeof address !== 'string') {
-      return false
-    }
-    
-    const trimmed = address.trim()
-    
-    // Delimiter logic: 0x + exactly 64 hex characters = complete address
-    return (
-      trimmed.startsWith('0x') &&
-      trimmed.length === 66 && // 0x (2) + 64 hex chars
-      /^0x[a-fA-F0-9]{64}$/.test(trimmed)
-    )
+    // Use the consolidated validation function that supports both formats
+    return isValidCircularAddress(address)
   }
 
   /**

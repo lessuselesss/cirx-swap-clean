@@ -79,21 +79,21 @@
           :input-amount="inputAmount"
         />
 
-        <!-- Action Button -->
-        <SwapActionButton
-          :can-purchase="canPurchase"
-          :loading="loading"
-          :loading-text="loadingText"
-          :active-tab="activeTab"
-          :wallet-connected="walletStore.isConnected"
-          :quote="quote"
-          :input-amount="inputAmount"
-          :input-balance="inputBalance"
-          :input-token="inputToken"
-          :eth-balance="awaitedEthBalance"
-          :network-fee-eth="networkFee.eth"
+        <!-- Unified CTA Button -->
+        <CallToAction
+          :wallet-connected="false"
           :recipient-address="recipientAddress"
           :recipient-address-error="recipientAddressError"
+          :input-amount="inputAmount"
+          :input-balance="inputBalance"
+          :eth-balance="ethBalance"
+          :network-fee-eth="networkFee.eth"
+          :input-token="inputToken"
+          :active-tab="activeTab"
+          :loading="loading"
+          :loading-text="loadingText"
+          :can-purchase="canPurchase"
+          :quote="quote"
           @connect-wallet="handleConnectWallet"
           @enter-address="handleEnterAddress"
           @enter-valid-address="handleEnterValidAddress"
@@ -158,25 +158,11 @@
 <script setup>
 import { ref, computed, watch, inject, onBeforeUnmount, nextTick } from 'vue'
 import { validateWalletAddress } from '../utils/validation.js'
+import CallToAction from '~/components/CallToAction.vue'
 
-// Composables and stores with defensive initialization
-let walletStore, contracts, swapLogic, errorHandler
+// All wallet functionality completely removed
 
-try {
-  walletStore = useWalletStore()
-  console.log('✅ WalletStore initialized in SwapForm')
-} catch (error) {
-  console.error('❌ Failed to initialize walletStore in SwapForm:', error)
-  // Create a mock store to prevent crashes
-  walletStore = {
-    isConnected: ref(false),
-    isConnecting: ref(false),
-    activeWallet: ref(null),
-    connectWallet: () => Promise.reject(new Error('Wallet store not available')),
-    clearError: () => {},
-    setSelectedToken: () => {} // Mock for testing
-  }
-}
+let contracts, swapLogic, errorHandler
 
 try {
   contracts = useBackendApi()
@@ -249,16 +235,20 @@ const { otcConfig, discountTiers } = useOtcConfig()
 
 // Computed properties
 const inputBalance = computed(() => {
-  if (!walletStore.isConnected) return '0.0'
-  
-  // Validate wallet supports the selected token
-  try {
-    walletStore.validateWalletForToken(inputToken.value)
-    return contracts.getTokenBalance(inputToken.value)
-  } catch (err) {
-    return '0.0'
-  }
+  // Wallet functionality removed - return placeholder balance
+  return '0.0'
 })
+
+// ETH balance for gas fee calculations
+const ethBalance = computed(() => {
+  // Wallet functionality removed - return placeholder balance
+  return '0'
+})
+
+// Network fee estimation
+const networkFee = computed(() => ({
+  eth: '0.01' // Estimated gas fee in ETH - TODO: implement dynamic gas estimation
+}))
 
 // Pure quote calculation without side effects to prevent focus loss
 const quote = computed(() => {
@@ -345,23 +335,11 @@ watch(() => [cirxAmount.value, lastUpdatedField.value], ([newCirxAmount, field])
 const canPurchase = computed(() => {
   const hasAmount = inputAmount.value && parseFloat(inputAmount.value) > 0
   const notLoading = !loading.value
-  const hasWallet = walletStore.isConnected
   const hasValidRecipient = recipientAddress.value && !recipientAddressError.value
   
-  // Balance validation - only check if wallet is connected
-  const hasSufficientBalance = !walletStore.isConnected || (() => {
-    const inputAmountNum = parseFloat(inputAmount.value) || 0
-    const balanceNum = parseFloat(inputBalance.value) || 0
-    
-    // For ETH, reserve gas fees (0.01 ETH)
-    const gasReserve = inputToken.value === 'ETH' ? 0.01 : 0
-    const availableBalance = Math.max(0, balanceNum - gasReserve)
-    
-    return inputAmountNum <= availableBalance
-  })()
-  
-  // All conditions must be met: amount + no loading + wallet connected + valid recipient + sufficient balance
-  return hasAmount && notLoading && hasWallet && hasValidRecipient && hasSufficientBalance
+  // Wallet functionality removed - simplified validation
+  // Only require amount and valid recipient address
+  return hasAmount && notLoading && hasValidRecipient
 })
 
 // Methods
@@ -399,23 +377,11 @@ const validateRecipientAddress = (address) => {
 }
 
 const handleConnectWallet = async () => {
-  try {
-    error.value = null
-    
-    // Open centralized wallet modal
-    try { useWalletStore().openWalletModal() } catch {}
-    // Optional: keep a small hint
-    toast?.info('Select a wallet to connect.', { title: 'Connect Wallet', autoTimeoutMs: 3000 })
-    
-  } catch (err) {
-    console.error('Wallet connection preparation failed:', err)
-    
-    // Use simpler error handling to avoid triggering critical error
-    toast?.error('Unable to prepare wallet connection. Please refresh the page and try again.', {
-      title: 'Connection Error',
-      autoTimeoutMs: 5000
-    })
-  }
+  // Wallet functionality removed - show placeholder message
+  toast?.info('Wallet functionality has been removed from this version.', {
+    title: 'Wallet Disabled',
+    autoTimeoutMs: 3000
+  })
 }
 
 const handleEnterAddress = () => {
@@ -454,22 +420,11 @@ const handleSwap = async () => {
     loading: loading.value
   })
   
-  // Handle the four CTA states based on wallet connection and address input
-  if (!walletStore.isConnected && !recipientAddress.value) {
-    // State 1: "Connect" - No wallet + no address
-    return handleConnectWallet()
-  }
-  
-  if (!walletStore.isConnected && recipientAddress.value) {
-    // State 2: "Connect Wallet" - Has address but no wallet
-    return handleConnectWallet()
-  }
-  
-  if (walletStore.isConnected && !recipientAddress.value) {
-    // State 3: "Enter Address" - Has wallet but no address
+  // Simplified logic without wallet connection states
+  if (!recipientAddress.value) {
+    // No address entered - focus address input
     console.log('🎯 Enter Address clicked - attempting to focus CIRX address input')
     await nextTick()
-    // Use setTimeout to delay focus and avoid interference from other event handlers
     setTimeout(() => {
       if (recipientAddressInputRef.value) {
         console.log('🎯 Calling focusInput on recipient address (delayed)')
@@ -482,8 +437,8 @@ const handleSwap = async () => {
     return
   }
   
-  if (walletStore.isConnected && recipientAddress.value && recipientAddressError.value) {
-    // State 4: "Enter a Valid Address" - Has wallet + invalid address
+  if (recipientAddress.value && recipientAddressError.value) {
+    // Invalid address - clear and focus address input
     await nextTick()
     if (recipientAddressInputRef.value) {
       recipientAddressInputRef.value.clearAndFocusInput()
@@ -503,17 +458,15 @@ const handleSwap = async () => {
       inputAmount.value,
       inputToken.value,
       recipientAddress.value,
-      walletStore.isConnected
+      false
     )
 
     if (!validation.isValid) {
       throw new Error(validation.errors.join(', '))
     }
 
-    // Get recipient address
-    const recipient = walletStore.isConnected 
-      ? walletStore.activeWallet.address 
-      : recipientAddress.value
+    // Get recipient address (wallet functionality removed)
+    const recipient = recipientAddress.value
 
     // Validate quote
     if (!quote.value) {
@@ -528,23 +481,12 @@ const handleSwap = async () => {
     // Step 2: Create transaction data for MetaMask
     const totalAmount = quote.value.totalPaymentRequired || inputAmount.value
     
-    // Step 3: Execute MetaMask transaction
+    // Step 3: Execute transaction (wallet functionality removed)
     let txHash
-    if (!walletStore.isConnected) {
-      throw new Error('Wallet not connected. Please connect your wallet first.')
-    }
 
     try {
-      // Prepare transaction for MetaMask
-      const txParams = {
-        to: depositAddress,
-        value: inputToken.value === 'ETH' ? 
-          '0x' + Math.floor(parseFloat(totalAmount) * 1e18).toString(16) : '0x0',
-        data: '0x', // Simple transfer, no data needed
-      }
-
-      // Request transaction through wallet
-      txHash = await walletStore.ethereumWallet?.walletClient?.sendTransaction(txParams)
+      // Wallet functionality removed - throw error
+      throw new Error('Transaction functionality has been removed. Wallet integration is disabled.')
       
       if (!txHash) {
         throw new Error('Transaction was rejected or failed')
@@ -682,8 +624,7 @@ watch([activeTab, inputToken], () => {
   // Reset to input field priority when tab/token changes
   lastUpdatedField.value = 'input'
   
-  // Sync selected token to wallet store for header balance display
-  try { useWalletStore().setSelectedToken(inputToken.value) } catch {}
+  // Wallet functionality removed - no token syncing needed
   
   // Handle tier selection based on tab
   if (activeTab.value === 'otc') {
@@ -711,32 +652,7 @@ watch([activeTab, inputToken], () => {
   }
 })
 
-// Watch for token changes to validate wallet compatibility
-watch([inputToken, () => walletStore.activeChain], () => {
-  if (walletStore.isConnected) {
-    try {
-      walletStore.validateWalletForToken(inputToken.value)
-      error.value = null
-    } catch (err) {
-      const processedError = errorHandler.handleError(err, {
-        description: 'Token validation'
-      })
-      
-      // Show as toast for validation errors
-      toast?.warning(processedError.userMessage, {
-        title: 'Token Not Supported',
-        autoTimeoutMs: 4000
-      })
-      
-      // Auto-switch to compatible token
-      if (walletStore.activeChain === 'solana' && ['ETH', 'USDC', 'USDT'].includes(inputToken.value)) {
-        inputToken.value = 'SOL'
-      } else if (walletStore.activeChain === 'ethereum' && inputToken.value === 'SOL') {
-        inputToken.value = 'ETH'
-      }
-    }
-  }
-})
+// Wallet functionality removed - no token validation needed
 
 // Cleanup debounce timers to prevent memory leaks and focus issues
 onBeforeUnmount(() => {

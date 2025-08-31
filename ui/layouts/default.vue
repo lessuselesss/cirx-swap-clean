@@ -15,8 +15,8 @@
             <NuxtLink to="/swap" class="nav-link">
               Swap
             </NuxtLink>
-            <button class="connect-wallet-btn" @click="handleConnectWallet">
-              Connect
+            <button class="connect-wallet-btn" disabled>
+              <span>Connect (Disabled)</span>
             </button>
           </div>
         </nav>
@@ -40,11 +40,7 @@
 </template>
 
 <script setup>
-const { open } = useAppKit()
-
-const handleConnectWallet = () => {
-  open()
-}
+// Wallet functionality completely removed
 </script>
 
 <style scoped>
@@ -64,18 +60,21 @@ const handleConnectWallet = () => {
 }
 
 .connect-wallet-btn {
-  background: white;
-  border: 1px solid #d1d5db;
+  background: #6b7280;
+  border: 1px solid #6b7280;
   border-radius: 6px;
   padding: 0.375rem 0.75rem;
   font-size: 0.875rem;
   font-weight: 500;
-  cursor: pointer;
+  cursor: not-allowed;
   transition: all 0.2s;
+  opacity: 0.6;
+  color: white;
 }
 
-.connect-wallet-btn:hover {
-  background: #f9fafb;
-  border-color: #9ca3af;
+.connect-wallet-btn:disabled {
+  background: #6b7280;
+  border-color: #6b7280;
+  color: white;
 }
 </style>

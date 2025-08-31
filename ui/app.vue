@@ -95,9 +95,8 @@ onErrorCaptured((error, instance, info) => {
   // Check for specific error patterns that should trigger critical error
   const isCriticalError = error.message?.includes('Cannot read properties') || 
                          error.message?.includes('Cannot access before initialization') ||
-                         error.message?.includes('useAccount') ||
-                         error.message?.includes('useBalance') ||
-                         error.message?.includes('useConnect')
+                         error.message?.includes('AppKit') ||
+                         error.message?.includes('Reown')
   
   if (isCriticalError) {
     console.error('🚨 CRITICAL VUE ERROR - triggering global error handler')

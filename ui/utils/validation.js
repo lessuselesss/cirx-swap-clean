@@ -3,7 +3,9 @@
  * Consolidates duplicate validation logic across the codebase
  */
 
-import { isValidEthereumAddress, isValidSolanaAddress, isValidCircularAddress } from './addressFormatting.js'
+import { useFormattedNumbers } from '../composables/useFormattedNumbers.js'
+
+const { isValidEthereumAddress, isValidSolanaAddress, isValidCircularAddress } = useFormattedNumbers()
 
 /**
  * Validate token amount

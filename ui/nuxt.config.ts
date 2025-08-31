@@ -31,7 +31,6 @@ export default defineNuxtConfig({
   modules: [
     '@nuxtjs/tailwindcss', 
     '@pinia/nuxt',
-    '@wagmi/vue/nuxt',
     // '@nuxt/ui' // Temporarily disabled - causing build issues
     'nuxt-icon',
     'unplugin-icons/nuxt',
@@ -67,12 +66,6 @@ export default defineNuxtConfig({
     }
   },
 
-  // Vue configuration for custom elements (AppKit web components)
-  vue: {
-    compilerOptions: {
-      isCustomElement: (tag) => tag.startsWith('w3m-') || tag.startsWith('wui-') || tag.startsWith('appkit-')
-    }
-  },
 
   // Runtime configuration for environment variables
   runtimeConfig: {

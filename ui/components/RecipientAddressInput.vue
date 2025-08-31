@@ -62,7 +62,10 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { getAddressType } from '../utils/addressFormatting.js'
+import { useFormattedNumbers } from '../composables/useFormattedNumbers.js'
+
+// Initialize composable
+const { getAddressType } = useFormattedNumbers()
 
 const props = defineProps({
   modelValue: {

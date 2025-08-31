@@ -15,15 +15,8 @@
         <div class="flex items-start">
           <!-- Icon -->
           <div class="flex-shrink-0">
-            <!-- Wallet Icon (when provided) -->
-            <div v-if="walletIcon" :class="[
-              'w-6 h-6 rounded-full overflow-hidden border-2',
-              type === 'success' ? 'border-green-500' : type === 'error' ? 'border-red-500' : 'border-gray-600/50'
-            ]">
-              <img :src="walletIcon" :alt="title" class="w-full h-full object-cover" @error="$event.target.style.display='none'" />
-            </div>
-            <!-- Default status icons -->
-            <div v-else-if="type === 'success'" class="w-6 h-6 bg-green-500/20 rounded-full flex items-center justify-center">
+            <!-- Default status icons (wallet icon functionality removed) -->
+            <div v-if="type === 'success'" class="w-6 h-6 bg-green-500/20 rounded-full flex items-center justify-center">
               <svg class="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
               </svg>
@@ -71,7 +64,7 @@ const props = defineProps({
   },
   title: String,
   message: String,
-  walletIcon: String,
+  // walletIcon prop removed - wallet functionality disabled
   duration: {
     type: Number,
     default: 4000

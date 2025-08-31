@@ -4,7 +4,9 @@
  */
 
 import { describe, it, expect } from 'vitest'
-import { formatAddress, isValidEthereumAddress, isValidSolanaAddress } from '../addressFormatting'
+import { useFormattedNumbers } from '../../composables/useFormattedNumbers.js'
+
+const { formatAddress, isValidEthereumAddress, isValidSolanaAddress } = useFormattedNumbers()
 import { validateTokenAmount, validateWalletAddress } from '../validation'
 import { formatTokenAmount, formatCurrency, formatPercentage } from '../formatting'
 import { WALLET_METADATA, getWalletMetadata, isWalletSupported } from '../config/walletConfig'
