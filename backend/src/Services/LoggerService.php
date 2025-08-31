@@ -107,13 +107,18 @@ class LoggerService
      */
     private static function addDevelopmentHandlers(Logger $logger, int $logLevel): void
     {
-        // Console/STDOUT handler for development
-        $consoleHandler = new StreamHandler('php://stdout', $logLevel);
-        $consoleHandler->setFormatter(new LineFormatter(
-            "[%datetime%] %channel%.%level_name%: %message% %context% %extra%\n",
-            'Y-m-d H:i:s'
-        ));
-        $logger->pushHandler($consoleHandler);
+        // Console/STDOUT handler for development with error handling
+        try {
+            $consoleHandler = new StreamHandler('php://stdout', $logLevel);
+            $consoleHandler->setFormatter(new LineFormatter(
+                "[%datetime%] %channel%.%level_name%: %message% %context% %extra%\n",
+                'Y-m-d H:i:s'
+            ));
+            $logger->pushHandler($consoleHandler);
+        } catch (\Exception $e) {
+            // Silently fail if stdout is not available (prevents broken pipe crashes)
+            error_log("Warning: Could not create console logger: " . $e->getMessage());
+        }
 
         // File handler for development (if configured)
         $logPath = $_ENV['LOG_FILE_PATH'] ?? 'storage/logs/application.log';
@@ -238,7 +243,27 @@ class LoggerService
             $message .= " [{$responseCode}]";
         }
 
-        $logger->info($message, $logContext);
+        self::safeLog($logger, 'info', $message, $logContext);
+    }
+
+    /**
+     * Safely log a message, catching broken pipe errors
+     */
+    private static function safeLog(Logger $logger, string $level, string $message, array $context = []): void
+    {
+        try {
+            $logger->{$level}($message, $context);
+        } catch (\UnexpectedValueException $e) {
+            if (strpos($e->getMessage(), 'Broken pipe') !== false) {
+                // Silently ignore broken pipe errors to prevent crashes
+                return;
+            }
+            // Re-throw non-broken-pipe logging errors
+            throw $e;
+        } catch (\Exception $e) {
+            // Catch any other logging exceptions to prevent crashes
+            error_log("Logging error: " . $e->getMessage());
+        }
     }
 
     /**

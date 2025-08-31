@@ -162,10 +162,17 @@ class LoggingMiddleware implements MiddlewareInterface
 
         // Log slow requests
         if ($duration > 1000) { // Requests taking more than 1 second
-            LoggerService::getLogger('performance')->warning(
-                "Slow API request: {$method} {$path} took {$duration}ms",
-                $context
-            );
+            try {
+                LoggerService::getLogger('performance')->warning(
+                    "Slow API request: {$method} {$path} took {$duration}ms",
+                    $context
+                );
+            } catch (\UnexpectedValueException $e) {
+                if (strpos($e->getMessage(), 'Broken pipe') === false) {
+                    throw $e;  // Re-throw non-broken-pipe errors
+                }
+                // Silently ignore broken pipe logging errors
+            }
         }
     }
 
@@ -190,10 +197,17 @@ class LoggingMiddleware implements MiddlewareInterface
             'stack_trace' => $exception->getTraceAsString()
         ];
 
-        LoggerService::getLogger('error')->error(
-            "API request error: {$method} {$path} - {$exception->getMessage()}",
-            $context
-        );
+        try {
+            LoggerService::getLogger('error')->error(
+                "API request error: {$method} {$path} - {$exception->getMessage()}",
+                $context
+            );
+        } catch (\UnexpectedValueException $e) {
+            if (strpos($e->getMessage(), 'Broken pipe') === false) {
+                throw $e;  // Re-throw non-broken-pipe errors
+            }
+            // Silently ignore broken pipe logging errors
+        }
     }
 
     /**

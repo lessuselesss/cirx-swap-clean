@@ -402,7 +402,7 @@ $app->group('/api/v1', function ($group) {
         }
     });
     
-    $group->get('/proxy/circular-labs', function (Request $request, Response $response) {
+    $group->map(['GET', 'POST'], '/proxy/circular-labs', function (Request $request, Response $response) {
         try {
             // Get the target endpoint from query parameters
             $endpoint = $request->getQueryParams()['endpoint'] ?? '';
@@ -435,6 +435,19 @@ $app->group('/api/v1', function ($group) {
             curl_setopt($ch, CURLOPT_TIMEOUT, 30);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
             curl_setopt($ch, CURLOPT_USERAGENT, 'CIRX-OTC-Backend/1.0');
+            
+            // Handle POST data if this is a POST request
+            if ($request->getMethod() === 'POST') {
+                $postData = (string) $request->getBody();
+                if (!empty($postData)) {
+                    curl_setopt($ch, CURLOPT_POST, true);
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+                    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                        'Content-Type: application/json',
+                        'Content-Length: ' . strlen($postData)
+                    ]);
+                }
+            }
             
             $data = curl_exec($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);

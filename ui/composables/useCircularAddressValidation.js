@@ -117,7 +117,13 @@ export const useCircularAddressValidation = () => {
         throw new Error(`HTTP ${walletResponse.status}: ${walletResponse.statusText}`)
       }
 
-      const walletData = await walletResponse.json()
+      let walletData
+      try {
+        walletData = await walletResponse.json()
+      } catch (parseError) {
+        console.error('🚨 Failed to parse wallet check response as JSON:', parseError)
+        throw new Error('Server returned invalid response (expected JSON, got HTML/text). Check backend logs.')
+      }
       console.log('🔍 Wallet check response:', walletData)
 
       if (walletData.Result !== 200) {
@@ -148,7 +154,13 @@ export const useCircularAddressValidation = () => {
         throw new Error(`Balance HTTP ${balanceResponse.status}: ${balanceResponse.statusText}`)
       }
 
-      const balanceData = await balanceResponse.json()
+      let balanceData
+      try {
+        balanceData = await balanceResponse.json()
+      } catch (parseError) {
+        console.error('🚨 Failed to parse balance check response as JSON:', parseError)
+        throw new Error('Server returned invalid response (expected JSON, got HTML/text). Check backend logs.')
+      }
       console.log('🔍 Balance check response:', balanceData)
 
       if (balanceData.Result === 200 && balanceData.Response?.Balance !== undefined) {
