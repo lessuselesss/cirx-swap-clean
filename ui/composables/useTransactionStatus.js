@@ -4,9 +4,8 @@
  * Provides real-time transaction status updates with toast notifications
  */
 import { ref, reactive, computed, onUnmounted } from 'vue'
-import { useBackendApi } from './useBackendApi'
-// Import safe toast utility
-import { safeToast } from '~/utils/toast.js'
+import { useBackendApi } from './useBackendAPIs'
+import { safeToast } from '~/composables/useToast' // Import safe toast utility
 
 export function useTransactionStatus() {
   const { apiCall } = useBackendApi()

@@ -210,7 +210,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useBackendApi } from '~/composables/useBackendApi.js'
+import { useBackendApi } from '~/composables/useBackendAPIs.js'
 
 // Page metadata
 definePageMeta({

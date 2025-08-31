@@ -645,17 +645,17 @@ import CirxStakingPanel from '~/components/CirxStakingPanel.vue'
 import CallToAction from '~/components/CallToAction.vue'
 import GetCircularWalletModal from '~/components/GetCircularWalletModal.vue'
 // Import unified price data composable
-import { usePriceData } from '~/composables/usePriceData.js'
-import { AggregateMarket } from '~/scripts/aggregateMarket.js'
+import { usePriceData } from '~/composables/usePriceData'
+import { AggregateMarket } from '~/composables/usePriceData'
 // Address validation functions can be added here if needed
 // Import backend API integration
-import { useBackendApi } from '~/composables/useBackendApi.js'
+import { useBackendApi } from '~/composables/useBackendAPIs'
 // Import real-time transaction updates via IROH
-import { useRealTimeTransactions } from '~/composables/useRealTimeTransactions.js'
+import { useRealTimeTransactions } from '~/composables/useIrohNetwork'
 // Import Circular address validation
-import { useCircularAddressValidation } from '~/composables/useCircularAddressValidation.js'
+import { useCircularAddressValidation } from '~/composables/useValidators'
 // Import safe toast utility
-import { safeToast } from '~/utils/toast.js'
+import { safeToast } from '~/composables/useToast'
 // Extension detection disabled
 // import { detectAllExtensions } from '~/utils/comprehensiveExtensionDetection.js'
 // Removed useCircularChain import - Saturn wallet detection disabled

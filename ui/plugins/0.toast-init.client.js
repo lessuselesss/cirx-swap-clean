@@ -2,7 +2,7 @@
  * Toast initialization plugin
  * Loads safe toast functionality immediately to prevent "toast is not defined" errors
  */
-import { safeToast } from '~/utils/toast.js'
+import { safeToast } from '~/composables/useToast'
 
 export default defineNuxtPlugin(() => {
   // Immediately make safe toast available globally

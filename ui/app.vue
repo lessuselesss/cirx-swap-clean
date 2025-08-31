@@ -41,8 +41,8 @@
 
 <script setup>
 import { ref, onMounted, onErrorCaptured } from 'vue'
-import { useAutoWorker } from '~/composables/useAutoWorker.js'
-import { safeToast } from '~/utils/toast.js'
+import { useAutoWorker } from '~/composables/useAutoWorker'
+import { safeToast } from '~/composables/useToast'
 
 // Global error state
 const globalError = ref(null)

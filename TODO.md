@@ -1,64 +1,197 @@
-# Testing & Code Quality
+# Code Redundancy Refactoring Checklist
 
-- [ ] **CRITICAL: Centralize testing and check test coverage for backend and frontend**
-  - Backend PHPUnit tests are scattered and incomplete 
-  - Need comprehensive test coverage analysis
-  - Frontend testing strategy needs evaluation
-  - Unit tests should have caught the NAG API decimal conversion bug (203.1 CIRX treated as wei)
-  - Add integration tests for all blockchain interactions
+**Generated from neural embeddings analysis of 217 functions**  
+**Date: 2025-08-31**
 
-- [ ] **CRITICAL: Fix status constant naming inconsistency**
-  - Transaction status constants use `SCREAMING_SNAKE_CASE` names but store `lowercase_snake_case` values
-  - Constants should be: `STATUS_PAYMENT_VERIFIED = 'PAYMENT_VERIFIED'` not `'payment_verified'`
-  - Update `src/Models/Transaction.php` constants to match constant names
-  - Create database migration to update existing status values to `SCREAMING_SNAKE_CASE`
-  - Verify all code uses constants instead of hardcoded string values
+## 📋 PHASE 1: Critical Duplicates (Week 1)
 
-# Frontend
+### Day 1: Create Core Utility Files
 
-## **CRITICAL: Centralize Wallet Connection State Management**
+- [ ] **Create `ui/composables/useMathUtils.js`**
+  - [ ] Implement `safeOperation(operation, a, b, fallback)` generic function
+  - [ ] Create `safeDiv`, `safeMul`, `safePercentage` as wrappers
+  - [ ] Add input validation and NaN/Infinity checks
+  - [ ] Write unit tests for edge cases
 
-- [ ] **Fix disconnected wallet connection logic across components**
-  - **Problem**: AppKit integration is centralized but UI components aren't using it
-  - **Current Issue**: `index.vue` has inline button logic, `SwapActionButton.vue` expects `walletConnected` prop
-  - **Solution**: Connect all components to centralized AppKit state
+- [ ] **Create `ui/composables/useFormattingUtils.js`**
+  - [ ] Migrate advanced `formatNumber` (lines 758-803 from useFormattedNumbers.js)
+  - [ ] Migrate `formatCurrency` (lines 857-871)
+  - [ ] Migrate `formatTokenAmount` (lines 811-849)  
+  - [ ] Migrate `formatPercentage` (lines 879-907)
+  - [ ] Remove simple wrapper versions (lines 116-161)
+  - [ ] Test all formatting edge cases
 
-- [ ] **Update SwapActionButton component to use AppKit directly**
-  - Remove `walletConnected` prop requirement 
-  - Import `useAppKitAccount` and use `isConnected` directly
-  - Create computed ref for backwards compatibility with `useSwapButtonState` composable
-  - Ensure all 8 button states work: connect, enter address, enter amount, validation, purchase, etc.
+### Day 2: API Consolidation
 
-- [ ] **Replace inline button logic in index.vue with SwapActionButton component**
-  - Remove duplicate button text logic from template (`v-else-if` chains)
-  - Remove duplicate action logic from `handleSwap()` function  
-  - Use centralized `SwapActionButton` component that handles all states
-  - Pass required props: `activeTab`, `inputAmount`, `recipientAddress`, etc.
+- [ ] **Create `ui/composables/useApiClient.js`**
+  - [ ] Extract common `getHeaders()` logic from useBackendAPIs.js
+  - [ ] Create unified `createApiRequest(method, endpoint, data, options)`
+  - [ ] Merge `handleApiResponse()` error handling
+  - [ ] Add retry logic and timeout handling
 
-- [ ] **Verify all 8 button states work correctly with centralized logic**
-  - State 1: No connection, no address → "Connect" 
-  - State 2: No connection, has address → "Connect Wallet"
-  - State 3: Connected, no address → "Enter Address"
-  - State 4: No amount entered → "Enter an amount"
-  - State 5: Invalid/error address → "Get CIRX Wallet" 
-  - State 6: Connected + valid address + amount → "Buy [Liquid/Vested] CIRX"
-  - State 7: Address validating → "..." (loading states)
-  - State 8: Purchase processing → Loading with custom text
+- [ ] **Update useBackendAPIs.js**
+  - [ ] Replace `initiateSwap` and `getTransactionStatus` with unified client
+  - [ ] Merge `processTransactions` and `triggerManualProcess` (94.6% similarity)
+  - [ ] Remove duplicate error handling code
+  - [ ] Test all API endpoints still work
 
-## **Other Frontend Issues**
+### Day 3-4: Quote System Consolidation
 
-- [ ] cookie page no longer matches the design of this project please update it.
+- [ ] **Create `ui/composables/useQuoteCalculator.js`**
+  - [ ] Merge `getLiquidQuote` and `getOTCQuote` (97.3% similarity)
+    - [ ] Create unified `getQuote(inputToken, inputAmount, { type: 'liquid'|'otc' })`
+    - [ ] Preserve 0.3% vs 0.15% fee difference logic
+    - [ ] Maintain OTC discount calculation
+  - [ ] Merge `calculateQuote` and `calculateReverseQuote` (94.7% similarity)
+    - [ ] Create `calculateQuote(input, { reverse: boolean })`
+    - [ ] Preserve directional calculation logic
+  - [ ] Update imports in `useSwapHandler.js`
 
-- [ ] chart price in the top right takes a very very long time to load the price. the entire chart get's loaded many seconds before the price is rendered??
-- [ ] cirx/usdt dropdown on the chart shouldn't be a dropdown. 
-- [ ] icons for cirx/usdt pair in chart needed 
-- [ ] chart should show standard chart by default
-- [ ] chart should have the same background color as the swap form 
+- [ ] **Update useSwapHandler.js**
+  - [ ] Replace `safeDiv`, `safeMul` with `useMathUtils`
+  - [ ] Update quote functions to use new calculator
+  - [ ] Test swap calculations remain accurate
 
-- [ ] cirx transaction hash on transaction page points to a bogus url.  backend
+### Day 5: Price Data Consolidation
 
-- [ ] ~~transactions are't processing e2e when everything appears to be setup and working fine. why isn't this working? are we removing the '0x' for circular transcations?~~ **RESOLVED: NAG API decimal conversion bug fixed**
+- [ ] **Create `ui/composables/usePriceService.js`**
+  - [ ] Create `fetchPriceWithFallbacks(sources, symbol, pair)` 
+  - [ ] Define price source interfaces for different APIs
+  - [ ] Merge `fetchCIRXFromAggregator` and `fetchCIRXFromCoinGecko` (96.1% similarity)
+  - [ ] Create fallback chain: Aggregator → CoinGecko → DEXTools → Major tokens
 
-ENVs
+- [ ] **Update usePriceData.js**
+  - [ ] Replace individual fetch functions with unified service
+  - [ ] Merge `useSingleExchangeDatafeed` and `createSingleExchangeDatafeed` (97.8% similarity)
+  - [ ] Test price fetching still works with all sources
+  - [ ] Verify TradingView integration remains functional
 
-- [ ] we don't need to set the confirmations for each network. just the confirmations for the network that is provisioned, the rest should work dynamically
+## 📋 PHASE 2: Component Integration (Week 2)
+
+### Day 1-2: Update Component Imports
+
+- [ ] **Find all components using redundant functions**
+  - [ ] Search for imports of formatting functions
+  - [ ] Search for direct usage of `safeDiv`, `safeMul`
+  - [ ] Search for quote calculation calls
+  - [ ] Update imports to use new consolidated utilities
+
+- [ ] **Update component implementations**
+  - [ ] Replace old function calls with new unified APIs
+  - [ ] Update TypeScript types if applicable  
+  - [ ] Test each component individually
+
+### Day 3-4: Error Handling Consolidation
+
+- [ ] **Create `ui/composables/useErrorService.js`**
+  - [ ] Merge `clearError`/`clearAllErrors` from useErrorHandler.js (91.7% similarity)
+  - [ ] Merge `shouldShowAsToast`/`shouldShowInline` (92.6% similarity)
+  - [ ] Create unified error display strategy
+
+- [ ] **Create `ui/composables/useTransactionService.js`**
+  - [ ] Merge `fetchTransactionHistory`/`fetchVestingPositions`/`fetchUserStats` (93% similarity)
+  - [ ] Create generic `fetchUserData(type, userAddress, options)` function
+  - [ ] Maintain individual endpoint configurations
+
+### Day 5: Testing & Validation
+
+- [ ] **Run comprehensive tests**
+  - [ ] Test all swap calculations with various inputs
+  - [ ] Verify price data fetching from all sources
+  - [ ] Test error handling scenarios
+  - [ ] Check formatting edge cases
+  - [ ] Validate API calls still work
+
+- [ ] **Performance testing**
+  - [ ] Measure bundle size reduction
+  - [ ] Check for any performance regressions
+  - [ ] Verify memory usage improvements
+
+## 📋 PHASE 3: Architecture Cleanup (Week 3)
+
+### Day 1-2: Directory Restructuring
+
+- [ ] **Create new directory structure**
+  ```
+  ui/composables/
+  ├── core/
+  │   ├── useApiClient.js      ✅ Created
+  │   ├── useFormattingUtils.js ✅ Created 
+  │   ├── useMathUtils.js      ✅ Created
+  │   └── useErrorService.js    ✅ Created
+  ├── features/
+  │   ├── useSwapLogic.js      (cleaned up)
+  │   ├── usePriceService.js   ✅ Created
+  │   └── useTransactionService.js ✅ Created
+  └── utils/
+      ├── validators.js        (address validation)
+      └── constants.js         (shared constants)
+  ```
+
+- [ ] **Remove redundant code**
+  - [ ] Delete duplicate functions from original files
+  - [ ] Clean up imports and exports
+  - [ ] Update internal cross-references
+
+### Day 3-4: Final Integration
+
+- [ ] **Update all remaining files**
+  - [ ] Scan for any missed references to old functions
+  - [ ] Update TypeScript definitions
+  - [ ] Fix any circular dependency issues
+  - [ ] Clean up unused imports
+
+### Day 5: Documentation & Cleanup
+
+- [ ] **Update documentation**
+  - [ ] Document new utility APIs
+  - [ ] Add migration guide for future developers
+  - [ ] Update component examples
+
+- [ ] **Final validation**
+  - [ ] Run full test suite
+  - [ ] Test complete user flows (swap, price checking, etc.)
+  - [ ] Verify no console errors or warnings
+  - [ ] Check bundle size reduction metrics
+
+## ✅ SUCCESS CRITERIA
+
+- [ ] **Code Reduction**: Achieve 30-40% reduction in functions (217 → ~130)
+- [ ] **Eliminate Critical Duplicates**: All >90% similar functions consolidated  
+- [ ] **Maintain Functionality**: All existing features work identically
+- [ ] **Bundle Size**: Measurable reduction in JavaScript bundle size
+- [ ] **Developer Experience**: Cleaner, more consistent APIs
+- [ ] **Test Coverage**: Maintain or improve existing test coverage
+
+## 🚨 CRITICAL DEPENDENCIES TO PRESERVE
+
+- [ ] **External Dependencies**
+  - [ ] Vue Composition API (`ref`, `computed`, `watch`)
+  - [ ] Viem utilities for Web3 operations
+  - [ ] TradingView charting library API compliance
+  - [ ] Runtime config access patterns
+
+- [ ] **Cross-File Dependencies**  
+  - [ ] `usePriceData` import in `useSwapHandler` (line 57)
+  - [ ] Environment variables and API configurations
+  - [ ] Token address constants and contract ABIs
+  - [ ] Backend API endpoint URL structure
+
+## 📊 TRACKING PROGRESS
+
+**Current Status**: ⏳ Ready to start Phase 1
+- Total Functions: 217
+- Critical Duplicates: 45+ functions >90% similarity  
+- Target Functions: ~130 (40% reduction)
+- Estimated Completion: 3 weeks
+
+---
+
+## 🎯 IMMEDIATE NEXT STEPS
+
+1. **Start with Day 1 tasks** - Create `useMathUtils.js` and `useFormattingUtils.js`
+2. **Focus on highest similarity functions first** (97%+ similarity)
+3. **Test each consolidation incrementally** to avoid breaking functionality
+4. **Preserve all existing APIs** during transition phase
+
+*This checklist was generated from neural embeddings analysis showing 45+ functions with >90% semantic similarity that can be safely consolidated.*

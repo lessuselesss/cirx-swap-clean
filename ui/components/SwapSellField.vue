@@ -46,7 +46,7 @@
 </template>
 
 <script setup>
-import { useNumberInput } from '~/composables/useNumberInput'
+import { useNumberInput } from '~/composables/UseFormattedNumbers'
 import { watch } from 'vue'
 
 const props = defineProps({
