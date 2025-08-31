@@ -4,11 +4,11 @@
  * Provides real-time transaction status updates with toast notifications
  */
 import { ref, reactive, computed, onUnmounted } from 'vue'
-import { useBackendApi } from './useBackendAPIs'
+import { useApiClient } from './useApiClient.js'
 import { safeToast } from '~/composables/useToast' // Import safe toast utility
 
 export function useTransactionStatus() {
-  const { apiCall } = useBackendApi()
+  const apiClient = useApiClient()
   
   // State management
   const transactions = ref(new Map())
@@ -134,7 +134,9 @@ export function useTransactionStatus() {
 
     const pollStatus = async () => {
       try {
-        const response = await apiCall(`/transactions/${transactionId}/status`, 'GET')
+        const response = await apiClient.get(`/transactions/${transactionId}/status`, {
+          context: { operation: 'transaction_status_poll', transactionId }
+        })
         
         if (response.success) {
           const statusData = response.data

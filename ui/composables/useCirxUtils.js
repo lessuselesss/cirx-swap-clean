@@ -1,6 +1,5 @@
 /**
  * CIRX Business Logic Utilities
- * Extracted from useBackendAPIs.js to separate concerns
  * Contains deposit addresses, quote calculations, validation, and transaction helpers
  */
 import { computed } from 'vue'

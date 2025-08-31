@@ -210,7 +210,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useBackendApi } from '~/composables/useBackendAPIs.js'
+import { useApiClient } from '~/composables/useApiClient.js'
 
 // Page metadata
 definePageMeta({
@@ -218,8 +218,8 @@ definePageMeta({
   layout: 'default'
 })
 
-// Backend API integration
-const { getTransactionStatus } = useBackendApi()
+// API client integration
+const apiClient = useApiClient()
 
 // Component state
 const swapId = ref('')
@@ -321,12 +321,24 @@ const checkStatus = async () => {
     error.value = null
     status.value = null
 
-    console.log('📡 Calling getTransactionStatus API...')
-    const result = await getTransactionStatus(swapId.value)
+    console.log('📡 Calling transaction status API...')
+    const result = await apiClient.get(`/transactions/${swapId.value}/status`, {
+      context: { operation: 'transaction_status_check', swapId: swapId.value }
+    })
     console.log('📦 API Response:', result)
     
     if (result.success) {
-      status.value = result
+      // Transform the response to match expected format
+      status.value = {
+        success: true,
+        status: result.data.status,
+        message: result.data.message,
+        txId: result.data.payment_info?.payment_tx_id || result.data.txId,
+        cirxTransferTxId: result.data.recipient_info?.cirx_transfer_tx_id || result.data.cirxTransferTxId || null,
+        phase: result.data.phase,
+        progress: result.data.progress,
+        transactionId: result.data.transaction_id
+      }
       console.log('✅ Status updated successfully')
     } else {
       error.value = 'Failed to fetch transaction status'

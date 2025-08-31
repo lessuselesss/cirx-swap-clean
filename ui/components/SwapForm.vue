@@ -159,19 +159,27 @@
 import { ref, computed, watch, inject, onBeforeUnmount, nextTick } from 'vue'
 import { validateWalletAddress } from '../utils/validation.js'
 import CallToAction from '~/components/CallToAction.vue'
+import { useApiClient } from '~/composables/useApiClient.js'
+import { useCirxUtils } from '~/composables/useCirxUtils.js'
 
 // All wallet functionality completely removed
 
 let contracts, swapLogic, errorHandler
 
 try {
-  contracts = useBackendApi()
-  console.log('✅ Backend API initialized in SwapForm')
+  const apiClient = useApiClient()
+  const cirxUtils = useCirxUtils()
+  
+  contracts = {
+    calculateCirxQuote: cirxUtils.calculateCirxQuote,
+    isLoading: apiClient.isLoading
+  }
+  
+  console.log('✅ Unified API client initialized in SwapForm')
 } catch (error) {
-  console.error('❌ Failed to initialize backend API in SwapForm:', error)
+  console.error('❌ Failed to initialize API client in SwapForm:', error)
   contracts = {
     calculateCirxQuote: () => ({ cirxAmount: '0', platformFee: { token: '0' } }),
-    initiateSwap: () => Promise.reject(new Error('Backend API not available')),
     isLoading: ref(false)
   }
 }

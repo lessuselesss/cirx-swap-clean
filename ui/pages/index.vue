@@ -648,8 +648,9 @@ import GetCircularWalletModal from '~/components/GetCircularWalletModal.vue'
 import { usePriceData } from '~/composables/usePriceData'
 import { AggregateMarket } from '~/composables/usePriceData'
 // Address validation functions can be added here if needed
-// Import backend API integration
-import { useBackendApi } from '~/composables/useBackendAPIs'
+// Import unified API client and CIRX utilities
+import { useApiClient } from '~/composables/useApiClient.js'
+import { useCirxUtils } from '~/composables/useCirxUtils.js'
 // Import real-time transaction updates via IROH
 import { useRealTimeTransactions } from '~/composables/useIrohNetwork'
 // Import Circular address validation
@@ -707,19 +708,16 @@ const open = () => {
 }
 
 // Backend API integration
+// API client and CIRX utilities
+const apiClient = useApiClient()
 const {
-  initiateSwap,
-  getTransactionStatus,
-  getCirxBalance,
   calculateCirxQuote,
   getDepositAddress,
   validateCircularAddress,
   createSwapTransaction,
-  isLoading: backendLoading,
-  lastError: backendError,
   DEPOSIT_ADDRESSES,
-  tokenPrices: backendTokenPrices
-} = useBackendApi()
+  TOKEN_PRICES: backendTokenPrices
+} = useCirxUtils()
 
 // Real-time transaction updates via IROH
 const {
@@ -2113,7 +2111,18 @@ const handleSwap = async () => {
     
     let result
     try {
-      result = await initiateSwap(swapData)
+      const apiResponse = await apiClient.post('/transactions/initiate-swap', swapData, {
+        validateData: apiClient.validators.swapData,
+        context: { operation: 'initiate_swap', transactionHash }
+      })
+      
+      result = {
+        success: apiResponse.success,
+        swapId: apiResponse.data.swapId,
+        message: apiResponse.data.message,
+        status: apiResponse.data.status
+      }
+      
       console.log('🔥 BACKEND API SUCCESS:', result)
       
       // Show success notification
