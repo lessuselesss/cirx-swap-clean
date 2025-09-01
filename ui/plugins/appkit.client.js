@@ -78,40 +78,60 @@ export default defineNuxtPlugin((nuxtApp) => {
       icons: ['https://avatars.githubusercontent.com/u/179229932?s=200&v=4']
     }
     
-    // Create AppKit with the wagmi adapter
+    // Create AppKit with proper Vue integration - prevents Lit component update scheduling issues
     const appKit = createAppKit({
       adapters: [wagmiAdapter],
       networks,
       projectId,
       metadata,
       themeMode: 'dark',
+      // Re-enable essential features for full AppKit functionality
       features: {
         analytics: false,
         email: false,
-        socials: []
-      }
+        socials: [],
+        // Re-enable these essential features
+        history: true,
+        onramp: true,
+        swaps: true
+      },
+      // Add allowUnsupportedChain to reduce state changes
+      allowUnsupportedChain: true,
+      // Keep wallet connection options enabled
+      enableWalletConnect: true,
+      enableInjected: true,
+      enableEIP6963: true,
+      enableCoinbase: true
     })
     
-    // Make AppKit available globally for debugging
+    // Make AppKit available globally with better error handling
     if (typeof window !== 'undefined') {
       window.$appKit = appKit
       
-      // Add event listeners for debugging connection issues
+      // Throttle state change logging to prevent excessive updates
+      let lastStateLog = 0
+      const STATE_LOG_THROTTLE = 1000 // 1 second
+      
       appKit.subscribeState((state) => {
-        console.log('🔄 AppKit state change:', {
-          open: state.open,
-          selectedNetworkId: state.selectedNetworkId,
-          loading: state.loading
-        })
+        const now = Date.now()
+        if (now - lastStateLog > STATE_LOG_THROTTLE) {
+          console.log('🔄 AppKit state change:', {
+            open: state.open,
+            selectedNetworkId: state.selectedNetworkId,
+            loading: state.loading
+          })
+          lastStateLog = now
+        }
       })
       
-      // Simple debugging without aggressive cleanup
+      // Delayed debugging to avoid initialization conflicts
       setTimeout(() => {
         console.log('🔍 AppKit debugging:')
         console.log('- window.ethereum present:', !!window.ethereum)
         console.log('- MetaMask detected:', !!window.ethereum?.isMetaMask)
         console.log('- Current account:', appKit.getAccount?.()?.address || 'None')
-      }, 1000)
+        console.log('- AppKit modal element:', !!document.querySelector('w3m-modal'))
+      }, 2000)
     }
     
     console.log('✅ Reown AppKit plugin initialized successfully')

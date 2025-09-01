@@ -530,10 +530,11 @@
               :quote="quote"
               :debug="true"
               @connect-wallet="handleConnectWallet"
-              @enter-address="handleEnterAddress"
-              @enter-valid-address="handleEnterValidAddress"
-              @enter-amount="handleEnterAmount"
-              @click="handleSwap"
+              @focus-address="handleFocusAddress"
+              @clear-and-focus-address="handleClearAndFocusAddress"
+              @focus-amount="handleFocusAmount"
+              @get-cirx-wallet="handleGetCirxWallet"
+              @click="handleSwapFromCTA"
             />
           </form>
         </div>
@@ -685,13 +686,14 @@ import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 // AppKit handled by web components - no direct imports needed
 import { parseEther, parseUnits } from 'viem'
 // Import components
-// WalletButton import removed - wallet functionality disabled
+// AppKit wallet integration now handles all wallet functionality
 import ConnectionToast from '~/components/ConnectionToast.vue'
 import OtcDiscountDropdown from '~/components/OtcDiscountDropdown.vue'
 import CirxPriceChart from '~/components/CirxPriceChart.vue'
 import CirxStakingPanel from '~/components/CirxStakingPanel.vue'
 import CallToAction from '~/components/CallToAction.vue'
 import GetCircularWalletModal from '~/components/GetCircularWalletModal.vue'
+import { useCTAState } from '~/composables/core/useCallToActionState.js'
 // Import unified price data composable
 import { usePriceData } from '~/composables/usePriceData'
 // AggregateMarket consolidated into unified price service
@@ -707,7 +709,7 @@ import { useCircularAddressValidation } from '~/composables/utils/validators'
 import { safeToast } from '~/composables/useToast'
 // Extension detection disabled
 // import { detectAllExtensions } from '~/utils/comprehensiveExtensionDetection.js'
-// Removed useCircularChain import - Saturn wallet detection disabled
+// AppKit handles all wallet detection and connection
 
 // Page metadata
 definePageMeta({
@@ -719,6 +721,12 @@ definePageMeta({
 import { useFormattedNumbers } from '~/composables/useFormattedNumbers.js'
 // Import enhanced wallet composable with centralized balance management
 import { useAppKitWallet } from '~/composables/useAppKitWallet.js'
+// Import swap logic composable to replace duplicate implementations
+import { useSwapLogic } from '~/composables/useSwapHandler.js'
+// Import formatting utilities
+import { useSwapFormatting } from '~/composables/features/useSwapFormatting.js'
+// Import validation logic composable  
+import { useSwapValidation } from '~/composables/features/useSwapValidation.js'
 
 // Initialize formatted numbers composable
 const { isValidEthereumAddress, isValidSolanaAddress, getAddressType } = useFormattedNumbers()
@@ -777,6 +785,37 @@ const {
   DEPOSIT_ADDRESSES,
   TOKEN_PRICES: backendTokenPrices
 } = useCirxUtils()
+
+// Swap logic composable - replaces duplicate local implementations
+const swapLogic = useSwapLogic()
+const {
+  calculateQuote: swapCalculateQuote,
+  calculateReverseQuote: swapCalculateReverseQuote,
+  calculateDiscount: swapCalculateDiscount,
+  refreshPrices: swapRefreshPrices,
+  getTokenPrice: swapGetTokenPrice,
+  formatNumber: swapFormatNumber,
+  tokenPrices: swapTokenPrices,
+  fees: swapFees,
+  discountTiers: swapDiscountTiers,
+  qualifiesForOTC: swapQualifiesForOTC,
+  validateSwap: swapValidateSwap,
+  calculateMaxAmount: swapCalculateMaxAmount
+} = swapLogic
+
+// Formatting utilities composable
+const {
+  hexToBigInt,
+  formatBalance: swapFormatBalance, // Original from useSwapFormatting
+  formatAmount,
+  formatTokenBalance,
+  getExchangeRateDisplay,
+  getNewCirxBalance
+} = useSwapFormatting()
+
+// Use consolidated formatBalance from useFormattingUtils
+import { useFormattingUtils } from '~/composables/core/useFormattingUtils.js'
+const { formatBalance, formatWithCommas } = useFormattingUtils()
 
 // Real-time transaction updates via IROH
 const {
@@ -840,7 +879,7 @@ const handleCircularToast = ({ type, title, message }) => {
   }
 }
 
-// Saturn wallet detection disabled - using static CIRX values
+// Using AppKit for wallet balances - static values for development
 const isCircularChainAvailable = computed(() => false)
 const isCircularChainConnected = computed(() => false)
 
@@ -969,6 +1008,90 @@ const isBackendConnected = ref(true)
 const backendHealthCheckInterval = ref(null)
 // Track address validation state
 const addressValidationState = ref('idle') // 'idle', 'validating', 'valid', 'invalid'
+
+// Initialize swap validation composable with validation state
+const swapValidation = useSwapValidation({
+  recipientAddressError,
+  recipientAddressType,
+  addressValidationState,
+  hasClickedEnterAddress
+})
+
+// Safely destructure with fallbacks to prevent undefined errors
+const { 
+  validateNumberInput = (e) => true,
+  validateRecipientAddress = async () => {},
+  validateRecipientAddressSync = () => {},
+  createCanPurchaseValidator = () => () => true,
+  createAddressWatcher = () => {}
+} = swapValidation || {}
+
+// Initialize CTA state composable with handlers
+const ctaState = useCTAState({
+  isConnected,
+  recipientAddress,
+  recipientAddressError,
+  inputAmount,
+  addressValidationState,
+  activeTab,
+  quote
+})
+
+const {
+  handleConnectWallet: ctaHandleConnectWallet,
+  handleFocusAddress: ctaHandleFocusAddress,
+  handleClearAndFocusAddress: ctaHandleClearAndFocusAddress,
+  handleFocusAmount: ctaHandleFocusAmount,
+  handleFocusAmountInput: ctaHandleFocusAmountInput,
+  handleGetCirxWallet: ctaHandleGetCirxWallet,
+  handleSwap: ctaHandleSwap
+} = ctaState
+
+// Create wrapper functions that handle emit functionality with MetaMask sync
+const handleConnectWallet = async () => {
+  console.log('🔄 handleConnectWallet called - checking for MetaMask sync first...')
+  
+  // First try to sync with MetaMask if it's connected but AppKit isn't
+  if (window.ethereum && window.ethereum.selectedAddress && !isConnected?.value) {
+    console.log('🔗 MetaMask connected but AppKit not synced - attempting sync...')
+    try {
+      // Call our improved sync function from the AppKit wallet composable
+      const syncSuccessful = await syncWithMetaMask()
+      
+      // Wait for state to update
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      // Check if sync worked
+      if (syncSuccessful && isConnected?.value) {
+        console.log('✅ MetaMask sync successful - wallet now connected!')
+        return
+      } else {
+        console.log('⚠️ MetaMask sync didn\'t update AppKit state - proceeding with CTA handler')
+      }
+    } catch (error) {
+      console.warn('❌ MetaMask sync failed:', error)
+    }
+  }
+  
+  // If no MetaMask sync needed or sync failed, use the CTA handler
+  ctaHandleConnectWallet()
+}
+
+const handleFocusAddress = () => ctaHandleFocusAddress()
+const handleClearAndFocusAddress = () => ctaHandleClearAndFocusAddress()
+const handleFocusAmount = () => ctaHandleFocusAmount()
+
+// Handle getting CIRX wallet modal
+const handleGetCirxWallet = () => {
+  showConfirmationModal.value = true
+}
+
+// Handle swap transaction - delegate to existing swap logic
+const handleSwapFromCTA = () => {
+  // Pass the real handleSwap controller function to the CTA handler
+  ctaHandleSwap(handleSwap)
+}
+
 // Modal state for State 6
 const showConfirmationModal = ref(false)
 
@@ -991,12 +1114,7 @@ const timerProgress = computed(() => {
   return offset
 })
 
-const hexToBigInt = (hex) => {
-  try {
-    if (typeof hex !== 'string') return 0n
-    return BigInt(hex)
-  } catch { return 0n }
-}
+// hexToBigInt function moved to useSwapFormatting composable
 
 const fetchGasPrice = async () => {
   try {
@@ -1090,12 +1208,7 @@ setInterval(() => {
 }, 1000)
 
 // Helper function to format token balance
-const formatTokenBalance = (balanceData) => {
-  if (!balanceData) return '0.000000000000000000'
-  const amount = parseFloat(balanceData.formatted)
-  if (isNaN(amount)) return '0.000000000000000000'
-  return amount.toFixed(18)
-}
+// formatTokenBalance function moved to useSwapFormatting composable
 
 // inputBalance logic moved to wallet store - removed orphaned local balance logic
 
@@ -1147,8 +1260,8 @@ const shouldPositionLeft = computed(() => {
 //   USDT: 1
 // }
 
-// Dynamic fee structure
-const fees = computed(() => otcConfig.value.fees)
+// Use composable fee structure with local fallback
+const fees = computed(() => swapFees.value || otcConfig.value.fees)
 
 // Dynamic OTC configuration from hosted JSON
 const otcConfig = ref({
@@ -1200,8 +1313,8 @@ const fetchOtcConfig = async () => {
   }
 }
 
-// Use dynamic discount tiers
-const discountTiers = computed(() => otcConfig.value.discountTiers)
+// Use composable discount tiers with local fallback
+const discountTiers = computed(() => swapDiscountTiers.value || otcConfig.value.discountTiers)
 
 // Helpers for tier UI
 const currentUsd = computed(() => {
@@ -1216,65 +1329,21 @@ const lowestTierMin = computed(() => {
 })
 
 // Computed properties  
-const canPurchase = computed(() => {
-  try {
-    // Basic requirements
-    const hasAmount = inputAmount.value && parseFloat(inputAmount.value) > 0
-    const notLoading = !loading.value && !quoteLoading.value && !reverseQuoteLoading.value
-    
-    // Address validation
-    const addressValid = validateRecipientAddress(recipientAddress.value)
-    
-    // Either connected wallet OR valid recipient address required
-    const connected = isConnected?.value || false
-    const hasValidRecipient = connected || (recipientAddress.value && addressValid)
-    
-    // Balance validation - only check if wallet is connected
-    const hasSufficientBalance = !connected || (() => {
-      const inputAmountNum = parseFloat(inputAmount.value) || 0
-      const balanceNum = parseFloat(inputBalance.value) || 0
-      
-      // For ETH, reserve gas fees (0.01 ETH)
-      const gasReserve = inputToken.value === 'ETH' ? 0.01 : 0
-      const availableBalance = Math.max(0, balanceNum - gasReserve)
-      
-      return inputAmountNum <= availableBalance
-    })()
-    
-    // Network fee gating
-    const ethBal = parseFloat(awaitedEthBalance.value) || 0
-    const feeEth = parseFloat(networkFee.value?.eth || '0') || 0
-    const tokenBal = parseFloat(inputBalance.value) || 0
-
-    let hasSufficientForFees = true
-    if (isConnected) {
-      if (inputToken.value === 'ETH') {
-        hasSufficientForFees = ethBal >= ((parseFloat(inputAmount.value) || 0) + (feeEth || 0))
-      } else {
-        hasSufficientForFees = tokenBal >= (parseFloat(inputAmount.value) || 0) && ethBal >= (feeEth || 0)
-      }
-    }
-
-    const result = hasAmount && notLoading && hasValidRecipient && hasSufficientBalance && hasSufficientForFees
-    
-    console.log('🔥 canPurchase DEBUG:', {
-      hasAmount,
-      notLoading,
-      hasValidRecipient,
-      hasSufficientBalance,
-      hasSufficientForFees,
-      result,
-      inputAmount: inputAmount.value,
-      inputBalance: inputBalance.value,
-      ethBalance: awaitedEthBalance.value,
-      networkFee: networkFee.value
-    })
-    
-    return result
-  } catch (error) {
-    console.error('❌ Error in canPurchase computed:', error)
-    return false
-  }
+// Use validation composable for canPurchase logic
+const canPurchase = createCanPurchaseValidator({
+  inputAmount,
+  recipientAddress,
+  loading,
+  quoteLoading,
+  reverseQuoteLoading,
+  isConnected,
+  inputBalance,
+  inputToken,
+  awaitedEthBalance,
+  isBackendConnected,
+  hasValidQuote: computed(() => !!quote.value),
+  minPurchaseAmount: computed(() => null), // No minimum for now
+  isOtcMode: computed(() => false) // Not in OTC mode for now
 })
 
 // Calculate discount based on USD amount and return both percent and tier
@@ -1288,10 +1357,8 @@ const getTierForUsd = (usdAmount) => {
   return null
 }
 
-const calculateDiscount = (usdAmount) => {
-  const tier = getTierForUsd(usdAmount)
-  return tier ? tier.discount : 0
-}
+// Use composable implementation
+const calculateDiscount = swapCalculateDiscount
 
 // Calculate quote for purchase (forward: input token -> CIRX)
 const calculateQuote = (amount, token, isOTC = false) => {
@@ -1316,44 +1383,24 @@ const calculateQuote = (amount, token, isOTC = false) => {
       totalPaymentRequired: quoteResult.totalPaymentRequired
     }
   } catch (error) {
-    console.error('Backend quote calculation failed, using fallback:', error)
+    console.error('Backend quote calculation failed, using composable fallback:', error)
     
-    // Fallback to simplified logic if backend fails
-    const inputValue = parseFloat(amount)
-    const tokenPriceUsd = backendTokenPrices[token] || livePrices.value[token] || 0
-    
-    if (tokenPriceUsd <= 0) return null
-    
-    const totalUsdValue = inputValue * tokenPriceUsd
-    
-    // Base rate: $2.50 per CIRX
-    let cirxAmount = totalUsdValue / 2.5
-    let discount = 0
-    
-    if (isOTC) {
-      if (totalUsdValue >= 50000) {
-        discount = 12
-      } else if (totalUsdValue >= 10000) {
-        discount = 8
-      } else if (totalUsdValue >= 1000) {
-        discount = 5
-      }
-      
-      if (discount > 0) {
-        cirxAmount = cirxAmount * (1 + discount / 100)
+    // Fallback to composable implementation
+    const composableQuote = swapCalculateQuote(amount, token, isOTC)
+    if (composableQuote) {
+      return {
+        cirxAmount: composableQuote.cirxAmountFormatted || composableQuote.cirxAmount,
+        usdValue: composableQuote.inputUsdValue,
+        rate: (composableQuote.cirxAmount / parseFloat(amount)).toFixed(6),
+        inverseRate: (parseFloat(amount) / composableQuote.cirxAmount).toFixed(8),
+        discount: composableQuote.discount || 0,
+        fee: composableQuote.feeRate || (isOTC ? 0.15 : 0.3),
+        platformFee: composableQuote.feeUsd || 0,
+        totalPaymentRequired: amount // Simplified for fallback
       }
     }
     
-    const rate = cirxAmount / inputValue
-    
-    return {
-      rate: rate.toFixed(6),
-      inverseRate: (1 / rate).toFixed(8),
-      fee: isOTC ? 0.15 : 0.3,
-      discount: discount,
-      cirxAmount: cirxAmount.toFixed(6),
-      usdValue: totalUsdValue.toFixed(2)
-    }
+    return null
   }
 }
 
@@ -1374,40 +1421,20 @@ const calculateQuoteAsync = async (amount, token, isOTC = false) => {
 }
 
 // Reverse quote (output CIRX -> required input token amount)
+// Use composable implementation with fallback to local logic for UI consistency
 const calculateReverseQuote = (cirxAmt, token, isOTC = false) => {
-  const cirxValue = parseFloat(cirxAmt)
-  if (!cirxValue || cirxValue <= 0) return null
-
-  const tokenPriceUsd = livePrices.value[token] || 0
-  const cirxPriceUsd = livePrices.value.CIRX || 0
-  if (tokenPriceUsd <= 0 || cirxPriceUsd <= 0) return null
-
-  // USD value of desired CIRX
-  let usdNeeded = cirxValue * cirxPriceUsd
-
-  // Remove OTC bonus to find base after-fee requirement
-  let discount = 0
-  if (isOTC) {
-    discount = calculateDiscount(usdNeeded)
-    const bonusMultiplier = 1 + discount / 100
-    usdNeeded = usdNeeded / bonusMultiplier
+  const composableQuote = swapCalculateReverseQuote(cirxAmt, token, isOTC)
+  if (composableQuote) {
+    // Build forward quote for UI consistency
+    const forward = calculateQuote(composableQuote.inputAmount.toString(), token, isOTC)
+    
+    return {
+      inputAmount: composableQuote.inputAmount,
+      forwardQuote: forward
+    }
   }
-
-  // amountAfterFee (in input token units)
-  const feeRate = isOTC ? fees.value.otc : fees.value.liquid
-  const feeMultiplier = 1 - feeRate / 100
-  if (feeMultiplier <= 0) return null
-
-  const amountAfterFeeTokens = usdNeeded / tokenPriceUsd
-  const inputAmountNeeded = amountAfterFeeTokens / feeMultiplier
-
-  // Build forward quote for UI consistency
-  const forward = calculateQuote(inputAmountNeeded.toString(), token, isOTC)
-
-  return {
-    inputAmount: inputAmountNeeded,
-    forwardQuote: forward
-  }
+  
+  return null
 }
 
 const calculateReverseQuoteAsync = async (cirxAmt, token, isOTC = false) => {
@@ -1482,69 +1509,19 @@ const getTokenSymbol = (token) => {
   return symbolMap[token] || token
 }
 
-const formatBalance = (balance) => {
-  const num = parseFloat(balance)
-  if (num === 0 || isNaN(num)) return '0.0'
-  
-  const str = num.toString()
-  const [integer, decimal] = str.split('.')
-  
-  if (!decimal) return integer + '.0'
-  
-  // Find first non-zero digit in decimal
-  let firstNonZeroIndex = -1
-  for (let i = 0; i < decimal.length; i++) {
-    if (decimal[i] !== '0') {
-      firstNonZeroIndex = i
-      break
-    }
-  }
-  
-  if (firstNonZeroIndex === -1) {
-    // All decimal digits are zero
-    return integer + '.0'
-  }
-  
-  // Include up to and including the first non-zero decimal digit
-  const truncatedDecimal = decimal.substring(0, firstNonZeroIndex + 1)
-  return integer + '.' + truncatedDecimal
-}
+// Validation composable initialized after validation state declarations
 
-const getExchangeRateDisplay = () => {
-  const cirxAmountNum = parseFloat(cirxAmount.value) || 0
-  
-  if (cirxAmountNum === 0) {
-    return ''
-  }
-  
-  return `${cirxAmountNum.toFixed(4)} CIRX`
-}
+// Wrapper for getExchangeRateDisplay composable function with reactive values
+const getExchangeRateDisplayLocal = () => getExchangeRateDisplay(cirxAmount.value)
 
-// Get new CIRX balance after transaction (current + purchase amount)
-const getNewCirxBalance = () => {
-  const purchaseAmount = parseFloat(cirxAmount.value) || 0
-  
-  // If we have fetched the recipient's current balance, calculate the new total
-  if (recipientAddress.value && !recipientAddressError.value) {
-    const currentBalance = 0
-    const newBalance = currentBalance + purchaseAmount
-    return `New Balance: ${newBalance.toFixed(4)} CIRX`
-  }
-  
-  // If we have connected wallet balance, use that
-  if (isCircularChainConnected.value) {
-    const currentBalance = parseFloat(cirxBalance.value) || 0
-    const newBalance = currentBalance + purchaseAmount
-    return `New Balance: ${newBalance.toFixed(4)} CIRX`
-  }
-  
-  // Default case - just show the purchase amount as new balance
-  if (purchaseAmount > 0) {
-    return `New Balance: ${purchaseAmount.toFixed(4)} CIRX`
-  }
-  
-  return 'New Balance: 0.0000 CIRX'
-}
+// Wrapper for getNewCirxBalance composable function with reactive values
+const getNewCirxBalanceLocal = () => getNewCirxBalance({
+  cirxAmountValue: cirxAmount.value,
+  recipientAddress: recipientAddress.value,
+  recipientAddressError: recipientAddressError.value,
+  isCircularChainConnected: isCircularChainConnected.value,
+  cirxBalance: cirxBalance?.value || 0
+})
 
 
 // Saturn wallet detection
@@ -1577,18 +1554,7 @@ const isSaturnWalletDetected = computed(() => {
 // Methods
 
 // Helper function to format numbers with commas
-const formatWithCommas = (value) => {
-  if (!value || value === '') return ''
-  const cleanValue = value.toString().replace(/[^0-9.]/g, '')
-  if (!cleanValue) return ''
-  
-  const parts = cleanValue.split('.')
-  const integerPart = parts[0]
-  const decimalPart = parts[1]
-  
-  const withCommas = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-  return decimalPart !== undefined ? `${withCommas}.${decimalPart}` : withCommas
-}
+// formatWithCommas function moved to useSwapFormatting composable
 
 // Handle input amount changes with comma formatting
 const handleInputAmountChange = (value) => {
@@ -1699,49 +1665,14 @@ const autoSelectNativeToken = () => {
 }
 
 
-// Input validation for keypress events  
-const validateNumberInput = (event) => {
-  const char = event.key
-  const currentValue = event.target.value
-  const cursorPosition = event.target.selectionStart
-  
-  // Allow control keys (backspace, delete, tab, escape, enter, etc.)
-  if (event.ctrlKey || event.metaKey || 
-      ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(char)) {
-    return true
-  }
-  
-  // Allow only numbers and decimal point
-  if (!/[0-9.]/.test(char)) {
-    event.preventDefault()
-    return false
-  }
-  
-  // Prevent multiple decimal points
-  if (char === '.' && currentValue.includes('.')) {
-    event.preventDefault()
-    return false
-  }
-  
-  // Prevent leading zeros followed by digits (but allow "0.")
-  if (char !== '.' && currentValue === '0' && cursorPosition === 1) {
-    event.preventDefault()
-    return false
-  }
-  
-  return true
-}
+// validateNumberInput function moved to useSwapValidation composable
 
 const reverseSwap = () => {
   console.log('Reverse swap not supported yet')
 }
 
 // Format amount for display (e.g., "$1K", "$50K", "$1M")
-const formatAmount = (amount) => {
-  if (amount >= 1000000) return `${(amount / 1000000).toFixed(1)}M`.replace('.0M', 'M')
-  if (amount >= 1000) return `${(amount / 1000).toFixed(0)}K`
-  return amount.toString()
-}
+// formatAmount function moved to useSwapFormatting composable
 
 
 // Backend health check
@@ -1798,61 +1729,8 @@ const checkBackendHealth = async () => {
   }
 }
 
-// CTA Button Event Handlers
-const handleConnectWallet = async () => {
-  console.log('🔗 handleConnectWallet called - opening AppKit modal')
-  try {
-    if (window.$appKit && typeof window.$appKit.open === 'function') {
-      window.$appKit.open()
-    } else if (typeof open === 'function') {
-      open()
-    } else {
-      console.warn('AppKit modal not available')
-    }
-  } catch (error) {
-    console.error('Error opening AppKit modal:', error)
-  }
-}
-
-const handleEnterAddress = () => {
-  console.log('🎯 handleEnterAddress called - focusing recipient address input')
-  setTimeout(() => {
-    const addressInput = document.querySelector('input[placeholder*="Circular Chain Address"], input[placeholder*="CIRX Wallet Address"]')
-    if (addressInput) {
-      console.log('🎯 Focusing address input from button click')
-      addressInput.focus()
-    } else {
-      console.log('❌ Address input not found in handleEnterAddress')
-    }
-  }, 100)
-}
-
-const handleEnterValidAddress = () => {
-  console.log('🎯 handleEnterValidAddress called - clearing and focusing address input')
-  recipientAddress.value = ''
-  setTimeout(() => {
-    const addressInput = document.querySelector('input[placeholder*="Circular Chain Address"], input[placeholder*="CIRX Wallet Address"]')
-    if (addressInput) {
-      console.log('🎯 Clearing and focusing address input from button click')
-      addressInput.focus()
-    } else {
-      console.log('❌ Address input not found in handleEnterValidAddress')
-    }
-  }, 100)
-}
-
-const handleEnterAmount = () => {
-  console.log('🎯 handleEnterAmount called - focusing amount input')
-  setTimeout(() => {
-    const amountInput = document.querySelector('input[placeholder*="0.0"], input[type="number"]:first-of-type')
-    if (amountInput) {
-      console.log('🎯 Focusing amount input from button click')
-      amountInput.focus()
-    } else {
-      console.log('❌ Amount input not found in handleEnterAmount')
-    }
-  }, 100)
-}
+// CTA Button Event Handlers - Now using centralized handlers from useCallToActionState.js
+// Old duplicate handlers removed - now handled by CTA composable
 
 const handleSwap = async () => {
   try {
@@ -1964,7 +1842,8 @@ const handleSwap = async () => {
     // Force debug the canPurchase conditions
     const hasAmount = inputAmount.value && parseFloat(inputAmount.value) > 0
     const notLoading = !loading.value && !quoteLoading.value && !reverseQuoteLoading.value
-    const addressValid = validateRecipientAddress(recipientAddress.value)
+    const addressValid = recipientAddress.value && 
+      (addressValidationState.value === 'valid' || !recipientAddressError.value)
     const connected = isConnected?.value || false
     const hasValidRecipient = connected || (recipientAddress.value && addressValid)
     const inputAmountNum = parseFloat(inputAmount.value) || 0
@@ -2382,15 +2261,8 @@ watch([cirxAmount, inputToken, activeTab], async () => {
   }, 10000)
 })
 
-watch(recipientAddress, async (newAddress) => {
-  // Do synchronous validation first for immediate error detection
-  validateRecipientAddressSync(newAddress)
-  
-  // Then do async validation if needed
-  await validateRecipientAddress(newAddress)
-  
-  // Fetch CIRX balance for the new address if it's valid
-})
+// Use validation composable for address watching
+createAddressWatcher(recipientAddress)
 
 const alignTokenSelector = () => {
   const cirxButton = document.querySelector('.token-display-right')
@@ -2427,148 +2299,7 @@ const sanitizeAddressInput = (event) => {
   }
 }
 
-// Synchronous validation for immediate format checks (Ethereum/Solana detection)
-const validateRecipientAddressSync = (address) => {
-  console.log('🔍 Sync validation called with:', address, 'length:', address?.length)
-  
-  if (!address) {
-    recipientAddressError.value = ''
-    recipientAddressType.value = ''
-    addressValidationState.value = 'idle'
-    return true
-  }
-  
-  // Check for Ethereum addresses FIRST before treating as partial
-  // Ethereum addresses are exactly 42 chars (0x + 40 hex)
-  if (address.length === 42 && isValidEthereumAddress(address)) {
-    console.log('🔴 Ethereum address detected:', address)
-    recipientAddressError.value = 'Ethereum addresses are not supported. Please enter a valid CIRX address'
-    recipientAddressType.value = ''
-    addressValidationState.value = 'invalid'
-    return false
-  }
-  
-  // Clear errors for partial addresses being typed (but not complete Ethereum addresses)
-  if (address === '0' || (address.startsWith('0x') && address.length < 66 && address.length !== 42)) {
-    recipientAddressError.value = ''
-    recipientAddressType.value = ''
-    addressValidationState.value = 'idle'
-    return false
-  }
-  
-  // Invalid format check
-  if (address.startsWith('0') && !address.startsWith('0x')) {
-    recipientAddressError.value = 'Invalid address format. Circular addresses must start with "0x"'
-    recipientAddressType.value = ''
-    addressValidationState.value = 'invalid'
-    return false
-  }
-  
-  // Check if it looks like a valid CIRX address (66 chars: 0x + 64 hex)
-  if (address.length === 66 && address.startsWith('0x')) {
-    // Valid CIRX format - let async validation verify it exists on network
-    // Don't set errors here
-    return true
-  }
-  
-  // Check for Solana addresses
-  if (isValidSolanaAddress(address)) {
-    recipientAddressError.value = 'Solana addresses are not supported. Please enter a valid CIRX address'
-    recipientAddressType.value = ''
-    addressValidationState.value = 'invalid'
-    return false
-  }
-  
-  // For any other length that's not partial, it's invalid
-  if (address.startsWith('0x') && address.length > 66) {
-    recipientAddressError.value = 'Invalid address format. Address is too long'
-    recipientAddressType.value = ''
-    addressValidationState.value = 'invalid'
-    return false
-  }
-  
-  return true
-}
-
-const validateRecipientAddress = async (address) => {
-  if (!address) {
-    recipientAddressError.value = ''
-    recipientAddressType.value = ''
-    addressValidationState.value = 'idle'
-    return true
-  }
-
-  // Skip validation if synchronous validation already handled these cases
-  // The sync validation handles: Ethereum, Solana, partial addresses, invalid formats
-  if (recipientAddressError.value) {
-    // Error already set by sync validation, skip async validation
-    return false
-  }
-  
-  // Skip partial addresses that were already handled
-  if (address === '0' || (address.startsWith('0x') && address.length < 66)) {
-    return false
-  }
-  
-  // Skip invalid format addresses that were already handled
-  if ((address.startsWith('0') && !address.startsWith('0x')) ||
-      isValidEthereumAddress(address) || 
-      isValidSolanaAddress(address)) {
-    return false
-  }
-
-  // Check if it looks like a Circular address format
-  if (isValidCircularAddressFormat(address)) {
-    // Start async validation
-    addressValidationState.value = 'validating'
-    recipientAddressError.value = ''
-    recipientAddressType.value = ''
-
-    try {
-      // Perform async validation with balance checking (delimiter-based requirement)
-      const validation = await checkAddressExists(address)
-      
-      if (validation.isValid && validation.exists) {
-        // Address exists on network, now check balance for green light
-        recipientAddressError.value = ''
-        recipientAddressType.value = 'circular'
-        
-        // Store balance from validation (green light only if balance >= 0.0)
-        
-        addressValidationState.value = 'valid'
-        hasClickedEnterAddress.value = false
-        return true
-      } else if (validation.isValid && !validation.exists) {
-        // Valid format but doesn't exist on network yet (could be new address)
-        recipientAddressError.value = 'Address not found on Circular network. Please verify the address.'
-        recipientAddressType.value = ''
-        addressValidationState.value = 'invalid'
-            return false
-      } else {
-        // Invalid format or API error
-        recipientAddressError.value = validation.error || 'Invalid CIRX address'
-        recipientAddressType.value = ''
-        addressValidationState.value = 'invalid'
-            return false
-      }
-    } catch (error) {
-      console.error('Address validation error:', error)
-      recipientAddressError.value = 'Unable to validate address. Please try again.'
-      recipientAddressType.value = ''
-      addressValidationState.value = 'invalid'
-        return false
-    }
-  }
-
-  // If we reach here and there's no error already set, it's an invalid format
-  // But DON'T overwrite errors that were already set by sync validation
-  if (!recipientAddressError.value) {
-    recipientAddressError.value = 'Invalid Circular Protocol Address'
-    recipientAddressType.value = ''
-    addressValidationState.value = 'invalid'
-  }
-  return false
-}
+// Validation functions moved to useSwapValidation composable
 
 // Handle Circular chain events
 const handleCircularChainHelp = () => {

@@ -1,4 +1,5 @@
 <template>
+  <!-- CACHE CLEAR TEST -->
   <button
     :type="buttonType"
     :disabled="isButtonDisabled"
@@ -52,7 +53,6 @@ const connectWallet = () => {
 
 const props = defineProps({
   // Core state props - wallet connection now handled by AppKit
-  // walletConnected: { type: Boolean, default: false }, // REMOVED - using AppKit
   recipientAddress: { type: String, default: '' },
   recipientAddressError: { type: String, default: '' },
   inputAmount: { type: String, default: '' },
@@ -103,6 +103,17 @@ console.log('🔥 CallToAction - CTA State Props:', {
   allProps: Object.keys(ctaStateProps)
 })
 
+const ctaStateResult = useCTAState(ctaStateProps)
+
+console.log('🔥 CallToAction - useCTAState returned:', {
+  keys: Object.keys(ctaStateResult || {}),
+  buttonText: ctaStateResult?.buttonText,
+  currentState: ctaStateResult?.currentState,
+  isUndefined: ctaStateResult === undefined,
+  isNull: ctaStateResult === null,
+  type: typeof ctaStateResult
+})
+
 const {
   buttonType,
   buttonText,
@@ -110,30 +121,35 @@ const {
   isButtonDisabled,
   shouldShowSpinner,
   currentActionType,
+  currentState,
   handleButtonClick
-} = useCTAState(ctaStateProps)
+} = ctaStateResult || {}
 
 // Debug CTA state after component initialization
 nextTick(() => {
-  console.log('🔍 CallToAction - CTA button state:', {
+  console.log('🔍 CallToAction - CTA button state FIXED:', {
     buttonText: buttonText?.value,
     isConnected: isConnected?.value,
     isConnectedType: typeof isConnected?.value,
     rawIsConnected: isConnected?.value,
     currentActionType: currentActionType?.value,
-    currentState: currentState?.value
+    currentStateValue: currentState?.value,
+    hasButtonText: !!buttonText,
+    hasCurrentState: !!currentState
   })
 })
 
 // Add continuous debug watcher to see state changes
-watch(() => [isConnected?.value, buttonText.value, currentState?.value], 
+watch(() => [isConnected?.value, buttonText?.value, currentState?.value], 
   ([connected, text, state]) => {
     console.log('🔍 CallToAction - State Changed:', {
       timestamp: new Date().toISOString(),
       isConnected: connected,
       buttonText: text, 
       currentState: state,
-      isConnectedType: typeof connected
+      isConnectedType: typeof connected,
+      buttonTextExists: !!buttonText,
+      currentStateExists: !!currentState
     })
   }, 
   { immediate: true }

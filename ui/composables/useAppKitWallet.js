@@ -1,17 +1,159 @@
 import { ref, watch, computed } from 'vue'
 import { useAppKitAccount, useDisconnect, useAppKitEvents, useAppKitState } from "@reown/appkit/vue"
 import { createPublicClient, createWalletClient, custom, http } from 'viem'
-import { mainnet } from 'viem/chains'
+import { mainnet, sepolia } from 'viem/chains'
 import { safeToast } from '~/composables/useToast'
+import { getTokenDecimals } from '~/composables/core/useTokenUtils.js'
+
+// Singleton state - shared across all instances of useAppKitWallet()
+let singletonState = null
 
 export function useAppKitWallet() {
-    const { address, isConnected: rawIsConnected, chainId } = useAppKitAccount()
-    const { disconnect } = useDisconnect()
-    const { open } = useAppKitState() // Centralized AppKit modal control  
-    const events = useAppKitEvents() // Initialize events system
+    // Return existing singleton if already initialized
+    if (singletonState) {
+        return singletonState
+    }
+    
+    // Add try-catch to prevent critical errors during AppKit hook usage
+    let address, rawIsConnected, chainId, disconnect, open, events
+    
+    try {
+        const accountHooks = useAppKitAccount()
+        address = accountHooks?.address || ref(null)
+        rawIsConnected = accountHooks?.isConnected || ref(false)
+        chainId = accountHooks?.chainId || ref(null)
+        
+        const disconnectHooks = useDisconnect()
+        disconnect = disconnectHooks?.disconnect || (() => console.warn('Disconnect not available'))
+        
+        const stateHooks = useAppKitState()
+        open = stateHooks?.open || (() => console.warn('AppKit modal not available'))
+        
+        events = useAppKitEvents() || null
+    } catch (error) {
+        console.error('❌ Error initializing AppKit hooks:', error)
+        // Provide fallback values to prevent undefined errors
+        address = ref(null)
+        rawIsConnected = ref(false)
+        chainId = ref(null)
+        disconnect = () => console.warn('Disconnect not available')
+        open = () => console.warn('AppKit modal not available')
+        events = null
+    }
+    
+    // Debug: Log what useAppKitAccount actually returns with throttling
+    let lastDebugLog = 0
+    const DEBUG_THROTTLE = 5000 // 5 seconds
+    
+    const logDebugInfo = () => {
+        const now = Date.now()
+        if (now - lastDebugLog > DEBUG_THROTTLE) {
+            console.log('🔍 useAppKitAccount state:', {
+                address: address?.value,
+                rawIsConnected: rawIsConnected?.value,
+                chainId: chainId?.value,
+                addressType: typeof address?.value,
+                isConnectedType: typeof rawIsConnected?.value,
+                chainIdType: typeof chainId?.value,
+                timestamp: new Date().toISOString()
+            })
+            lastDebugLog = now
+        }
+    }
+    
+    // Log initial state
+    logDebugInfo()
     
     // Use the raw AppKit isConnected state directly - it's already reactive
     const isConnected = rawIsConnected
+    
+    // Check for existing MetaMask connection and sync with AppKit
+    const syncWithMetaMask = async () => {
+        if (!process.client) return
+        
+        try {
+            // Check if MetaMask is connected but AppKit isn't
+            if (window.ethereum && window.ethereum.selectedAddress && !isConnected?.value) {
+                console.log('🔗 MetaMask is connected but AppKit is not - attempting sync...')
+                console.log('MetaMask address:', window.ethereum.selectedAddress)
+                console.log('AppKit connected:', isConnected?.value)
+                
+                // Method 1: Try to reconnect through MetaMask provider
+                try {
+                    console.log('🔄 Attempting MetaMask account refresh...')
+                    const accounts = await window.ethereum.request({ method: 'eth_accounts' })
+                    console.log('MetaMask accounts:', accounts)
+                    
+                    if (accounts && accounts.length > 0) {
+                        // Force AppKit to check for connection updates
+                        if (window.$appKit) {
+                            console.log('🔄 Triggering AppKit state refresh...')
+                            // Try to get wagmi to recognize the connection
+                            const state = window.$appKit.getState?.()
+                            console.log('AppKit state before sync:', state)
+                            
+                            // Wait a moment for potential state updates
+                            await new Promise(resolve => setTimeout(resolve, 500))
+                            
+                            // Check if AppKit now sees the connection
+                            const accountAfter = window.$appKit.getAccount?.()
+                            console.log('AppKit account after sync attempt:', accountAfter)
+                            
+                            if (accountAfter?.address) {
+                                console.log('✅ AppKit now sees connected account:', accountAfter.address)
+                                
+                                // Direct state update from AppKit internal values (avoids Vue lifecycle warnings)
+                                console.log('🔧 Force-setting reactive state from AppKit internal values...')
+                                address.value = accountAfter.address
+                                rawIsConnected.value = true
+                                if (accountAfter?.chainId) {
+                                    chainId.value = accountAfter.chainId
+                                }
+                                
+                                await new Promise(resolve => setTimeout(resolve, 300))
+                                logDebugInfo()
+                                return true
+                            }
+                        }
+                    }
+                } catch (providerError) {
+                    console.warn('⚠️ MetaMask provider sync failed:', providerError)
+                }
+                
+                // Method 2: Try wagmi reconnection if available
+                try {
+                    if (window.$appKit && typeof window.$appKit.reconnect === 'function') {
+                        console.log('🔄 Attempting AppKit reconnect...')
+                        await window.$appKit.reconnect()
+                        await new Promise(resolve => setTimeout(resolve, 1000))
+                        
+                        if (isConnected?.value) {
+                            console.log('✅ AppKit reconnect successful!')
+                            return true
+                        }
+                    }
+                } catch (reconnectError) {
+                    console.warn('⚠️ AppKit reconnect failed:', reconnectError)
+                }
+                
+                console.log('⚠️ MetaMask sync unsuccessful - AppKit state not updated')
+                return false
+            }
+            
+            // Already synchronized or no MetaMask connection
+            return true
+            
+        } catch (error) {
+            console.error('❌ Error syncing with MetaMask:', error)
+            return false
+        }
+    }
+    
+    // Run sync check on component mount and when visibility changes
+    if (process.client) {
+        setTimeout(syncWithMetaMask, 2000) // Delayed to ensure AppKit is fully initialized
+        document.addEventListener('visibilitychange', syncWithMetaMask)
+    }
     
     // Get provider reference from AppKit for viem clients
     const provider = ref(null)
@@ -96,16 +238,6 @@ export function useAppKitWallet() {
         USDC: process.env.NUXT_PUBLIC_USDC_ADDRESS || '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // Circle USDC
         USDT: process.env.NUXT_PUBLIC_USDT_ADDRESS || '0xdac17f958d2ee523a2206206994597c13d831ec7'  // Tether USDT
         // CIRX not included - it's a native asset, not ERC-20
-    }
-    
-    const getTokenDecimals = (tokenSymbol) => {
-        const decimals = {
-            ETH: 18,
-            USDC: 6,
-            USDT: 6,
-            CIRX: 18
-        }
-        return decimals[tokenSymbol] || 18
     }
     
     // Centralized balance fetching functions
@@ -263,7 +395,7 @@ export function useAppKitWallet() {
                 }
                 
                 // Show toast notification
-                safeToast('Wallet connected successfully', 'success')
+                safeToast.success('Wallet connected successfully')
                 
                 // Start balance refresh when connected
                 setTimeout(startBalanceRefresh, 1000) // Small delay to ensure connection is stable
@@ -280,7 +412,7 @@ export function useAppKitWallet() {
                 }
                 
                 // Show toast notification
-                safeToast('Wallet disconnected', 'error')
+                safeToast.info('Wallet disconnected')
                 
                 // Clear stored icon after use
                 lastConnectedWalletIcon.value = null
@@ -292,20 +424,33 @@ export function useAppKitWallet() {
         { immediate: false }
     )
     
-    // Debug watcher for connection updates
+    // Debug watcher for connection updates with throttling
+    let lastWatchLog = 0
+    const WATCH_LOG_THROTTLE = 2000 // 2 seconds
+    
     watch(() => [isConnected?.value, address?.value], 
         ([connected, addr]) => {
-            console.log('🔍 WALLET DEBUG: AppKit state changed:')
-            console.log('  - Connected:', connected)
-            console.log('  - Address:', (addr && typeof addr === 'string' && addr.length > 10) 
-                ? addr.slice(0, 6) + '...' + addr.slice(-4) 
-                : addr || 'none')
-            console.log('  - Timestamp:', new Date().toISOString())
+            const now = Date.now()
+            if (now - lastWatchLog > WATCH_LOG_THROTTLE) {
+                console.log('🔍 WALLET DEBUG: AppKit state changed:')
+                console.log('  - Connected:', connected)
+                console.log('  - Address:', (addr && typeof addr === 'string' && addr.length > 10) 
+                    ? addr.slice(0, 6) + '...' + addr.slice(-4) 
+                    : addr || 'none')
+                console.log('  - Direct AppKit account:', window.$appKit?.getAccount?.())
+                console.log('  - Direct AppKit state:', window.$appKit?.getState?.())
+                console.log('  - Timestamp:', new Date().toISOString())
+                lastWatchLog = now
+            }
+            
+            // Always call logDebugInfo to maintain throttled general logging
+            logDebugInfo()
         }, 
         { immediate: true }
     )
     
-    return {
+    // Create the singleton state object
+    singletonState = {
         // AppKit state
         address,
         isConnected, 
@@ -314,6 +459,9 @@ export function useAppKitWallet() {
         
         // AppKit modal control (centralized singleton)
         open,
+        
+        // MetaMask sync utility
+        syncWithMetaMask,
         
         // Connection state management
         connectionToast,
@@ -334,7 +482,9 @@ export function useAppKitWallet() {
         walletClient,
         
         // Token configuration
-        TOKEN_ADDRESSES,
-        getTokenDecimals
+        TOKEN_ADDRESSES
+        // getTokenDecimals now imported from useTokenUtils
     }
+    
+    return singletonState
 }
