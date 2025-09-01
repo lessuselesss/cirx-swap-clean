@@ -24,12 +24,20 @@
 </template>
 
 <script setup>
-import { toRefs, nextTick } from 'vue'
+import { toRefs, nextTick, watch } from 'vue'
 import { useCTAState } from '~/composables/core/useCallToActionState.js'
 import { useAppKitWallet } from '~/composables/useAppKitWallet.js'
 
 // Use centralized wallet composable (includes AppKit singleton)
 const { isConnected, open } = useAppKitWallet()
+
+// DEBUG: Check what isConnected actually contains
+console.log('🔥 CallToAction - isConnected from useAppKitWallet:', {
+  isConnected,
+  value: isConnected?.value,
+  type: typeof isConnected?.value,
+  timestamp: new Date().toISOString()
+})
 
 const connectWallet = () => {
   // Use global AppKit instance directly for reliable modal opening
@@ -81,6 +89,20 @@ const emit = defineEmits([
 ])
 
 // Use the unified CTA state composable
+// Explicitly create the state object with wallet connection from AppKit
+const ctaStateProps = {
+  // Spread props first
+  ...toRefs(props),
+  // Use AppKit isConnected directly
+  isConnected: isConnected
+}
+
+console.log('🔥 CallToAction - CTA State Props:', {
+  isConnected: ctaStateProps.isConnected,
+  isConnectedValue: ctaStateProps.isConnected?.value,
+  allProps: Object.keys(ctaStateProps)
+})
+
 const {
   buttonType,
   buttonText,
@@ -89,20 +111,33 @@ const {
   shouldShowSpinner,
   currentActionType,
   handleButtonClick
-} = useCTAState({
-  ...toRefs(props),
-  walletConnected: isConnected // Use AppKit connection state
-})
+} = useCTAState(ctaStateProps)
 
 // Debug CTA state after component initialization
 nextTick(() => {
   console.log('🔍 CallToAction - CTA button state:', {
     buttonText: buttonText?.value,
-    walletConnected: isConnected?.value,
-    walletConnectedNormalized: !!isConnected?.value, // Convert undefined to false
-    currentActionType: currentActionType?.value
+    isConnected: isConnected?.value,
+    isConnectedType: typeof isConnected?.value,
+    rawIsConnected: isConnected?.value,
+    currentActionType: currentActionType?.value,
+    currentState: currentState?.value
   })
 })
+
+// Add continuous debug watcher to see state changes
+watch(() => [isConnected?.value, buttonText.value, currentState?.value], 
+  ([connected, text, state]) => {
+    console.log('🔍 CallToAction - State Changed:', {
+      timestamp: new Date().toISOString(),
+      isConnected: connected,
+      buttonText: text, 
+      currentState: state,
+      isConnectedType: typeof connected
+    })
+  }, 
+  { immediate: true }
+)
 
 // Debug logging
 const debugClick = (e) => {

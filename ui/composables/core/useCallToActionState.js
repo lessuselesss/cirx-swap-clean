@@ -6,7 +6,7 @@ import { computed } from 'vue'
  */
 export function useCTAState({
   // Core state props
-  walletConnected,
+  isConnected,
   recipientAddress,
   recipientAddressError, 
   inputAmount,
@@ -18,23 +18,31 @@ export function useCTAState({
   loadingText = null,
   variant = 'primary'
 }) {
+  
+  // Debug log the received isConnected value
+  console.log('🔍 useCTAState - Received isConnected:', {
+    value: isConnected?.value,
+    type: typeof isConnected?.value,
+    isRef: !!isConnected?.value !== undefined,
+    timestamp: new Date().toISOString()
+  })
 
   // Button type - determines click behavior
   const buttonType = computed(() => {
     // State 1: Not connected - clickable to connect
-    if (!walletConnected?.value) return 'button'
+    if (!isConnected?.value) return 'button'
     
     // State 3: Address validating - disabled
-    if (walletConnected.value && addressValidationState?.value === 'validating') return 'disabled'
+    if (isConnected?.value && addressValidationState?.value === 'validating') return 'disabled'
     
     // State 5: Invalid address - clickable to clear and focus
-    if (walletConnected.value && recipientAddressError?.value) return 'button'
+    if (isConnected?.value && recipientAddressError?.value) return 'button'
     
     // State 2: Empty address - clickable to focus
-    if (walletConnected.value && (!recipientAddress?.value || recipientAddress.value.trim() === '')) return 'button'
+    if (isConnected?.value && (!recipientAddress?.value || recipientAddress.value.trim() === '')) return 'button'
     
     // State 4: Valid address but no amount - clickable to focus
-    if (walletConnected.value && 
+    if (isConnected?.value && 
         recipientAddress?.value && 
         !recipientAddressError?.value && 
         addressValidationState?.value === 'valid' &&
@@ -49,31 +57,31 @@ export function useCTAState({
     // State 1: Wallet/AppKit not connected 
     // (Circular Chain address filled/empty = irrelevant, Sell field filled/empty = irrelevant)
     // Button displays "Connect": onclick opens AppKit/wallet
-    if (!walletConnected?.value) {
+    if (!isConnected?.value) {
       return 'Connect'
     }
     
     // State 3: Wallet connected + Address validating + Sell field input filled
     // Button displays "...": onclick is disabled
-    if (walletConnected.value && addressValidationState?.value === 'validating') {
+    if (isConnected?.value && addressValidationState?.value === 'validating') {
       return '...'
     }
     
     // State 5: Wallet connected + Address invalid (sell field filled/empty = irrelevant)
     // Button displays "Enter Valid Address": onclick clears address field and focuses
-    if (walletConnected.value && recipientAddressError?.value) {
+    if (isConnected?.value && recipientAddressError?.value) {
       return 'Enter Valid Address'
     }
     
     // State 2: Wallet connected + Address empty + Sell field empty
     // Button displays "Enter Address": onclick focuses address input field
-    if (walletConnected.value && (!recipientAddress?.value || recipientAddress.value.trim() === '')) {
+    if (isConnected?.value && (!recipientAddress?.value || recipientAddress.value.trim() === '')) {
       return 'Enter Address'
     }
     
     // State 4: Wallet connected + Address validated + Sell field empty
     // Button displays "Enter Amount": onclick focuses sell field input
-    if (walletConnected.value && 
+    if (isConnected?.value && 
         recipientAddress?.value && 
         !recipientAddressError?.value && 
         addressValidationState?.value === 'valid' &&
@@ -111,7 +119,7 @@ export function useCTAState({
   // Button disabled state
   const isButtonDisabled = computed(() => {
     // State 3: Address validating - button disabled
-    if (walletConnected?.value && addressValidationState?.value === 'validating') {
+    if (isConnected?.value && addressValidationState?.value === 'validating') {
       return true
     }
     
@@ -121,7 +129,7 @@ export function useCTAState({
   // Handle button click based on current state
   const handleButtonClick = (event, emit) => {
     console.log('🔥 useCTAState handleButtonClick called!', {
-      walletConnected: walletConnected?.value,
+      isConnected: isConnected?.value,
       recipientAddress: recipientAddress?.value,
       recipientAddressError: recipientAddressError?.value,
       inputAmount: inputAmount?.value,
@@ -131,21 +139,21 @@ export function useCTAState({
     })
     
     // State 1: Connect wallet
-    if (!walletConnected?.value) {
+    if (!isConnected?.value) {
       console.log('🔥 State 1: Connect - Opening AppKit modal')
       emit('connect-wallet')
       return
     }
     
     // State 3: Address validating - disabled, do nothing
-    if (walletConnected.value && addressValidationState?.value === 'validating') {
+    if (isConnected?.value && addressValidationState?.value === 'validating') {
       console.log('🔥 State 3: Address validating - button disabled')
       event.preventDefault()
       return
     }
     
     // State 5: Invalid address - clear and focus
-    if (walletConnected.value && recipientAddressError?.value) {
+    if (isConnected?.value && recipientAddressError?.value) {
       console.log('🔥 State 5: Invalid address - clearing and focusing address field')
       event.preventDefault()
       emit('clear-and-focus-address')
@@ -153,7 +161,7 @@ export function useCTAState({
     }
     
     // State 2: Empty address - focus address field
-    if (walletConnected.value && (!recipientAddress?.value || recipientAddress.value.trim() === '')) {
+    if (isConnected?.value && (!recipientAddress?.value || recipientAddress.value.trim() === '')) {
       console.log('🔥 State 2: Empty address - focusing address field')
       event.preventDefault()
       emit('focus-address')
@@ -161,7 +169,7 @@ export function useCTAState({
     }
     
     // State 4: Valid address but no amount - focus amount field
-    if (walletConnected.value && 
+    if (isConnected?.value && 
         recipientAddress?.value && 
         !recipientAddressError?.value && 
         addressValidationState?.value === 'valid' &&
@@ -179,7 +187,7 @@ export function useCTAState({
 
   // Current state for debugging
   const currentState = computed(() => {
-    if (!walletConnected?.value) return 'state-1-connect'
+    if (!isConnected?.value) return 'state-1-connect'
     if (addressValidationState?.value === 'validating') return 'state-3-validating'
     if (recipientAddressError?.value) return 'state-5-invalid-address'
     if (!recipientAddress?.value || recipientAddress.value.trim() === '') return 'state-2-enter-address'

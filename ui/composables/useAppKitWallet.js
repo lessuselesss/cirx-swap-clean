@@ -10,17 +10,14 @@ export function useAppKitWallet() {
     const { open } = useAppKitState() // Centralized AppKit modal control  
     const events = useAppKitEvents() // Initialize events system
     
-    // Ensure isConnected always returns a boolean (never undefined)
-    const isConnected = computed(() => {
-        const connected = rawIsConnected?.value
-        return connected === true // Explicit boolean conversion
-    })
+    // Use the raw AppKit isConnected state directly - it's already reactive
+    const isConnected = rawIsConnected
     
     // Get provider reference from AppKit for viem clients
     const provider = ref(null)
     
     // Initialize provider when wallet connects (with safe null check)
-    watch(() => isConnected.value, async (connected) => {
+    watch(() => isConnected?.value, async (connected) => {
         if (connected && window.$appKit) {
             try {
                 provider.value = await window.$appKit.getWalletProvider()
@@ -41,7 +38,7 @@ export function useAppKitWallet() {
     // Create public client for balance operations
     const publicClient = computed(() => {
         try {
-            if (provider.value && isConnected.value) {
+            if (provider.value && isConnected?.value) {
                 return createPublicClient({
                     chain: mainnet,
                     transport: custom(provider.value)
@@ -64,7 +61,7 @@ export function useAppKitWallet() {
     // Create wallet client for transaction operations
     const walletClient = computed(() => {
         try {
-            if (!provider.value || !isConnected.value) {
+            if (!provider.value || !isConnected?.value) {
                 return null
             }
             
@@ -114,7 +111,7 @@ export function useAppKitWallet() {
     // Centralized balance fetching functions
     const fetchTokenBalance = async (tokenSymbol) => {
         try {
-            if (!address.value || !isConnected.value || !publicClient.value) {
+            if (!address.value || !isConnected?.value || !publicClient.value) {
                 return '0'
             }
             
@@ -155,7 +152,7 @@ export function useAppKitWallet() {
     }
     
     const fetchAllBalances = async () => {
-        if (!address.value || !isConnected.value) {
+        if (!address.value || !isConnected?.value) {
             tokenBalances.value = { ETH: '0', USDC: '0', USDT: '0', CIRX: '0' }
             return
         }
@@ -188,7 +185,7 @@ export function useAppKitWallet() {
     }
     
     const refreshBalances = () => {
-        if (isConnected.value && address.value) {
+        if (isConnected?.value && address.value) {
             fetchAllBalances()
         }
     }
@@ -206,7 +203,7 @@ export function useAppKitWallet() {
         
         // Set up periodic refresh (every 30 seconds)
         balanceRefreshInterval = setInterval(() => {
-            if (isConnected.value && address?.value) {
+            if (isConnected?.value && address?.value) {
                 fetchAllBalances()
             } else {
                 clearInterval(balanceRefreshInterval)
@@ -248,7 +245,7 @@ export function useAppKitWallet() {
     console.log('🔧 AppKit Events initialized:', events ? 'Available' : 'Not available')
     
     // Watch for connection state changes with toast notifications
-    watch([() => isConnected.value, () => address?.value || null], 
+    watch([() => isConnected?.value, () => address?.value || null], 
         ([connected, addr], [prevConnected, prevAddr] = [false, null]) => {
             // Skip if values haven't actually changed or are still initializing
             if (connected === undefined || addr === undefined) return
@@ -296,7 +293,7 @@ export function useAppKitWallet() {
     )
     
     // Debug watcher for connection updates
-    watch(() => [isConnected.value, address?.value], 
+    watch(() => [isConnected?.value, address?.value], 
         ([connected, addr]) => {
             console.log('🔍 WALLET DEBUG: AppKit state changed:')
             console.log('  - Connected:', connected)

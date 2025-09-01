@@ -729,6 +729,7 @@ const {
   isConnected, 
   chainId, 
   disconnect, 
+  open,
   connectionToast, 
   lastConnectedWalletIcon, 
   walletIcon,
@@ -1799,11 +1800,18 @@ const checkBackendHealth = async () => {
 
 // CTA Button Event Handlers
 const handleConnectWallet = async () => {
-  console.log('🔗 handleConnectWallet called - wallet functionality removed')
-  safeToast?.info('Wallet functionality has been removed from this version.', {
-    title: 'Wallet Disabled',
-    autoTimeoutMs: 3000
-  })
+  console.log('🔗 handleConnectWallet called - opening AppKit modal')
+  try {
+    if (window.$appKit && typeof window.$appKit.open === 'function') {
+      window.$appKit.open()
+    } else if (typeof open === 'function') {
+      open()
+    } else {
+      console.warn('AppKit modal not available')
+    }
+  } catch (error) {
+    console.error('Error opening AppKit modal:', error)
+  }
 }
 
 const handleEnterAddress = () => {

@@ -98,7 +98,6 @@
 
         <!-- Unified CTA Button -->
         <CallToAction
-          :wallet-connected="false"
           :recipient-address="recipientAddress"
           :recipient-address-error="recipientAddressError"
           :input-amount="inputAmount"
@@ -429,11 +428,18 @@ const validateRecipientAddress = (address) => {
 }
 
 const handleConnectWallet = async () => {
-  // Wallet functionality removed - show placeholder message
-  toast?.info('Wallet functionality has been removed from this version.', {
-    title: 'Wallet Disabled',
-    autoTimeoutMs: 3000
-  })
+  // Use same logic as AppKit button in header
+  try {
+    if (window.$appKit && typeof window.$appKit.open === 'function') {
+      window.$appKit.open()
+    } else if (typeof open === 'function') {
+      open()
+    } else {
+      console.warn('AppKit modal not available')
+    }
+  } catch (error) {
+    console.error('Error opening AppKit modal:', error)
+  }
 }
 
 const handleEnterAddress = () => {
