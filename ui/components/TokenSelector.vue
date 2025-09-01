@@ -122,9 +122,12 @@ const getTokenSymbol = (tokenSymbol) => {
   return tokenSymbol.replace('_SOL', '')
 }
 
+// Define emits for parent communication
+const emit = defineEmits(['token-selected'])
+
 const selectToken = (tokenSymbol) => {
-  // Update the global wallet store instead of emitting to parent
-  walletStore.selectInputToken(tokenSymbol)
+  // Emit to parent component instead of using non-existent walletStore
+  emit('token-selected', tokenSymbol)
 }
 
 const handleImageError = (event) => {

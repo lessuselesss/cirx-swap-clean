@@ -16,6 +16,23 @@
         @dismiss="clearError"
         class="mb-6"
       />
+      
+      <!-- DEBUG: Manual test button -->
+      <div class="mb-4 p-2 bg-yellow-900/20 border border-yellow-600 rounded">
+        <p class="text-yellow-400 text-sm mb-2">DEBUG: inputAmount = "{{ inputAmount }}"</p>
+        <button 
+          @click="inputAmount = '999.123456'"
+          class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-white text-sm mr-2"
+        >
+          Set to 999.123456
+        </button>
+        <button 
+          @click="inputAmount = '5000.789'"
+          class="bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-white text-sm"
+        >
+          Set to 5000.789
+        </button>
+      </div>
 
       <!-- Swap Form -->
       <div>
@@ -159,10 +176,23 @@
 import { ref, computed, watch, inject, onBeforeUnmount, nextTick } from 'vue'
 import { validateWalletAddress } from '../utils/validation.js'
 import CallToAction from '~/components/CallToAction.vue'
-import { useApiClient } from '~/composables/useApiClient.js'
+import { useApiClient } from '~/composables/core/useApiClient.js'
 import { useCirxUtils } from '~/composables/useCirxUtils.js'
+import { useSwapLogic } from '~/composables/useSwapHandler.js'
+import { useErrorHandler } from '~/composables/core/useErrorService.js'
+import { useTransactionStatus } from '~/composables/useTransactionStatus.js'
+import { useVestedConfig } from '~/composables/useFormattedNumbers.js'
+import { useAppKitWallet } from '~/composables/useAppKitWallet.js'
 
-// All wallet functionality completely removed
+// Use enhanced wallet composable for connection state (includes AppKit singleton)
+const { address, isConnected, open } = useAppKitWallet()
+
+// Watch for wallet connection and auto-populate recipient address
+watch(address, (newAddress) => {
+  if (newAddress && !recipientAddress.value) {
+    recipientAddress.value = newAddress
+  }
+})
 
 let contracts, swapLogic, errorHandler
 
@@ -187,11 +217,24 @@ try {
 try {
   swapLogic = useSwapLogic()
   console.log('✅ SwapLogic initialized in SwapForm')
+  console.log('🔧 SwapLogic has getTokenPrice:', typeof swapLogic.getTokenPrice)
 } catch (error) {
   console.error('❌ Failed to initialize swapLogic in SwapForm:', error)
   swapLogic = {
     calculateQuote: () => null,
-    validateSwap: () => ({ isValid: false, errors: ['Swap logic not available'] })
+    calculateReverseQuote: () => null,
+    validateSwap: () => ({ isValid: false, errors: ['Swap logic not available'] }),
+    getTokenPrice: (token) => {
+      // Fallback token prices
+      const fallbackPrices = {
+        ETH: 2500,
+        USDC: 1,
+        USDT: 1,
+        SOL: 100,
+        CIRX: 1
+      }
+      return fallbackPrices[token] || 1
+    }
   }
 }
 
@@ -238,8 +281,9 @@ const lastUpdatedField = ref('input') // 'input' or 'cirx'
 let debounceTimer = null
 let reverseDebounceTimer = null
 
-// OTC Configuration
-const { otcConfig, discountTiers } = useOtcConfig()
+// Vested Configuration
+const { otcConfig, discountTiers } = useVestedConfig()
+console.log('🔧 Vested config loaded. discountTiers:', discountTiers.value)
 
 // Computed properties
 const inputBalance = computed(() => {
@@ -421,7 +465,7 @@ const handleEnterAmount = () => {
 
 const handleSwap = async () => {
   console.log('🔥 handleSwap called!', {
-    walletConnected: walletStore.isConnected,
+    walletConnected: isConnected?.value || false,
     recipientAddress: recipientAddress.value,
     recipientAddressError: recipientAddressError.value,
     canPurchase: canPurchase.value,
@@ -608,24 +652,58 @@ const handleCirxAmountChange = () => {
 
 // Handle discount tier selection changes
 const handleTierChange = (tier) => {
+  console.log('🔧 handleTierChange called with tier:', tier)
+  console.log('🔧 Current inputAmount before change:', inputAmount.value)
+  console.log('🔧 Current inputToken:', inputToken.value)
+  
   selectedTier.value = tier
   
-  // Recalculate quote with new tier if we have an input amount
-  if (inputAmount.value && parseFloat(inputAmount.value) > 0) {
-    lastUpdatedField.value = 'input'
+  // Calculate and set the minimum token amount for this tier
+  if (tier && tier.minAmount) {
+    console.log('🔧 Setting minimum amount for tier:', tier.minAmount)
     
-    const newQuote = swapLogic.calculateQuote(
-      inputAmount.value,
-      inputToken.value,
-      activeTab.value === 'otc',
-      tier // Pass the selected tier
-    )
+    // Get current token price for conversion
+    const currentPrice = swapLogic.getTokenPrice(inputToken.value)
+    console.log('🔧 Retrieved token price:', currentPrice)
     
-    if (newQuote) {
-      cirxAmount.value = newQuote.cirxAmount
+    if (currentPrice && currentPrice > 0) {
+      // Calculate token amount needed to reach the minimum USD value
+      const requiredTokenAmount = tier.minAmount / currentPrice
+      const formattedAmount = requiredTokenAmount.toFixed(6)
+      
+      console.log('🔧 Calculated token amount:', {
+        minUsdAmount: tier.minAmount,
+        currentPrice,
+        requiredTokenAmount,
+        formattedAmount
+      })
+      
+      // Update the input amount - this should trigger the reactive binding
+      const oldValue = inputAmount.value
+      inputAmount.value = formattedAmount
+      lastUpdatedField.value = 'input'
+      
+      console.log('🔧 inputAmount updated:', {
+        oldValue,
+        newValue: inputAmount.value,
+        actuallyChanged: oldValue !== inputAmount.value
+      })
+      
+      // Force reactivity by triggering the change after a tick
+      nextTick(() => {
+        console.log('🔧 nextTick: inputAmount is now:', inputAmount.value)
+      })
+      
+    } else {
+      console.warn('🔧 Unable to calculate token amount: no valid price')
     }
   }
 }
+
+// DEBUG: Watch inputAmount changes
+watch(inputAmount, (newValue, oldValue) => {
+  console.log('🔧 inputAmount changed:', { oldValue, newValue })
+}, { immediate: false })
 
 // Watch for tab or token changes to reset field tracking and recalculate
 watch([activeTab, inputToken], () => {

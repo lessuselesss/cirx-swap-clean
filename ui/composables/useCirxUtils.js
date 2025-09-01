@@ -3,8 +3,11 @@
  * Contains deposit addresses, quote calculations, validation, and transaction helpers
  */
 import { computed } from 'vue'
+import { useVestedConfig } from './useFormattedNumbers.js'
 
 export function useCirxUtils() {
+  // Get dynamic vested configuration
+  const { discountTiers } = useVestedConfig()
   const runtimeConfig = useRuntimeConfig()
   
   // Deposit wallet addresses for different chains/tokens
@@ -25,6 +28,21 @@ export function useCirxUtils() {
     'SOL': 100.0,    // $100 per SOL
     'BNB': 300.0,    // $300 per BNB
     'MATIC': 0.80    // $0.80 per MATIC
+  }
+
+  /**
+   * Calculate discount percentage based on USD amount using dynamic tiers
+   */
+  const calculateDiscount = (usdAmount) => {
+    const tiers = discountTiers.value
+    if (!tiers) return 0
+    
+    for (const tier of tiers) {
+      if (usdAmount >= tier.minAmount) {
+        return tier.discount
+      }
+    }
+    return 0
   }
 
   /**
@@ -54,13 +72,7 @@ export function useCirxUtils() {
       // Apply OTC discount if applicable (to gross amount before fee)
       let discountPercentage = 0
       if (isOTC) {
-        if (usdAmount >= 50000) {
-          discountPercentage = 12 // 12% discount for $50K+
-        } else if (usdAmount >= 10000) {
-          discountPercentage = 8  // 8% discount for $10K-$50K
-        } else if (usdAmount >= 1000) {
-          discountPercentage = 5  // 5% discount for $1K-$10K
-        }
+        discountPercentage = calculateDiscount(usdAmount)
         
         if (discountPercentage > 0) {
           const discountMultiplier = 1 + (discountPercentage / 100)

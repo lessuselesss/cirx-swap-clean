@@ -1,8 +1,10 @@
 import { computed, ref } from 'vue'
 import { usePriceData } from './usePriceData.js'
-import { useMathUtils } from './useMathUtils.js'
-import { useFormattingUtils } from './useFormattingUtils.js'
+import { useMathUtils } from './core/useMathUtils.js'
+import { useFormattingUtils } from './core/useFormattingUtils.js'
+import { useVestedConfig } from './useFormattedNumbers.js'
 import { parseEther, formatEther, parseUnits, formatUnits, getContract } from 'viem'
+import { useAppKitWallet } from './useAppKitWallet.js'
 /**
  * Swap business logic composable
  * Handles quote calculations, price feeds, and swap validation
@@ -13,6 +15,16 @@ export function useSwapLogic() {
   // Import consolidated utilities to eliminate duplication
   const { safeDiv, safeMul, safePercentage, validateNumber } = useMathUtils()
   const { formatNumber } = useFormattingUtils()
+
+  // Use enhanced AppKit wallet composable instead of direct imports
+  const { address, isConnected, chainId, publicClient, walletClient } = useAppKitWallet()
+  
+  // Helper computed values for wallet state (no walletStore needed)
+  const activeChain = computed(() => chainId?.value === 1 ? 'ethereum' : 'unknown')
+  const isOnSupportedChain = computed(() => [1, 137, 8453].includes(chainId?.value))
+  
+  // Get dynamic vested configuration
+  const { discountTiers: dynamicDiscountTiers, fees: dynamicFees } = useVestedConfig()
   
   // Real-time token prices (fetched from live APIs)
   const tokenPrices = ref({
@@ -42,24 +54,26 @@ export function useSwapLogic() {
   // Auto-initialize prices
   initializePrices()
 
-  // Fee structure
-  const fees = {
-    liquid: 0.3,  // 0.3% for liquid swaps
-    otc: 0.15     // 0.15% for OTC swaps
-  }
+  // Fee structure - use dynamic fees with fallback
+  const fees = computed(() => ({
+    liquid: dynamicFees.value?.liquid || 0.3,  // 0.3% for liquid swaps (fallback)
+    otc: dynamicFees.value?.otc || 0.15        // 0.15% for OTC swaps (fallback)
+  }))
 
-  // OTC discount tiers
-  const discountTiers = [
-    { minAmount: 50000, discount: 12 },  // $50K+: 12%
-    { minAmount: 10000, discount: 8 },   // $10K+: 8%  
-    { minAmount: 1000, discount: 5 }     // $1K+: 5%
-  ]
+  // Dynamic discount tiers with fallback
+  const discountTiers = computed(() => 
+    dynamicDiscountTiers.value || [
+      { minAmount: 50000, discount: 12 },  // $50K+: 12%
+      { minAmount: 10000, discount: 8 },   // $10K+: 8%  
+      { minAmount: 1000, discount: 5 }     // $1K+: 5%
+    ]
+  )
 
   /**
    * Calculate discount percentage based on USD amount
    */
   const calculateDiscount = (usdAmount) => {
-    for (const tier of discountTiers) {
+    for (const tier of discountTiers.value) {
       if (usdAmount >= tier.minAmount) {
         return tier.discount
       }
@@ -129,7 +143,7 @@ export function useSwapLogic() {
     }
     
     // Calculate fee with safe percentage handling
-    const feeRate = safePercentage(isOTC ? fees.otc : fees.liquid)
+    const feeRate = safePercentage(isOTC ? fees.value.otc : fees.value.liquid)
     const feeAmount = safeMul(inputValue, safeDiv(feeRate, 100))
     const amountAfterFee = Math.max(0, inputValue - feeAmount)
     const usdAfterFee = safeMul(amountAfterFee, inputTokenPrice)
@@ -236,7 +250,7 @@ export function useSwapLogic() {
     }
     
     // Reverse the fee calculation with safe operations
-    const feeRate = safePercentage(isOTC ? fees.otc : fees.liquid)
+    const feeRate = safePercentage(isOTC ? fees.value.otc : fees.value.liquid)
     const feeMultiplier = 1 - safeDiv(feeRate, 100)
     
     // Validate fee multiplier to prevent division by zero
@@ -363,7 +377,8 @@ export function useSwapLogic() {
    */
   const qualifiesForOTC = (inputAmount, inputToken) => {
     const usdValue = parseFloat(inputAmount) * getTokenPrice(inputToken)
-    return usdValue >= 1000 // Minimum for OTC discount
+    const tiers = discountTiers.value
+    return usdValue >= (tiers[tiers.length - 1]?.minAmount || 1000) // Dynamic minimum for OTC discount
   }
 
   /**
@@ -579,15 +594,15 @@ export function useSwapService() {
 
   // Helper functions
   const validateConnection = () => {
-    if (!walletStore.isConnected) {
+    if (!isConnected?.value) {
       throw new Error('Wallet not connected')
     }
     
-    if (walletStore.activeChain !== 'ethereum') {
+    if (activeChain.value !== 'ethereum') {
       throw new Error('Ethereum wallet required for contract interactions')
     }
 
-    if (!walletStore.activeWallet?.isOnSupportedChain) {
+    if (!isOnSupportedChain.value) {
       throw new Error('Please switch to a supported network')
     }
   }
@@ -616,14 +631,14 @@ export function useSwapService() {
     try {
       validateConnection()
       
-      const address = userAddress || walletStore.activeWallet?.address
-      if (!address) {
+      const walletAddress = userAddress || address?.value
+      if (!walletAddress) {
         throw new Error('No address provided')
       }
 
       // Handle native ETH
       if (tokenSymbol === 'ETH') {
-        const balance = await walletStore.ethereumWallet.publicClient?.getBalance({ address })
+        const balance = await publicClient.value?.getBalance({ address: walletAddress })
         return balance ? formatEther(balance) : '0'
       }
 
@@ -633,11 +648,11 @@ export function useSwapService() {
         throw new Error(`Token ${tokenSymbol} not configured`)
       }
 
-      const balance = await walletStore.ethereumWallet.publicClient?.readContract({
+      const balance = await publicClient.value?.readContract({
         address: tokenAddress,
         abi: ABIS.ERC20,
         functionName: 'balanceOf',
-        args: [address]
+        args: [walletAddress]
       })
 
       const decimals = getTokenDecimals(tokenSymbol)
@@ -674,7 +689,7 @@ export function useSwapService() {
       const decimals = getTokenDecimals(tokenSymbol)
       const amountWei = parseUnits(amount.toString(), decimals)
 
-      const hash = await walletStore.ethereumWallet.walletClient?.writeContract({
+      const hash = await walletClient.value?.writeContract({
         address: tokenAddress,
         abi: ABIS.ERC20,
         functionName: 'approve',
@@ -697,7 +712,7 @@ export function useSwapService() {
 
       const tokenAddress = validateContractAddress(tokenSymbol)
       
-      const allowance = await walletStore.ethereumWallet.publicClient?.readContract({
+      const allowance = await publicClient.value?.readContract({
         address: tokenAddress,
         abi: ABIS.ERC20,
         functionName: 'allowance',
@@ -732,7 +747,7 @@ export function useSwapService() {
       const decimals = getTokenDecimals(inputToken)
       const amountWei = parseUnits(inputAmount.toString(), decimals)
 
-      const [cirxAmount, fee] = await walletStore.ethereumWallet.publicClient?.readContract({
+      const [cirxAmount, fee] = await publicClient.value?.readContract({
         address: contractAddress,
         abi: ABIS.OTC_SWAP,
         functionName: 'getLiquidQuote',
@@ -759,11 +774,8 @@ export function useSwapService() {
         const baseAmount = parseFloat(inputAmount) * mockPrice
         const usdValue = baseAmount
 
-        // Mock discount tiers
-        let discount = 0
-        if (usdValue >= 50000) discount = 12
-        else if (usdValue >= 10000) discount = 8
-        else if (usdValue >= 1000) discount = 5
+        // Apply dynamic discount tiers
+        let discount = calculateDiscount(usdValue)
 
         const discountMultiplier = 1 + (discount / 100)
         const cirxAmount = baseAmount * discountMultiplier
@@ -782,7 +794,7 @@ export function useSwapService() {
       const decimals = getTokenDecimals(inputToken)
       const amountWei = parseUnits(inputAmount.toString(), decimals)
 
-      const [cirxAmount, fee, discountBps] = await walletStore.ethereumWallet.publicClient?.readContract({
+      const [cirxAmount, fee, discountBps] = await publicClient.value?.readContract({
         address: contractAddress,
         abi: ABIS.OTC_SWAP,
         functionName: 'getOTCQuote',
@@ -819,13 +831,13 @@ export function useSwapService() {
         let paymentHash
         if (inputToken === 'ETH') {
           // Send ETH to payment address
-          paymentHash = await walletStore.ethereumWallet.walletClient?.sendTransaction({
+          paymentHash = await walletClient.value?.sendTransaction({
             to: paymentAddress,
             value: amountWei
           })
         } else {
           // Send ERC20 token to payment address
-          paymentHash = await walletStore.ethereumWallet.walletClient?.writeContract({
+          paymentHash = await walletClient.value?.writeContract({
             address: tokenAddress,
             abi: ABIS.ERC20,
             functionName: 'transfer',
@@ -846,7 +858,7 @@ export function useSwapService() {
           body: JSON.stringify({
             txId: paymentHash,
             paymentChain: 'ethereum',
-            cirxRecipientAddress: walletStore.activeWallet.address,
+            cirxRecipientAddress: address?.value,
             amountPaid: inputAmount.toString(),
             paymentToken: inputToken
           })
@@ -875,7 +887,7 @@ export function useSwapService() {
       if (inputToken !== 'ETH') {
         const currentAllowance = await getAllowance(
           inputToken, 
-          walletStore.activeWallet.address, 
+          address?.value, 
           contractAddress
         )
         
@@ -885,7 +897,7 @@ export function useSwapService() {
       }
 
       // Execute swap
-      const hash = await walletStore.ethereumWallet.walletClient?.writeContract({
+      const hash = await walletClient.value?.writeContract({
         address: contractAddress,
         abi: ABIS.OTC_SWAP,
         functionName: 'swapLiquid',
@@ -921,13 +933,13 @@ export function useSwapService() {
         let paymentHash
         if (inputToken === 'ETH') {
           // Send ETH to payment address
-          paymentHash = await walletStore.ethereumWallet.walletClient?.sendTransaction({
+          paymentHash = await walletClient.value?.sendTransaction({
             to: paymentAddress,
             value: amountWei
           })
         } else {
           // Send ERC20 token to payment address
-          paymentHash = await walletStore.ethereumWallet.walletClient?.writeContract({
+          paymentHash = await walletClient.value?.writeContract({
             address: tokenAddress,
             abi: ABIS.ERC20,
             functionName: 'transfer',
@@ -948,7 +960,7 @@ export function useSwapService() {
           body: JSON.stringify({
             txId: paymentHash,
             paymentChain: 'ethereum',
-            cirxRecipientAddress: walletStore.activeWallet.address,
+            cirxRecipientAddress: address?.value,
             amountPaid: inputAmount.toString(),
             paymentToken: inputToken
           })
@@ -977,7 +989,7 @@ export function useSwapService() {
       if (inputToken !== 'ETH') {
         const currentAllowance = await getAllowance(
           inputToken, 
-          walletStore.activeWallet.address, 
+          address?.value, 
           contractAddress
         )
         
@@ -987,7 +999,7 @@ export function useSwapService() {
       }
 
       // Execute OTC swap
-      const hash = await walletStore.ethereumWallet.walletClient?.writeContract({
+      const hash = await walletClient.value?.writeContract({
         address: contractAddress,
         abi: ABIS.OTC_SWAP,
         functionName: 'swapOTC',
@@ -1010,8 +1022,8 @@ export function useSwapService() {
   // Vesting operations
   const getVestingInfo = async (userAddress = null) => {
     try {
-      const address = userAddress || walletStore.activeWallet?.address
-      if (!address) {
+      const walletAddress = userAddress || address?.value
+      if (!walletAddress) {
         throw new Error('No address provided')
       }
 
@@ -1030,7 +1042,7 @@ export function useSwapService() {
       const contractAddress = validateContractAddress('VESTING_CONTRACT')
 
       const [totalAmount, startTime, claimedAmount, claimableAmount, isActive] = 
-        await walletStore.ethereumWallet.publicClient?.readContract({
+        await publicClient.value?.readContract({
           address: contractAddress,
           abi: ABIS.VESTING,
           functionName: 'getVestingInfo',
@@ -1061,7 +1073,7 @@ export function useSwapService() {
 
       const contractAddress = validateContractAddress('VESTING_CONTRACT')
 
-      const hash = await walletStore.ethereumWallet.walletClient?.writeContract({
+      const hash = await walletClient.value?.writeContract({
         address: contractAddress,
         abi: ABIS.VESTING,
         functionName: 'claimTokens',

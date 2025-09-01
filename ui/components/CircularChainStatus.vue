@@ -98,7 +98,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { useCircularChain } from '~/composables/useValidators'
+import { useCircularChain } from '~/composables/utils/validators'
 
 // Props
 defineProps({

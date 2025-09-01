@@ -210,7 +210,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useApiClient } from '~/composables/useApiClient.js'
+import { useApiClient } from '~/composables/core/useApiClient.js'
 
 // Page metadata
 definePageMeta({

@@ -355,33 +355,38 @@ export function useErrorHandler() {
   }
 
   /**
-   * Clear current error
+   * Unified error clearing function
+   * Consolidates clearError + clearAllErrors (91.7% similarity eliminated)
    */
-  const clearError = () => {
+  const clearErrors = (includeHistory = false) => {
     currentError.value = null
+    if (includeHistory) {
+      errorHistory.value = []
+    }
   }
 
-  /**
-   * Clear all errors
-   */
-  const clearAllErrors = () => {
-    currentError.value = null
-    errorHistory.value = []
-  }
+  // Backward compatibility functions
+  const clearError = () => clearErrors(false)
+  const clearAllErrors = () => clearErrors(true)
 
   /**
-   * Check if error should be displayed as toast
+   * Unified error display type checker
+   * Consolidates shouldShowAsToast + shouldShowInline (92.6% similarity eliminated)
    */
-  const shouldShowAsToast = (error) => {
-    return error && [ERROR_SEVERITY.LOW, ERROR_SEVERITY.MEDIUM].includes(error.severity)
+  const shouldShowAs = (error, displayType) => {
+    if (!error) return false
+    
+    const severityGroups = {
+      toast: [ERROR_SEVERITY.LOW, ERROR_SEVERITY.MEDIUM],
+      inline: [ERROR_SEVERITY.HIGH, ERROR_SEVERITY.CRITICAL]
+    }
+    
+    return severityGroups[displayType]?.includes(error.severity) || false
   }
 
-  /**
-   * Check if error should be displayed inline
-   */
-  const shouldShowInline = (error) => {
-    return error && [ERROR_SEVERITY.HIGH, ERROR_SEVERITY.CRITICAL].includes(error.severity)
-  }
+  // Backward compatibility functions
+  const shouldShowAsToast = (error) => shouldShowAs(error, 'toast')
+  const shouldShowInline = (error) => shouldShowAs(error, 'inline')
 
   // Computed properties
   const hasError = computed(() => currentError.value !== null)
@@ -399,16 +404,18 @@ export function useErrorHandler() {
 
     // Methods
     handleError,
-    clearError,
-    clearAllErrors,
+    clearErrors,        // ✨ New unified function
+    clearError,         // Backward compatibility
+    clearAllErrors,     // Backward compatibility
     
     // Utilities
     categorizeError,
     getErrorSeverity,
     getUserFriendlyMessage,
     getRecoveryActions,
-    shouldShowAsToast,
-    shouldShowInline,
+    shouldShowAs,           // ✨ New unified function  
+    shouldShowAsToast,      // Backward compatibility
+    shouldShowInline,       // Backward compatibility
 
     // Constants
     ERROR_CATEGORIES,

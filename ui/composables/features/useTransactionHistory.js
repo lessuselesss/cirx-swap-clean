@@ -133,57 +133,134 @@ export const useTransactionHistory = () => {
     throw lastError;
   };
 
-  // Enhanced fetch with error handling and user feedback
-  const fetchTransactionHistory = async (userAddress, options = {}) => {
+  /**
+   * Unified user data fetching function (93% similarity eliminated)
+   * Consolidates fetchTransactionHistory + fetchVestingPositions + fetchUserStats
+   * @param {string} userAddress - User wallet address
+   * @param {string} dataType - Type of data to fetch: 'transactions', 'vesting', 'stats'
+   * @param {object} options - Additional options for transactions (limit, offset, type)
+   * @returns {Promise} Data from API
+   */
+  const fetchUserDataByType = async (userAddress, dataType, options = {}) => {
     if (!userAddress) {
-      transactions.value = [];
+      // Reset appropriate state based on data type
+      switch (dataType) {
+        case 'transactions':
+          transactions.value = [];
+          break;
+        case 'vesting':
+          vestingPositions.value = [];
+          break;
+        case 'stats':
+          userStats.value = null;
+          break;
+      }
       error.value = null;
       return;
     }
 
-    isLoading.value = true;
+    // Stats endpoint doesn't use loading state
+    if (dataType !== 'stats') {
+      isLoading.value = true;
+    }
     error.value = null;
 
     try {
-      const { limit = 50, offset = 0, type } = options;
-      const queryParams = new URLSearchParams();
-      
-      if (limit) queryParams.append('limit', limit);
-      if (offset) queryParams.append('offset', offset);
-      if (type) queryParams.append('type', type);
+      let endpoint;
+      let apiCallFn;
 
-      const endpoint = `/transactions/${userAddress}?${queryParams.toString()}`;
-      
-      const data = await withRetry(async () => {
-        return await apiCall(endpoint);
-      });
-      
-      // Handle successful response
-      if (data.success && data.data) {
-        transactions.value = data.data.transactions || [];
-        return data.data;
-      } else {
-        // Handle API response without success flag (backwards compatibility)
-        transactions.value = data.transactions || [];
-        return data;
+      // Configure endpoint and API call based on data type
+      switch (dataType) {
+        case 'transactions':
+          const { limit = 50, offset = 0, type } = options;
+          const queryParams = new URLSearchParams();
+          
+          if (limit) queryParams.append('limit', limit);
+          if (offset) queryParams.append('offset', offset);
+          if (type) queryParams.append('type', type);
+
+          endpoint = `/transactions/${userAddress}?${queryParams.toString()}`;
+          apiCallFn = async () => withRetry(async () => await apiCall(endpoint));
+          break;
+        case 'vesting':
+          endpoint = `/vesting/${userAddress}`;
+          apiCallFn = async () => await apiCall(endpoint);
+          break;
+        case 'stats':
+          endpoint = `/stats/${userAddress}`;
+          apiCallFn = async () => await apiCall(endpoint);
+          break;
+        default:
+          throw new Error(`Unknown data type: ${dataType}`);
       }
+      
+      const data = await apiCallFn();
+      
+      // Update appropriate state based on data type
+      switch (dataType) {
+        case 'transactions':
+          // Handle successful response with complex logic for transactions
+          if (data.success && data.data) {
+            transactions.value = data.data.transactions || [];
+            return data.data;
+          } else {
+            // Handle API response without success flag (backwards compatibility)
+            transactions.value = data.transactions || [];
+            return data;
+          }
+        case 'vesting':
+          vestingPositions.value = data.positions || [];
+          return data;
+        case 'stats':
+          userStats.value = data.summary;
+          return data;
+      }
+      
     } catch (err) {
-      const userFriendlyError = getUserFriendlyError(err);
-      error.value = userFriendlyError.message;
-      transactions.value = [];
-      
-      // Log detailed error for debugging
-      console.error('Failed to fetch transaction history:', {
-        error: err,
-        userAddress,
-        options,
-        timestamp: new Date().toISOString()
-      });
-      
-      throw userFriendlyError;
+      // Enhanced error handling for transactions, basic for others
+      if (dataType === 'transactions') {
+        const userFriendlyError = getUserFriendlyError(err);
+        error.value = userFriendlyError.message;
+        transactions.value = [];
+        
+        // Log detailed error for debugging
+        console.error('Failed to fetch transaction history:', {
+          error: err,
+          userAddress,
+          options,
+          timestamp: new Date().toISOString()
+        });
+        
+        throw userFriendlyError;
+      } else {
+        // Basic error handling for vesting and stats
+        error.value = err.message;
+        if (dataType === 'vesting') {
+          vestingPositions.value = [];
+        } else if (dataType === 'stats') {
+          userStats.value = null;
+        }
+        throw err;
+      }
     } finally {
-      isLoading.value = false;
+      // Only reset loading for transactions and vesting
+      if (dataType !== 'stats') {
+        isLoading.value = false;
+      }
     }
+  };
+
+  // Backward compatibility functions (maintain existing API)
+  const fetchTransactionHistory = async (userAddress, options = {}) => {
+    return await fetchUserDataByType(userAddress, 'transactions', options);
+  };
+
+  const fetchVestingPositions = async (userAddress) => {
+    return await fetchUserDataByType(userAddress, 'vesting');
+  };
+
+  const fetchUserStats = async (userAddress) => {
+    return await fetchUserDataByType(userAddress, 'stats');
   };
 
   // Convert technical errors to user-friendly messages
@@ -236,47 +313,6 @@ export const useTransactionHistory = () => {
       code: 'UNKNOWN_ERROR',
       retryable: true
     };
-  };
-
-  // Fetch vesting positions for a user
-  const fetchVestingPositions = async (userAddress) => {
-    if (!userAddress) {
-      vestingPositions.value = [];
-      return;
-    }
-
-    isLoading.value = true;
-    error.value = null;
-
-    try {
-      const data = await apiCall(`/vesting/${userAddress}`);
-      vestingPositions.value = data.positions || [];
-      return data;
-    } catch (err) {
-      error.value = err.message;
-      vestingPositions.value = [];
-      throw err;
-    } finally {
-      isLoading.value = false;
-    }
-  };
-
-  // Fetch user statistics
-  const fetchUserStats = async (userAddress) => {
-    if (!userAddress) {
-      userStats.value = null;
-      return;
-    }
-
-    try {
-      const data = await apiCall(`/stats/${userAddress}`);
-      userStats.value = data.summary;
-      return data;
-    } catch (err) {
-      error.value = err.message;
-      userStats.value = null;
-      throw err;
-    }
   };
 
   // Fetch all user data (transactions + vesting + stats)
@@ -434,9 +470,10 @@ export const useTransactionHistory = () => {
     hasAnyData,
 
     // Methods
-    fetchTransactionHistory,
-    fetchVestingPositions,
-    fetchUserStats,
+    fetchUserDataByType,     // ✨ New unified function
+    fetchTransactionHistory, // Backward compatibility
+    fetchVestingPositions,   // Backward compatibility
+    fetchUserStats,          // Backward compatibility
     fetchUserData,
     checkIndexerHealth,
     checkServiceStatus,

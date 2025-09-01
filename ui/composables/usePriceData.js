@@ -1,5 +1,5 @@
 import { ref, computed, onMounted, onBeforeUnmount, getCurrentInstance } from 'vue'
-import { AggregateMarket } from '~/composables/usePriceData.js'
+import { usePriceService } from '~/composables/features/usePriceService.js'
 
 /**
  * Unified Price Data Service for CIRX Token
@@ -29,7 +29,9 @@ export function usePriceData() {
   
   let updateTimer = null
   let priceCache = new Map()
-  let aggregateMarket = null
+  
+  // Initialize unified price service
+  const { fetchUnifiedPrice, getTokenPrice: getUnifiedTokenPrice } = usePriceService()
   
   /**
    * Fetch CIRX price from backend aggregator (primary source)
@@ -38,11 +40,14 @@ export function usePriceData() {
     try {
       console.log('🔄 Fetching CIRX/USDT price from backend aggregator...')
       
-      if (!aggregateMarket) {
-        aggregateMarket = AggregateMarket.getInstance()
-      }
+      // Use unified price service with aggregator source
+      const priceData = await fetchUnifiedPrice('CIRX', 'usdt', { sources: ['aggregator'] })
       
-      const marketData = await aggregateMarket.getMarketData('CIRX', 'USDT')
+      // Transform to expected format for backward compatibility
+      const marketData = {
+        averagePrice: priceData.price,
+        averageFluctuation: priceData.change24h || 0
+      }
       
       if (marketData && marketData.averagePrice) {
         const price = parseFloat(marketData.averagePrice)
@@ -201,23 +206,19 @@ export function usePriceData() {
         lastUpdated: cirxData.lastUpdated
       }
       
-      // Update market stats from aggregator
-      if (aggregateMarket) {
-        try {
-          const marketData = await aggregateMarket.getMarketData('CIRX', 'USDT')
-          marketStats.value = {
-            volume24h: `$${marketData.totalVolumeUSDT || 'N/A'}`,
-            circulatingSupply: marketData.circulatingSupply 
-              ? `${(marketData.circulatingSupply / 1000000000).toFixed(2)}B CIRX`
-              : '3.38B CIRX',
-            marketCap: marketData.circulatingSupply && cirxData.price
-              ? `$${((cirxData.price * marketData.circulatingSupply) / 1000000).toFixed(2)}M`
-              : '$14.8M',
-            averageFluctuation: `${marketData.averageFluctuation || '0.00'}%`
-          }
-        } catch (statsError) {
-          console.warn('Failed to update market stats:', statsError)
+      // Update market stats using unified price service  
+      try {
+        const priceData = await fetchUnifiedPrice('CIRX', 'usdt', { sources: ['aggregator'] })
+        marketStats.value = {
+          volume24h: `$${priceData.volume24h || 'N/A'}`,
+          circulatingSupply: '3.38B CIRX', // Static fallback until we have API
+          marketCap: cirxData.price 
+            ? `$${((cirxData.price * 3380000000) / 1000000).toFixed(2)}M`
+            : '$14.8M',
+          averageFluctuation: `${priceData.change24h || '0.00'}%`
         }
+      } catch (statsError) {
+        console.warn('Failed to update market stats:', statsError)
       }
       
       // Cache the result
@@ -547,9 +548,11 @@ export function usePriceData() {
  * Much faster than aggregate as it only calls 1 API instead of 4
  */
 
-export function useSingleExchangeDatafeed() {
-  
-  const createSingleExchangeDatafeed = (exchange) => {
+/**
+ * Creates a TradingView datafeed for a single exchange
+ * Consolidated from useSingleExchangeDatafeed wrapper (97.8% similarity elimination)
+ */
+export function createSingleExchangeDatafeed(exchange) {
     return {
       onReady: (callback) => {
         setTimeout(() => {
@@ -657,9 +660,6 @@ export function useSingleExchangeDatafeed() {
         }
       }
     }
-  }
-
-  return { createSingleExchangeDatafeed }
 }
 
 // Fetch data from individual exchanges
@@ -778,7 +778,7 @@ function getResolutionMs(resolution) {
 /**
  * CIRX Aggregate TradingView Datafeed
  * Implements TradingView Datafeed API with multi-exchange aggregated data
- * Data Sources: BitMart, XT, LBank (via AggregateMarket)
+ * Data Sources: Backend Aggregator, CoinGecko, DEXTools (via unified price service)
 */
 
 export const useAggregateDatafeed = () => {
@@ -804,8 +804,8 @@ export const useAggregateDatafeed = () => {
     }
   }
 
-  // Use singleton instance for multi-exchange data (shares cache with preloading)
-  const aggregateMarket = AggregateMarket.getInstance()
+  // Use unified price service for TradingView datafeed
+  const { fetchUnifiedPrice: fetchTVPrice } = usePriceService()
 
   /**
    * Create custom datafeed object
@@ -910,17 +910,17 @@ export const useAggregateDatafeed = () => {
         })
 
         try {
-          // Get aggregated market data from multiple exchanges
-          const marketData = await aggregateMarket.getMarketData('CIRX', 'USDT')
+          // Get aggregated market data using unified price service
+          const priceData = await fetchTVPrice('CIRX', 'usdt', { sources: ['aggregator', 'coingecko', 'dextools'] })
           
-          if (!marketData || !marketData.averagePrice) {
+          if (!priceData || !priceData.price) {
             console.warn('[CIRX Datafeed]: No market data available, using fallback')
             onHistoryCallback([], { noData: true })
             return
           }
 
           // Generate historical bars using real current price as base
-          const currentPrice = parseFloat(marketData.averagePrice)
+          const currentPrice = parseFloat(priceData.price)
           const bars = generateHistoricalBars(currentPrice, resolution, periodParams)
           
           setTimeout(() => {
@@ -1045,10 +1045,10 @@ export const useAggregateDatafeed = () => {
     // Function to fetch and update with real market data
     const updateWithRealData = async () => {
       try {
-        const marketData = await aggregateMarket.getMarketData('CIRX', 'USDT')
+        const priceData = await fetchTVPrice('CIRX', 'usdt', { sources: ['aggregator', 'coingecko', 'dextools'] })
         
-        if (marketData && marketData.averagePrice) {
-          const currentPrice = parseFloat(marketData.averagePrice)
+        if (priceData && priceData.price) {
+          const currentPrice = parseFloat(priceData.price)
           const now = Math.floor(Date.now() / 1000)
           
           // Create realistic bar with small variations around current price

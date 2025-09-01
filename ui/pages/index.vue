@@ -26,10 +26,16 @@
               Transactions
             </NuxtLink>
             
-            <!-- Wallet functionality removed -->
-            <button disabled class="px-4 py-2 bg-gray-600 text-gray-400 rounded-xl cursor-not-allowed">
-              Wallet Disabled
-            </button>
+            <!-- AppKit Wallet Connection -->
+            <ClientOnly>
+              <template #fallback>
+                <div class="w-32 h-10 bg-gray-800 rounded-lg animate-pulse"></div>
+              </template>
+              <AppKitButton v-if="$appkit" />
+              <div v-else class="px-4 py-2 bg-gray-600 text-gray-300 rounded-lg text-sm">
+                Wallet Unavailable
+              </div>
+            </ClientOnly>
           </div>
         </div>
       </div>
@@ -104,6 +110,49 @@
             </button>
           </div>
 
+          <!-- DEBUG: Manual test panel -->
+          <div class="mb-4 p-2 bg-yellow-900/20 border border-yellow-600 rounded">
+            <p class="text-yellow-400 text-sm mb-2">🔧 DEBUG: inputAmount = "{{ inputAmount }}" | Token = "{{ inputToken }}"</p>
+            <div class="mb-2">
+              <button 
+                type="button"
+                @click="inputAmount = '999.123456'"
+                class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-white text-sm mr-2"
+              >
+                Set to 999.123456
+              </button>
+              <button 
+                type="button"
+                @click="inputAmount = '5000.789'"
+                class="bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-white text-sm"
+              >
+                Set to 5000.789
+              </button>
+            </div>
+            <div>
+              <button 
+                type="button"
+                @click="selectToken('ETH')"
+                class="bg-orange-600 hover:bg-orange-700 px-3 py-1 rounded text-white text-sm mr-2"
+              >
+                Select ETH
+              </button>
+              <button 
+                type="button"
+                @click="selectToken('USDC')"
+                class="bg-cyan-600 hover:bg-cyan-700 px-3 py-1 rounded text-white text-sm mr-2"
+              >
+                Select USDC
+              </button>
+              <button 
+                type="button"
+                @click="selectToken('USDT')"
+                class="bg-purple-600 hover:bg-purple-700 px-3 py-1 rounded text-white text-sm"
+              >
+                Select USDT
+              </button>
+            </div>
+          </div>
           
           <form @submit.prevent="handleSwap" novalidate>
             
@@ -114,7 +163,10 @@
                 <div class="input-section input-section-top">
                   <div class="input-header">
                     <label class="text-sm font-medium text-white">Sell</label>
-                    <span v-if="inputToken" class="balance-display pr-3" @click="setMaxAmount" @dblclick="forceRefreshBalance">
+                    <span v-if="inputToken && inputBalance !== null" class="balance-display pr-3" @click="setMaxAmount" @dblclick="forceRefreshBalance">
+                      Balance: {{ inputBalance }} {{ inputToken }}
+                    </span>
+                    <span v-else-if="inputToken" class="balance-display pr-3">
                       Balance: -
                     </span>
                     <span v-else class="balance-display pr-3">
@@ -385,14 +437,12 @@
                         {
                           'bg-red-500': recipientAddressError,
                           'bg-green-500': (() => {
-                            const greenCondition = recipientAddress && recipientAddressType === 'circular' && !recipientAddressError && addressValidationState === 'valid' && recipientCirxBalance !== null && parseFloat(recipientCirxBalance) >= 0.0;
+                            const greenCondition = recipientAddress && recipientAddressType === 'circular' && !recipientAddressError && addressValidationState === 'valid';
                             console.log('🟢 Green light condition check:', {
                               recipientAddress: recipientAddress,
                               recipientAddressType: recipientAddressType,
                               recipientAddressError: recipientAddressError,
                               addressValidationState: addressValidationState,
-                              recipientCirxBalance: recipientCirxBalance,
-                              balanceFloat: parseFloat(recipientCirxBalance),
                               greenCondition: greenCondition
                             });
                             return greenCondition;
@@ -437,7 +487,7 @@
                   </button>
                 </div>
               </div>
-              <div v-if="isConnected && hasClickedEnterAddress && !recipientAddress" class="mt-2 flex items-center gap-2 text-sm text-yellow-400">
+              <div v-if="isConnected?.value && hasClickedEnterAddress && !recipientAddress" class="mt-2 flex items-center gap-2 text-sm text-yellow-400">
                 <img 
                   v-if="isSaturnWalletDetected" 
                   src="https://avatars.githubusercontent.com/u/saturn-wallet?s=20" 
@@ -465,12 +515,12 @@
 
             <!-- Unified CTA Button -->
             <CallToAction
-              :wallet-connected="isConnected"
+              :wallet-connected="isConnected?.value"
               :recipient-address="recipientAddress"
               :recipient-address-error="recipientAddressError"
               :input-amount="inputAmount"
               :input-balance="inputBalance"
-              :eth-balance="ethBalance"
+              :eth-balance="awaitedEthBalance"
               :network-fee-eth="networkFee.eth"
               :input-token="inputToken"
               :active-tab="activeTab"
@@ -539,7 +589,6 @@
       :type="connectionToast.type"
       :title="connectionToast.title"
       :message="connectionToast.message"
-      :wallet-icon="connectionToast.walletIcon"
       @close="connectionToast.show = false"
     />
 
@@ -633,8 +682,7 @@
 <script setup>
 // Import Vue composables
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
-// Import Reown AppKit Vue hooks directly
-// Removed direct Wagmi import - AppKit handles this internally
+// AppKit handled by web components - no direct imports needed
 import { parseEther, parseUnits } from 'viem'
 // Import components
 // WalletButton import removed - wallet functionality disabled
@@ -646,15 +694,15 @@ import CallToAction from '~/components/CallToAction.vue'
 import GetCircularWalletModal from '~/components/GetCircularWalletModal.vue'
 // Import unified price data composable
 import { usePriceData } from '~/composables/usePriceData'
-import { AggregateMarket } from '~/composables/usePriceData'
+// AggregateMarket consolidated into unified price service
 // Address validation functions can be added here if needed
 // Import unified API client and CIRX utilities
-import { useApiClient } from '~/composables/useApiClient.js'
+import { useApiClient } from '~/composables/core/useApiClient.js'
 import { useCirxUtils } from '~/composables/useCirxUtils.js'
 // Import real-time transaction updates via IROH
 import { useRealTimeTransactions } from '~/composables/useIrohNetwork'
 // Import Circular address validation
-import { useCircularAddressValidation } from '~/composables/useValidators'
+import { useCircularAddressValidation } from '~/composables/utils/validators'
 // Import safe toast utility
 import { safeToast } from '~/composables/useToast'
 // Extension detection disabled
@@ -664,18 +712,32 @@ import { safeToast } from '~/composables/useToast'
 // Page metadata
 definePageMeta({
   title: 'Circular Swap',
-  layout: 'default'
+  layout: false  // Don't use default layout - this page has its own header
 })
 
 // Use AppKit hooks directly for state
 import { useFormattedNumbers } from '~/composables/useFormattedNumbers.js'
+// Import enhanced wallet composable with centralized balance management
+import { useAppKitWallet } from '~/composables/useAppKitWallet.js'
 
 // Initialize formatted numbers composable
 const { isValidEthereumAddress, isValidSolanaAddress, getAddressType } = useFormattedNumbers()
 
-// All wallet functionality completely removed
-const address = computed(() => null)
-const isConnected = computed(() => false)
+// Use enhanced wallet composable with centralized balance management
+const { 
+  address, 
+  isConnected, 
+  chainId, 
+  disconnect, 
+  connectionToast, 
+  lastConnectedWalletIcon, 
+  walletIcon,
+  // Centralized balance management
+  tokenBalances,
+  formattedBalances,
+  balanceLoading,
+  refreshBalances
+} = useAppKitWallet()
 
 // Forward declare functions that will be defined later
 let handleClickOutside, handleGlobalEnter
@@ -702,10 +764,7 @@ const tokenAddresses = {
 
 // Balance fetching will be handled using provider when needed
 
-// Use AppKit composable for opening modal
-const open = () => {
-  console.log('Wallet connection removed')
-}
+// AppKit modal opening is handled by the open function from useAppKit() above
 
 // Backend API integration
 // API client and CIRX utilities
@@ -713,7 +772,6 @@ const apiClient = useApiClient()
 const {
   calculateCirxQuote,
   getDepositAddress,
-  validateCircularAddress,
   createSwapTransaction,
   DEPOSIT_ADDRESSES,
   TOKEN_PRICES: backendTokenPrices
@@ -729,7 +787,7 @@ const {
 } = useRealTimeTransactions()
 
 // Circular address validation
-const { checkAddressExists, isValidCircularAddressFormat, isAddressPending } = useCircularAddressValidation()
+const { checkAddressExists } = useCircularAddressValidation()
 
 // Network configuration for dynamic placeholder
 const networkConfig = ref({
@@ -782,8 +840,6 @@ const handleCircularToast = ({ type, title, message }) => {
 }
 
 // Saturn wallet detection disabled - using static CIRX values
-const cirxBalance = ref('0')
-const formatCirxBalance = computed(() => '0.0000')
 const isCircularChainAvailable = computed(() => false)
 const isCircularChainConnected = computed(() => false)
 
@@ -793,8 +849,8 @@ const isButtonShowingDots = computed(() => {
   if (loading.value || quoteLoading.value || reverseQuoteLoading.value) return true
   
   // Don't disable if not connected or no address - these are actionable states
-  if (!isConnected) return false
-  if (isConnected && (!recipientAddress.value || recipientAddress.value.trim() === '')) return false
+  if (!isConnected?.value) return false
+  if (isConnected?.value && (!recipientAddress.value || recipientAddress.value.trim() === '')) return false
   
   // Disable for the specific "..." conditions (address validation states)
   return (
@@ -806,63 +862,45 @@ const isButtonShowingDots = computed(() => {
 
 // Format ETH balance using wallet store balance
 const formattedEthBalance = computed(() => {
-  if (!isConnected.value || !null) {
+  if (!isConnected?.value) {
     return '0.000000000000000000'
   }
   
-  // Use wallet store balance
-  return null.formatted || '0.000000000000000000'
+  // Use centralized balance from AppKit wallet composable
+  return tokenBalances.value.ETH || '0.000000000000000000'
 })
 
-// Connection state management
-const connectionToast = ref({ show: false, type: 'success', title: '', message: '', walletIcon: null })
-const lastConnectedWalletIcon = ref(null) // Store icon when connected
-
-// Watch for connection state changes with toast notifications - defensive approach
-watch([() => isConnected || false, () => address || null], ([connected, addr], [prevConnected, prevAddr] = [false, null]) => {
-  // Skip if values haven't actually changed or are still initializing
-  if (connected === undefined || addr === undefined) return
-  console.log('🔍 CONNECTION WATCH: State changed:', { connected, addr, prevConnected, prevAddr })
-  
-  if (connected && !prevConnected) {
-    // Just connected - store the icon for later use
-    lastConnectedWalletIcon.value = walletIcon.value
-    connectionToast.value = {
-      show: true,
-      type: 'success',
-      title: 'Wallet Connected',
-      message: `Connected to ${addr?.slice(0, 6)}...${addr?.slice(-4)}`,
-      walletIcon: walletIcon.value
-    }
-  } else if (!connected && prevConnected) {
-    // Just disconnected - use stored icon
-    console.log('🔍 Wallet disconnected, using stored icon:', lastConnectedWalletIcon.value)
-    connectionToast.value = {
-      show: true,
-      type: 'error',
-      title: 'Wallet Disconnected',
-      message: 'Your wallet has been disconnected',
-      walletIcon: lastConnectedWalletIcon.value
-    }
-    // Clear stored icon after use
-    lastConnectedWalletIcon.value = null
-  }
-}, { immediate: false })
-
-// Watch for connection updates
-watch(() => [isConnected, address], 
-  ([connected, addr]) => {
-    console.log('🔍 CONNECTION WATCH: AppKit state changed:')
-    console.log('  - Connected:', connected)
-    console.log('  - Address:', addr ? addr.slice(0, 6) + '...' + addr.slice(-4) : 'none')
-    console.log('  - Timestamp:', new Date().toISOString())
-  }, 
-  { immediate: true }
-)
+// Connection state management and watchers are now handled by useAppKitWallet composable
 
 // Reactive state
 const activeTab = ref('liquid')
 const inputAmount = ref('')
+// Mock token balances for testing (since wallet is disabled)
+const mockTokenBalances = ref({
+  ETH: '5.123456',   // Mock ETH balance
+  USDC: '10000.50',  // Mock USDC balance  
+  USDT: '7500.25'    // Mock USDT balance
+})
+
+// Token balance for selected input token - computed based on inputToken selection
+const inputBalance = computed(() => {
+  // Return null when not connected (no wallet connected)
+  if (!isConnected?.value) {
+    return null
+  }
+  
+  // Real wallet balance logic using centralized balance management
+  switch (inputToken.value) {
+    case 'ETH':
+      return tokenBalances.value.ETH || '0'
+    case 'USDC':
+      return tokenBalances.value.USDC || '0'
+    case 'USDT':
+      return tokenBalances.value.USDT || '0'
+    default:
+      return '0'
+  }
+})
 const showWalletModal = ref(false)
 const cirxAmount = ref('')
 // Input token selection - default to ETH
@@ -880,8 +918,6 @@ const showStaking = ref(false)
 let chartPreloadStarted = false
 const chartDataLoading = ref(false)
 const chartDataError = ref(null)
-let aggregateMarketInstance = null
-
 // Price feed composable - accessible at component level for lifecycle management
 const { 
   currentPrice: cirxPrice, 
@@ -899,19 +935,15 @@ const startChartPreloading = async () => {
   console.log('🚀 Starting background chart data preload after swap page loaded...')
   
   try {
-    // Use singleton instance (shares cache with chart datafeeds)
-    aggregateMarketInstance = AggregateMarket.getInstance()
+    // Chart data preloading now handled by unified price service in usePriceData composable
+    // Start background price updates which will also warm up the chart data cache
+    startPriceUpdates()
     
-    // Start preloading TradingView chart data in background (non-blocking)
+    // Additional TradingView chart preloading (if needed) - 1 second delay to ensure swap page is fully rendered
     setTimeout(() => {
-      console.log('📊 Preloading TradingView chart data in background...')
-      aggregateMarketInstance.getMarketData('CIRX', 'USDT').catch(e => {
-        console.log('Background preload failed (non-critical):', e.message)
-        chartDataError.value = e.message
-      }).finally(() => {
-        chartDataLoading.value = false
-      })
-    }, 1000) // 1 second delay to ensure swap page is fully rendered
+      console.log('📊 Chart data cache warmed up via unified price service')
+      chartDataLoading.value = false
+    }, 1000)
     
   } catch (error) {
     console.warn('Chart preloading initialization failed:', error)
@@ -926,7 +958,6 @@ const amountInputRef = ref(null)
 const recipientAddress = ref('')
 const recipientAddressError = ref('')
 const recipientAddressType = ref('')
-const recipientCirxBalance = ref(null)
 const isFetchingRecipientBalance = ref(false)
 const showTokenDropdown = ref(false)
 // Track whether user has clicked "Enter Address" button
@@ -1069,7 +1100,7 @@ const formatTokenBalance = (balanceData) => {
 
 // ETH balance for gas gating (0 when not connected)
 const awaitedEthBalance = computed(() => {
-  if (isConnected) {
+  if (isConnected?.value) {
     return formattedEthBalance.value || '0.000000000000000000'
   }
   return '0.000000000000000000'
@@ -1077,8 +1108,8 @@ const awaitedEthBalance = computed(() => {
 
 const displayCirxBalance = computed(() => {
   // Only show balance if we have a valid recipient address and fetched balance
-  if (recipientAddress.value && !recipientAddressError.value && recipientCirxBalance.value !== null) {
-    return recipientCirxBalance.value
+  if (recipientAddress.value && !recipientAddressError.value) {
+    return '0'
   }
   return null // No address or no balance fetched, show "Balance: -"
 })
@@ -1096,12 +1127,7 @@ const connectedWallet = computed(() => {
   return isConnected ? 'ethereum' : null
 })
 
-// Wallet icon logic - simplified fallback
-const walletIcon = computed(() => {
-  // Default to MetaMask icon when connected
-  if (!isConnected) return null
-  return '/icons/wallets/metamask-fox.svg'
-})
+// Wallet icon logic is now handled by the useAppKitWallet composable
 
 // Check if dropdown should be positioned to the left to prevent overflow
 const shouldPositionLeft = computed(() => {
@@ -1199,7 +1225,7 @@ const canPurchase = computed(() => {
     const addressValid = validateRecipientAddress(recipientAddress.value)
     
     // Either connected wallet OR valid recipient address required
-    const connected = isConnected || false
+    const connected = isConnected?.value || false
     const hasValidRecipient = connected || (recipientAddress.value && addressValid)
     
     // Balance validation - only check if wallet is connected
@@ -1498,8 +1524,8 @@ const getNewCirxBalance = () => {
   const purchaseAmount = parseFloat(cirxAmount.value) || 0
   
   // If we have fetched the recipient's current balance, calculate the new total
-  if (recipientCirxBalance.value !== null) {
-    const currentBalance = parseFloat(recipientCirxBalance.value) || 0
+  if (recipientAddress.value && !recipientAddressError.value) {
+    const currentBalance = 0
     const newBalance = currentBalance + purchaseAmount
     return `New Balance: ${newBalance.toFixed(4)} CIRX`
   }
@@ -1590,15 +1616,37 @@ const handleCirxAmountChange = (value) => {
 }
 
 const setMaxAmount = () => {
-  if (isConnected) {
-    // Set to 95% of balance to account for gas fees
-    let balance = 0
+  console.log('🔧 setMaxAmount called for token:', inputToken.value)
+  console.log('🔧 Current inputBalance:', inputBalance.value)
+  
+  // Can't set max if no wallet connected or no balance available
+  if (!isConnected?.value || inputBalance.value === null) {
+    console.log('🔧 No wallet connected or no balance available')
+    return
+  }
+  
+  // Get the current balance for the selected token
+  const balance = parseFloat(inputBalance.value || '0')
+  
+  if (balance > 0) {
+    // Reserve different amounts based on token type
+    let maxAmount = 0
+    
     if (inputToken.value === 'ETH') {
-      balance = parseFloat(formattedEthBalance.value || '0')
+      // Reserve more ETH for gas fees (5% reserve)
+      maxAmount = balance * 0.95
     } else {
-      balance = 0 // Other tokens not implemented yet
+      // For ERC-20 tokens (USDC/USDT), reserve less (1% for micro gas)
+      maxAmount = balance * 0.99
     }
-    const maxAmount = inputToken === 'ETH' ? balance * 0.95 : balance * 0.99
+    
+    console.log('🔧 Setting max amount:', {
+      token: inputToken.value,
+      balance,
+      maxAmount,
+      formatted: maxAmount.toFixed(6)
+    })
+    
     inputAmount.value = maxAmount.toFixed(6)
   } else {
     inputAmount.value = '1.0' // Fallback for demo
@@ -1615,11 +1663,24 @@ const forceRefreshBalance = async () => {
 }
 
 const selectToken = (token) => {
-  // Token selection now handled by wallet store
-  // Token selection functionality removed(token)
+  console.log('🔧 selectToken called with:', token)
+  console.log('🔧 Current inputToken before change:', inputToken.value)
+  
+  // Update the selected token
+  inputToken.value = token
   showTokenDropdown.value = false
-  // Reset input when token changes
-  inputAmount.value = ''
+  
+  console.log('🔧 inputToken updated to:', inputToken.value)
+  console.log('🔧 New balance for token:', inputBalance.value)
+  
+  // Test: Force reactivity update
+  nextTick(() => {
+    console.log('🔧 After nextTick - inputToken:', inputToken.value)
+    console.log('🔧 DOM should now reflect new token')
+  })
+  
+  // Reset input when token changes (optional - user can decide)
+  // inputAmount.value = ''
   lastEditedField.value = 'input'
 }
 
@@ -1795,21 +1856,21 @@ const handleSwap = async () => {
     })
   
     // PRIORITY: Handle wallet connection states FIRST (before input validation)
-    if (!isConnected && (!recipientAddress.value || recipientAddress.value.trim() === '')) {
+    if (!isConnected?.value && (!recipientAddress.value || recipientAddress.value.trim() === '')) {
       console.log('🔥 State 1: Connect - Opening wallet modal')
       console.log('✅ Opening AppKit modal via composable')
       console.log('Wallet connection removed')
       return
     }
     
-    if (!isConnected && recipientAddress.value && recipientAddress.value.trim() !== '') {
+    if (!isConnected?.value && recipientAddress.value && recipientAddress.value.trim() !== '') {
       console.log('🔥 State 2: Connect Wallet - Opening wallet modal')
       open() // Open AppKit modal
       return
     }
     
     // If button shows "Enter Address", focus the address input field instead of swapping
-    if (isConnected && (!recipientAddress.value || recipientAddress.value.trim() === '')) {
+    if (isConnected?.value && (!recipientAddress.value || recipientAddress.value.trim() === '')) {
       console.log('🔥 No address entered, focusing address input field')
       const addressInput = addressInputRef.value
       if (addressInput) {
@@ -1839,7 +1900,7 @@ const handleSwap = async () => {
     })
     
     // State 3: "Enter Address" - Wallet connected but no address input
-    if (isConnected && (!recipientAddress.value || recipientAddress.value.trim() === '')) {
+    if (isConnected?.value && (!recipientAddress.value || recipientAddress.value.trim() === '')) {
       // Set flag to indicate user has clicked "Enter Address"
       hasClickedEnterAddress.value = true
       // Focus the CIRX address input field specifically
@@ -1858,13 +1919,12 @@ const handleSwap = async () => {
     }
 
     // State 6: "Modal" - Connected + amount + address populated but not confirmed (not green)
-    if (isConnected && inputAmount.value && parseFloat(inputAmount.value) > 0 && recipientAddress.value && recipientAddress.value.trim() !== '') {
+    if (isConnected?.value && inputAmount.value && parseFloat(inputAmount.value) > 0 && recipientAddress.value && recipientAddress.value.trim() !== '') {
       // Check if address is not confirmed (not green light state)
       const isAddressConfirmed = recipientAddressType.value === 'circular' && 
                                 !recipientAddressError.value && 
                                 addressValidationState.value === 'valid' && 
-                                recipientCirxBalance.value !== null && 
-                                parseFloat(recipientCirxBalance.value) >= 0.0
+                                recipientAddress.value && !recipientAddressError.value
       
       if (!isAddressConfirmed) {
         // Show modal
@@ -1897,7 +1957,7 @@ const handleSwap = async () => {
     const hasAmount = inputAmount.value && parseFloat(inputAmount.value) > 0
     const notLoading = !loading.value && !quoteLoading.value && !reverseQuoteLoading.value
     const addressValid = validateRecipientAddress(recipientAddress.value)
-    const connected = isConnected || false
+    const connected = isConnected?.value || false
     const hasValidRecipient = connected || (recipientAddress.value && addressValid)
     const inputAmountNum = parseFloat(inputAmount.value) || 0
     const balanceNum = parseFloat(inputBalance.value) || 0
@@ -2176,23 +2236,52 @@ const handleSwap = async () => {
 
 // Handle OTC tier selection
 const handleTierChange = (tier) => {
+  console.log('🔧 INDEX.VUE handleTierChange called with tier:', tier)
+  console.log('🔧 Current inputAmount before change:', inputAmount.value)
+  
   selectedTier.value = tier
 
-  if (activeTab.value !== 'otc') return
+  if (activeTab.value !== 'otc') {
+    console.log('🔧 Not in OTC tab, skipping calculation')
+    return
+  }
 
   // When user picks a tier, set the input amount to the minimum USD required for that tier
   // Convert tier.minAmount USD into selected input token units
-  const tokenPriceUsd = livePrices.value[inputToken] || 0
+  const tokenPriceUsd = livePrices.value[inputToken.value] || 0  // Fixed: added .value
+  console.log('🔧 TOKEN PRICE DEBUG:', {
+    inputToken: inputToken.value,
+    livePrices: livePrices.value,
+    tokenPriceUsd,
+    tierMinAmount: tier?.minAmount
+  })
   if (tokenPriceUsd > 0 && tier?.minAmount) {
     const feeRate = fees.value.otc
     const feeMultiplier = 1 - feeRate / 100
+    console.log('🔧 Fee calculation:', { feeRate, feeMultiplier })
+    
     if (feeMultiplier > 0) {
       // We want amountAfterFee * tokenPriceUsd >= tier.minAmount
       // amountAfterFee = inputAmount * feeMultiplier => inputAmount = minUsd / (tokenPriceUsd * feeMultiplier)
       const requiredInput = tier.minAmount / (tokenPriceUsd * feeMultiplier)
-      inputAmount.value = requiredInput.toFixed(6)
+      const formattedInput = requiredInput.toFixed(6)
+      
+      console.log('🔧 Calculation result:', {
+        tierMinAmount: tier.minAmount,
+        requiredInput,
+        formattedInput,
+        oldInputAmount: inputAmount.value
+      })
+      
+      inputAmount.value = formattedInput
       lastEditedField.value = 'input'
+      
+      console.log('🔧 inputAmount updated to:', inputAmount.value)
+    } else {
+      console.warn('🔧 Invalid fee multiplier:', feeMultiplier)
     }
+  } else {
+    console.warn('🔧 Cannot calculate: tokenPriceUsd =', tokenPriceUsd, 'tier.minAmount =', tier?.minAmount)
   }
 
   // Recalculate quote with new tier
@@ -2293,9 +2382,6 @@ watch(recipientAddress, async (newAddress) => {
   await validateRecipientAddress(newAddress)
   
   // Fetch CIRX balance for the new address if it's valid
-  if (newAddress && !recipientAddressError.value && addressValidationState.value === 'valid') {
-    await fetchCirxBalanceForAddress(newAddress)
-  }
 })
 
 const alignTokenSelector = () => {
@@ -2314,55 +2400,6 @@ const alignTokenSelector = () => {
   }
 }
 
-// Fetch CIRX balance for a given address
-const fetchCirxBalanceForAddress = async (address) => {
-  if (!address || recipientAddressError.value) {
-    recipientCirxBalance.value = null
-    return
-  }
-
-  try {
-    isFetchingRecipientBalance.value = true
-    
-    // Get runtime config for API base URL
-    const config = useRuntimeConfig()
-    const apiBaseUrl = config.public.apiBaseUrl || 'http://localhost:18423/api/v1'
-    
-    // Call our backend API to get CIRX balance
-    const response = await fetch(`${apiBaseUrl}/cirx/balance/${address}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        // Add API key if required
-        ...(config.public.apiKey && { 'X-API-Key': config.public.apiKey })
-      }
-    })
-    
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`)
-    }
-    
-    const data = await response.json()
-    
-    if (!data.success) {
-      throw new Error(data.message || 'Failed to fetch balance')
-    }
-    
-    // Set the balance from the API response
-    recipientCirxBalance.value = data.balance
-    
-    console.log(`📊 Fetched CIRX balance for ${address}: ${recipientCirxBalance.value}`)
-  } catch (error) {
-    console.error('Failed to fetch CIRX balance:', error)
-    // Don't reset balance to null if we already have a valid balance from address validation
-    if (recipientCirxBalance.value === null) {
-      recipientCirxBalance.value = null
-    }
-    // Keep existing balance if we have one
-  } finally {
-    isFetchingRecipientBalance.value = false
-  }
-}
 
 // Sanitize address input to remove spaces
 const sanitizeAddressInput = (event) => {
@@ -2389,7 +2426,6 @@ const validateRecipientAddressSync = (address) => {
   if (!address) {
     recipientAddressError.value = ''
     recipientAddressType.value = ''
-    recipientCirxBalance.value = null
     addressValidationState.value = 'idle'
     return true
   }
@@ -2450,7 +2486,6 @@ const validateRecipientAddress = async (address) => {
   if (!address) {
     recipientAddressError.value = ''
     recipientAddressType.value = ''
-    recipientCirxBalance.value = null
     addressValidationState.value = 'idle'
     return true
   }
@@ -2491,11 +2526,6 @@ const validateRecipientAddress = async (address) => {
         recipientAddressType.value = 'circular'
         
         // Store balance from validation (green light only if balance >= 0.0)
-        if (validation.hasBalance && validation.balance !== undefined) {
-          recipientCirxBalance.value = validation.balance
-        } else {
-          recipientCirxBalance.value = '0'
-        }
         
         addressValidationState.value = 'valid'
         hasClickedEnterAddress.value = false
@@ -2505,23 +2535,20 @@ const validateRecipientAddress = async (address) => {
         recipientAddressError.value = 'Address not found on Circular network. Please verify the address.'
         recipientAddressType.value = ''
         addressValidationState.value = 'invalid'
-        recipientCirxBalance.value = null
-        return false
+            return false
       } else {
         // Invalid format or API error
         recipientAddressError.value = validation.error || 'Invalid CIRX address'
         recipientAddressType.value = ''
         addressValidationState.value = 'invalid'
-        recipientCirxBalance.value = null
-        return false
+            return false
       }
     } catch (error) {
       console.error('Address validation error:', error)
       recipientAddressError.value = 'Unable to validate address. Please try again.'
       recipientAddressType.value = ''
       addressValidationState.value = 'invalid'
-      recipientCirxBalance.value = null
-      return false
+        return false
     }
   }
 

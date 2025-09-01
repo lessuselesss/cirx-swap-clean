@@ -25,11 +25,19 @@
 
 <script setup>
 import { toRefs } from 'vue'
-import { useCTAState } from '~/composables/useCallToActionState.js'
+import { useCTAState } from '~/composables/core/useCallToActionState.js'
+import { useAppKitWallet } from '~/composables/useAppKitWallet.js'
+
+// Use centralized wallet composable (includes AppKit singleton)
+const { isConnected, open } = useAppKitWallet()
+
+const connectWallet = () => {
+  open({ view: "Connect" })
+}
 
 const props = defineProps({
-  // Core state props
-  walletConnected: { type: Boolean, default: false },
+  // Core state props - wallet connection now handled by AppKit
+  // walletConnected: { type: Boolean, default: false }, // REMOVED - using AppKit
   recipientAddress: { type: String, default: '' },
   recipientAddressError: { type: String, default: '' },
   inputAmount: { type: String, default: '' },
@@ -74,7 +82,10 @@ const {
   shouldShowSpinner,
   currentActionType,
   handleButtonClick
-} = useCTAState(toRefs(props))
+} = useCTAState({
+  ...toRefs(props),
+  walletConnected: isConnected // Use AppKit connection state
+})
 
 // Debug logging
 const debugClick = (e) => {

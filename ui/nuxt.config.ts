@@ -11,12 +11,23 @@ export default defineNuxtConfig({
     port: 3000
   },
   
-  // Configure for static generation
+  // Configure for static generation with CORS support
   nitro: {
     preset: 'static',
     // Disable app manifest to avoid 403 errors
     experimental: {
       appManifest: false
+    },
+    // Add CORS headers for API routes
+    routeRules: {
+      '/api/**': {
+        cors: true,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With'
+        }
+      }
     }
   },
   
@@ -27,6 +38,13 @@ export default defineNuxtConfig({
   
   // Disable SSR for Web3 compatibility
   ssr: false,
+
+  // Vue configuration for Web Components
+  vue: {
+    compilerOptions: {
+      isCustomElement: (tag) => tag.startsWith('w3m-') || tag.startsWith('appkit-')
+    }
+  },
 
   modules: [
     '@nuxtjs/tailwindcss', 

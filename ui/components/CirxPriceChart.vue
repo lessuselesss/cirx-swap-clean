@@ -186,9 +186,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
-import { useSingleExchangeDatafeed } from '~/composables/usePriceData.js'
-import { usePriceData } from '~/composables/usePriceData.js'
-import { useAggregateDatafeed } from '~/composables/usePriceData.js'
+import { createSingleExchangeDatafeed, usePriceData, useAggregateDatafeed } from '~/composables/usePriceData.js'
 
 // Use aggregate price feed for multi-exchange data with manual lifecycle management
 const {
@@ -226,7 +224,7 @@ const chartKey = computed(() => `${selectedDataSource.value}-${selectedSymbol.va
 
 // Import both datafeeds
 const { createDatafeed } = useAggregateDatafeed()
-const { createSingleExchangeDatafeed } = useSingleExchangeDatafeed()
+// createSingleExchangeDatafeed is imported directly, not from a composable
 
 // TradingView Chart Options - dynamic datafeed based on selection
 const chartOptions = computed(() => ({

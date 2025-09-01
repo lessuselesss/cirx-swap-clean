@@ -6,7 +6,6 @@ export const useCircularChain = (toastCallback = null) => {
   // Reactive state
   const cirxAddress = ref('')
   const isCircularChainConnected = ref(false)
-  const cirxBalance = ref('0')
   const isLoadingBalance = ref(false)
   const chainConnectionError = ref('')
   const isDetectingChain = ref(true)
@@ -50,7 +49,6 @@ export const useCircularChain = (toastCallback = null) => {
         showToast('info', 'Manual Setup Required', 'Please enter your Circular address manually below')
       } else {
         // Try to fetch balance for existing address
-        await fetchCirxBalance()
         showToast('success', 'Connected', `Using address ${cirxAddress.value.slice(0, 6)}...${cirxAddress.value.slice(-4)}`)
       }
       
@@ -64,66 +62,9 @@ export const useCircularChain = (toastCallback = null) => {
   }
 
 
-  // Fetch CIRX balance for the connected address
-  const fetchCirxBalance = async () => {
-    if (!cirxAddress.value) return
-
-    try {
-      isLoadingBalance.value = true
-      
-      // Fetch balance via backend NAG API
-      const balance = await fetchBalanceFromNAG(cirxAddress.value)
-      cirxBalance.value = balance
-      
-      console.log(`💰 CIRX Balance: ${cirxBalance.value} CIRX`)
-      
-    } catch (error) {
-      console.error('❌ Error fetching CIRX balance:', error)
-      cirxBalance.value = '0'
-    } finally {
-      isLoadingBalance.value = false
-    }
-  }
-
-  // Fetch balance from backend NAG API
-  const fetchBalanceFromNAG = async (address) => {
-    try {
-      const { $fetch } = useNuxtApp()
-      const response = await $fetch('/debug/nag-balance', {
-        method: 'POST',
-        body: {
-          nagUrl: '/api/v1/proxy/circular-labs?endpoint=NAG.php&cep=',
-          endpoint: 'GetWalletBalance_',
-          address: address
-        }
-      })
-      
-      if (response.success && response.nag_response?.body?.Result === 200) {
-        return response.nag_response.body.Response.Balance.toString()
-      } else {
-        console.warn('NAG balance fetch failed:', response.nag_response?.body || response.error)
-        return '0'
-      }
-    } catch (error) {
-      console.error('Error fetching balance from NAG:', error)
-      return '0'
-    }
-  }
 
 
-  // Format CIRX balance for display
-  const formatCirxBalance = computed(() => {
-    const balance = parseFloat(cirxBalance.value) || 0
-    if (balance === 0) return '0.0000'
-    
-    // Format with appropriate decimal places - enhanced precision for debugging
-    if (balance < 0.000000001) return balance.toExponential(2) // Scientific notation for tiny amounts
-    if (balance < 0.0001) return balance.toFixed(8) // Show 8 decimals for small amounts
-    if (balance < 1) return balance.toFixed(6)
-    if (balance < 1000) return balance.toFixed(4)
-    if (balance < 1000000) return (balance / 1000).toFixed(2) + 'K'
-    return (balance / 1000000).toFixed(2) + 'M'
-  })
+
 
   // UX guidance based on Circular chain availability
   const getUxGuidance = computed(() => {
@@ -146,7 +87,7 @@ export const useCircularChain = (toastCallback = null) => {
     if (isCircularChainAvailable.value) {
       return {
         status: 'connected',
-        message: `Connected to Circular chain (${formatCirxBalance.value} CIRX)`,
+        message: 'Connected to Circular chain',
         action: null
       }
     }
@@ -172,19 +113,16 @@ export const useCircularChain = (toastCallback = null) => {
     // State
     cirxAddress,
     isCircularChainConnected,
-    cirxBalance,
     isLoadingBalance,
     chainConnectionError,
     isDetectingChain,
     
     // Computed
     isCircularChainAvailable,
-    formatCirxBalance,
     getUxGuidance,
     
     // Methods
     detectCircularChain,
-    fetchCirxBalance,
     
     // Config
     CIRCULAR_CHAIN_CONFIG
@@ -727,6 +665,50 @@ export function validateForm(formData, rules) {
       return Object.values(results)
         .flatMap(field => field.errors)
     }
+  }
+}
+
+/**
+ * Fetch CIRX balance for a given address
+ * @param {string} address - The Circular address to fetch balance for
+ * @returns {Promise<{success: boolean, balance?: string, error?: string}>}
+ */
+export async function fetchCirxBalanceForAddress(address) {
+  if (!address) {
+    return { success: false, error: 'No address provided' }
+  }
+
+  try {
+    // Get runtime config for API base URL
+    const config = useRuntimeConfig()
+    const apiBaseUrl = config.public.apiBaseUrl || 'http://localhost:18423/api/v1'
+    
+    // Call our backend API to get CIRX balance
+    const response = await fetch(`${apiBaseUrl}/cirx/balance/${address}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        // Add API key if required
+        ...(config.public.apiKey && { 'X-API-Key': config.public.apiKey })
+      }
+    })
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+    }
+    
+    const data = await response.json()
+    
+    if (!data.success) {
+      throw new Error(data.message || 'Failed to fetch balance')
+    }
+    
+    console.log(`📊 Fetched CIRX balance for ${address}: ${data.balance}`)
+    return { success: true, balance: data.balance }
+    
+  } catch (error) {
+    console.error('Failed to fetch CIRX balance:', error)
+    return { success: false, error: error.message }
   }
 }
 

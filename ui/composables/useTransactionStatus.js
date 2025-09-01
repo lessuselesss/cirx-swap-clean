@@ -4,7 +4,7 @@
  * Provides real-time transaction status updates with toast notifications
  */
 import { ref, reactive, computed, onUnmounted } from 'vue'
-import { useApiClient } from './useApiClient.js'
+import { useApiClient } from './core/useApiClient.js'
 import { safeToast } from '~/composables/useToast' // Import safe toast utility
 
 export function useTransactionStatus() {

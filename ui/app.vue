@@ -40,15 +40,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onErrorCaptured } from 'vue'
+import { ref, onMounted, onErrorCaptured, provide } from 'vue'
 import { safeToast } from '~/composables/useToast'
+import ToastNotifications from '~/components/ToastNotifications.vue'
 
 // Global error state
 const globalError = ref(null)
 const toastManager = ref(null)
 
 // Auto-worker for background transaction processing
-const { isProcessing, getWorkerStatus } = useAutoWorker()
+// TODO: Implement useAutoWorker composable for background processing
 
 // Global error handler
 const handleGlobalError = (error, context = 'Unknown') => {
@@ -118,8 +119,20 @@ onErrorCaptured((error, instance, info) => {
   return false
 })
 
-// Global unhandled error handlers
-onMounted(() => {
+// Initialize AppKit wallet integration synchronously (Vue lifecycle requirement)
+if (import.meta.client) {
+  try {
+    // Import and initialize wallet composable synchronously in setup
+    const { useAppKitWallet } = await import('~/composables/useAppKitWallet.js')
+    useAppKitWallet() // Initialize wallet composable to register lifecycle hooks
+    console.log('✅ AppKit wallet integration initialized')
+  } catch (error) {
+    console.warn('⚠️ AppKit wallet integration failed:', error)
+  }
+}
+
+// Global unhandled error handlers  
+onMounted(async () => {
   // Handle unhandled promise rejections
   window.addEventListener('unhandledrejection', (event) => {
     console.error('🔴 UNHANDLED PROMISE REJECTION:', event.reason)
@@ -214,4 +227,19 @@ body {
   background: linear-gradient(to right, #00ff88, #0088ff);
   height: 3px;
 }
+
+/* AppKit modal z-index fix - ensure it appears above all content */
+appkit-modal,
+w3m-modal,
+[data-appkit-modal],
+[data-w3m-modal] {
+  z-index: 999999 !important;
+}
+
+/* AppKit overlay z-index */
+appkit-modal::part(overlay),
+w3m-modal::part(overlay) {
+  z-index: 999998 !important;
+}
+
 </style>

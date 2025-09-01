@@ -9,13 +9,17 @@
  */
 import { ref, computed } from 'vue'
 import { parseUnits, formatUnits } from 'viem'
-import { useMathUtils } from './useMathUtils.js'
-import { useFormattingUtils } from './useFormattingUtils.js'
-import { usePriceData } from './usePriceData.js'
+import { useMathUtils } from '../core/useMathUtils.js'
+import { useFormattingUtils } from '../core/useFormattingUtils.js'
+import { usePriceData } from '../usePriceData.js'
+import { useVestedConfig } from '../useFormattedNumbers.js'
 
 export function useQuoteCalculator() {
   const { safeDiv, safeMul, safePercentage, validateNumber } = useMathUtils()
   const { formatNumber } = useFormattingUtils()
+  
+  // Get dynamic vested configuration
+  const { discountTiers: dynamicDiscountTiers, fees: dynamicFees } = useVestedConfig()
   
   // Token prices (fetched from live APIs)
   const tokenPrices = ref({
@@ -29,18 +33,20 @@ export function useQuoteCalculator() {
   // Track if we're using live or fallback prices
   const priceSource = ref('loading')
 
-  // Fee structure
-  const fees = {
-    liquid: 0.3,  // 0.3% for liquid swaps
-    otc: 0.15     // 0.15% for OTC swaps
-  }
+  // Fee structure - use dynamic fees with fallback
+  const fees = computed(() => ({
+    liquid: dynamicFees.value?.liquid || 0.3,  // 0.3% for liquid swaps (fallback)
+    otc: dynamicFees.value?.otc || 0.15        // 0.15% for OTC swaps (fallback)
+  }))
 
-  // OTC discount tiers
-  const discountTiers = [
-    { minAmount: 50000, discount: 12 },  // $50K+: 12%
-    { minAmount: 10000, discount: 8 },   // $10K+: 8%  
-    { minAmount: 1000, discount: 5 }     // $1K+: 5%
-  ]
+  // Dynamic discount tiers with fallback
+  const discountTiers = computed(() => 
+    dynamicDiscountTiers.value || [
+      { minAmount: 50000, discount: 12 },  // $50K+: 12%
+      { minAmount: 10000, discount: 8 },   // $10K+: 8%  
+      { minAmount: 1000, discount: 5 }     // $1K+: 5%
+    ]
+  )
 
   /**
    * Initialize prices on first use
@@ -61,7 +67,7 @@ export function useQuoteCalculator() {
    * Calculate discount percentage based on USD amount
    */
   const calculateDiscount = (usdAmount) => {
-    for (const tier of discountTiers) {
+    for (const tier of discountTiers.value) {
       if (usdAmount >= tier.minAmount) {
         return tier.discount
       }
@@ -136,7 +142,7 @@ export function useQuoteCalculator() {
     }
     
     // Calculate fee with safe percentage handling
-    const feeRate = safePercentage(isOTC ? fees.otc : fees.liquid)
+    const feeRate = safePercentage(isOTC ? fees.value.otc : fees.value.liquid)
     const feeAmount = safeMul(inputValue, safeDiv(feeRate, 100))
     const amountAfterFee = Math.max(0, inputValue - feeAmount)
     const usdAfterFee = safeMul(amountAfterFee, sourceTokenPrice)
@@ -207,27 +213,25 @@ export function useQuoteCalculator() {
     const {
       isOTC = false,
       contractsDeployed = { value: { otcSwap: false } },
-      walletStore = null,
       CONTRACT_ADDRESSES = { value: {} },
       ABIS = {}
     } = options
 
     try {
-      // Development/fallback mode - use calculation-based quotes
-      if (!contractsDeployed.value.otcSwap || !walletStore) {
+      // Development/fallback mode - use calculation-based quotes  
+      // Note: Smart contract integration removed - needs AppKit-compatible implementation
+      if (!contractsDeployed.value.otcSwap) {
         const mockPrice = inputToken === 'ETH' ? 2500 : 1 // $2500 per ETH, $1 per stablecoin
         const baseAmount = parseFloat(inputAmount) * mockPrice
         
         let discount = 0
         if (isOTC) {
-          // Apply OTC discount tiers
-          if (baseAmount >= 50000) discount = 12
-          else if (baseAmount >= 10000) discount = 8
-          else if (baseAmount >= 1000) discount = 5
+          // Apply dynamic OTC discount tiers
+          discount = calculateDiscount(baseAmount)
         }
         
         const discountMultiplier = 1 + (discount / 100)
-        const feeRate = isOTC ? fees.otc : fees.liquid
+        const feeRate = isOTC ? fees.value.otc : fees.value.liquid
         const feeAmount = baseAmount * (feeRate / 100)
         const cirxReceived = (baseAmount - feeAmount) * discountMultiplier
         
@@ -257,22 +261,38 @@ export function useQuoteCalculator() {
       const decimals = inputToken === 'USDC' || inputToken === 'USDT' ? 6 : 18
       const amountWei = parseUnits(inputAmount.toString(), decimals)
 
-      // Call appropriate contract function
-      const functionName = isOTC ? 'getOTCQuote' : 'getLiquidQuote'
-      const contractResult = await walletStore.ethereumWallet.publicClient?.readContract({
-        address: contractAddress,
-        abi: ABIS.OTC_SWAP,
-        functionName,
-        args: [tokenAddress, amountWei]
-      })
+      // TODO: Replace with AppKit-compatible contract reading
+      // Original: const contractResult = await publicClient.readContract({...})
+      const contractResult = null // Temporarily disabled until AppKit integration
 
-      // Parse contract response
+      // Parse contract response (fallback to mock when contract is disabled)
+      if (!contractResult) {
+        // Fallback to calculation-based quotes when contract is unavailable
+        const mockPrice = inputToken === 'ETH' ? 2500 : 1
+        const baseAmount = parseFloat(inputAmount) * mockPrice
+        
+        let discount = 0
+        if (isOTC) {
+          if (baseAmount >= 50000) discount = 12
+          else if (baseAmount >= 10000) discount = 8  
+          else if (baseAmount >= 1000) discount = 5
+        }
+
+        const cirxAmount = baseAmount * (100 - discount) / 100
+        return {
+          cirxAmount: cirxAmount.toString(),
+          fee: (baseAmount * 0.003).toString(), // 0.3% fee
+          discount: discount.toString(),
+          pricePerCirx: '1.00'
+        }
+      }
+      
       if (isOTC) {
         const [cirxAmount, fee, discountBps] = contractResult
         return {
           cirxAmount: formatUnits(cirxAmount, 18),
           fee: formatUnits(fee, 18),
-          feePercentage: fees.otc.toString(),
+          feePercentage: fees.value.otc.toString(),
           discount: (parseInt(discountBps) / 100).toString(),
           discountBps: discountBps.toString(),
           type: 'otc',
@@ -283,7 +303,7 @@ export function useQuoteCalculator() {
         return {
           cirxAmount: formatUnits(cirxAmount, 18),
           fee: formatUnits(fee, 18),
-          feePercentage: fees.liquid.toString(),
+          feePercentage: fees.value.liquid.toString(),
           discount: '0',
           discountBps: '0',
           type: 'liquid',
@@ -336,7 +356,8 @@ export function useQuoteCalculator() {
 
   const qualifiesForOTC = (inputAmount, inputToken) => {
     const usdValue = safeMul(parseFloat(inputAmount), getTokenPrice(inputToken))
-    return usdValue >= discountTiers[discountTiers.length - 1].minAmount // $1K minimum
+    const tiers = discountTiers.value
+    return usdValue >= (tiers[tiers.length - 1]?.minAmount || 1000) // $1K minimum fallback
   }
 
   // Auto-initialize prices

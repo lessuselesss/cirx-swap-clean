@@ -1,0 +1,33 @@
+{
+  "discountTiers": [
+    {
+      "minAmount": 50000,
+      "discount": 12,
+      "vestingMonths": 6
+    },
+    {
+      "minAmount": 10000,
+      "discount": 8,
+      "vestingMonths": 6
+    },
+    {
+      "minAmount": 1000,
+      "discount": 5,
+      "vestingMonths": 6
+    }
+  ],
+  "vestingPeriod": {
+    "months": 6,
+    "type": "linear"
+  },
+  "fees": {
+    "otc": 0.15,
+    "liquid": 0.3
+  },
+  "displayRange": "5-12%",
+  "enabled": true,
+  "minimumAmount": 1000,
+  "maximumAmount": null,
+  "lastUpdated": "2025-08-31T00:00:00Z",
+  "version": "1.0.0"
+}

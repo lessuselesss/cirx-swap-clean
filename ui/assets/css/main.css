@@ -1,5 +1,6 @@
 /* Import Circular Labs brand fonts */
-@import url('https://fonts.googleapis.com/css2?family=Michroma:wght@400&display=swap');
+/* @import url('https://fonts.googleapis.com/css2?family=Michroma:wght@400&display=swap'); */
+/* Font import disabled due to CSP restrictions - using system fonts instead */
 
 @tailwind base;
 @tailwind components;
@@ -15,6 +16,7 @@
   .font-michroma {
     font-family: 'Michroma', sans-serif;
   }
+  
 
   .token-selector-wrapper {
     right: 0 !important;

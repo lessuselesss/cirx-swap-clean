@@ -20,7 +20,7 @@
         placeholder="0.0"
         :class="[
           'w-full pl-4 pr-20 py-4 text-xl font-semibold bg-transparent border-4 border-green-400 border-t-0 rounded-b-xl text-white placeholder-gray-500 transition-all duration-300',
-          'hover:bg-circular-primary/5 focus:bg-circular-primary/5 focus:ring-2 focus:ring-circular-primary/50 focus:outline-none',
+          'hover:bg-circular-primary/5 hover:border hover:border-circular-primary focus:bg-circular-primary/5 focus:ring-2 focus:ring-circular-primary/50 focus:outline-none',
           loading && 'opacity-50'
         ]"
       />

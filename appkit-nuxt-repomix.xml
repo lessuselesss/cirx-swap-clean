@@ -1,0 +1,382 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+components/
+  Connect.vue
+composables/
+  useWalletEvents.ts
+config/
+  wagmi.ts
+plugins/
+  1.vue-query.ts
+  2.wagmi.ts
+  3.appkit.client.ts
+public/
+  robots.txt
+server/
+  tsconfig.json
+.gitignore
+app.vue
+nuxt.config.ts
+package.json
+README.md
+tsconfig.json
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="components/Connect.vue">
+<script setup lang="ts">
+import { useAppKit } from "@reown/appkit/vue";
+
+const { open } = useAppKit();
+const openModal = () => {
+    open({
+        view: "Connect"
+    })
+}
+
+</script>
+<template>
+    <div>
+        <button @click="openModal">Open Modal</button>
+    </div>
+</template>
+</file>
+
+<file path="composables/useWalletEvents.ts">
+import { onMounted, onUnmounted } from 'vue'
+import { useAccount, useAccountEffect } from '@wagmi/vue'
+import { useAppKitAccount } from "@reown/appkit/vue";
+import { useDisconnect } from "@reown/appkit/vue";
+// import { useAppKit } from '@reown/appkit/vue';
+export function useWalletEvents() {
+    const { disconnect } = useDisconnect();
+    const accountData = useAppKitAccount()
+    useAccountEffect({
+        onConnect(data) {
+            console.log('✅✅✅✅✅✅✅✅ Connected!连接上了!-----', data)
+            // useWalletLogin()
+        },
+        onDisconnect() {
+            console.log('❌❌❌❌❌❌❌❌ DisConnected!-----',)
+        },
+    })
+}
+</file>
+
+<file path="config/wagmi.ts">
+import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
+import { mainnet, polygon, base } from '@reown/appkit/networks'
+import type { AppKitNetwork } from '@reown/appkit/networks'
+
+
+export const projectId = "b56e18d47c72ab683b10814fe9495694"
+
+export const networks: [AppKitNetwork, ...AppKitNetwork[]] = [mainnet, polygon, base];
+
+export const wagmiAdapter = new WagmiAdapter({
+  ssr: false,
+  networks: networks,
+  projectId
+})
+</file>
+
+<file path="plugins/1.vue-query.ts">
+import { VueQueryPlugin, QueryClient } from '@tanstack/vue-query'
+import { defineNuxtPlugin } from '#imports'
+
+
+
+export default defineNuxtPlugin((nuxt) => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { staleTime: 5000 } },
+  })
+
+  nuxt.vueApp.use(VueQueryPlugin, {
+    queryClient,
+    enableDevtoolsV6Plugin: true,
+  })
+})
+</file>
+
+<file path="plugins/2.wagmi.ts">
+import { VueQueryPlugin } from '@tanstack/vue-query'
+import { WagmiPlugin } from '@wagmi/vue'
+import { defineNuxtPlugin } from 'nuxt/app'
+import { wagmiAdapter } from '~/config/wagmi'
+
+export default defineNuxtPlugin(nuxtApp => {
+  nuxtApp.vueApp.use(WagmiPlugin, { config: wagmiAdapter.wagmiConfig })
+})
+</file>
+
+<file path="plugins/3.appkit.client.ts">
+import { defineNuxtPlugin } from '#imports'
+import { createAppKit } from '@reown/appkit/vue'
+import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
+import type { AppKitNetwork } from '@reown/appkit/networks'
+import { wagmiAdapter, projectId, networks } from '~/config/wagmi'
+
+
+export default defineNuxtPlugin(() => {
+    createAppKit({
+        adapters: [wagmiAdapter],
+        networks,
+        projectId,
+        themeMode: 'light',
+        metadata: {
+            name: 'AppKit Nuxt Example',
+            description: 'AppKit Nuxt Example',
+            url: 'https://reown.com/appkit',
+            icons: ['https://avatars.githubusercontent.com/u/179229932?s=200&v=4']
+        }
+    });
+})
+</file>
+
+<file path="public/robots.txt">
+
+</file>
+
+<file path="server/tsconfig.json">
+{
+  "extends": "../.nuxt/tsconfig.server.json"
+}
+</file>
+
+<file path="app.vue">
+<script setup lang="ts">
+import { createAppKit } from '@reown/appkit/vue'
+import { mainnet, polygon, base } from '@reown/appkit/networks'
+import { wagmiAdapter, projectId, networks } from './config/wagmi'
+import { useDisconnect } from "@reown/appkit/vue";
+import { useAppKit } from "@reown/appkit/vue";
+import { connect } from '@wagmi/core';
+
+const { disconnect } = useDisconnect();
+const handleDisconnect = () => {
+  disconnect();
+}
+
+
+
+if (import.meta.client) {
+  useWalletEvents();
+}
+
+
+</script>
+<template>
+  <client-only>
+    <appkit-button />
+    <appkit-network-button />
+    <button @click="handleDisconnect">Disconnect</button>
+    <Connect />
+  </client-only>
+</template>
+</file>
+
+<file path="nuxt.config.ts">
+// https://nuxt.com/docs/api/configuration/nuxt-config
+export default defineNuxtConfig({
+  compatibilityDate: '2024-11-01',
+  devtools: { enabled: true },
+  runtimeConfig: {
+    public: {
+      projectId: process.env.NUXT_PROJECT_ID
+    }
+  },
+  devServer: {
+    host: '0.0.0.0',  // 同时允许 localhost 和 IP 地址访问
+    port: 3001       // 使用默认端口或指定其他端口
+  }
+})
+</file>
+
+<file path="package.json">
+{
+  "name": "@examples/nuxt-wagmi",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@reown/appkit": "1.7.17",
+    "@reown/appkit-adapter-solana": "^1.7.17",
+    "@reown/appkit-adapter-wagmi": "^1.7.17",
+    "@solana/web3.js": "^1.98.2",
+    "@tanstack/vue-query": "^5.83.0",
+    "@vue/devtools-api": "^7.7.7",
+    "@wagmi/core": "^2.18.0",
+    "@wagmi/vue": "0.1.24",
+    "viem": "^2.33.1",
+    "@walletconnect/logger": "2.1.2",
+    "wagmi": "^2.16.0",
+    "nuxt": "^3.17.6",
+    "vue": "latest",
+    "vue-router": "latest"
+  }
+}
+</file>
+
+<file path="README.md">
+# Nuxt Minimal Starter
+
+Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+
+## Setup
+
+Make sure to install dependencies:
+
+```bash
+# npm
+npm install
+
+# pnpm
+pnpm install
+
+# yarn
+yarn install
+
+# bun
+bun install
+```
+
+## Development Server
+
+Start the development server on `http://localhost:3000`:
+
+```bash
+# npm
+npm run dev
+
+# pnpm
+pnpm dev
+
+# yarn
+yarn dev
+
+# bun
+bun run dev
+```
+
+## Production
+
+Build the application for production:
+
+```bash
+# npm
+npm run build
+
+# pnpm
+pnpm build
+
+# yarn
+yarn build
+
+# bun
+bun run build
+```
+
+Locally preview production build:
+
+```bash
+# npm
+npm run preview
+
+# pnpm
+pnpm preview
+
+# yarn
+yarn preview
+
+# bun
+bun run preview
+```
+
+Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+</file>
+
+<file path="tsconfig.json">
+{
+  // https://nuxt.com/docs/guide/concepts/typescript
+  "extends": "./.nuxt/tsconfig.json"
+}
+</file>
+
+<file path=".gitignore">
+# Nuxt dev/build outputs
+.output
+.data
+.nuxt
+.nitro
+.cache
+dist
+
+# Node dependencies
+node_modules
+
+# Logs
+logs
+*.log
+
+# Misc
+.DS_Store
+.fleet
+.idea
+
+# Local env files
+.env
+.env.*
+!.env.example
+pnpm-workspace.yaml
+pnpm-lock.yaml
+</file>
+
+</files>

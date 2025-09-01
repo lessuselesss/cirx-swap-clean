@@ -3,7 +3,7 @@
  * Testing number, currency, token, and percentage formatting
  */
 import { describe, it, expect } from 'vitest'
-import { useFormattingUtils } from '../useFormattingUtils.js'
+import { useFormattingUtils } from '../core/useFormattingUtils.js'
 
 const { 
   formatNumber,

@@ -46,8 +46,8 @@
 </template>
 
 <script setup>
-import { useNumberInput } from '~/composables/UseFormattedNumbers'
-import { watch } from 'vue'
+import { useNumberInput } from '~/composables/useFormattedNumbers'
+import { toRef } from 'vue'
 
 const props = defineProps({
   amount: {
@@ -83,7 +83,7 @@ const {
   handleBlur,
   handleKeypress,
   handlePaste
-} = useNumberInput(props.amount, {
+} = useNumberInput(toRef(props, 'amount'), {
   decimals: 8,
   allowCommas: true,
   formatOnBlur: true

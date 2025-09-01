@@ -3,7 +3,7 @@
  * Testing edge cases and safe arithmetic operations
  */
 import { describe, it, expect } from 'vitest'
-import { useMathUtils } from '../useMathUtils.js'
+import { useMathUtils } from '../core/useMathUtils.js'
 
 const { 
   safeDiv, 
