@@ -187,12 +187,23 @@ export function useCTAState({
     return 'ready-to-purchase'
   })
 
+  // Current action type (alias for currentState for backward compatibility)
+  const currentActionType = currentState
+
+  // Loading spinner display logic
+  const shouldShowSpinner = computed(() => {
+    // Show spinner during address validation
+    return addressValidationState?.value === 'validating'
+  })
+
   return {
     buttonType,
     buttonText,
     buttonClasses,
     isButtonDisabled,
+    shouldShowSpinner,
     currentState,
+    currentActionType,
     handleButtonClick
   }
 }

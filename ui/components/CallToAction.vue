@@ -24,7 +24,7 @@
 </template>
 
 <script setup>
-import { toRefs } from 'vue'
+import { toRefs, nextTick } from 'vue'
 import { useCTAState } from '~/composables/core/useCallToActionState.js'
 import { useAppKitWallet } from '~/composables/useAppKitWallet.js'
 
@@ -32,7 +32,14 @@ import { useAppKitWallet } from '~/composables/useAppKitWallet.js'
 const { isConnected, open } = useAppKitWallet()
 
 const connectWallet = () => {
-  open({ view: "Connect" })
+  // Use global AppKit instance directly for reliable modal opening
+  if (window.$appKit && typeof window.$appKit.open === 'function') {
+    window.$appKit.open()
+  } else if (typeof open === 'function') {
+    open()
+  } else {
+    console.warn('AppKit modal not available')
+  }
 }
 
 const props = defineProps({
@@ -85,6 +92,16 @@ const {
 } = useCTAState({
   ...toRefs(props),
   walletConnected: isConnected // Use AppKit connection state
+})
+
+// Debug CTA state after component initialization
+nextTick(() => {
+  console.log('🔍 CallToAction - CTA button state:', {
+    buttonText: buttonText?.value,
+    walletConnected: isConnected?.value,
+    walletConnectedNormalized: !!isConnected?.value, // Convert undefined to false
+    currentActionType: currentActionType?.value
+  })
 })
 
 // Debug logging
