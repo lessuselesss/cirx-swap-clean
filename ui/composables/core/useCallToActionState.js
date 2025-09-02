@@ -169,16 +169,13 @@ export function useCTAState({
     return '...'
   })
 
-  // Button styling based on variant and active tab
+  // Button styling based on variant - always use circular-primary to match "Buy Liquid" button
   const buttonClasses = computed(() => {
     const baseClasses = 'w-full py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 border-2 disabled:opacity-50 disabled:cursor-not-allowed'
     
     if (variant === 'primary') {
-      if (activeTab?.value === 'liquid') {
-        return `${baseClasses} bg-circular-primary border-circular-primary text-gray-900 hover:bg-circular-primary/90 hover:border-circular-primary/90`
-      } else {
-        return `${baseClasses} bg-circular-purple border-circular-purple text-white hover:bg-circular-purple/90 hover:border-circular-purple/90`
-      }
+      // Always use circular-primary color to match "Buy Liquid" button, regardless of tab
+      return `${baseClasses} bg-circular-primary border-circular-primary text-gray-900 hover:bg-circular-primary/90 hover:border-circular-primary/90`
     }
     
     return baseClasses
