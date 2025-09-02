@@ -44,51 +44,95 @@ export function useAppKitWallet() {
     }
     
     // Set up global AppKit state subscription for immediate reactive updates
-    // Use setTimeout to ensure AppKit is fully initialized
     if (process.client) {
-        const setupAppKitSubscription = () => {
-            if (window.$appKit && typeof window.$appKit.subscribeAccount === 'function') {
-                try {
-                    // Subscribe to account changes and update reactive refs directly
-                    window.$appKit.subscribeAccount((accountState) => {
-                        console.log('🔄 Global AppKit account subscription:', accountState)
-                        
-                        // Update reactive refs that Vue templates can watch
-                        const newAddress = accountState?.address || null
-                        const newConnected = accountState?.isConnected || false
-                        const newChainId = accountState?.chainId || null
-                        
-                        // Only update if values actually changed to avoid unnecessary renders
-                        if (address.value !== newAddress) {
-                            address.value = newAddress
-                            console.log('🔄 Reactive address updated:', newAddress ? newAddress.slice(0, 6) + '...' + newAddress.slice(-4) : 'null')
-                        }
-                        
-                        if (isConnected.value !== newConnected) {
-                            isConnected.value = newConnected
-                            console.log('🔄 Reactive isConnected updated:', newConnected)
-                        }
-                        
-                        if (chainId.value !== newChainId) {
-                            chainId.value = newChainId 
-                            console.log('🔄 Reactive chainId updated:', newChainId)
-                        }
-                    })
+        const syncAppKitState = () => {
+            try {
+                if (window.$appKit) {
+                    // Try to get current state immediately
+                    const currentState = window.$appKit.getState?.() || {}
+                    const currentAccount = window.$appKit.getAccount?.() || {}
                     
-                    console.log('✅ Global AppKit reactive subscription initialized')
+                    console.log('🔄 Syncing AppKit state:', { currentState, currentAccount })
                     
-                } catch (subscriptionError) {
-                    console.warn('⚠️ Failed to set up AppKit subscription:', subscriptionError)
+                    // Update from current state
+                    const newAddress = currentAccount?.address || currentState?.selectedNetworkId || null
+                    const newConnected = currentAccount?.isConnected || currentState?.open === false && !!currentAccount?.address || false
+                    const newChainId = currentAccount?.chainId || currentState?.selectedNetworkId || null
+                    
+                    if (newAddress && address.value !== newAddress) {
+                        address.value = newAddress
+                        console.log('🔄 Synced address:', newAddress.slice(0, 6) + '...' + newAddress.slice(-4))
+                    }
+                    
+                    if (isConnected.value !== newConnected) {
+                        isConnected.value = newConnected
+                        console.log('🔄 Synced isConnected:', newConnected)
+                    }
+                    
+                    if (newChainId && chainId.value !== newChainId) {
+                        chainId.value = newChainId
+                        console.log('🔄 Synced chainId:', newChainId)
+                    }
                 }
+            } catch (error) {
+                console.warn('Failed to sync AppKit state:', error)
+            }
+        }
+        
+        const setupAppKitSubscription = () => {
+            if (window.$appKit) {
+                // First, sync current state
+                syncAppKitState()
+                
+                // Then set up subscription if available
+                if (typeof window.$appKit.subscribeAccount === 'function') {
+                    try {
+                        window.$appKit.subscribeAccount((accountState) => {
+                            console.log('🔄 AppKit account subscription update:', accountState)
+                            
+                            const newAddress = accountState?.address || null
+                            const newConnected = accountState?.isConnected || false
+                            const newChainId = accountState?.chainId || null
+                            
+                            if (address.value !== newAddress) {
+                                address.value = newAddress
+                                console.log('🔄 Subscription address updated:', newAddress ? newAddress.slice(0, 6) + '...' + newAddress.slice(-4) : 'null')
+                            }
+                            
+                            if (isConnected.value !== newConnected) {
+                                isConnected.value = newConnected
+                                console.log('🔄 Subscription isConnected updated:', newConnected)
+                            }
+                            
+                            if (chainId.value !== newChainId) {
+                                chainId.value = newChainId
+                                console.log('🔄 Subscription chainId updated:', newChainId)
+                            }
+                        })
+                        console.log('✅ AppKit subscription initialized')
+                    } catch (subscriptionError) {
+                        console.warn('⚠️ Failed to set up AppKit subscription:', subscriptionError)
+                    }
+                }
+                
+                // Also try to sync periodically in case subscription doesn't work
+                const syncInterval = setInterval(() => {
+                    syncAppKitState()
+                }, 2000)
+                
+                // Clear interval after 30 seconds to avoid memory leaks
+                setTimeout(() => clearInterval(syncInterval), 30000)
+                
             } else {
-                // Retry after delay if AppKit not ready
-                console.log('⏳ AppKit not ready, retrying subscription setup...')
+                console.log('⏳ AppKit not ready, retrying...')
                 setTimeout(setupAppKitSubscription, 1000)
             }
         }
         
-        // Start subscription setup with small delay
-        setTimeout(setupAppKitSubscription, 500)
+        // Start setup with multiple attempts
+        setTimeout(setupAppKitSubscription, 100)
+        setTimeout(syncAppKitState, 1000)  // Extra sync attempt
+        setTimeout(syncAppKitState, 3000)  // Another sync attempt
     }
     
     // Debug: Log reactive state changes with throttling

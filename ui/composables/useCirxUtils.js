@@ -116,15 +116,27 @@ export function useCirxUtils() {
   
   /**
    * Validate if a Circular Protocol address is properly formatted
+   * This is a basic client-side check - the backend does the authoritative validation
    */
   const validateCircularAddress = (address) => {
     if (!address || typeof address !== 'string') {
       return false
     }
     
-    // Circular Protocol addresses are 64 hex characters with 0x prefix
+    // Basic format check - Circular Protocol addresses are typically 64 hex characters with 0x prefix
+    // NOTE: This is just a preliminary check. Backend validation is authoritative.
     const circularAddressRegex = /^0x[a-fA-F0-9]{64}$/
     return circularAddressRegex.test(address)
+  }
+  
+  /**
+   * Validate address via backend API (authoritative validation)
+   */
+  const validateAddressViaBackend = async (address) => {
+    // This should call your backend API for proper validation
+    // For now, falls back to client-side check
+    // TODO: Implement API call to backend validation endpoint
+    return validateCircularAddress(address)
   }
   
   /**
@@ -149,6 +161,7 @@ export function useCirxUtils() {
     calculateCirxQuote,
     getDepositAddress,
     validateCircularAddress,
+    validateAddressViaBackend,
     createSwapTransaction
   }
 }

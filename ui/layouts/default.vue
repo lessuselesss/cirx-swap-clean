@@ -15,9 +15,7 @@
             <NuxtLink to="/swap" class="nav-link">
               Swap
             </NuxtLink>
-            <button class="connect-wallet-btn" disabled>
-              <span>Connect (Disabled)</span>
-            </button>
+            <w3m-button />
           </div>
         </nav>
       </div>
@@ -40,7 +38,7 @@
 </template>
 
 <script setup>
-// Wallet functionality completely removed
+// Uses w3m-button component for wallet connection (AppKit integration)
 </script>
 
 <style scoped>
@@ -59,22 +57,5 @@
   color: #2563eb;
 }
 
-.connect-wallet-btn {
-  background: #6b7280;
-  border: 1px solid #6b7280;
-  border-radius: 6px;
-  padding: 0.375rem 0.75rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: not-allowed;
-  transition: all 0.2s;
-  opacity: 0.6;
-  color: white;
-}
-
-.connect-wallet-btn:disabled {
-  background: #6b7280;
-  border-color: #6b7280;
-  color: white;
-}
+/* Removed disabled wallet button styles - now using w3m-button */
 </style>

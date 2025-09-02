@@ -167,9 +167,13 @@ import { useTransactionStatus } from '~/composables/features/useTransactionData.
 import { useVestedConfig } from '~/composables/useFormattedNumbers.js'
 import { useAppKitWallet } from '~/composables/useAppKitWallet.js'
 import { useSwapValidation } from '~/composables/features/useSwapValidation.js'
+import { useBlockchainTransaction } from '~/composables/useBlockchainTransaction.js'
 
 // Use enhanced wallet composable for connection state (includes AppKit singleton)
 const { address, isConnected, open } = useAppKitWallet()
+
+// Initialize blockchain transaction composable
+const blockchainTx = useBlockchainTransaction()
 
 // Watch for wallet connection and auto-populate recipient address
 watch(address, (newAddress) => {
@@ -178,23 +182,22 @@ watch(address, (newAddress) => {
   }
 })
 
-let contracts, swapLogic, errorHandler
+// Watch blockchain transaction execution steps for better user feedback
+watch(() => blockchainTx.executionStep, (step) => {
+  if (step && loading.value) {
+    loadingText.value = step
+  }
+})
+
+let cirxUtils, swapLogic, errorHandler
 
 try {
-  const apiClient = useApiClient()
-  const cirxUtils = useCirxUtils()
-  
-  contracts = {
-    calculateCirxQuote: cirxUtils.calculateCirxQuote,
-    isLoading: apiClient.isLoading
-  }
-  
-  console.log('✅ Unified API client initialized in SwapForm')
+  cirxUtils = useCirxUtils()
+  console.log('✅ CIRX utilities initialized in SwapForm')
 } catch (error) {
-  console.error('❌ Failed to initialize API client in SwapForm:', error)
-  contracts = {
-    calculateCirxQuote: () => ({ cirxAmount: '0', platformFee: { token: '0' } }),
-    isLoading: ref(false)
+  console.error('❌ Failed to initialize CIRX utils in SwapForm:', error)
+  cirxUtils = {
+    calculateCirxQuote: () => ({ cirxAmount: '0', platformFee: { token: '0' } })
   }
 }
 
@@ -312,7 +315,7 @@ const quote = computed(() => {
     // Forward calculation: input amount -> CIRX amount
     if (!inputAmount.value || parseFloat(inputAmount.value) <= 0) return null
     
-    return contracts.calculateCirxQuote(
+    return cirxUtils.calculateCirxQuote(
       inputAmount.value,
       inputToken.value,
       activeTab.value === 'otc'
@@ -519,49 +522,25 @@ const handleSwap = async () => {
 
     loadingText.value = 'Confirm transaction in wallet...'
 
-    // Step 1: Get the deposit address for the payment
-    const depositAddress = contracts.getDepositAddress(inputToken.value, 'ethereum')
+    // Get the final payment amount from quote (extract raw values to avoid postMessage issues)
+    const currentQuote = quote.value
+    const totalAmount = currentQuote?.totalPaymentRequired || inputAmount.value
+    const currentInputToken = inputToken.value
+    const recipientAddress = recipient
     
-    // Step 2: Create transaction data for MetaMask
-    const totalAmount = quote.value.totalPaymentRequired || inputAmount.value
-    
-    // Step 3: Execute transaction (wallet functionality removed)
-    let txHash
-
-    try {
-      // Wallet functionality removed - throw error
-      throw new Error('Transaction functionality has been removed. Wallet integration is disabled.')
-      
-      if (!txHash) {
-        throw new Error('Transaction was rejected or failed')
-      }
-
-      loadingText.value = 'Processing swap on backend...'
-
-      // Step 4: Call backend API with transaction details
-      const swapData = contracts.createSwapTransaction(
-        txHash,
-        'ethereum',
-        recipient,
-        totalAmount,
-        inputToken.value
-      )
-
-      const result = await contracts.initiateSwap(swapData)
-      
-    } catch (walletError) {
-      if (walletError.code === 4001) {
-        throw new Error('Transaction was rejected by user')
-      }
-      throw new Error(`Wallet transaction failed: ${walletError.message}`)
-    }
+    // Execute complete transaction flow: wallet transaction + backend submission
+    const result = await blockchainTx.executeCompleteTransaction(
+      currentInputToken,
+      totalAmount,
+      recipientAddress
+    )
 
     if (result.success) {
-      // Start tracking the transaction with real-time updates
-      currentTransaction.value = trackTransaction(result.transaction_id, {
+      // Start tracking the transaction with real-time updates  
+      currentTransaction.value = trackTransaction(result.swapId, {
         showToasts: true,
         onStatusChange: (statusData, previousPhase) => {
-          console.log(`Transaction ${result.transaction_id} moved from ${previousPhase} to ${statusData.phase}`)
+          console.log(`Transaction ${result.swapId} moved from ${previousPhase} to ${statusData.phase}`)
         },
         onComplete: (statusData) => {
           // Clear form only when truly complete
@@ -579,7 +558,7 @@ const handleSwap = async () => {
                 const config = useRuntimeConfig()
                 const network = config.public.ethereumNetwork || 'mainnet'
                 const baseUrl = network === 'sepolia' ? 'https://sepolia.etherscan.io/tx/' : 'https://etherscan.io/tx/'
-                window.open(`${baseUrl}${txHash}`, '_blank')
+                window.open(`${baseUrl}${result.txHash}`, '_blank')
               },
               primary: false
             }]
