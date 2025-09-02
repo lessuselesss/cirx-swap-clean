@@ -110,49 +110,6 @@
             </button>
           </div>
 
-          <!-- DEBUG: Manual test panel -->
-          <div class="mb-4 p-2 bg-yellow-900/20 border border-yellow-600 rounded">
-            <p class="text-yellow-400 text-sm mb-2">🔧 DEBUG: inputAmount = "{{ inputAmount }}" | Token = "{{ inputToken }}"</p>
-            <div class="mb-2">
-              <button 
-                type="button"
-                @click="inputAmount = '999.123456'"
-                class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-white text-sm mr-2"
-              >
-                Set to 999.123456
-              </button>
-              <button 
-                type="button"
-                @click="inputAmount = '5000.789'"
-                class="bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-white text-sm"
-              >
-                Set to 5000.789
-              </button>
-            </div>
-            <div>
-              <button 
-                type="button"
-                @click="selectToken('ETH')"
-                class="bg-orange-600 hover:bg-orange-700 px-3 py-1 rounded text-white text-sm mr-2"
-              >
-                Select ETH
-              </button>
-              <button 
-                type="button"
-                @click="selectToken('USDC')"
-                class="bg-cyan-600 hover:bg-cyan-700 px-3 py-1 rounded text-white text-sm mr-2"
-              >
-                Select USDC
-              </button>
-              <button 
-                type="button"
-                @click="selectToken('USDT')"
-                class="bg-purple-600 hover:bg-purple-700 px-3 py-1 rounded text-white text-sm"
-              >
-                Select USDT
-              </button>
-            </div>
-          </div>
           
           <form @submit.prevent="handleSwap" novalidate>
             

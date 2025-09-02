@@ -17,22 +17,6 @@
         class="mb-6"
       />
       
-      <!-- DEBUG: Manual test button -->
-      <div class="mb-4 p-2 bg-yellow-900/20 border border-yellow-600 rounded">
-        <p class="text-yellow-400 text-sm mb-2">DEBUG: inputAmount = "{{ inputAmount }}"</p>
-        <button 
-          @click="inputAmount = '999.123456'"
-          class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-white text-sm mr-2"
-        >
-          Set to 999.123456
-        </button>
-        <button 
-          @click="inputAmount = '5000.789'"
-          class="bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-white text-sm"
-        >
-          Set to 5000.789
-        </button>
-      </div>
 
       <!-- Swap Form -->
       <div>
