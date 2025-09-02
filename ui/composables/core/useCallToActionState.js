@@ -173,11 +173,17 @@ export function useCTAState({
   const buttonClasses = computed(() => {
     const baseClasses = 'w-full py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 border-2 disabled:opacity-50 disabled:cursor-not-allowed'
     
-    if (variant === 'primary') {
+    const variantValue = variant?.value || variant || 'primary'
+    console.log('🎨 CTA buttonClasses computed - variant:', variantValue)
+    
+    if (variantValue === 'primary') {
       // Always use circular-primary color to match "Buy Liquid" button, regardless of tab
-      return `${baseClasses} bg-circular-primary border-circular-primary text-gray-900 hover:bg-circular-primary/90 hover:border-circular-primary/90`
+      const classes = `${baseClasses} bg-circular-primary border-circular-primary text-gray-900 hover:bg-circular-primary/90 hover:border-circular-primary/90`
+      console.log('🎨 CTA buttonClasses - primary variant classes:', classes)
+      return classes
     }
     
+    console.log('🎨 CTA buttonClasses - fallback classes:', baseClasses)
     return baseClasses
   })
 
