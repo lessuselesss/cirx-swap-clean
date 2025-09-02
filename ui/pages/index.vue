@@ -423,6 +423,7 @@
                   :readonly="false"
                   :placeholder="dynamicPlaceholder"
                   @input="sanitizeAddressInput"
+                  @keydown="handleAddressKeydown"
                   @blur="handleAddressBlur"
                   :class="[
                     'w-full pl-4 pr-12 py-3 text-sm bg-transparent border rounded-xl text-white placeholder-gray-400 transition-all duration-300',
@@ -2259,6 +2260,44 @@ const alignTokenSelector = () => {
   }
 }
 
+
+// Handle keydown to prevent invalid characters from being typed (same logic as RecipientAddressInput)
+const handleAddressKeydown = (event) => {
+  const currentValue = event.target.value
+  const key = event.key
+  
+  // Allow control keys
+  if (['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'Home', 'End', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(key) || 
+      event.ctrlKey || event.metaKey) {
+    return
+  }
+  
+  // If field is empty and user types something other than '0', prevent it
+  if (currentValue === '' && key !== '0') {
+    event.preventDefault()
+    return
+  }
+  
+  // If field has '0' and user types something other than 'x', prevent it
+  if (currentValue === '0' && key !== 'x') {
+    event.preventDefault()
+    return
+  }
+  
+  // If field starts with '0x', only allow hex characters (0-9, a-f, A-F)
+  if (currentValue.startsWith('0x')) {
+    if (!/[0-9a-fA-F]/.test(key)) {
+      event.preventDefault()
+      return
+    }
+  }
+  
+  // If field has something that doesn't start with '0x', prevent further input
+  if (currentValue && !currentValue.startsWith('0x') && currentValue !== '0') {
+    event.preventDefault()
+    return
+  }
+}
 
 // Sanitize address input to remove spaces and trigger validation during typing
 const sanitizeAddressInput = (event) => {
