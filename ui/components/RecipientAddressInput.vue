@@ -54,8 +54,8 @@
     </div>
     
     <!-- Help text -->
-    <div v-else-if="modelValue && !modelValue.startsWith('0x')" class="mt-2 text-xs text-red-400">
-      Incorrect address format. Please enter your Circular Protocol Address (0x...)
+    <div v-else-if="modelValue && modelValue.length > 0 && modelValue.length < 66" class="mt-2 text-xs text-gray-400">
+      Enter your Circular Protocol Address (0x + 64 hex characters)
     </div>
   </div>
 </template>
@@ -91,7 +91,24 @@ const hasFormatError = computed(() => {
 
 // Handle input changes
 const handleInput = (event) => {
-  const value = event.target.value
+  let value = event.target.value
+  
+  // Enforce 0x prefix requirement - silently prevent non-0x input
+  if (value && !value.startsWith('0x')) {
+    // If user tries to input something that doesn't start with 0x, 
+    // only allow if it's partial "0" (allow typing "0" then "x")
+    if (value !== '0') {
+      // Prevent any input that doesn't start with 0x
+      return
+    }
+  }
+  
+  // Sanitize input - remove any non-hex characters after 0x prefix
+  if (value.startsWith('0x') && value.length > 2) {
+    const hexPart = value.slice(2).replace(/[^a-fA-F0-9]/g, '')
+    value = '0x' + hexPart
+  }
+  
   emit('update:modelValue', value)
   
   // Clear previous validation
