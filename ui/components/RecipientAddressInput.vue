@@ -18,6 +18,7 @@
         ref="addressInput"
         :value="modelValue"
         @input="handleInput"
+        @keydown="handleKeydown"
         @blur="handleValidation"
         @focus="() => console.log('🎯 CIRX Address input received focus!')"
         type="text"
@@ -89,25 +90,47 @@ const hasFormatError = computed(() => {
   return props.modelValue && !props.modelValue.startsWith('0x')
 })
 
-// Handle input changes
-const handleInput = (event) => {
-  let value = event.target.value
+// Handle keydown to prevent invalid characters from being typed
+const handleKeydown = (event) => {
+  const currentValue = event.target.value
+  const key = event.key
   
-  // Enforce 0x prefix requirement - silently prevent non-0x input
-  if (value && !value.startsWith('0x')) {
-    // If user tries to input something that doesn't start with 0x, 
-    // only allow if it's partial "0" (allow typing "0" then "x")
-    if (value !== '0') {
-      // Prevent any input that doesn't start with 0x
+  // Allow control keys
+  if (['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'Home', 'End', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(key) || 
+      event.ctrlKey || event.metaKey) {
+    return
+  }
+  
+  // If field is empty and user types something other than '0', prevent it
+  if (currentValue === '' && key !== '0') {
+    event.preventDefault()
+    return
+  }
+  
+  // If field has '0' and user types something other than 'x', prevent it
+  if (currentValue === '0' && key !== 'x') {
+    event.preventDefault()
+    return
+  }
+  
+  // If field starts with '0x', only allow hex characters (0-9, a-f, A-F)
+  if (currentValue.startsWith('0x')) {
+    if (!/[0-9a-fA-F]/.test(key)) {
+      event.preventDefault()
       return
     }
   }
   
-  // Sanitize input - remove any non-hex characters after 0x prefix
-  if (value.startsWith('0x') && value.length > 2) {
-    const hexPart = value.slice(2).replace(/[^a-fA-F0-9]/g, '')
-    value = '0x' + hexPart
+  // If field has something that doesn't start with '0x', prevent further input
+  if (currentValue && !currentValue.startsWith('0x') && currentValue !== '0') {
+    event.preventDefault()
+    return
   }
+}
+
+// Handle input changes (simplified since keydown prevents invalid chars)
+const handleInput = (event) => {
+  const value = event.target.value
   
   emit('update:modelValue', value)
   
@@ -115,14 +138,12 @@ const handleInput = (event) => {
   addressType.value = ''
   
   // Only show type indicator for valid Circular addresses
-  // Don't show indicators for Ethereum/Solana addresses as they're not supported
   if (value) {
     const detectedType = getAddressType(value)
     // Only set addressType for Circular addresses (which are valid for CIRX)
     if (detectedType === 'circular') {
       addressType.value = 'circular'
     }
-    // Don't set addressType for ethereum/solana/ens as they should show error state
   }
 }
 
