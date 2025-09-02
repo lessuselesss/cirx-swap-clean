@@ -4,54 +4,28 @@
  */
 
 import { ref, computed, watch } from 'vue'
+import { useAddressValidation } from './core/useAddressValidation.js'
+import { useFormattingUtils } from './core/useFormattingUtils.js'
 
 export function useFormattedNumbers() {
-  /**
-   * Validate if a string is a valid Ethereum address
-   * @param {string} address - The address to validate
-   * @returns {boolean} - True if valid Ethereum address
-   */
-  const isValidEthereumAddress = (address) => {
-    if (!address || typeof address !== 'string') return false
-    // Check if it's a valid hex string starting with 0x and 40 hex characters
-    return /^0x[a-fA-F0-9]{40}$/.test(address)
-  }
+  // Import consolidated address validation functions
+  const { 
+    isValidEthereumAddress: validEth,
+    isValidSolanaAddress: validSol,
+    isValidCircularAddress: validCirc,
+    detectAddressType,
+    isValidAddress
+  } = useAddressValidation()
+  
+  // Import consolidated formatting functions
+  const { formatAddress: formatAddr } = useFormattingUtils()
 
-  /**
-   * Validate if a string is a valid Solana address
-   * @param {string} address - The address to validate
-   * @returns {boolean} - True if valid Solana address
-   */
-  const isValidSolanaAddress = (address) => {
-    if (!address || typeof address !== 'string') return false
-    // Solana addresses are base58 encoded, 32-44 characters
-    return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address)
-  }
+  // Use imported validators for all address types
+  const isValidEthereumAddress = validEth
+  const isValidSolanaAddress = validSol
+  const isValidCircularAddress = validCirc
 
-  /**
-   * Validate if a string is a valid Circular Protocol address
-   * Circular addresses must be exactly 0x + 64 hex characters (66 total)
-   * @param {string} address - The address to validate
-   * @returns {boolean} - True if valid Circular address
-   */
-  const isValidCircularAddress = (address) => {
-    if (!address || typeof address !== 'string') return false
-    
-    const trimmed = address.trim()
-    
-    // Circular addresses are 0x + exactly 64 hex characters (66 total)
-    return (
-      trimmed.startsWith('0x') &&
-      trimmed.length === 66 &&
-      /^0x[a-fA-F0-9]{64}$/.test(trimmed)
-    )
-  }
-
-  /**
-   * Determine the type of address
-   * @param {string} address - The address to analyze
-   * @returns {string|null} - Address type: 'ethereum', 'solana', 'circular', or null if invalid
-   */
+  // Custom address type detection for this project's requirements
   const getAddressType = (address) => {
     if (!address || typeof address !== 'string') return null
     
@@ -73,27 +47,10 @@ export function useFormattedNumbers() {
     return null
   }
 
-  /**
-   * Format address for display (truncate middle)
-   * @param {string} address - The address to format
-   * @param {number} prefixLength - Number of characters to show at start
-   * @param {number} suffixLength - Number of characters to show at end
-   * @returns {string} - Formatted address
-   */
-  const formatAddress = (address, prefixLength = 6, suffixLength = 4) => {
-    if (!address || address.length <= prefixLength + suffixLength) {
-      return address || ''
-    }
-    
-    return `${address.slice(0, prefixLength)}...${address.slice(-suffixLength)}`
-  }
+  // Use imported formatAddress function
+  const formatAddress = formatAddr
 
-  /**
-   * Check if address is valid for a specific chain
-   * @param {string} address - The address to validate
-   * @param {string} chain - The chain type ('ethereum', 'solana', 'circular')
-   * @returns {boolean} - True if valid for the specified chain
-   */
+  // Custom chain validation using imported validators
   const isValidAddressForChain = (address, chain) => {
     switch (chain?.toLowerCase()) {
       case 'ethereum':
@@ -107,58 +64,8 @@ export function useFormattedNumbers() {
     }
   }
 
-  /**
-   * Format numbers with proper decimal places and commas
-   * @param {number|string} value - The number to format
-   * @param {number} decimals - Number of decimal places
-   * @returns {string} - Formatted number
-   */
-  const formatNumber = (value, decimals = 2) => {
-    if (value === null || value === undefined || value === '') return '0'
-    
-    const numValue = typeof value === 'string' ? parseFloat(value) : value
-    if (isNaN(numValue)) return '0'
-    
-    return numValue.toLocaleString('en-US', {
-      minimumFractionDigits: decimals,
-      maximumFractionDigits: decimals
-    })
-  }
-
-  /**
-   * Format currency values
-   * @param {number|string} value - The value to format
-   * @param {string} currency - Currency symbol (default: '$')
-   * @param {number} decimals - Number of decimal places
-   * @returns {string} - Formatted currency
-   */
-  const formatCurrency = (value, currency = '$', decimals = 2) => {
-    const formatted = formatNumber(value, decimals)
-    return `${currency}${formatted}`
-  }
-
-  /**
-   * Format token amounts with proper decimal handling
-   * @param {number|string} value - The token amount
-   * @param {string} symbol - Token symbol
-   * @param {number} decimals - Number of decimal places
-   * @returns {string} - Formatted token amount
-   */
-  const formatTokenAmount = (value, symbol = '', decimals = 6) => {
-    const formatted = formatNumber(value, decimals)
-    return symbol ? `${formatted} ${symbol}` : formatted
-  }
-
-  /**
-   * Format percentage values
-   * @param {number|string} value - The percentage value
-   * @param {number} decimals - Number of decimal places
-   * @returns {string} - Formatted percentage
-   */
-  const formatPercentage = (value, decimals = 2) => {
-    const formatted = formatNumber(value, decimals)
-    return `${formatted}%`
-  }
+  // NOTE: Formatting functions moved to ~/composables/core/useFormattingUtils.js
+  // Import that composable instead of duplicating formatting logic here
 
   return {
     // Address validation functions
@@ -167,13 +74,10 @@ export function useFormattedNumbers() {
     isValidCircularAddress,
     getAddressType,
     formatAddress,
-    isValidAddressForChain,
+    isValidAddressForChain
     
-    // Number formatting functions
-    formatNumber,
-    formatCurrency,
-    formatTokenAmount,
-    formatPercentage
+    // NOTE: Number formatting functions moved to ~/composables/core/useFormattingUtils.js
+    // formatNumber, formatCurrency, formatTokenAmount, formatPercentage
   }
 }
 
@@ -195,24 +99,9 @@ export function useNumberInput(initialValue = '', options = {}) {
   const rawValue = ref(getValue())
   const displayValue = ref(getValue())
   
-  // Simple comma formatting function
-  function addCommas(value) {
-    if (!value || value === '') return ''
-    
-    // Remove existing commas and clean the value
-    const cleaned = value.toString().replace(/[^0-9.]/g, '')
-    if (!cleaned) return ''
-    
-    const parts = cleaned.split('.')
-    const integerPart = parts[0]
-    const decimalPart = parts[1]
-    
-    // Add commas to integer part
-    const withCommas = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-    
-    // Reconstruct with decimal if it exists
-    return decimalPart !== undefined ? `${withCommas}.${decimalPart}` : withCommas
-  }
+  // Use comma formatting from consolidated utilities
+  const { formatWithCommas } = useFormattingUtils()
+  const addCommas = formatWithCommas
   
   // Remove commas for calculations
   function removeCommas(value) {
@@ -559,310 +448,3 @@ export function useVestedConfig() {
 // REMOVED: Balance management functions moved to useAppKitWallet.js for centralization
 // This eliminates 183 lines of duplicate code and ensures single source of truth
 
-/**
- * Formatting utilities
- * Consolidates duplicate formatting logic across the codebase
- */
-
-/**
- * Format numbers with proper locale and options
- * @param {number|string} value - Value to format
- * @param {object} options - Formatting options
- * @returns {string} Formatted number
- */
-export function formatNumber(value, options = {}) {
-  const {
-    decimals = 2,
-    locale = 'en-US',
-    style = 'decimal',
-    currency = 'USD',
-    compact = false,
-    showSign = false
-  } = options
-
-  if (value === null || value === undefined || value === '') {
-    return '0'
-  }
-
-  const numValue = typeof value === 'string' ? parseFloat(value) : value
-  
-  if (isNaN(numValue)) {
-    return '0'
-  }
-
-  const formatOptions = {
-    style,
-    minimumFractionDigits: style === 'currency' ? 2 : 0,
-    maximumFractionDigits: decimals
-  }
-
-  if (style === 'currency') {
-    formatOptions.currency = currency
-  }
-
-  if (compact) {
-    formatOptions.notation = 'compact'
-    formatOptions.compactDisplay = 'short'
-  }
-
-  if (showSign) {
-    formatOptions.signDisplay = 'always'
-  }
-
-  try {
-    return new Intl.NumberFormat(locale, formatOptions).format(numValue)
-  } catch (error) {
-    console.warn('Number formatting error:', error)
-    return numValue.toString()
-  }
-}
-
-/**
- * Format token amounts with appropriate decimal places
- * @param {number|string} amount - Token amount
- * @param {object} options - Formatting options
- * @returns {string} Formatted token amount
- */
-export function formatTokenAmount(amount, options = {}) {
-  const {
-    decimals = 6,
-    symbol = '',
-    compact = false,
-    showFullPrecision = false
-  } = options
-
-  if (!amount || amount === '0') {
-    return `0${symbol ? ' ' + symbol : ''}`
-  }
-
-  const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount
-  
-  if (isNaN(numAmount)) {
-    return `0${symbol ? ' ' + symbol : ''}`
-  }
-
-  let formattedAmount
-
-  if (showFullPrecision) {
-    // Show full precision for very small amounts
-    formattedAmount = numAmount.toString()
-  } else if (compact && numAmount >= 1000) {
-    // Use compact notation for large amounts
-    formattedAmount = formatNumber(numAmount, { decimals: 2, compact: true })
-  } else if (numAmount < 0.001) {
-    // Use scientific notation for very small amounts
-    formattedAmount = numAmount.toExponential(2)
-  } else if (numAmount < 1) {
-    // More decimals for amounts less than 1
-    formattedAmount = formatNumber(numAmount, { decimals: Math.min(decimals + 2, 8) })
-  } else {
-    // Standard formatting
-    formattedAmount = formatNumber(numAmount, { decimals })
-  }
-
-  return `${formattedAmount}${symbol ? ' ' + symbol : ''}`
-}
-
-/**
- * Format currency amounts
- * @param {number|string} amount - Currency amount
- * @param {object} options - Formatting options
- * @returns {string} Formatted currency
- */
-export function formatCurrency(amount, options = {}) {
-  const {
-    currency = 'USD',
-    locale = 'en-US',
-    compact = false
-  } = options
-
-  return formatNumber(amount, {
-    style: 'currency',
-    currency,
-    locale,
-    compact,
-    decimals: 2
-  })
-}
-
-/**
- * Format percentage values
- * @param {number|string} value - Percentage value (0.15 for 15%)
- * @param {object} options - Formatting options
- * @returns {string} Formatted percentage
- */
-export function formatPercentage(value, options = {}) {
-  const {
-    decimals = 2,
-    locale = 'en-US',
-    multiply100 = true
-  } = options
-
-  if (value === null || value === undefined || value === '') {
-    return '0%'
-  }
-
-  const numValue = typeof value === 'string' ? parseFloat(value) : value
-  
-  if (isNaN(numValue)) {
-    return '0%'
-  }
-
-  const displayValue = multiply100 ? numValue * 100 : numValue
-
-  try {
-    return new Intl.NumberFormat(locale, {
-      style: 'percent',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: decimals
-    }).format(multiply100 ? numValue : numValue / 100)
-  } catch (error) {
-    return `${displayValue.toFixed(decimals)}%`
-  }
-}
-
-/**
- * Format time durations
- * @param {number} seconds - Duration in seconds
- * @param {object} options - Formatting options
- * @returns {string} Formatted duration
- */
-export function formatDuration(seconds, options = {}) {
-  const {
-    format = 'auto', // 'auto', 'short', 'long'
-    showSeconds = true
-  } = options
-
-  if (!seconds || seconds <= 0) {
-    return format === 'long' ? '0 seconds' : '0s'
-  }
-
-  const units = [
-    { label: format === 'long' ? 'year' : 'y', seconds: 31536000 },
-    { label: format === 'long' ? 'month' : 'mo', seconds: 2592000 },
-    { label: format === 'long' ? 'day' : 'd', seconds: 86400 },
-    { label: format === 'long' ? 'hour' : 'h', seconds: 3600 },
-    { label: format === 'long' ? 'minute' : 'm', seconds: 60 },
-    { label: format === 'long' ? 'second' : 's', seconds: 1 }
-  ]
-
-  const parts = []
-  let remaining = Math.floor(seconds)
-
-  for (const unit of units) {
-    if (remaining >= unit.seconds) {
-      const count = Math.floor(remaining / unit.seconds)
-      remaining -= count * unit.seconds
-      
-      if (format === 'long') {
-        parts.push(`${count} ${unit.label}${count !== 1 ? 's' : ''}`)
-      } else {
-        parts.push(`${count}${unit.label}`)
-      }
-
-      if (format === 'auto' && parts.length >= 2) break
-      if (!showSeconds && unit.label.includes('second')) break
-    }
-  }
-
-  if (parts.length === 0) {
-    return format === 'long' ? '0 seconds' : '0s'
-  }
-
-  return format === 'long' ? parts.join(', ') : parts.join(' ')
-}
-
-/**
- * Format file sizes
- * @param {number} bytes - Size in bytes
- * @param {object} options - Formatting options
- * @returns {string} Formatted file size
- */
-export function formatFileSize(bytes, options = {}) {
-  const {
-    decimals = 1,
-    binary = true
-  } = options
-
-  if (bytes === 0) return '0 B'
-
-  const k = binary ? 1024 : 1000
-  const sizes = binary 
-    ? ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB']
-    : ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
-
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  const size = bytes / Math.pow(k, i)
-
-  return `${size.toFixed(decimals)} ${sizes[i]}`
-}
-
-/**
- * Format transaction hashes
- * @param {string} hash - Transaction hash
- * @param {object} options - Formatting options
- * @returns {string} Formatted hash
- */
-export function formatTransactionHash(hash, options = {}) {
-  const {
-    startChars = 8,
-    endChars = 6,
-    separator = '...'
-  } = options
-
-  if (!hash) return ''
-
-  if (hash.length <= startChars + endChars + separator.length) {
-    return hash
-  }
-
-  return `${hash.slice(0, startChars)}${separator}${hash.slice(-endChars)}`
-}
-
-/**
- * Format relative time (time ago)
- * @param {Date|string|number} date - Date to format
- * @param {object} options - Formatting options
- * @returns {string} Formatted relative time
- */
-export function formatTimeAgo(date, options = {}) {
-  const {
-    locale = 'en-US',
-    numeric = 'auto' // 'auto', 'always'
-  } = options
-
-  if (!date) return ''
-
-  const now = new Date()
-  const targetDate = new Date(date)
-  
-  if (isNaN(targetDate.getTime())) {
-    return 'Invalid date'
-  }
-
-  try {
-    const rtf = new Intl.RelativeTimeFormat(locale, { numeric })
-    const diffInSeconds = Math.floor((targetDate.getTime() - now.getTime()) / 1000)
-
-    const units = [
-      { unit: 'year', seconds: 31536000 },
-      { unit: 'month', seconds: 2592000 },
-      { unit: 'day', seconds: 86400 },
-      { unit: 'hour', seconds: 3600 },
-      { unit: 'minute', seconds: 60 },
-      { unit: 'second', seconds: 1 }
-    ]
-
-    for (const { unit, seconds } of units) {
-      const interval = Math.floor(Math.abs(diffInSeconds) / seconds)
-      if (interval >= 1) {
-        return rtf.format(diffInSeconds < 0 ? -interval : interval, unit)
-      }
-    }
-
-    return rtf.format(0, 'second')
-  } catch (error) {
-    console.warn('Relative time formatting error:', error)
-    return targetDate.toLocaleDateString()
-  }
-}

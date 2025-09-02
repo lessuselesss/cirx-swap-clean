@@ -1,5 +1,10 @@
 <template>
   <div class="min-h-screen">
+    <!-- AppKit Modal Component (Required for state management) -->
+    <ClientOnly>
+      <appkit-modal />
+    </ClientOnly>
+    
     <!-- Main App Content -->
     <NuxtPage />
     

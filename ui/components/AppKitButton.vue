@@ -25,38 +25,44 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useAppKitWallet } from '~/composables/useAppKitWallet.js'
-import { useAppKit, useAppKitAccount } from '@reown/appkit/vue'
+import { useAppKit } from '@reown/appkit/vue'
 
-// Use defensive destructuring with default values to prevent undefined errors
-const walletComposable = useAppKitWallet()
-const address = walletComposable?.address || ref(null)
-const isConnected = walletComposable?.isConnected || ref(false)
-const syncWithMetaMask = walletComposable?.syncWithMetaMask || (() => console.warn('MetaMask sync not available'))
-
-// Use proper AppKit hooks for modal control
+// Get AppKit modal control
 const { open: openModal } = useAppKit()
 
-// Debug logging
-console.log('🔍 AppKit modal function:', {
+// Get wallet composable with reactive state
+const walletComposable = useAppKitWallet()
+
+// Use reactive refs from wallet composable - these are properly reactive for Vue templates
+const address = walletComposable.address
+const isConnected = walletComposable.isConnected
+
+// Watch for reactive state changes to debug
+watch([isConnected, address], 
+  ([connected, addr]) => {
+    console.log('🔄 AppKitButton reactive state changed:', {
+      connected,
+      address: addr?.slice(0, 6) + '...' + addr?.slice(-4),
+      timestamp: new Date().toISOString()
+    })
+  },
+  { immediate: true }
+)
+
+// Debug logging with reactive state details
+console.log('🔍 AppKit button initialization with reactive state:', {
   hasOpenModal: !!openModal,
-  openModalType: typeof openModal,
+  hasWalletComposable: !!walletComposable,
+  addressRef: address.value?.slice(0, 6) + '...' + address.value?.slice(-4),
+  connectedRef: isConnected.value,
+  addressIsRef: !!address._rawValue !== undefined,
+  connectedIsRef: !!isConnected._rawValue !== undefined,
   timestamp: new Date().toISOString()
 })
 
 const isConnecting = ref(false)
-
-// Debug: Log wallet state to diagnose issues
-console.log('🔍 AppKitButton - Wallet composable state:', {
-  hasComposable: !!walletComposable,
-  hasAddress: !!address,
-  hasIsConnected: !!isConnected,
-  hasOpen: !!open,
-  addressValue: address?.value,
-  isConnectedValue: isConnected?.value,
-  timestamp: new Date().toISOString()
-})
 
 // Throttle connection attempts to prevent Lit component update scheduling issues
 let lastConnectionAttempt = 0
@@ -70,177 +76,17 @@ const handleClick = async () => {
   }
   lastConnectionAttempt = now
 
-  // If already connected, open the AppKit account/profile modal
-  if (isConnected.value) {
-    console.log('🔗 Already connected - opening AppKit account modal:', formatAddress(address.value))
-    
-    try {
-      // For connected users, we want to open the account modal, not the connect modal
-      // Try different approaches for opening the account modal
-      
-      // Method 1: Try AppKit state/router methods for navigation
-      if (window.$appKit) {
-        console.log('📋 Trying AppKit navigation methods')
-        console.log('Available methods:', Object.keys(window.$appKit))
-        
-        // Look for methods that might open account/profile view
-        const potentialMethods = Object.keys(window.$appKit).filter(key => 
-          key.toLowerCase().includes('open') || 
-          key.toLowerCase().includes('show') || 
-          key.toLowerCase().includes('navigate') ||
-          key.toLowerCase().includes('account') ||
-          key.toLowerCase().includes('profile')
-        )
-        console.log('Potential navigation methods:', potentialMethods)
-        
-        // Try some common AppKit methods for opening account view
-        const methodsToTry = ['openAccount', 'showAccount', 'openProfile', 'showProfile']
-        for (const method of methodsToTry) {
-          if (typeof window.$appKit[method] === 'function') {
-            console.log(`✅ Trying ${method}()`)
-            try {
-              window.$appKit[method]()
-              setTimeout(() => { isConnecting.value = false }, 500)
-              return
-            } catch (err) {
-              console.warn(`❌ ${method}() failed:`, err)
-            }
-          }
-        }
-      }
-      
-      // Method 2: Look for appkit-modal element and trigger account view
-      const modal = document.querySelector('appkit-modal, w3m-modal')
-      if (modal) {
-        console.log('📋 Found modal element, opening account view')
-        console.log('Modal methods:', Object.getOwnPropertyNames(modal).filter(prop => typeof modal[prop] === 'function'))
-        
-        // Try different ways to open the modal
-        if (typeof modal.open === 'function') {
-          console.log('Calling modal.open()')
-          modal.open()
-        } else if (modal.show && typeof modal.show === 'function') {
-          console.log('Calling modal.show()')
-          modal.show()
-        } else if (modal.setAttribute) {
-          console.log('Setting modal attributes')
-          modal.setAttribute('open', 'true')
-        }
-        
-        setTimeout(() => { isConnecting.value = false }, 500)
-        return
-      }
-      
-      // Method 2: Try creating w3m-account-button instead of w3m-button
-      console.log('🔄 Trying w3m-account-button for connected users')
-      const accountButton = document.createElement('w3m-account-button')
-      if (accountButton) {
-        accountButton.style.position = 'absolute'
-        accountButton.style.left = '-9999px'
-        accountButton.style.visibility = 'hidden'
-        document.body.appendChild(accountButton)
-        
-        setTimeout(() => {
-          accountButton.click()
-          document.body.removeChild(accountButton)
-        }, 100)
-        
-        setTimeout(() => {
-          isConnecting.value = false
-        }, 500)
-        return
-      }
-      
-    } catch (error) {
-      console.error('❌ Error opening account modal:', error)
-    }
-  }
-
-  // Check if MetaMask is connected but AppKit doesn't know about it
-  if (window.ethereum && window.ethereum.selectedAddress && !isConnected.value) {
-    console.log('🔄 MetaMask connected but AppKit not synced - attempting sync first...')
-    try {
-      await syncWithMetaMask()
-      // Wait a moment for the sync to take effect
-      await new Promise(resolve => setTimeout(resolve, 500))
-      
-      // Check again if sync worked
-      if (isConnected.value) {
-        console.log('✅ Sync successful - wallet now connected!')
-        return
-      }
-    } catch (error) {
-      console.warn('⚠️ MetaMask sync failed, proceeding with modal:', error)
-    }
-  }
-
   try {
     isConnecting.value = true
-    console.log('🔗 Opening AppKit modal using openModal function...')
+    console.log('🔗 Opening AppKit modal...')
     
-    // Try using the openModal function from useAppKit
+    // Use the openModal function from useAppKit - let AppKit handle everything
     if (openModal && typeof openModal === 'function') {
       console.log('✅ Calling openModal()')
       await openModal()
       console.log('✅ Modal opened successfully')
-      setTimeout(() => {
-        isConnecting.value = false
-      }, 500)
-      return
-    }
-    
-    console.warn('⚠️ openModal function not available, trying fallback methods...')
-    
-    // Fallback: try the modal directly
-    const modal = document.querySelector('appkit-modal, w3m-modal')
-    if (modal) {
-      console.log('📋 Found modal, trying different approaches')
-      
-      // Try dispatching a custom event to open the modal
-      try {
-        const openEvent = new CustomEvent('open', { detail: { view: 'Account' } })
-        modal.dispatchEvent(openEvent)
-        console.log('✅ Dispatched open event')
-      } catch (err) {
-        console.warn('❌ Custom event failed:', err)
-      }
-      
-      // Try setting multiple attributes
-      try {
-        modal.style.display = 'block'
-        modal.setAttribute('open', '')
-        modal.setAttribute('data-state', 'open')
-        console.log('✅ Set modal attributes and style')
-      } catch (err) {
-        console.warn('❌ Attribute setting failed:', err)
-      }
-      
-      // Try calling any available methods that might open it
-      if (modal.show && typeof modal.show === 'function') {
-        modal.show()
-        console.log('✅ Called modal.show()')
-      }
-      
-      // Try triggering a click event on the modal itself
-      try {
-        modal.click()
-        console.log('✅ Triggered modal click')
-      } catch (err) {
-        console.warn('❌ Modal click failed:', err)
-      }
-      
     } else {
-      console.error('❌ No modal element found')
-      
-      // As a last resort, try to create and add a modal
-      try {
-        const newModal = document.createElement('appkit-modal')
-        newModal.setAttribute('open', '')
-        document.body.appendChild(newModal)
-        console.log('✅ Created new modal')
-      } catch (err) {
-        console.warn('❌ Modal creation failed:', err)
-      }
+      console.warn('⚠️ openModal function not available')
     }
     
   } catch (error) {
@@ -249,7 +95,7 @@ const handleClick = async () => {
     // Reset connecting state after a delay
     setTimeout(() => {
       isConnecting.value = false
-    }, 1500)
+    }, 500)
   }
 }
 

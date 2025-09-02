@@ -1,6 +1,14 @@
 import { ref, computed, onMounted, onBeforeUnmount, getCurrentInstance } from 'vue'
 import { usePriceService } from '~/composables/features/usePriceService.js'
 
+// Use shared price service for consolidated functionality
+const { 
+  fetchPriceFromDEXTools: sharedFetchPriceFromDEXTools,
+  fetchCIRXFromAggregator: sharedFetchCIRXFromAggregator,
+  fetchCIRXFromCoinGecko: sharedFetchCIRXFromCoinGecko,
+  fetchCurrentPrice: sharedFetchCurrentPrice
+} = usePriceService()
+
 /**
  * Unified Price Data Service for CIRX Token
  * Consolidated from multiple price services to eliminate duplication
@@ -113,31 +121,7 @@ export function usePriceData() {
    * Fallback price fetch from DEXTools
    */
   const fetchPriceFromDEXTools = async () => {
-    const response = await fetch(
-      `https://api.dextools.io/v1/token/1/${CIRX_CONTRACT}/price`,
-      {
-        headers: {
-          'Accept': 'application/json'
-        }
-      }
-    )
-    
-    if (!response.ok) {
-      throw new Error(`DEXTools API error: ${response.status}`)
-    }
-    
-    const data = await response.json()
-    
-    if (!data.data || !data.data.price) {
-      throw new Error('Invalid DEXTools price data')
-    }
-    
-    return {
-      price: parseFloat(data.data.price),
-      change24h: 0,
-      lastUpdated: Date.now() / 1000,
-      source: 'dextools'
-    }
+    return await sharedFetchPriceFromDEXTools()
   }
   
   /**

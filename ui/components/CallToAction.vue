@@ -8,7 +8,6 @@
       customClasses
     ]"
     @click="(event) => handleButtonClick(event, $emit)"
-    @click.capture="debugClick"
   >
     <!-- Loading State -->
     <div v-if="shouldShowSpinner" class="flex items-center justify-center gap-3">
@@ -25,36 +24,41 @@
 </template>
 
 <script setup>
-import { toRefs, nextTick, watch } from 'vue'
+import { toRefs, nextTick, watch, ref, computed } from 'vue'
 import { useCTAState } from '~/composables/core/useCallToActionState.js'
 import { useAppKitWallet } from '~/composables/useAppKitWallet.js'
 
-// Use centralized wallet composable (includes AppKit singleton)
-const { isConnected, open } = useAppKitWallet()
+// Get wallet composable with reactive state
+const walletComposable = useAppKitWallet()
 
-// DEBUG: Check what isConnected actually contains
-console.log('🔥 CallToAction - isConnected from useAppKitWallet:', {
-  isConnected,
-  value: isConnected?.value,
-  type: typeof isConnected?.value,
+// Use reactive state from wallet composable - this is properly reactive for Vue templates
+const isConnected = walletComposable.isConnected
+
+// Watch for reactive state changes to debug
+watch(isConnected, 
+  (connected) => {
+    console.log('🔄 CallToAction reactive connection state changed:', {
+      connected,
+      timestamp: new Date().toISOString()
+    })
+  },
+  { immediate: true }
+)
+
+// DEBUG: Check reactive state initialization
+console.log('🔥 CallToAction - Reactive connection state:', {
+  reactiveConnected: isConnected.value,
+  isRef: !!isConnected._rawValue !== undefined,
   timestamp: new Date().toISOString()
 })
 
-const connectWallet = () => {
-  // Use global AppKit instance directly for reliable modal opening
-  if (window.$appKit && typeof window.$appKit.open === 'function') {
-    window.$appKit.open()
-  } else if (typeof open === 'function') {
-    open()
-  } else {
-    console.warn('AppKit modal not available')
-  }
-}
+// Wallet connection is now handled by the CTA state logic
 
 const props = defineProps({
   // Core state props - wallet connection now handled by AppKit
   recipientAddress: { type: String, default: '' },
   recipientAddressError: { type: String, default: '' },
+  addressValidationState: { type: String, default: 'idle' }, // CRITICAL: needed for "..." display
   inputAmount: { type: String, default: '' },
   inputBalance: { type: String, default: '0' },
   ethBalance: { type: String, default: '0' },
@@ -155,20 +159,7 @@ watch(() => [isConnected?.value, buttonText?.value, currentState?.value],
   { immediate: true }
 )
 
-// Debug logging
-const debugClick = (e) => {
-  if (props.debug) {
-    console.log('🔥 CallToAction button click captured!', {
-      disabled: e.target.disabled,
-      canPurchase: props.canPurchase,
-      loading: props.loading,
-      buttonText: buttonText.value,
-      currentActionType: currentActionType.value,
-      recipientAddress: props.recipientAddress,
-      inputAmount: props.inputAmount
-    })
-  }
-}
+// Debug logging removed - functionality now handled by CTA state
 
 // Expose internal state for parent components if needed
 defineExpose({

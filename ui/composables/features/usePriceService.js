@@ -135,7 +135,7 @@ export function usePriceService() {
       .filter(source => PRICE_SOURCES[source])
       .sort((a, b) => PRICE_SOURCES[a].priority - PRICE_SOURCES[b].priority)
 
-    let lastError = null
+    let currentError = null
     
     // Try each source in order
     for (const sourceName of sortedSources) {
@@ -171,7 +171,7 @@ export function usePriceService() {
         
       } catch (error) {
         console.warn(`❌ Failed to fetch from ${source.name}:`, error.message)
-        lastError = error
+        currentError = error
         
         // If fallback is disabled, throw immediately
         if (!fallbackEnabled) {
@@ -185,7 +185,7 @@ export function usePriceService() {
 
     // All sources failed
     isLoading.value = false
-    const errorMessage = `Failed to fetch ${symbol}/${currency} from all sources: ${lastError?.message}`
+    const errorMessage = `Failed to fetch ${symbol}/${currency} from all sources: ${currentError?.message}`
     lastError.value = errorMessage
     throw new Error(errorMessage)
   }
@@ -247,6 +247,23 @@ export function usePriceService() {
       }
       
       return fallbackPrices[symbol.toUpperCase()] || 0
+    }
+  }
+
+  /**
+   * Initialize prices with reactive state management
+   * Consolidated from useQuoteCalculator.js and useSwapHandler.js (100% similarity)
+   */
+  const initializePrices = async (tokenPrices, priceSource) => {
+    try {
+      const { getTokenPrices } = await import('~/composables/usePriceData')
+      const { getTokenPrices: priceGetter } = getTokenPrices()
+      const livePrices = await priceGetter()
+      tokenPrices.value = { ...livePrices }
+      priceSource.value = 'live'
+    } catch (error) {
+      console.warn('Failed to load live prices, using fallback:', error)
+      priceSource.value = 'fallback'
     }
   }
 
@@ -331,6 +348,7 @@ export function usePriceService() {
     fetchMultipleTokenPrices,
     getCurrentPrices,
     getTokenPrice,
+    initializePrices,
     
     // Backward compatibility (old API)
     fetchCIRXFromAggregator,

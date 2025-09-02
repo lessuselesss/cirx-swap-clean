@@ -13,10 +13,13 @@ import { useMathUtils } from '../core/useMathUtils.js'
 import { useFormattingUtils } from '../core/useFormattingUtils.js'
 import { usePriceData } from '../usePriceData.js'
 import { useVestedConfig } from '../useFormattedNumbers.js'
+import { usePriceService } from './usePriceService.js'
+import { normalizeTokenSymbol } from '../core/useTokenUtils.js'
 
 export function useQuoteCalculator() {
-  const { safeDiv, safeMul, safePercentage, validateNumber } = useMathUtils()
+  const { safeDiv, safeMul, safePercentage, validateNumber, calculateDiscount } = useMathUtils()
   const { formatNumber } = useFormattingUtils()
+  const { initializePrices: sharedInitializePrices } = usePriceService()
   
   // Get dynamic vested configuration
   const { discountTiers: dynamicDiscountTiers, fees: dynamicFees } = useVestedConfig()
@@ -25,8 +28,7 @@ export function useQuoteCalculator() {
   const tokenPrices = ref({
     ETH: 2500,   // Will be updated with live prices
     USDC: 1,     
-    USDT: 1,     
-    SOL: 100,    
+    USDT: 1,         
     CIRX: 1      
   })
 
@@ -50,40 +52,15 @@ export function useQuoteCalculator() {
 
   /**
    * Initialize prices on first use
+   * Now using shared implementation from usePriceService
    */
   const initializePrices = async () => {
-    try {
-      const { getTokenPrices } = usePriceData()
-      const livePrices = await getTokenPrices()
-      tokenPrices.value = { ...livePrices }
-      priceSource.value = 'live'
-    } catch (error) {
-      console.warn('Failed to load live prices, using fallback:', error)
-      priceSource.value = 'fallback'
-    }
+    await sharedInitializePrices(tokenPrices, priceSource)
   }
 
-  /**
-   * Calculate discount percentage based on USD amount
-   */
-  const calculateDiscount = (usdAmount) => {
-    for (const tier of discountTiers.value) {
-      if (usdAmount >= tier.minAmount) {
-        return tier.discount
-      }
-    }
-    return 0
-  }
+  // calculateDiscount is now imported from useMathUtils
 
-  /**
-   * Normalize token symbol for price lookup
-   */
-  const normalizeTokenSymbol = (tokenSymbol) => {
-    // Handle Solana-specific token naming
-    if (tokenSymbol === 'USDC_SOL') return 'USDC'
-    if (tokenSymbol === 'USDT_SOL') return 'USDT'
-    return tokenSymbol?.toUpperCase() || 'UNKNOWN'
-  }
+  // normalizeTokenSymbol is now imported from useTokenUtils
 
   /**
    * Get token price with validation
@@ -161,7 +138,7 @@ export function useQuoteCalculator() {
       if (selectedTier && selectedTier.discount) {
         discount = safePercentage(selectedTier.discount)
       } else {
-        discount = safePercentage(calculateDiscount(totalUsdValue))
+        discount = safePercentage(calculateDiscount(totalUsdValue, discountTiers.value))
       }
       
       if (discount > 0) {
@@ -227,7 +204,7 @@ export function useQuoteCalculator() {
         let discount = 0
         if (isOTC) {
           // Apply dynamic OTC discount tiers
-          discount = calculateDiscount(baseAmount)
+          discount = calculateDiscount(baseAmount, discountTiers.value)
         }
         
         const discountMultiplier = 1 + (discount / 100)

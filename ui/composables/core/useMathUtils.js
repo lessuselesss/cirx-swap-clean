@@ -160,6 +160,50 @@ export function useMathUtils() {
     return safeMul(percentage, 10000, fallback)
   }
 
+  /**
+   * Calculate discount percentage based on USD amount and discount tiers
+   * Consolidated from useQuoteCalculator.js, useCirxUtils.js, useSwapHandler.js
+   * @param {number} usdAmount - USD amount to calculate discount for
+   * @param {Array} discountTiers - Array of discount tiers with minAmount and discount properties
+   * @returns {number} Discount percentage (0 if no applicable tier)
+   */
+  const calculateDiscount = (usdAmount, discountTiers = []) => {
+    if (!Array.isArray(discountTiers) || discountTiers.length === 0) {
+      return 0
+    }
+    
+    const amount = parseFloat(usdAmount)
+    if (!isValidNumber(amount) || amount < 0) {
+      return 0
+    }
+    
+    // Find the highest tier the amount qualifies for
+    for (const tier of discountTiers) {
+      if (tier && typeof tier.minAmount === 'number' && typeof tier.discount === 'number') {
+        if (amount >= tier.minAmount) {
+          return Math.max(0, tier.discount) // Ensure non-negative discount
+        }
+      }
+    }
+    
+    return 0
+  }
+
+  /**
+   * Check if amount qualifies for OTC discount
+   * Consolidated from useQuoteCalculator.js and useSwapHandler.js (100% similarity eliminated)
+   * @param {number|string} inputAmount - Input token amount
+   * @param {string} inputToken - Token symbol for price lookup
+   * @param {function} getTokenPrice - Price lookup function
+   * @param {Array} discountTiers - Discount tiers configuration
+   * @returns {boolean} True if qualifies for OTC discount
+   */
+  const qualifiesForOTC = (inputAmount, inputToken, getTokenPrice, discountTiers = []) => {
+    const usdValue = safeMul(parseFloat(inputAmount), getTokenPrice(inputToken))
+    const minAmount = discountTiers[discountTiers.length - 1]?.minAmount || 1000 // $1K minimum fallback
+    return usdValue >= minAmount
+  }
+
   // Return all utility functions
   return {
     // Core safe operations
@@ -182,7 +226,9 @@ export function useMathUtils() {
     
     // Utility functions
     safeRound,
-    clamp
+    clamp,
+    calculateDiscount,
+    qualifiesForOTC
   }
 }
 
@@ -200,5 +246,7 @@ export const {
   safeRound,
   clamp,
   basisPointsToPercentage,
-  percentageToBasisPoints
+  percentageToBasisPoints,
+  calculateDiscount,
+  qualifiesForOTC
 } = useMathUtils()

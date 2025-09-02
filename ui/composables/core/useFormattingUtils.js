@@ -301,6 +301,92 @@ export function useFormattingUtils() {
     return formatAddress(hash, { prefixLength: 8, suffixLength: 6, ...options })
   }
 
+  /**
+   * Format number with comma separators
+   * @param {string|number} value - Value to format
+   * @returns {string} Formatted value with commas
+   */
+  const formatWithCommas = (value) => {
+    if (!value && value !== 0) return ''
+    
+    // Remove existing commas and clean the value
+    const cleaned = value.toString().replace(/[^0-9.-]/g, '')
+    if (!cleaned) return ''
+    
+    const parts = cleaned.split('.')
+    const integerPart = parts[0]
+    const decimalPart = parts[1]
+    
+    // Add commas to integer part
+    const withCommas = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+    
+    // Reconstruct with decimal if it exists
+    return decimalPart !== undefined ? `${withCommas}.${decimalPart}` : withCommas
+  }
+
+  /**
+   * Format balance with intelligent decimal truncation
+   * Shows first non-zero decimal digit for small amounts
+   * @param {string|number} balance - Balance to format
+   * @param {number} decimals - Token decimals (default 18)
+   * @returns {string} Formatted balance
+   */
+  const formatBalance = (balance, decimals = 18) => {
+    if (!balance || balance === '0') return '0.0'
+    
+    // Handle raw balance (BigInt or large number)
+    let num
+    if (typeof balance === 'bigint' || (typeof balance === 'string' && balance.length > 15)) {
+      // Convert from smallest unit to human readable
+      const divisor = BigInt(10 ** decimals)
+      const balanceBigInt = typeof balance === 'bigint' ? balance : BigInt(balance)
+      const wholePart = balanceBigInt / divisor
+      const fractionalPart = balanceBigInt % divisor
+      
+      // Convert to decimal string
+      const fractionalStr = fractionalPart.toString().padStart(decimals, '0')
+      num = parseFloat(`${wholePart}.${fractionalStr}`)
+    } else {
+      num = parseFloat(balance)
+    }
+    
+    if (isNaN(num) || num === 0) return '0.0'
+    
+    // For very small numbers, show first significant digit
+    if (num < 0.01) {
+      const str = num.toString()
+      const [integer, decimal] = str.split('.')
+      
+      if (!decimal) return integer + '.0'
+      
+      // Find first non-zero digit in decimal
+      let firstNonZeroIndex = -1
+      for (let i = 0; i < decimal.length; i++) {
+        if (decimal[i] !== '0') {
+          firstNonZeroIndex = i
+          break
+        }
+      }
+      
+      if (firstNonZeroIndex === -1) {
+        return integer + '.0'
+      }
+      
+      // Include up to and including the first non-zero decimal digit
+      const truncatedDecimal = decimal.substring(0, firstNonZeroIndex + 1)
+      return integer + '.' + truncatedDecimal
+    }
+    
+    // For normal numbers, show 2-4 decimal places
+    if (num >= 1000) {
+      return formatWithCommas(num.toFixed(2))
+    } else if (num >= 1) {
+      return num.toFixed(4).replace(/\.?0+$/, '')
+    } else {
+      return num.toFixed(6).replace(/\.?0+$/, '')
+    }
+  }
+
   // Return all utility functions
   return {
     // Core formatting
@@ -308,6 +394,8 @@ export function useFormattingUtils() {
     formatCurrency,
     formatTokenAmount,
     formatPercentage,
+    formatWithCommas,
+    formatBalance,
     
     // Specialized formatting
     formatFileSize,

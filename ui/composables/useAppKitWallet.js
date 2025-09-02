@@ -14,46 +14,96 @@ export function useAppKitWallet() {
         return singletonState
     }
     
-    // Add try-catch to prevent critical errors during AppKit hook usage
-    let address, rawIsConnected, chainId, disconnect, open, events
+    // Create properly reactive refs for Vue templates
+    const address = ref(null)
+    const isConnected = ref(false) 
+    const chainId = ref(null)
+    
+    // Initialize with AppKit hooks but don't rely on their reactivity
+    let disconnect, open, events
     
     try {
         const accountHooks = useAppKitAccount()
-        address = accountHooks?.address || ref(null)
-        rawIsConnected = accountHooks?.isConnected || ref(false)
-        chainId = accountHooks?.chainId || ref(null)
-        
         const disconnectHooks = useDisconnect()
-        disconnect = disconnectHooks?.disconnect || (() => console.warn('Disconnect not available'))
-        
         const stateHooks = useAppKitState()
-        open = stateHooks?.open || (() => console.warn('AppKit modal not available'))
         
+        disconnect = disconnectHooks?.disconnect || (() => console.warn('Disconnect not available'))
+        open = stateHooks?.open || (() => console.warn('AppKit modal not available'))
         events = useAppKitEvents() || null
+        
+        // Initialize with current values
+        address.value = accountHooks?.address?.value || null
+        isConnected.value = accountHooks?.isConnected?.value || false
+        chainId.value = accountHooks?.chainId?.value || null
+        
     } catch (error) {
         console.error('❌ Error initializing AppKit hooks:', error)
-        // Provide fallback values to prevent undefined errors
-        address = ref(null)
-        rawIsConnected = ref(false)
-        chainId = ref(null)
         disconnect = () => console.warn('Disconnect not available')
-        open = () => console.warn('AppKit modal not available')
+        open = () => console.warn('AppKit modal not available') 
         events = null
     }
     
-    // Debug: Log what useAppKitAccount actually returns with throttling
+    // Set up global AppKit state subscription for immediate reactive updates
+    // Use setTimeout to ensure AppKit is fully initialized
+    if (process.client) {
+        const setupAppKitSubscription = () => {
+            if (window.$appKit && typeof window.$appKit.subscribeAccount === 'function') {
+                try {
+                    // Subscribe to account changes and update reactive refs directly
+                    window.$appKit.subscribeAccount((accountState) => {
+                        console.log('🔄 Global AppKit account subscription:', accountState)
+                        
+                        // Update reactive refs that Vue templates can watch
+                        const newAddress = accountState?.address || null
+                        const newConnected = accountState?.isConnected || false
+                        const newChainId = accountState?.chainId || null
+                        
+                        // Only update if values actually changed to avoid unnecessary renders
+                        if (address.value !== newAddress) {
+                            address.value = newAddress
+                            console.log('🔄 Reactive address updated:', newAddress ? newAddress.slice(0, 6) + '...' + newAddress.slice(-4) : 'null')
+                        }
+                        
+                        if (isConnected.value !== newConnected) {
+                            isConnected.value = newConnected
+                            console.log('🔄 Reactive isConnected updated:', newConnected)
+                        }
+                        
+                        if (chainId.value !== newChainId) {
+                            chainId.value = newChainId 
+                            console.log('🔄 Reactive chainId updated:', newChainId)
+                        }
+                    })
+                    
+                    console.log('✅ Global AppKit reactive subscription initialized')
+                    
+                } catch (subscriptionError) {
+                    console.warn('⚠️ Failed to set up AppKit subscription:', subscriptionError)
+                }
+            } else {
+                // Retry after delay if AppKit not ready
+                console.log('⏳ AppKit not ready, retrying subscription setup...')
+                setTimeout(setupAppKitSubscription, 1000)
+            }
+        }
+        
+        // Start subscription setup with small delay
+        setTimeout(setupAppKitSubscription, 500)
+    }
+    
+    // Debug: Log reactive state changes with throttling
     let lastDebugLog = 0
     const DEBUG_THROTTLE = 5000 // 5 seconds
     
     const logDebugInfo = () => {
         const now = Date.now()
         if (now - lastDebugLog > DEBUG_THROTTLE) {
-            console.log('🔍 useAppKitAccount state:', {
+            console.log('🔍 Reactive wallet state:', {
                 address: address?.value,
-                rawIsConnected: rawIsConnected?.value,
+                isConnected: isConnected?.value,
                 chainId: chainId?.value,
                 addressType: typeof address?.value,
-                isConnectedType: typeof rawIsConnected?.value,
+                isConnectedType: typeof isConnected?.value,
                 chainIdType: typeof chainId?.value,
                 timestamp: new Date().toISOString()
             })
@@ -64,96 +114,11 @@ export function useAppKitWallet() {
     // Log initial state
     logDebugInfo()
     
-    // Use the raw AppKit isConnected state directly - it's already reactive
-    const isConnected = rawIsConnected
+    // Let AppKit handle all wallet connections naturally
     
-    // Check for existing MetaMask connection and sync with AppKit
-    const syncWithMetaMask = async () => {
-        if (!process.client) return
-        
-        try {
-            // Check if MetaMask is connected but AppKit isn't
-            if (window.ethereum && window.ethereum.selectedAddress && !isConnected?.value) {
-                console.log('🔗 MetaMask is connected but AppKit is not - attempting sync...')
-                console.log('MetaMask address:', window.ethereum.selectedAddress)
-                console.log('AppKit connected:', isConnected?.value)
-                
-                // Method 1: Try to reconnect through MetaMask provider
-                try {
-                    console.log('🔄 Attempting MetaMask account refresh...')
-                    const accounts = await window.ethereum.request({ method: 'eth_accounts' })
-                    console.log('MetaMask accounts:', accounts)
-                    
-                    if (accounts && accounts.length > 0) {
-                        // Force AppKit to check for connection updates
-                        if (window.$appKit) {
-                            console.log('🔄 Triggering AppKit state refresh...')
-                            // Try to get wagmi to recognize the connection
-                            const state = window.$appKit.getState?.()
-                            console.log('AppKit state before sync:', state)
-                            
-                            // Wait a moment for potential state updates
-                            await new Promise(resolve => setTimeout(resolve, 500))
-                            
-                            // Check if AppKit now sees the connection
-                            const accountAfter = window.$appKit.getAccount?.()
-                            console.log('AppKit account after sync attempt:', accountAfter)
-                            
-                            if (accountAfter?.address) {
-                                console.log('✅ AppKit now sees connected account:', accountAfter.address)
-                                
-                                // Direct state update from AppKit internal values (avoids Vue lifecycle warnings)
-                                console.log('🔧 Force-setting reactive state from AppKit internal values...')
-                                address.value = accountAfter.address
-                                rawIsConnected.value = true
-                                if (accountAfter?.chainId) {
-                                    chainId.value = accountAfter.chainId
-                                }
-                                
-                                await new Promise(resolve => setTimeout(resolve, 300))
-                                logDebugInfo()
-                                return true
-                            }
-                        }
-                    }
-                } catch (providerError) {
-                    console.warn('⚠️ MetaMask provider sync failed:', providerError)
-                }
-                
-                // Method 2: Try wagmi reconnection if available
-                try {
-                    if (window.$appKit && typeof window.$appKit.reconnect === 'function') {
-                        console.log('🔄 Attempting AppKit reconnect...')
-                        await window.$appKit.reconnect()
-                        await new Promise(resolve => setTimeout(resolve, 1000))
-                        
-                        if (isConnected?.value) {
-                            console.log('✅ AppKit reconnect successful!')
-                            return true
-                        }
-                    }
-                } catch (reconnectError) {
-                    console.warn('⚠️ AppKit reconnect failed:', reconnectError)
-                }
-                
-                console.log('⚠️ MetaMask sync unsuccessful - AppKit state not updated')
-                return false
-            }
-            
-            // Already synchronized or no MetaMask connection
-            return true
-            
-        } catch (error) {
-            console.error('❌ Error syncing with MetaMask:', error)
-            return false
-        }
-    }
-    
-    // Run sync check on component mount and when visibility changes
-    if (process.client) {
-        setTimeout(syncWithMetaMask, 2000) // Delayed to ensure AppKit is fully initialized
-        document.addEventListener('visibilitychange', syncWithMetaMask)
-    }
+    // Disable automatic sync to prevent conflicts with AppKit's connection flow
+    // The syncWithMetaMask function is still available for manual use but won't run automatically
+    // This prevents double connection attempts when users connect through AppKit modal
     
     // Get provider reference from AppKit for viem clients
     const provider = ref(null)
@@ -459,9 +424,6 @@ export function useAppKitWallet() {
         
         // AppKit modal control (centralized singleton)
         open,
-        
-        // MetaMask sync utility
-        syncWithMetaMask,
         
         // Connection state management
         connectionToast,

@@ -1,10 +1,12 @@
 import { computed, ref } from 'vue'
-import { usePriceData } from './usePriceData.js'
 import { useMathUtils } from './core/useMathUtils.js'
 import { useFormattingUtils } from './core/useFormattingUtils.js'
 import { useVestedConfig } from './useFormattedNumbers.js'
-import { parseEther, formatEther, parseUnits, formatUnits, getContract } from 'viem'
+import { usePriceService } from './features/usePriceService.js'
+import { useQuoteCalculator } from './features/useQuoteCalculator.js'
+import { formatEther, parseUnits, formatUnits } from 'viem'
 import { useAppKitWallet } from './useAppKitWallet.js'
+import { getTokenDecimals, normalizeTokenSymbol } from './core/useTokenUtils.js'
 /**
  * Swap business logic composable
  * Handles quote calculations, price feeds, and swap validation
@@ -13,15 +15,13 @@ import { useAppKitWallet } from './useAppKitWallet.js'
 export function useSwapLogic() {
   
   // Import consolidated utilities to eliminate duplication
-  const { safeDiv, safeMul, safePercentage, validateNumber } = useMathUtils()
+  const { safeDiv, safeMul, safePercentage, validateNumber, calculateDiscount } = useMathUtils()
   const { formatNumber } = useFormattingUtils()
+  const { initializePrices: sharedInitializePrices } = usePriceService()
+  const { calculateReverseQuote: sharedCalculateReverseQuote, getLiquidQuote: sharedGetLiquidQuote, getOTCQuote: sharedGetOTCQuote } = useQuoteCalculator()
 
-  // Use enhanced AppKit wallet composable instead of direct imports
-  const { address, isConnected, chainId, publicClient, walletClient } = useAppKitWallet()
-  
-  // Helper computed values for wallet state (no walletStore needed)
-  const activeChain = computed(() => chainId?.value === 1 ? 'ethereum' : 'unknown')
-  const isOnSupportedChain = computed(() => [1, 137, 8453].includes(chainId?.value))
+  // Use enhanced AppKit wallet composable for connection state and clients
+  const { address, isConnected, publicClient } = useAppKitWallet()
   
   // Get dynamic vested configuration
   const { discountTiers: dynamicDiscountTiers, fees: dynamicFees } = useVestedConfig()
@@ -39,16 +39,9 @@ export function useSwapLogic() {
   const priceSource = ref('loading')
 
   // Initialize prices on first use
+  // Now using shared implementation from usePriceService
   const initializePrices = async () => {
-    try {
-      const { getTokenPrices } = usePriceData()
-      const livePrices = await getTokenPrices()
-      tokenPrices.value = { ...livePrices }
-      priceSource.value = 'live'
-    } catch (error) {
-      console.warn('Failed to load live prices, using fallback:', error)
-      priceSource.value = 'fallback'
-    }
+    await sharedInitializePrices(tokenPrices, priceSource)
   }
 
   // Auto-initialize prices
@@ -69,27 +62,9 @@ export function useSwapLogic() {
     ]
   )
 
-  /**
-   * Calculate discount percentage based on USD amount
-   */
-  const calculateDiscount = (usdAmount) => {
-    for (const tier of discountTiers.value) {
-      if (usdAmount >= tier.minAmount) {
-        return tier.discount
-      }
-    }
-    return 0
-  }
+  // calculateDiscount is now imported from useMathUtils
 
-  /**
-   * Normalize token symbol for price lookup
-   */
-  const normalizeTokenSymbol = (tokenSymbol) => {
-    // Handle Solana-specific token naming
-    if (tokenSymbol === 'USDC_SOL') return 'USDC'
-    if (tokenSymbol === 'USDT_SOL') return 'USDT'
-    return tokenSymbol
-  }
+  // normalizeTokenSymbol is now imported from useTokenUtils
 
   /**
    * Get token price in USD
@@ -162,7 +137,7 @@ export function useSwapLogic() {
       if (selectedTier && selectedTier.discount) {
         discount = safePercentage(selectedTier.discount)
       } else {
-        discount = safePercentage(calculateDiscount(totalUsdValue))
+        discount = safePercentage(calculateDiscount(totalUsdValue, discountTiers.value))
       }
       
       if (discount > 0) {
@@ -202,87 +177,10 @@ export function useSwapLogic() {
 
   /**
    * Calculate reverse quote (CIRX amount -> input token amount) with proper price conversion
-   * Enhanced with comprehensive NaN prevention
+   * Now using shared implementation from useQuoteCalculator
    */
   const calculateReverseQuote = (cirxAmount, targetToken, isOTC = false, selectedTier = null) => {
-    // Validate CIRX amount
-    const cirxValue = validateNumber(cirxAmount, 'CIRX amount')
-    if (cirxValue === null || cirxValue <= 0) {
-      return null
-    }
-    
-    // Get token prices with validation
-    const targetTokenPrice = getTokenPrice(targetToken) // Price in USD
-    const cirxPrice = getTokenPrice('CIRX') // CIRX price in USD (via USDT)
-    
-    // Comprehensive price validation
-    if (targetTokenPrice <= 0 || cirxPrice <= 0) {
-      console.warn(`Cannot calculate reverse quote: invalid prices - ${targetToken}: $${targetTokenPrice}, CIRX: $${cirxPrice}`)
-      return null
-    }
-    
-    // Convert CIRX to USD with safe multiplication
-    let usdValue = safeMul(cirxValue, cirxPrice)
-    if (usdValue <= 0) {
-      console.error('Invalid USD value from CIRX conversion:', { cirxValue, cirxPrice, usdValue })
-      return null
-    }
-    
-    let discount = 0
-    
-    // Reverse the OTC discount calculation with safe operations
-    if (isOTC) {
-      // Use selected tier discount if provided, otherwise calculate based on amount
-      if (selectedTier && selectedTier.discount) {
-        discount = safePercentage(selectedTier.discount)
-      } else {
-        discount = safePercentage(calculateDiscount(usdValue))
-      }
-      
-      if (discount > 0) {
-        const discountMultiplier = 1 + safeDiv(discount, 100)
-        if (discountMultiplier <= 0) {
-          console.error('Invalid discount multiplier:', { discount, discountMultiplier })
-          return null
-        }
-        usdValue = safeDiv(usdValue, discountMultiplier)
-      }
-    }
-    
-    // Reverse the fee calculation with safe operations
-    const feeRate = safePercentage(isOTC ? fees.value.otc : fees.value.liquid)
-    const feeMultiplier = 1 - safeDiv(feeRate, 100)
-    
-    // Validate fee multiplier to prevent division by zero
-    if (feeMultiplier <= 0 || feeMultiplier > 1) {
-      console.error('Invalid fee multiplier:', { feeRate, feeMultiplier })
-      return null
-    }
-    
-    // Calculate input amount with safe division
-    const denominator = safeMul(targetTokenPrice, feeMultiplier)
-    const inputValue = safeDiv(usdValue, denominator)
-    
-    // Validate final result
-    if (inputValue <= 0 || !isFinite(inputValue)) {
-      console.error('Invalid reverse calculation result:', { usdValue, denominator, inputValue })
-      return null
-    }
-    
-    // Calculate the forward quote for verification and additional data
-    const forwardQuote = calculateQuote(inputValue.toString(), targetToken, isOTC, selectedTier)
-    
-    return {
-      inputAmount: inputValue,
-      inputToken: targetToken,
-      cirxAmount: cirxValue,
-      tokenPrice: targetTokenPrice,
-      cirxPrice,
-      feeRate,
-      discount,
-      isReverse: true,
-      forwardQuote // Include forward calculation for verification
-    }
+    return sharedCalculateReverseQuote(cirxAmount, targetToken, isOTC, selectedTier)
   }
 
   /**
@@ -615,16 +513,7 @@ export function useSwapService() {
     return address
   }
 
-  const getTokenDecimals = (tokenSymbol) => {
-    // Most tokens use 18 decimals, but we can customize here
-    const decimals = {
-      ETH: 18,
-      USDC: 6,  // USDC uses 6 decimals
-      USDT: 6,  // USDT uses 6 decimals
-      CIRX: 18
-    }
-    return decimals[tokenSymbol] || 18
-  }
+  // getTokenDecimals now imported from useTokenUtils
 
   // Token balance operations
   const getTokenBalance = async (tokenSymbol, userAddress = null) => {
@@ -730,88 +619,19 @@ export function useSwapService() {
 
   // Swap quote operations
   const getLiquidQuote = async (inputToken, inputAmount) => {
-    try {
-      if (!contractsDeployed.value.otcSwap) {
-        // Return mock quote for development
-        const mockPrice = inputToken === 'ETH' ? 2500 : 1 // $2500 per ETH, $1 per stablecoin
-        return {
-          cirxAmount: (parseFloat(inputAmount) * mockPrice).toFixed(2),
-          fee: (parseFloat(inputAmount) * mockPrice * 0.003).toFixed(4), // 0.3% fee
-          feePercentage: '0.3'
-        }
-      }
-
-      validateConnection()
-      const contractAddress = validateContractAddress('OTC_SWAP')
-      const tokenAddress = CONTRACT_ADDRESSES.value[inputToken]
-      const decimals = getTokenDecimals(inputToken)
-      const amountWei = parseUnits(inputAmount.toString(), decimals)
-
-      const [cirxAmount, fee] = await publicClient.value?.readContract({
-        address: contractAddress,
-        abi: ABIS.OTC_SWAP,
-        functionName: 'getLiquidQuote',
-        args: [tokenAddress, amountWei]
-      })
-
-      return {
-        cirxAmount: formatUnits(cirxAmount, 18),
-        fee: formatUnits(fee, 18),
-        feePercentage: '0.3' // Could be dynamic based on contract
-      }
-
-    } catch (error) {
-      console.error('Failed to get liquid quote:', error)
-      throw error
-    }
+    return await sharedGetLiquidQuote(inputToken, inputAmount, {
+      contractsDeployed,
+      CONTRACT_ADDRESSES,
+      ABIS
+    })
   }
 
   const getOTCQuote = async (inputToken, inputAmount) => {
-    try {
-      if (!contractsDeployed.value.otcSwap) {
-        // Return mock quote for development
-        const mockPrice = inputToken === 'ETH' ? 2500 : 1
-        const baseAmount = parseFloat(inputAmount) * mockPrice
-        const usdValue = baseAmount
-
-        // Apply dynamic discount tiers
-        let discount = calculateDiscount(usdValue)
-
-        const discountMultiplier = 1 + (discount / 100)
-        const cirxAmount = baseAmount * discountMultiplier
-
-        return {
-          cirxAmount: cirxAmount.toFixed(2),
-          fee: (cirxAmount * 0.0015).toFixed(4), // 0.15% fee for OTC
-          discount: discount.toString(),
-          feePercentage: '0.15'
-        }
-      }
-
-      validateConnection()
-      const contractAddress = validateContractAddress('OTC_SWAP')
-      const tokenAddress = CONTRACT_ADDRESSES.value[inputToken]
-      const decimals = getTokenDecimals(inputToken)
-      const amountWei = parseUnits(inputAmount.toString(), decimals)
-
-      const [cirxAmount, fee, discountBps] = await publicClient.value?.readContract({
-        address: contractAddress,
-        abi: ABIS.OTC_SWAP,
-        functionName: 'getOTCQuote',
-        args: [tokenAddress, amountWei]
-      })
-
-      return {
-        cirxAmount: formatUnits(cirxAmount, 18),
-        fee: formatUnits(fee, 18),
-        discount: (Number(discountBps) / 100).toString(),
-        feePercentage: '0.15'
-      }
-
-    } catch (error) {
-      console.error('Failed to get OTC quote:', error)
-      throw error
-    }
+    return await sharedGetOTCQuote(inputToken, inputAmount, {
+      contractsDeployed,
+      CONTRACT_ADDRESSES,
+      ABIS
+    })
   }
 
   // Swap execution operations

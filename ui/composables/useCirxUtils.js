@@ -4,6 +4,7 @@
  */
 import { computed } from 'vue'
 import { useVestedConfig } from './useFormattedNumbers.js'
+import { calculateDiscount } from './core/useMathUtils.js'
 
 export function useCirxUtils() {
   // Get dynamic vested configuration
@@ -16,8 +17,6 @@ export function useCirxUtils() {
     ETH: runtimeConfig.public.ethDepositAddress || '0x834244d016f29d6acb42c1b054a88e2e9b1c9228',
     USDC: runtimeConfig.public.usdcDepositAddress || '0x834244d016f29d6acb42c1b054a88e2e9b1c9228',
     USDT: runtimeConfig.public.usdtDepositAddress || '0x834244d016f29d6acb42c1b054a88e2e9b1c9228',
-    POLYGON: runtimeConfig.public.polygonDepositAddress || '0x834244d016f29d6acb42c1b054a88e2e9b1c9228',
-    BSC: runtimeConfig.public.bscDepositAddress || '0x834244d016f29d6acb42c1b054a88e2e9b1c9228'
   }))
 
   // Token price constants (ideally from backend or price oracle)
@@ -30,20 +29,7 @@ export function useCirxUtils() {
     'MATIC': 0.80    // $0.80 per MATIC
   }
 
-  /**
-   * Calculate discount percentage based on USD amount using dynamic tiers
-   */
-  const calculateDiscount = (usdAmount) => {
-    const tiers = discountTiers.value
-    if (!tiers) return 0
-    
-    for (const tier of tiers) {
-      if (usdAmount >= tier.minAmount) {
-        return tier.discount
-      }
-    }
-    return 0
-  }
+  // calculateDiscount is now imported from useMathUtils
 
   /**
    * Calculate CIRX quote based on payment amount and token
@@ -72,7 +58,7 @@ export function useCirxUtils() {
       // Apply OTC discount if applicable (to gross amount before fee)
       let discountPercentage = 0
       if (isOTC) {
-        discountPercentage = calculateDiscount(usdAmount)
+        discountPercentage = calculateDiscount(usdAmount, discountTiers.value)
         
         if (discountPercentage > 0) {
           const discountMultiplier = 1 + (discountPercentage / 100)

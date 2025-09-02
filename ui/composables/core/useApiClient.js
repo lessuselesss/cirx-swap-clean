@@ -289,12 +289,7 @@ export function useApiClient() {
     hasApiKey: !!API_KEY
   })
 
-  /**
-   * Clear error state
-   */
-  const clearError = () => {
-    lastError.value = null
-  }
+  // clearError removed - use useErrorService.js for error management
 
   // Return public API
   return {
@@ -309,7 +304,6 @@ export function useApiClient() {
     // Utilities
     healthCheck,
     getApiStatus,
-    clearError,
     validators,
     
     // State (readonly)

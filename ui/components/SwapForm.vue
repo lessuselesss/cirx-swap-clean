@@ -84,7 +84,7 @@
           ref="recipientAddressInputRef"
           v-model="recipientAddress"
           :error="recipientAddressError"
-          @validate="validateRecipientAddress"
+          @validate="handleAddressValidate"
         />
 
         <!-- Quote Details -->
@@ -179,9 +179,10 @@ import { useApiClient } from '~/composables/core/useApiClient.js'
 import { useCirxUtils } from '~/composables/useCirxUtils.js'
 import { useSwapLogic } from '~/composables/useSwapHandler.js'
 import { useErrorHandler } from '~/composables/core/useErrorService.js'
-import { useTransactionStatus } from '~/composables/useTransactionStatus.js'
+import { useTransactionStatus } from '~/composables/features/useTransactionData.js'
 import { useVestedConfig } from '~/composables/useFormattedNumbers.js'
 import { useAppKitWallet } from '~/composables/useAppKitWallet.js'
+import { useSwapValidation } from '~/composables/features/useSwapValidation.js'
 
 // Use enhanced wallet composable for connection state (includes AppKit singleton)
 const { address, isConnected, open } = useAppKitWallet()
@@ -237,6 +238,25 @@ try {
   }
 }
 
+// Initialize validation composable
+let validation
+try {
+  validation = useSwapValidation()
+  console.log('✅ SwapValidation initialized in SwapForm')
+} catch (error) {
+  console.error('❌ Failed to initialize validation in SwapForm:', error)
+  validation = {
+    validateRecipientAddress: () => true,
+    validateRecipientAddressSync: () => true,
+    recipientAddressError: ref(''),
+    recipientAddressType: ref(''),
+    addressValidationState: ref('idle')
+  }
+}
+
+// Extract validation state
+const { recipientAddressError, recipientAddressType, addressValidationState } = validation
+
 try {
   errorHandler = useErrorHandler()
   console.log('✅ ErrorHandler initialized in SwapForm')
@@ -266,7 +286,7 @@ const inputAmount = ref('')
 const inputToken = ref('ETH')
 const cirxAmount = ref('')
 const recipientAddress = ref('')
-const recipientAddressError = ref('')
+// recipientAddressError now comes from validation composable
 const loading = ref(false)
 const loadingText = ref('')
 const error = ref(null)
@@ -404,27 +424,9 @@ const setMaxAmount = () => {
   }
 }
 
+// Use validation from composable - sync validation for immediate feedback
 const validateRecipientAddress = (address) => {
-  if (!address) {
-    recipientAddressError.value = ''
-    return true
-  }
-
-  // Use circular-specific validation that only accepts Circular addresses
-  const result = validateWalletAddress(address, 'circular')
-  
-  if (!result.isValid) {
-    // Custom error message for rejected Ethereum addresses
-    if (address.length === 42 && address.startsWith('0x')) {
-      recipientAddressError.value = 'Ethereum addresses are not supported. Please enter a valid CIRX address'
-    } else {
-      recipientAddressError.value = result.errors[0] || 'Invalid CIRX address format'
-    }
-    return false
-  }
-
-  recipientAddressError.value = ''
-  return true
+  return validation.validateRecipientAddressSync(address)
 }
 
 const handleConnectWallet = async () => {

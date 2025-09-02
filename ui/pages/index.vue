@@ -466,6 +466,7 @@
                   :readonly="false"
                   :placeholder="dynamicPlaceholder"
                   @input="sanitizeAddressInput"
+                  @blur="handleAddressBlur"
                   :class="[
                     'w-full pl-4 pr-12 py-3 text-sm bg-transparent border rounded-xl text-white placeholder-gray-400 transition-all duration-300',
                     activeTab === 'liquid' 
@@ -518,6 +519,7 @@
               :wallet-connected="isConnected?.value"
               :recipient-address="recipientAddress"
               :recipient-address-error="recipientAddressError"
+              :address-validation-state="addressValidationState"
               :input-amount="inputAmount"
               :input-balance="inputBalance"
               :eth-balance="awaitedEthBalance"
@@ -1009,6 +1011,11 @@ const backendHealthCheckInterval = ref(null)
 // Track address validation state
 const addressValidationState = ref('idle') // 'idle', 'validating', 'valid', 'invalid'
 
+// Debug watcher for validation state changes
+watch(addressValidationState, (newState, oldState) => {
+  console.log('🔄 addressValidationState changed:', oldState, '->', newState)
+})
+
 // Initialize swap validation composable with validation state
 const swapValidation = useSwapValidation({
   recipientAddressError,
@@ -1044,7 +1051,8 @@ const {
   handleFocusAmount: ctaHandleFocusAmount,
   handleFocusAmountInput: ctaHandleFocusAmountInput,
   handleGetCirxWallet: ctaHandleGetCirxWallet,
-  handleSwap: ctaHandleSwap
+  handleSwap: ctaHandleSwap,
+  handleValidateAddress: ctaHandleValidateAddress
 } = ctaState
 
 // Create wrapper functions that handle emit functionality with MetaMask sync
@@ -1080,10 +1088,25 @@ const handleConnectWallet = async () => {
 const handleFocusAddress = () => ctaHandleFocusAddress()
 const handleClearAndFocusAddress = () => ctaHandleClearAndFocusAddress()
 const handleFocusAmount = () => ctaHandleFocusAmount()
+const handleValidateAddress = (address) => ctaHandleValidateAddress(validateRecipientAddress, address)
+
+// Handle address blur with programmatic focus prevention
+const handleAddressBlur = () => {
+  // Check if this blur event was caused by programmatic focus change
+  if (typeof window !== 'undefined' && window._preventAddressBlurValidation) {
+    console.log('🚫 Skipping address validation on blur - programmatic focus change')
+    return
+  }
+  
+  // Normal blur validation
+  console.log('✅ Running address validation on blur - user-initiated focus change')
+  handleValidateAddress(recipientAddress.value)
+}
 
 // Handle getting CIRX wallet modal
 const handleGetCirxWallet = () => {
-  showConfirmationModal.value = true
+  const showModal = () => { showConfirmationModal.value = true }
+  ctaHandleGetCirxWallet(showModal)
 }
 
 // Handle swap transaction - delegate to existing swap logic
@@ -2261,8 +2284,7 @@ watch([cirxAmount, inputToken, activeTab], async () => {
   }, 10000)
 })
 
-// Use validation composable for address watching
-createAddressWatcher(recipientAddress)
+// Address validation is now handled by @blur event on the input field
 
 const alignTokenSelector = () => {
   const cirxButton = document.querySelector('.token-display-right')
@@ -2281,7 +2303,7 @@ const alignTokenSelector = () => {
 }
 
 
-// Sanitize address input to remove spaces
+// Sanitize address input to remove spaces and trigger validation during typing
 const sanitizeAddressInput = (event) => {
   const input = event.target
   const value = input.value
@@ -2295,6 +2317,19 @@ const sanitizeAddressInput = (event) => {
     // Set cursor position to the end
     nextTick(() => {
       input.setSelectionRange(sanitized.length, sanitized.length)
+    })
+  }
+  
+  // Trigger validation during typing for potential Circular addresses
+  // Check if the address looks like it could be a complete Circular address (66 chars starting with 0x)
+  if (sanitized && sanitized.startsWith('0x') && sanitized.length === 66) {
+    console.log('🔍 Address looks complete during typing - triggering validation:', sanitized)
+    // Ensure the recipientAddress is updated before validation
+    recipientAddress.value = sanitized
+    // Trigger async validation immediately when address appears complete
+    nextTick(() => {
+      // Use recipientAddress.value instead of passing sanitized
+      handleValidateAddress(recipientAddress.value)
     })
   }
 }
