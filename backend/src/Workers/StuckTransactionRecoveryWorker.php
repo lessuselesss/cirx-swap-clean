@@ -21,7 +21,7 @@ class StuckTransactionRecoveryWorker
     private int $maxRecoveryAttempts;
     
     public function __construct(
-        PaymentVerificationService $paymentVerificationService = null,
+        ?PaymentVerificationService $paymentVerificationService = null,
         int $recoveryAgeHours = 24,
         int $maxRecoveryAttempts = 2
     ) {

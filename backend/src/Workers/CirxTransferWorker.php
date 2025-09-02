@@ -22,7 +22,7 @@ class CirxTransferWorker
     private int $retryDelay;
 
     public function __construct(
-        CirxTransferService $cirxTransferService = null,
+        ?CirxTransferService $cirxTransferService = null,
         int $maxRetries = 3,
         int $retryDelay = 60
     ) {

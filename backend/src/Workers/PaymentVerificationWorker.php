@@ -22,7 +22,7 @@ class PaymentVerificationWorker
     private int $retryDelay;
 
     public function __construct(
-        PaymentVerificationService $paymentVerificationService = null,
+        ?PaymentVerificationService $paymentVerificationService = null,
         int $maxRetries = 3,
         int $retryDelay = 30
     ) {
