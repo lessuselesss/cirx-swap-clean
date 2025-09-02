@@ -178,7 +178,7 @@ export function useCTAState({
     
     if (variantValue === 'primary') {
       // Always use circular-primary with 20% opacity to match "Buy Liquid" button styling
-      return `${baseClasses} bg-circular-primary/20 border-circular-primary text-circular-primary hover:bg-circular-primary/30 hover:border-circular-primary`
+      return `${baseClasses} bg-circular-primary/20 border-transparent text-circular-primary hover:bg-circular-primary/30 hover:border-transparent`
     }
     
     console.log('🎨 CTA buttonClasses - fallback classes:', baseClasses)
