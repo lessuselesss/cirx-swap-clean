@@ -204,8 +204,8 @@ jobs:
           # API Configuration
           NUXT_PUBLIC_API_BASE_URL="${{ secrets.NUXT_PUBLIC_API_BASE_URL || 'https://yoursite.com/api/v1' }}"
           
-          # Network Configuration
-          NUXT_PUBLIC_TESTNET_MODE="${{ secrets.NUXT_PUBLIC_TESTNET_MODE || 'false' }}"
+          # Network Configuration  
+          NUXT_PUBLIC_TESTNET_MODE="true"
           NUXT_PUBLIC_ETHEREUM_NETWORK="${{ secrets.NUXT_PUBLIC_ETHEREUM_NETWORK || 'mainnet' }}"
           NUXT_PUBLIC_ETHEREUM_CHAIN_ID="${{ secrets.NUXT_PUBLIC_ETHEREUM_CHAIN_ID || '1' }}"
           
