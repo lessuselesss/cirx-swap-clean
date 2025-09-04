@@ -177,7 +177,7 @@ export const useCircularAddressValidation = () => {
         network: 'testnet',
         environment: 'development',
         blockchain_id: '8a20baa40c45dc5055aeb26197c203e576ef389d9acb171bd62da11dc5ad72b2',
-        nag_url: '/api/v1/proxy/circular-labs?endpoint=NAG.php&cep=',
+        nag_url: '/api/v1/proxy/circular-labs?cep=',
         chain_name: 'Circular SandBox'
       }
     }
@@ -232,8 +232,24 @@ export const useCircularAddressValidation = () => {
         network: config.network
       })
 
+      // Get the API base URL
+      const runtimeConfig = useRuntimeConfig()
+      const apiBaseUrl = runtimeConfig.public.apiBaseUrl || 'http://localhost:18423/api/v1'
+      
+      // Build the full URL - if nag_url starts with /api/v1, replace with base URL
+      // Otherwise if it starts with /, prepend the base URL
+      let nagUrl
+      if (config.nag_url.startsWith('/api/v1')) {
+        // Replace /api/v1 prefix with the actual base URL
+        nagUrl = apiBaseUrl + config.nag_url.substring(7) // Remove '/api/v1' (7 chars)
+      } else if (config.nag_url.startsWith('/')) {
+        nagUrl = apiBaseUrl + config.nag_url
+      } else {
+        nagUrl = config.nag_url
+      }
+
       // Step 1: Check wallet existence first
-      const walletResponse = await fetch(config.nag_url + 'Circular_CheckWallet_', {
+      const walletResponse = await fetch(nagUrl + 'Circular_CheckWallet_', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -269,7 +285,7 @@ export const useCircularAddressValidation = () => {
       }
 
       // Step 2: Get balance for existing wallet (required for green light)
-      const balanceResponse = await fetch(config.nag_url + 'Circular_GetWalletBalance_', {
+      const balanceResponse = await fetch(nagUrl + 'Circular_GetWalletBalance_', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
