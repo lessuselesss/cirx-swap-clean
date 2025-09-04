@@ -15,7 +15,7 @@
             <NuxtLink to="/swap" class="nav-link">
               Swap
             </NuxtLink>
-            <w3m-button />
+            <AppKitButton />
           </div>
         </nav>
       </div>
@@ -38,7 +38,7 @@
 </template>
 
 <script setup>
-// Uses w3m-button component for wallet connection (AppKit integration)
+// Uses custom AppKitButton component for reliable wallet connection (AppKit integration)
 </script>
 
 <style scoped>
@@ -57,5 +57,5 @@
   color: #2563eb;
 }
 
-/* Removed disabled wallet button styles - now using w3m-button */
+/* Removed disabled wallet button styles - now using custom AppKitButton */
 </style>
