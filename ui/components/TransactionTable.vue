@@ -107,10 +107,12 @@
     </div>
 
     <div v-if="loading" class="text-center py-4">
-      <svg class="animate-spin w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-      </svg>
-      <span class="ml-2 text-white">Loading transactions...</span>
+      <div class="text-white mb-12">Loading transactions...</div>
+      <div class="flex justify-center mb-3">
+        <svg class="animate-spin w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+        </svg>
+      </div>
     </div>
 
     <div v-if="!loading && transactions.length === 0" class="text-center py-8 text-gray-400">
@@ -138,6 +140,8 @@ const pollInterval = ref(null)
 
 const fetchTransactions = async () => {
   loading.value = true
+  const startTime = Date.now()
+  
   try {
     const config = useRuntimeConfig()
     const response = await fetch(`${config.public.apiBaseUrl}/transactions/table?limit=20`)
@@ -157,7 +161,13 @@ const fetchTransactions = async () => {
   } catch (error) {
     console.error('Failed to fetch transactions:', error)
   } finally {
-    loading.value = false
+    // Ensure spinner shows for at least 3 seconds
+    const elapsedTime = Date.now() - startTime
+    const remainingTime = Math.max(0, 3000 - elapsedTime)
+    
+    setTimeout(() => {
+      loading.value = false
+    }, remainingTime)
   }
 }
 
