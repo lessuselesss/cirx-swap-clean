@@ -14,7 +14,11 @@ export default defineNuxtPlugin((nuxtApp) => {
   if (!projectId || projectId === 'your_reown_project_id') {
     console.error('❌ AppKit Project ID is missing!')
     console.error('Please set NUXT_PUBLIC_REOWN_PROJECT_ID in your .env file')
-    return
+    return {
+      provide: {
+        appkit: null
+      }
+    }
   }
 
   try {
@@ -144,5 +148,10 @@ export default defineNuxtPlugin((nuxtApp) => {
   } catch (error) {
     console.error('❌ Failed to initialize Reown AppKit plugin:', error)
     console.error('Error details:', error)
+    return {
+      provide: {
+        appkit: null
+      }
+    }
   }
 })
