@@ -404,29 +404,30 @@ $app->group('/api/v1', function ($group) {
     
     $group->map(['GET', 'POST'], '/proxy/circular-labs', function (Request $request, Response $response) {
         try {
-            // Get the target endpoint from query parameters
-            $endpoint = $request->getQueryParams()['endpoint'] ?? '';
+            // Get the target method from query parameters
+            $cep = $request->getQueryParams()['cep'] ?? '';
             
-            // Whitelist of allowed Circular Labs endpoints
-            $allowedEndpoints = [
+            // Whitelist of allowed Circular Labs methods
+            $allowedMethods = [
                 'GetCirculatingSupply.php',
-                'CProxy.php',
-                'NAG.php'
+                'CProxy.php', 
+                'Circular_CheckWallet_',
+                'Circular_GetWalletBalance_'
             ];
             
-            // Validate endpoint
-            $endpointFile = basename($endpoint);
-            if (!in_array($endpointFile, $allowedEndpoints)) {
-                throw new Exception('Invalid endpoint');
+            // Validate method
+            if (!in_array($cep, $allowedMethods)) {
+                throw new Exception('Invalid method');
             }
             
-            // Build URL with all query parameters except 'endpoint'
-            $params = $request->getQueryParams();
-            unset($params['endpoint']);
+            // Build NAG URL with cep parameter
+            $url = 'https://nag.circularlabs.io/NAG.php?cep=' . urlencode($cep);
             
-            $url = 'https://nag.circularlabs.io/' . $endpoint;
+            // Add any additional query parameters except 'cep'
+            $params = $request->getQueryParams();
+            unset($params['cep']);
             if (!empty($params)) {
-                $url .= (strpos($endpoint, '?') !== false ? '&' : '?') . http_build_query($params);
+                $url .= '&' . http_build_query($params);
             }
             
             $ch = curl_init();
@@ -465,7 +466,7 @@ $app->group('/api/v1', function ($group) {
             
             // Determine appropriate content type
             $responseContentType = 'application/json';
-            if (strpos($contentType, 'text/plain') !== false || strpos($endpoint, 'GetCirculatingSupply') !== false) {
+            if (strpos($contentType, 'text/plain') !== false || strpos($cep, 'GetCirculatingSupply') !== false) {
                 $responseContentType = 'text/plain';
             }
             

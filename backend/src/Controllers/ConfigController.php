@@ -73,7 +73,7 @@ class ConfigController
                     'network' => 'testnet',
                     'environment' => 'staging', 
                     'blockchain_id' => 'acb8a9b79f3c663aa01be852cd42725f9e0e497fd849b436df51c5e074ebeb28',
-                    'nag_url' => '/api/v1/proxy/circular-labs?endpoint=NAG.php&cep=',
+                    'nag_url' => '/api/v1/proxy/circular-labs?cep=',
                     'chain_name' => 'Circular Secondary Public'
                 ];
                 
@@ -84,7 +84,7 @@ class ConfigController
                     'network' => 'testnet',
                     'environment' => 'development',
                     'blockchain_id' => '8a20baa40c45dc5055aeb26197c203e576ef389d9acb171bd62da11dc5ad72b2',
-                    'nag_url' => '/api/v1/proxy/circular-labs?endpoint=NAG.php&cep=',
+                    'nag_url' => '/api/v1/proxy/circular-labs?cep=',
                     'chain_name' => 'Circular SandBox'
                 ];
         }
