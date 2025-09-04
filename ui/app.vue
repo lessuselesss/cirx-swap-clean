@@ -47,6 +47,7 @@
 <script setup>
 import { ref, onMounted, onErrorCaptured, provide } from 'vue'
 import { safeToast } from '~/composables/useToast'
+import { useAutoWorker } from '~/composables/useAutoWorker'
 import ToastNotifications from '~/components/ToastNotifications.vue'
 
 // Global error state
@@ -54,7 +55,7 @@ const globalError = ref(null)
 const toastManager = ref(null)
 
 // Auto-worker for background transaction processing
-// TODO: Implement useAutoWorker composable for background processing
+const autoWorker = useAutoWorker()
 
 // Global error handler
 const handleGlobalError = (error, context = 'Unknown') => {
@@ -124,13 +125,14 @@ onErrorCaptured((error, instance, info) => {
   return false
 })
 
-// Initialize AppKit wallet integration synchronously (Vue lifecycle requirement)
+// Initialize AppKit wallet integration (Vue lifecycle requirement)
 if (import.meta.client) {
   try {
-    // Import and initialize wallet composable synchronously in setup
-    const { useAppKitWallet } = await import('~/composables/useAppKitWallet.js')
-    useAppKitWallet() // Initialize wallet composable to register lifecycle hooks
-    console.log('✅ AppKit wallet integration initialized')
+    // Import and initialize wallet composable during component lifecycle
+    import('~/composables/useAppKitWallet.js').then(({ useAppKitWallet }) => {
+      useAppKitWallet() // Initialize wallet composable to register lifecycle hooks
+      console.log('✅ AppKit wallet integration initialized')
+    })
   } catch (error) {
     console.warn('⚠️ AppKit wallet integration failed:', error)
   }

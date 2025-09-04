@@ -222,11 +222,7 @@ class HashUtils
             }
         }
 
-        // Check for timestamp patterns (unix timestamps shouldn't be in tx hashes)
-        if (preg_match('/\d{10,}/', $hash)) {
-            // Contains 10+ digit sequence (likely timestamp)
-            return false;
-        }
+        // Removed timestamp pattern check - legitimate tx hashes can contain digit sequences
 
         return true;
     }
