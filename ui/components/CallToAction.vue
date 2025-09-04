@@ -55,18 +55,7 @@ console.log('🔥 CallToAction - Reactive connection state:', {
   timestamp: new Date().toISOString()
 })
 
-// DEBUG: Watch button state changes
-watch(() => [buttonText?.value, isButtonDisabled?.value, currentState?.value], 
-  ([text, disabled, state]) => {
-    console.log('🔍 CallToAction - Button State Change:', {
-      buttonText: text,
-      isDisabled: disabled,
-      currentState: state,
-      timestamp: new Date().toISOString()
-    })
-  }, 
-  { immediate: true }
-)
+// Moved watch functions after buttonText destructuring to avoid initialization errors
 
 // Wallet connection is now handled by the CTA state logic
 
@@ -158,6 +147,19 @@ nextTick(() => {
     hasCurrentState: !!currentState
   })
 })
+
+// DEBUG: Watch button state changes (moved after destructuring)
+watch(() => [buttonText?.value, isButtonDisabled?.value, currentState?.value], 
+  ([text, disabled, state]) => {
+    console.log('🔍 CallToAction - Button State Change:', {
+      buttonText: text,
+      isDisabled: disabled,
+      currentState: state,
+      timestamp: new Date().toISOString()
+    })
+  }, 
+  { immediate: true }
+)
 
 // Add continuous debug watcher to see state changes
 watch(() => [isConnected?.value, buttonText?.value, currentState?.value], 
