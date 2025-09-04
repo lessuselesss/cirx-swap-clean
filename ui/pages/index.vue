@@ -26,6 +26,12 @@
               Transactions
             </NuxtLink>
             
+            <!-- Debug Info (TEMPORARY) -->
+            <div class="px-2 py-1 bg-red-900 text-red-200 rounded text-xs mb-2">
+              DEBUG: ProjectID: {{ $config.public.reownProjectId?.slice(0,8) }}...
+              TestMode: {{ $config.public.testnetMode }}
+            </div>
+            
             <!-- AppKit Wallet Connection -->
             <ClientOnly>
               <template #fallback>
