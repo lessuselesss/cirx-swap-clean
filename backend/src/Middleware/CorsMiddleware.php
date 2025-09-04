@@ -34,6 +34,7 @@ class CorsMiddleware implements MiddlewareInterface
             'Origin',
             'Authorization',
             'X-API-Key',
+            'X-Request-ID',
             'Cache-Control'
         ];
         

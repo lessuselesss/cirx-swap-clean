@@ -16,29 +16,103 @@ export function usePriceService() {
   const lastError = ref(null)
   const CACHE_DURATION = 30000 // 30 seconds
 
+  // Error classification for better logging
+  const classifyError = (error, response, sourceName) => {
+    if (error.message?.includes('CORS') || error.message?.includes('Failed to fetch')) {
+      return { 
+        level: 'warn', 
+        message: `🌐 ${sourceName}: Network/CORS issue - external API blocked by browser`,
+        category: 'network'
+      }
+    }
+    if (response?.status === 429) {
+      return { 
+        level: 'info', 
+        message: `⏳ ${sourceName}: Rate limited - will retry with backoff`,
+        category: 'rate_limit'
+      }
+    }
+    if (response?.status >= 500) {
+      return { 
+        level: 'error', 
+        message: `🔴 ${sourceName}: Server error ${response.status}`,
+        category: 'server_error'
+      }
+    }
+    if (response?.status === 404) {
+      return { 
+        level: 'warn', 
+        message: `⚠️ ${sourceName}: Endpoint not found - may need API update`,
+        category: 'client_error'
+      }
+    }
+    if (error.name === 'AbortError' || error.message?.includes('timeout')) {
+      return { 
+        level: 'info', 
+        message: `⏱️ ${sourceName}: Request timed out`,
+        category: 'timeout'
+      }
+    }
+    return { 
+      level: 'error', 
+      message: `❌ ${sourceName}: ${error.message}`,
+      category: 'unknown'
+    }
+  }
+
+  const logError = (errorInfo) => {
+    switch (errorInfo.level) {
+      case 'error':
+        console.error(errorInfo.message)
+        break
+      case 'warn':
+        console.warn(errorInfo.message)
+        break
+      case 'info':
+        console.info(errorInfo.message)
+        break
+      default:
+        console.log(errorInfo.message)
+    }
+  }
+
   // Configuration for different price sources
   const PRICE_SOURCES = {
-    aggregator: {
-      name: 'Backend Aggregator',
-      priority: 1,
-      timeout: 10000,
-      fetcher: async (symbol, currency = 'USDT') => {
-        // Backend aggregator API endpoint for consolidated price data
-        const response = await fetch(`/api/v1/prices/${symbol}/${currency}`)
-        if (!response.ok) throw new Error(`Aggregator API error: ${response.status}`)
-        const data = await response.json()
-        return {
-          price: parseFloat(data.averagePrice),
-          change24h: parseFloat(data.change24h || 0),
-          volume24h: parseFloat(data.volume24h || 0),
-          lastUpdated: Date.now(),
-          source: 'aggregator'
+    // Development mock for reliable testing
+    ...(process.env.NODE_ENV === 'development' && {
+      mock: {
+        name: 'Development Mock',
+        priority: 0, // Highest priority in development
+        timeout: 100,
+        fetcher: async (symbol, currency = 'usd') => {
+          // Simulate realistic CIRX price with some volatility
+          const basePrices = {
+            'CIRX': 0.0028,
+            'ETH': 3200,
+            'USDC': 1.0,
+            'USDT': 1.0,
+            'BTC': 65000
+          }
+          const basePrice = basePrices[symbol.toUpperCase()] || 1.0
+          const volatility = 0.02 // 2% random fluctuation
+          const randomMultiplier = 1 + (Math.random() - 0.5) * volatility
+          
+          // Simulate network delay
+          await new Promise(resolve => setTimeout(resolve, 50 + Math.random() * 50))
+          
+          return {
+            price: basePrice * randomMultiplier,
+            change24h: (Math.random() - 0.5) * 10, // -5% to +5% change
+            volume24h: Math.random() * 100000 + 50000,
+            lastUpdated: Date.now(),
+            source: 'mock'
+          }
         }
       }
-    },
+    }),
     coingecko: {
       name: 'CoinGecko',
-      priority: 2, 
+      priority: 1, 
       timeout: 8000,
       fetcher: async (symbol, currency = 'usd') => {
         const symbolMap = {
@@ -82,15 +156,33 @@ export function usePriceService() {
         const contractAddress = contractMap[symbol.toUpperCase()]
         if (!contractAddress) throw new Error(`No contract address for ${symbol}`)
         
-        const response = await fetch(
-          `https://api.dextools.io/v1/token/1/${contractAddress}/price`,
-          {
-            headers: { 'Accept': 'application/json' },
-            signal: AbortSignal.timeout(6000)
-          }
-        )
+        // Try multiple DEXTools endpoint formats (v1 often returns 404, v2 is newer)
+        const endpoints = [
+          `https://api.dextools.io/v2/token/ether/${contractAddress}`,
+          `https://api.dextools.io/v2/token/ethereum/${contractAddress}/price`,
+          `https://api.dextools.io/v1/token/ether/${contractAddress}/price`,
+          `https://api.dextools.io/v1/token/1/${contractAddress}/price` // fallback to original
+        ]
         
-        if (!response.ok) throw new Error(`DEXTools API error: ${response.status}`)
+        let response, lastError
+        for (const endpoint of endpoints) {
+          try {
+            response = await fetch(endpoint, {
+              headers: { 'Accept': 'application/json' },
+              signal: AbortSignal.timeout(6000)
+            })
+            if (response.ok) break // Success, stop trying other endpoints
+            lastError = new Error(`DEXTools API error: ${response.status} from ${endpoint}`)
+          } catch (error) {
+            lastError = error
+            continue
+          }
+        }
+        
+        if (!response?.ok) {
+          throw lastError || new Error('All DEXTools endpoints failed')
+        }
+        
         const data = await response.json()
         
         return {
@@ -170,7 +262,8 @@ export function usePriceService() {
         return priceData
         
       } catch (error) {
-        console.warn(`❌ Failed to fetch from ${source.name}:`, error.message)
+        const errorInfo = classifyError(error, error.response, source.name)
+        logError(errorInfo)
         currentError = error
         
         // If fallback is disabled, throw immediately
@@ -233,7 +326,8 @@ export function usePriceService() {
       const priceData = await fetchUnifiedPrice(symbol, currency, options)
       return priceData.price
     } catch (error) {
-      console.error(`Failed to get ${symbol} price:`, error.message)
+      const errorInfo = classifyError(error, error.response, 'All Sources')
+      logError(errorInfo)
       
       // Return reasonable fallback prices
       const fallbackPrices = {
@@ -262,7 +356,8 @@ export function usePriceService() {
       tokenPrices.value = { ...livePrices }
       priceSource.value = 'live'
     } catch (error) {
-      console.warn('Failed to load live prices, using fallback:', error)
+      const errorInfo = classifyError(error, error.response, 'Price Loader')
+      logError({ ...errorInfo, message: `${errorInfo.message} - using fallback prices` })
       priceSource.value = 'fallback'
     }
   }

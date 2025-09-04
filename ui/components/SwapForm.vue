@@ -98,7 +98,6 @@
           @enter-address="handleEnterAddress"
           @enter-valid-address="handleEnterValidAddress"
           @enter-amount="handleEnterAmount"
-          @click="handleSwap"
         />
 
       </div>
@@ -167,13 +166,13 @@ import { useTransactionStatus } from '~/composables/features/useTransactionData.
 import { useVestedConfig } from '~/composables/useFormattedNumbers.js'
 import { useAppKitWallet } from '~/composables/useAppKitWallet.js'
 import { useSwapValidation } from '~/composables/features/useSwapValidation.js'
-import { useBlockchainTransaction } from '~/composables/useBlockchainTransaction.js'
+import { useSwapTransaction } from '~/composables/useSwapTransaction.js'
 
 // Use enhanced wallet composable for connection state (includes AppKit singleton)
 const { address, isConnected, open } = useAppKitWallet()
 
 // Initialize blockchain transaction composable
-const blockchainTx = useBlockchainTransaction()
+const swapTx = useSwapTransaction()
 
 // Watch for wallet connection and auto-populate recipient address
 watch(address, (newAddress) => {
@@ -260,7 +259,7 @@ try {
 const toast = inject('toast')
 
 // Transaction status tracking
-const { trackTransaction, transactionPhases, getTransaction } = useTransactionStatus()
+const { transactionPhases, getTransaction } = useTransactionStatus()
 const currentTransaction = ref(null)
 const showTransactionProgress = ref(false)
 
@@ -459,18 +458,25 @@ const handleEnterAmount = () => {
 }
 
 const handleSwap = async () => {
+  console.log('🔥🔥🔥 SWAPFORM handleSwap FUNCTION CALLED! 🔥🔥🔥');
   console.log('🔥 handleSwap called!', {
     walletConnected: isConnected?.value || false,
     recipientAddress: recipientAddress.value,
     recipientAddressError: recipientAddressError.value,
     canPurchase: canPurchase.value,
-    loading: loading.value
+    loading: loading.value,
+    inputAmount: inputAmount.value,
+    quote: quote.value,
+    blockchainTxAvailable: !!blockchainTx
   })
+  
+  // Add detailed debugging at each step
+  console.log('🔥 Step 1: Starting transaction validation...')
   
   // Simplified logic without wallet connection states
   if (!recipientAddress.value) {
     // No address entered - focus address input
-    console.log('🎯 Enter Address clicked - attempting to focus CIRX address input')
+    console.log('🎯 Step 1a: No recipient address - focusing address input')
     await nextTick()
     setTimeout(() => {
       if (recipientAddressInputRef.value) {
@@ -528,58 +534,54 @@ const handleSwap = async () => {
     const currentInputToken = inputToken.value
     const recipientAddress = recipient
     
-    // Execute complete transaction flow: wallet transaction + backend submission
-    const result = await blockchainTx.executeCompleteTransaction(
-      currentInputToken,
-      totalAmount,
-      recipientAddress
-    )
-
-    if (result.success) {
-      // Start tracking the transaction with real-time updates  
-      currentTransaction.value = trackTransaction(result.swapId, {
-        showToasts: true,
-        onStatusChange: (statusData, previousPhase) => {
-          console.log(`Transaction ${result.swapId} moved from ${previousPhase} to ${statusData.phase}`)
+    // Use unified swap transaction handler
+    const result = await swapTx.executeSwap({
+      tokenSymbol: String(currentInputToken),
+      amount: String(totalAmount),
+      recipientAddress: String(recipientAddress),
+      cirxAmount: cirxAmount.value,
+      isOTC: activeTab.value === 'otc',
+      callbacks: {
+        onStatusUpdate: (status) => {
+          if (status === 'checking_health') {
+            loadingText.value = 'Checking system status...'
+          } else if (status === 'executing_blockchain') {
+            loadingText.value = 'Confirm transaction in wallet...'
+          } else if (status === 'tracking_status') {
+            loadingText.value = 'Tracking transaction...'
+          }
         },
         onComplete: (statusData) => {
           // Clear form only when truly complete
           inputAmount.value = ''
           recipientAddress.value = ''
           
-          // Show final success notification
-          toast?.success('CIRX tokens successfully transferred to your address!', {
-            title: 'Swap Complete',
-            autoTimeoutMs: 10000,
-            actions: [{
-              label: 'View Transaction',
-              handler: () => {
-                // Use the same logic as server-side BlockchainExplorerService
-                const config = useRuntimeConfig()
-                const network = config.public.ethereumNetwork || 'mainnet'
-                const baseUrl = network === 'sepolia' ? 'https://sepolia.etherscan.io/tx/' : 'https://etherscan.io/tx/'
-                window.open(`${baseUrl}${result.txHash}`, '_blank')
-              },
-              primary: false
-            }]
-          })
-        },
-        onError: (error) => {
-          console.error('Transaction tracking error:', error)
+          // Show transaction progress modal
+          showTransactionProgress.value = true
+          
+          // View transaction action
+          if (result.txHash) {
+            const config = useRuntimeConfig()
+            const network = config.public.ethereumNetwork || 'mainnet'
+            const baseUrl = network === 'sepolia' ? 'https://sepolia.etherscan.io/tx/' : 'https://etherscan.io/tx/'
+            window.open(`${baseUrl}${result.txHash}`, '_blank')
+          }
         }
-      })
-      
+      }
+    })
+
+    if (result.success) {
       // Show transaction progress modal
       showTransactionProgress.value = true
       
-      // Show initial success notification for payment submission
+      // Store current transaction for tracking
+      currentTransaction.value = swapTx.currentTransaction.value
+      
+      // Show initial success notification
       toast?.success('Payment submitted successfully! Tracking transaction progress...', {
         title: 'Payment Sent',
         autoTimeoutMs: 5000
       })
-
-      // Optionally redirect to transaction page
-      // await navigateTo(`/transaction/${result.hash}`)
     }
 
   } catch (err) {

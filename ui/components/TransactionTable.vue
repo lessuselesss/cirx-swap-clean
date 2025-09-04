@@ -1,6 +1,6 @@
 <template>
   <div class="transaction-list-container">
-    <h2 class="text-xl font-semibold mb-4 text-white">Transaction Status</h2>
+    <h2 class="text-xl font-semibold mb-4 text-white text-center" style="background: transparent;">Status</h2>
     
     <div class="space-y-4">
       <div 
@@ -256,7 +256,7 @@ onUnmounted(() => {
 
 <style scoped>
 .transaction-list-container {
-  @apply bg-gray-900 rounded-lg shadow-sm p-6;
+  @apply rounded-lg shadow-sm p-6;
 }
 
 .transaction-card {

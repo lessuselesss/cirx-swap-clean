@@ -165,6 +165,7 @@ export function useApiClient() {
         }
 
         console.log(`🌐 ${method.toUpperCase()} ${fullUrl}`, data ? { data } : '')
+        console.log(`🔧 API_BASE_URL: ${API_BASE_URL}`)
 
         // Make the request
         const response = await fetch(fullUrl, requestConfig)

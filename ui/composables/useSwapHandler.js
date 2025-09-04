@@ -204,9 +204,8 @@ export function useSwapLogic() {
       errors.push('Recipient address required')
     }
 
-    if (recipientAddress && !/^0x[a-fA-F0-9]{40}$/.test(recipientAddress)) {
-      errors.push('Invalid recipient address')
-    }
+    // Note: CIRX address validation is handled by the backend, not client-side
+    // Client only needs to ensure the address exists for backend processing
 
     // Minimum amount validation
     const usdValue = parseFloat(inputAmount) * getTokenPrice(inputToken)

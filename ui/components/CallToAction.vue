@@ -7,7 +7,10 @@
       buttonClasses,
       customClasses
     ]"
-    @click="(event) => handleButtonClick(event, $emit)"
+    @click="(event) => {
+      console.log('🔥 BUTTON CLICKED! CallToAction button click detected');
+      handleButtonClick(event, $emit);
+    }"
   >
     <!-- Loading State -->
     <div v-if="shouldShowSpinner" class="flex items-center justify-center gap-3">
@@ -51,6 +54,19 @@ console.log('🔥 CallToAction - Reactive connection state:', {
   isRef: !!isConnected._rawValue !== undefined,
   timestamp: new Date().toISOString()
 })
+
+// DEBUG: Watch button state changes
+watch(() => [buttonText?.value, isButtonDisabled?.value, currentState?.value], 
+  ([text, disabled, state]) => {
+    console.log('🔍 CallToAction - Button State Change:', {
+      buttonText: text,
+      isDisabled: disabled,
+      currentState: state,
+      timestamp: new Date().toISOString()
+    })
+  }, 
+  { immediate: true }
+)
 
 // Wallet connection is now handled by the CTA state logic
 

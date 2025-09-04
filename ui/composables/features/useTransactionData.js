@@ -693,7 +693,7 @@ export const useTransactionData = () => {
       cirxAmount: parseFloat(tx.cirx_amount_formatted).toLocaleString(),
       discount: tx.discount_percentage || 0,
       hash: tx.tx_hash,
-      etherscanUrl: tx.etherscan_url // Server-provided URL only,
+      etherscanUrl: tx.etherscan_url, // Server-provided URL only
       timestamp: tx.timestamp,
       gasUsed: tx.gas_used,
       gasPrice: tx.gas_price

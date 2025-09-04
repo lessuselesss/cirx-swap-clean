@@ -37,7 +37,7 @@
         
         <!-- Status Check Card -->
         <div class="bg-gray-900/95 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-8 mb-6">
-          <h1 class="text-2xl font-bold text-white mb-4 text-center">
+          <h1 class="text-2xl font-bold text-white mb-4">
             Transaction Status
           </h1>
           
@@ -90,15 +90,6 @@
             </button>
           </div>
 
-          <!-- Test Button (temporary) -->
-          <div class="mb-4">
-            <button
-              @click="testBackendConnection"
-              class="text-sm bg-purple-600 hover:bg-purple-500 text-white px-3 py-1 rounded"
-            >
-              Test Backend Connection
-            </button>
-          </div>
 
           <!-- Status Display -->
           <div v-if="status" class="mt-6 p-6 bg-gray-800/50 rounded-xl border border-gray-600/30">
@@ -159,11 +150,17 @@
         </div>
 
         <!-- Transaction Table -->
-        <div class="bg-gray-900/95 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-6 mb-6">
-          <h2 class="text-lg font-semibold text-white mb-4">
+        <div class="space-modal rounded-2xl p-6 mb-6 shadow-2xl shadow-cyan-500/20 relative gradient-border-animated border border-white/10 overflow-hidden">
+          <!-- Additional star layers for random blinking -->
+          <div class="star-layer-1"></div>
+          <div class="star-layer-2"></div>
+          
+          <h2 class="text-2xl font-semibold text-white mb-4 relative z-10 text-center">
             Recent Transactions
           </h2>
-          <TransactionTable />
+          <div class="relative z-10">
+            <TransactionTable />
+          </div>
         </div>
 
 
@@ -408,3 +405,169 @@ const getStatusText = (status) => {
   return texts[status] || status
 }
 </script>
+
+<style scoped>
+/* Gradient border that's always animated (for modal) */
+.gradient-border-animated {
+  position: relative;
+  border: 1px solid #00ff88;
+  border-radius: 1rem;
+  transition: all 0.3s ease;
+  animation: border-color-cycle 75s ease infinite;
+}
+
+@keyframes border-color-cycle {
+  0% { border-color: #00ff88; }
+  25% { border-color: #00d9ff; }
+  50% { border-color: #8b5cf6; }
+  75% { border-color: #a855f7; }
+  100% { border-color: #00ff88; }
+}
+
+/* Space Theme Modal with Particles */
+.space-modal {
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(15, 15, 35, 0.9));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    0 8px 32px 0 rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.space-modal::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background-image: 
+    radial-gradient(2px 2px at 20px 30px, rgba(255, 255, 255, 0.8), transparent),
+    radial-gradient(2px 2px at 40px 70px, rgba(200, 200, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 90px 40px, rgba(255, 255, 255, 0.9), transparent),
+    radial-gradient(1px 1px at 130px 80px, rgba(255, 200, 200, 0.5), transparent),
+    radial-gradient(2px 2px at 160px 30px, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(1px 1px at 200px 90px, rgba(200, 255, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 240px 50px, rgba(255, 255, 255, 0.8), transparent),
+    radial-gradient(2px 2px at 280px 10px, rgba(255, 255, 255, 0.9), transparent),
+    radial-gradient(1px 1px at 320px 70px, rgba(255, 255, 200, 0.4), transparent),
+    radial-gradient(1px 1px at 360px 20px, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(3px 3px at 80px 120px, rgba(255, 255, 255, 0.8), transparent),
+    radial-gradient(1px 1px at 220px 140px, rgba(200, 200, 255, 0.5), transparent),
+    radial-gradient(2px 2px at 300px 100px, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 180px 60px, rgba(255, 200, 255, 0.3), transparent);
+  background-repeat: repeat;
+  background-size: 400px 200px;
+  animation: starsMove 40s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.space-modal::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background-image: 
+    radial-gradient(2px 2px at 45px 85px, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.9) 50%, transparent),
+    radial-gradient(1px 1px at 125px 45px, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.7) 50%, transparent),
+    radial-gradient(2px 2px at 245px 125px, rgba(200, 200, 255, 0), rgba(200, 200, 255, 0.8) 50%, transparent),
+    radial-gradient(1px 1px at 315px 65px, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.6) 50%, transparent),
+    radial-gradient(3px 3px at 185px 25px, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.9) 50%, transparent);
+  background-repeat: repeat;
+  background-size: 400px 200px;
+  animation: starsMove 40s linear infinite, randomBlink1 8s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Additional star layers for random blinking */
+.space-modal .star-layer-1 {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background-image: 
+    radial-gradient(1px 1px at 60px 110px, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.8) 50%, transparent),
+    radial-gradient(2px 2px at 340px 45px, rgba(200, 255, 200, 0), rgba(200, 255, 200, 0.7) 50%, transparent),
+    radial-gradient(1px 1px at 150px 180px, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.6) 50%, transparent);
+  background-repeat: repeat;
+  background-size: 400px 200px;
+  animation: starsMove 40s linear infinite, randomBlink2 12s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.space-modal .star-layer-2 {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background-image: 
+    radial-gradient(1px 1px at 275px 155px, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.9) 50%, transparent),
+    radial-gradient(2px 2px at 95px 75px, rgba(255, 200, 255, 0), rgba(255, 200, 255, 0.6) 50%, transparent),
+    radial-gradient(1px 1px at 385px 135px, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.7) 50%, transparent);
+  background-repeat: repeat;
+  background-size: 400px 200px;
+  animation: starsMove 40s linear infinite, randomBlink3 16s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.space-modal > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Animation keyframes */
+@keyframes starsMove {
+  0% {
+    transform: translateX(0px) translateY(0px) rotate(0deg);
+  }
+  100% {
+    transform: translateX(-400px) translateY(-200px) rotate(90deg);
+  }
+}
+
+@keyframes randomBlink1 {
+  0% { opacity: 0.3; }
+  15% { opacity: 0.8; }
+  20% { opacity: 0.3; }
+  45% { opacity: 0.3; }
+  50% { opacity: 1; }
+  55% { opacity: 0.3; }
+  80% { opacity: 0.3; }
+  85% { opacity: 0.9; }
+  90% { opacity: 0.3; }
+  100% { opacity: 0.3; }
+}
+
+@keyframes randomBlink2 {
+  0% { opacity: 0.4; }
+  25% { opacity: 0.4; }
+  30% { opacity: 0.9; }
+  35% { opacity: 0.4; }
+  65% { opacity: 0.4; }
+  70% { opacity: 1; }
+  75% { opacity: 0.4; }
+  100% { opacity: 0.4; }
+}
+
+@keyframes randomBlink3 {
+  0% { opacity: 0.2; }
+  10% { opacity: 0.7; }
+  15% { opacity: 0.2; }
+  40% { opacity: 0.2; }
+  60% { opacity: 0.2; }
+  65% { opacity: 0.8; }
+  70% { opacity: 0.2; }
+  90% { opacity: 0.2; }
+  95% { opacity: 0.6; }
+  100% { opacity: 0.2; }
+}
+</style>

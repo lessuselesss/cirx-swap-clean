@@ -319,7 +319,7 @@ export function useSwapValidation(validationState = {}) {
         let hasSufficientForFees = true
         if (connected) {
           const ethBal = parseFloat(awaitedEthBalance.value) || 0
-          const feeEth = parseFloat(networkFee.value?.eth || '0') || 0
+          const feeEth = parseFloat((networkFee.value && networkFee.value.eth) || '0') || 0
           const inputAmountNum = parseFloat(inputAmount.value) || 0
           
           if (inputToken.value === 'ETH') {
