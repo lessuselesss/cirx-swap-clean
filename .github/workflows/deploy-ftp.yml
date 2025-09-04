@@ -221,6 +221,16 @@ jobs:
           NUXT_PUBLIC_DEBUG_MODE="${{ secrets.NUXT_PUBLIC_DEBUG_MODE || 'false' }}"
           EOF
       
+      # Debug: Check .env file contents
+      - name: 🔍 Debug .env file contents
+        working-directory: ${{ env.FRONTEND_LOCAL_DIR }}
+        run: |
+          echo "=== .env file contents ==="
+          cat .env
+          echo "=== Environment variables ==="
+          echo "NUXT_PUBLIC_REOWN_PROJECT_ID=$NUXT_PUBLIC_REOWN_PROJECT_ID"
+          echo "NUXT_PUBLIC_TESTNET_MODE=$NUXT_PUBLIC_TESTNET_MODE"
+          
       # Build frontend
       - name: 🔨 Build frontend for production
         working-directory: ${{ env.FRONTEND_LOCAL_DIR }}
