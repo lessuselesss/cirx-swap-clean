@@ -72,6 +72,12 @@ The backend provides network-specific configuration through the `/api/v1/config/
 
 ### Environment-Specific Settings
 
+**Important**: The network selection is controlled by the `TESTNET_MODE` environment variable:
+- `TESTNET_MODE=true` - Uses testnet endpoints (staging config)
+- `TESTNET_MODE=false` - Uses mainnet endpoints (production config)
+
+This allows production deployments to run in testnet mode by setting `TESTNET_MODE=true`.
+
 #### Development/Testing
 ```php
 [

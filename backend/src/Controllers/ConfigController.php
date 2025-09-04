@@ -57,6 +57,20 @@ class ConfigController
     private function getCircularConfiguration(): array
     {
         $environment = $_ENV['APP_ENV'] ?? 'development';
+        $testnetMode = ($_ENV['TESTNET_MODE'] ?? 'true') === 'true';
+        
+        // Override environment based on testnet mode
+        if ($testnetMode) {
+            switch ($environment) {
+                case 'production':
+                    $environment = 'staging'; // Use staging config for production + testnet
+                    break;
+                case 'development':
+                default:
+                    $environment = 'development';
+                    break;
+            }
+        }
         
         switch ($environment) {
             case 'production':
