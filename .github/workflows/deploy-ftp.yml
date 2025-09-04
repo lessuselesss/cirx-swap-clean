@@ -79,10 +79,6 @@ jobs:
       # Checkout repository code
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
-        with:
-          # fetch-depth: 0     # Uncomment for full history
-          # submodules: true   # Uncomment if using git submodules
-          # lfs: true         # Uncomment if using Git LFS
       
       # Setup PHP environment
       - name: 🐘 Setup PHP ${{ env.PHP_VERSION }}
@@ -96,7 +92,7 @@ jobs:
       
       # Cache Composer dependencies
       - name: 📦 Cache Composer dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ env.BACKEND_LOCAL_DIR }}/vendor
           key: composer-${{ hashFiles('**/composer.lock') }}
@@ -167,7 +163,7 @@ jobs:
       
       # Upload backend artifact (for deployment job)
       - name: 📤 Upload backend artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: backend-build
           path: ${{ env.BACKEND_LOCAL_DIR }}
@@ -238,7 +234,7 @@ jobs:
       
       # Upload frontend artifact
       - name: 📤 Upload frontend artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: frontend-build
           path: ${{ env.FRONTEND_BUILD_DIR }}
