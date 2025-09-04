@@ -2,8 +2,8 @@
  * Blockchain Transaction Composable
  * Handles ETH and ERC20 token transactions using AppKit/viem
  */
-import { ref, computed, unref } from 'vue'
-import { parseUnits, formatUnits, isAddress } from 'viem'
+import { ref, computed } from 'vue'
+import { parseUnits, formatUnits } from 'viem'
 import { useAppKitWallet } from './useAppKitWallet.js'
 import { useApiClient } from './core/useApiClient.js'
 import { useCirxUtils } from './useCirxUtils.js'
@@ -64,41 +64,69 @@ export function useBlockchainTransaction() {
   const executionStep = ref('')
   
   /**
-   * Execute a blockchain transaction (ETH or ERC20)
+   * Execute a blockchain transaction (ETH or ERC20) using AppKit's provider
    */
   const executeTransaction = async (paymentToken, amount, recipientAddress) => {
-    // Get raw values from reactive refs to avoid postMessage cloning issues
-    // CRITICAL: Use unref() to extract raw values without Vue reactivity wrappers
-    const currentWalletClient = unref(wallet.walletClient)
-    const currentPublicClient = unref(wallet.publicClient)  
-    const currentAddress = unref(wallet.address)
-    const currentIsConnected = unref(wallet.isConnected)
-    
-    if (!currentIsConnected || !currentWalletClient) {
+    if (!wallet.isConnected.value) {
       throw new Error('Wallet not connected')
     }
     
-    if (!isAddress(recipientAddress)) {
-      throw new Error('Invalid recipient address')
-    }
+    // Note: recipientAddress is a CIRX address for the backend, not needed for blockchain transaction
+    // The actual blockchain transaction goes to the protocol's deposit address
     
     isExecuting.value = true
     executionStep.value = 'Preparing transaction...'
     
     try {
       let txHash
-      const depositAddress = cirxUtils.getDepositAddress(paymentToken, 'ethereum')
+      const depositAddress = String(cirxUtils.getDepositAddress(paymentToken, 'ethereum'))
+      
+      // Get AppKit's provider directly - this respects the user's connected chain
+      const provider = await window.$appKit?.getWalletProvider()
+      if (!provider) {
+        throw new Error('AppKit provider not available')
+      }
       
       if (paymentToken === 'ETH') {
-        // Native ETH transfer
-        executionStep.value = 'Sending ETH transaction...'
-        txHash = await currentWalletClient.sendTransaction({
-          to: depositAddress,
-          value: parseUnits(amount.toString(), TOKEN_DECIMALS.ETH),
-          account: currentAddress
+        // Native ETH transfer using AppKit provider
+        executionStep.value = 'Estimating gas for ETH transaction...'
+        
+        const value = '0x' + parseUnits(amount.toString(), TOKEN_DECIMALS.ETH).toString(16)
+        
+        // Estimate gas for the transaction
+        const gasEstimate = await provider.request({
+          method: 'eth_estimateGas',
+          params: [{
+            from: String(wallet.address.value),
+            to: String(depositAddress),
+            value: value
+          }]
         })
+        
+        // Get current gas price
+        const gasPrice = await provider.request({
+          method: 'eth_gasPrice',
+          params: []
+        })
+        
+        // Add 20% buffer to gas estimate
+        const gasLimit = '0x' + Math.floor(parseInt(gasEstimate, 16) * 1.2).toString(16)
+        
+        executionStep.value = 'Sending ETH transaction...'
+        
+        txHash = await provider.request({
+          method: 'eth_sendTransaction',
+          params: [{
+            from: String(wallet.address.value),
+            to: String(depositAddress),
+            value: value,
+            gas: gasLimit,
+            gasPrice: gasPrice
+          }]
+        })
+        
       } else {
-        // ERC20 token transfer
+        // ERC20 token transfer using AppKit provider
         const contractAddress = TOKEN_CONTRACTS[paymentToken]
         if (!contractAddress) {
           throw new Error(`Contract address not found for token ${paymentToken}`)
@@ -107,24 +135,66 @@ export function useBlockchainTransaction() {
         const decimals = TOKEN_DECIMALS[paymentToken]
         const transferAmount = parseUnits(amount.toString(), decimals)
         
+        // Encode ERC20 transfer function call
+        // transfer(address,uint256) = 0xa9059cbb
+        const transferSelector = '0xa9059cbb'
+        const paddedAddress = depositAddress.slice(2).padStart(64, '0')
+        const paddedAmount = transferAmount.toString(16).padStart(64, '0')
+        const transferData = transferSelector + paddedAddress + paddedAmount
+        
+        executionStep.value = `Estimating gas for ${paymentToken} transaction...`
+        
+        // Estimate gas for the ERC20 transfer
+        const gasEstimate = await provider.request({
+          method: 'eth_estimateGas',
+          params: [{
+            from: String(wallet.address.value),
+            to: String(contractAddress),
+            data: String(transferData)
+          }]
+        })
+        
+        // Get current gas price
+        const gasPrice = await provider.request({
+          method: 'eth_gasPrice',
+          params: []
+        })
+        
+        // Add 20% buffer to gas estimate
+        const gasLimit = '0x' + Math.floor(parseInt(gasEstimate, 16) * 1.2).toString(16)
+        
         executionStep.value = `Sending ${paymentToken} transaction...`
-        txHash = await currentWalletClient.writeContract({
-          address: contractAddress,
-          abi: ERC20_ABI,
-          functionName: 'transfer',
-          args: [depositAddress, transferAmount],
-          account: currentAddress
+        
+        txHash = await provider.request({
+          method: 'eth_sendTransaction',
+          params: [{
+            from: String(wallet.address.value),
+            to: String(contractAddress),
+            data: String(transferData),
+            gas: gasLimit,
+            gasPrice: gasPrice
+          }]
         })
       }
       
       executionStep.value = 'Transaction sent, waiting for confirmation...'
       
-      // Wait for transaction receipt
-      if (currentPublicClient) {
-        await currentPublicClient.waitForTransactionReceipt({ 
-          hash: txHash,
-          timeout: 60000 // 60 second timeout
-        })
+      // Wait for transaction receipt using AppKit's provider
+      const receipt = await provider.request({
+        method: 'eth_getTransactionReceipt',
+        params: [txHash]
+      })
+      
+      // Simple polling for receipt if not immediately available
+      if (!receipt) {
+        for (let i = 0; i < 30; i++) {
+          await new Promise(resolve => setTimeout(resolve, 2000))
+          const pollReceipt = await provider.request({
+            method: 'eth_getTransactionReceipt',
+            params: [txHash]
+          })
+          if (pollReceipt) break
+        }
       }
       
       return {
@@ -133,7 +203,7 @@ export function useBlockchainTransaction() {
         amount: amount.toString(),
         token: paymentToken,
         depositAddress,
-        senderAddress: currentAddress
+        senderAddress: wallet.address.value
       }
       
     } catch (error) {
@@ -144,8 +214,12 @@ export function useBlockchainTransaction() {
         throw new Error('Transaction rejected by user')
       } else if (error.message?.includes('insufficient funds')) {
         throw new Error(`Insufficient ${paymentToken} balance`)
-      } else if (error.message?.includes('gas')) {
-        throw new Error('Transaction failed due to gas issues. Try increasing gas limit.')
+      } else if (error.message?.includes('gas') || error.message?.includes('estimate')) {
+        throw new Error('Gas estimation failed. Please try again or contact support.')
+      } else if (error.message?.includes('revert') || error.message?.includes('execution reverted')) {
+        throw new Error('Transaction reverted. Check contract conditions or token balance.')
+      } else if (error.message?.includes('nonce')) {
+        throw new Error('Nonce error. Please reset your wallet or try again.')
       } else {
         throw new Error(error.message || 'Transaction failed')
       }
@@ -178,15 +252,18 @@ export function useBlockchainTransaction() {
     
     console.log('Submitting to backend:', swapData)
     
-    const response = await apiClient.post('/transactions/initiate-swap', swapData)
+    const apiResponse = await apiClient.post('/transactions/initiate-swap', swapData)
     
-    if (response.status !== 'success') {
-      throw new Error(response.message || 'Backend submission failed')
+    // API client wraps backend response in 'data' property
+    const backendResponse = apiResponse.data
+    
+    if (backendResponse.status !== 'success') {
+      throw new Error(backendResponse.message || 'Backend submission failed')
     }
     
     return {
       success: true,
-      swapId: response.swapId,
+      swapId: backendResponse.swapId,
       transactionHash: transactionResult.txHash
     }
   }
@@ -221,11 +298,7 @@ export function useBlockchainTransaction() {
    * Estimate gas for a transaction (useful for pre-flight checks)
    */
   const estimateGas = async (paymentToken, amount) => {
-    // CRITICAL: Use unref() to extract raw values without Vue reactivity wrappers
-    const currentPublicClient = unref(wallet.publicClient)
-    const currentAddress = unref(wallet.address)
-    
-    if (!currentPublicClient || !currentAddress) {
+    if (!wallet.publicClient?.value || !wallet.address.value) {
       return null
     }
     
@@ -233,10 +306,10 @@ export function useBlockchainTransaction() {
       const depositAddress = cirxUtils.getDepositAddress(paymentToken, 'ethereum')
       
       if (paymentToken === 'ETH') {
-        const gasEstimate = await currentPublicClient.estimateGas({
+        const gasEstimate = await wallet.publicClient.value.estimateGas({
           to: depositAddress,
           value: parseUnits(amount.toString(), TOKEN_DECIMALS.ETH),
-          account: currentAddress
+          account: wallet.address.value
         })
         return gasEstimate
       } else {
@@ -246,12 +319,12 @@ export function useBlockchainTransaction() {
         const decimals = TOKEN_DECIMALS[paymentToken]
         const transferAmount = parseUnits(amount.toString(), decimals)
         
-        const gasEstimate = await currentPublicClient.estimateContractGas({
+        const gasEstimate = await wallet.publicClient.value.estimateContractGas({
           address: contractAddress,
           abi: ERC20_ABI,
           functionName: 'transfer',
           args: [depositAddress, transferAmount],
-          account: currentAddress
+          account: wallet.address.value
         })
         return gasEstimate
       }
