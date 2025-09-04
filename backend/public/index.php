@@ -477,9 +477,20 @@ $app->group('/api/v1', function ($group) {
                 ->withStatus(200);
                 
         } catch (Exception $e) {
+            // Enhanced error logging for production debugging
+            error_log("Circular proxy error: " . $e->getMessage() . " | CEP: " . ($cep ?? 'none') . " | Method: " . $request->getMethod());
+            
             $errorData = [
                 'success' => false,
                 'error' => 'Proxy request failed: ' . $e->getMessage(),
+                'debug' => [
+                    'cep' => $cep ?? 'not_provided',
+                    'method' => $request->getMethod(),
+                    'whitelist_check' => in_array($cep ?? '', $allowedMethods),
+                    'post_body_size' => strlen((string)$request->getBody()),
+                    'php_version' => PHP_VERSION,
+                    'testnet_mode' => $_ENV['TESTNET_MODE'] ?? 'NOT_SET'
+                ],
                 'timestamp' => date('c')
             ];
             $response->getBody()->write(json_encode($errorData));
@@ -487,6 +498,72 @@ $app->group('/api/v1', function ($group) {
                 ->withHeader('Content-Type', 'application/json')
                 ->withStatus(502);
         }
+    });
+
+    // Production debug endpoints for troubleshooting HTTP 500 errors
+    $group->get('/debug/circular-config', function (Request $request, Response $response) {
+        try {
+            $controller = new \App\Controllers\ConfigController();
+            $method = new ReflectionMethod($controller, 'getCircularConfiguration');
+            $method->setAccessible(true);
+            $config = $method->invoke($controller);
+            
+            $data = [
+                'testnet_mode_env' => $_ENV['TESTNET_MODE'] ?? 'NOT_SET',
+                'app_env' => $_ENV['APP_ENV'] ?? 'NOT_SET',
+                'config_result' => $config,
+                'whitelist' => [
+                    'GetCirculatingSupply.php',
+                    'CProxy.php', 
+                    'Circular_CheckWallet_',
+                    'Circular_GetWalletBalance_'
+                ],
+                'php_version' => PHP_VERSION,
+                'timestamp' => date('c')
+            ];
+            
+            $response->getBody()->write(json_encode($data, JSON_PRETTY_PRINT));
+            return $response->withHeader('Content-Type', 'application/json');
+        } catch (Exception $e) {
+            $response->getBody()->write(json_encode(['error' => $e->getMessage()]));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(500);
+        }
+    });
+
+    $group->get('/debug/nag-direct', function (Request $request, Response $response) {
+        try {
+            $url = 'https://nag.circularlabs.io/NAG.php?cep=Circular_CheckWallet_';
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+            curl_setopt($ch, CURLOPT_USERAGENT, 'CIRX-OTC-Backend/1.0');
+            
+            $data = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $error = curl_error($ch);
+            $info = curl_getinfo($ch);
+            curl_close($ch);
+            
+            $result = [
+                'success' => $httpCode === 200 && !$error,
+                'http_code' => $httpCode,
+                'curl_error' => $error ?: 'none',
+                'response' => $data,
+                'url' => $url,
+                'curl_info' => [
+                    'total_time' => $info['total_time'],
+                    'namelookup_time' => $info['namelookup_time'],
+                    'connect_time' => $info['connect_time']
+                ]
+            ];
+        } catch (Exception $e) {
+            $result = ['error' => $e->getMessage()];
+        }
+        
+        $response->getBody()->write(json_encode($result, JSON_PRETTY_PRINT));
+        return $response->withHeader('Content-Type', 'application/json');
     });
 
     // Demo/Testing endpoints (only in development)
