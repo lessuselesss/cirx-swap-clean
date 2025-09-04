@@ -196,46 +196,7 @@ jobs:
           npm ci --prefer-offline --no-audit
           # npm install  # Use this instead if you don't have package-lock.json
       
-      # Create frontend .env file
-      - name: 🔐 Create frontend .env file
-        working-directory: ${{ env.FRONTEND_LOCAL_DIR }}
-        run: |
-          cat > .env << EOF
-          # API Configuration
-          NUXT_PUBLIC_API_BASE_URL="${{ secrets.NUXT_PUBLIC_API_BASE_URL || 'https://yoursite.com/api/v1' }}"
-          
-          # Network Configuration  
-          NUXT_PUBLIC_TESTNET_MODE="true"
-          NUXT_PUBLIC_ETHEREUM_NETWORK="${{ secrets.NUXT_PUBLIC_ETHEREUM_NETWORK || 'mainnet' }}"
-          NUXT_PUBLIC_ETHEREUM_CHAIN_ID="${{ secrets.NUXT_PUBLIC_ETHEREUM_CHAIN_ID || '1' }}"
-          
-          # Web3 Configuration
-          NUXT_PUBLIC_REOWN_PROJECT_ID="${{ secrets.NUXT_PUBLIC_REOWN_PROJECT_ID || '2585d3b6fd8a214ece0e26b344957169' }}"
-          
-          # Platform Wallet Addresses
-          NUXT_PUBLIC_ETH_DEPOSIT_ADDRESS="${{ secrets.NUXT_PUBLIC_ETH_DEPOSIT_ADDRESS || '0x834244d016f29d6acb42c1b054a88e2e9b1c9228' }}"
-          NUXT_PUBLIC_USDC_DEPOSIT_ADDRESS="${{ secrets.NUXT_PUBLIC_USDC_DEPOSIT_ADDRESS || '0x834244d016f29d6acb42c1b054a88e2e9b1c9228' }}"
-          NUXT_PUBLIC_USDT_DEPOSIT_ADDRESS="${{ secrets.NUXT_PUBLIC_USDT_DEPOSIT_ADDRESS || '0x834244d016f29d6acb42c1b054a88e2e9b1c9228' }}"
-          
-          # Debug Mode
-          NUXT_PUBLIC_DEBUG_MODE="${{ secrets.NUXT_PUBLIC_DEBUG_MODE || 'false' }}"
-          EOF
-      
-      # Debug: Check .env file contents
-      - name: 🔍 Debug .env file contents
-        working-directory: ${{ env.FRONTEND_LOCAL_DIR }}
-        run: |
-          echo "=== .env file contents ==="
-          cat .env
-          echo "=== Environment variables ==="
-          echo "NUXT_PUBLIC_REOWN_PROJECT_ID=$NUXT_PUBLIC_REOWN_PROJECT_ID"
-          echo "NUXT_PUBLIC_TESTNET_MODE=$NUXT_PUBLIC_TESTNET_MODE"
-          
-      # Build frontend
-      - name: 🔨 Build frontend for production
-        working-directory: ${{ env.FRONTEND_LOCAL_DIR }}
-        run: |
-          npm run generate  # Generate static site for FTP deployment
+      # Environment variables are now set directly in build step below
       
       # Run frontend tests (optional)
       # - name: 🧪 Run frontend tests
@@ -292,6 +253,10 @@ jobs:
       # Build frontend directly
       - name: 🔨 Build Frontend  
         working-directory: ui
+        env:
+          NUXT_PUBLIC_REOWN_PROJECT_ID: ${{ secrets.NUXT_PUBLIC_REOWN_PROJECT_ID }}
+          NUXT_PUBLIC_TESTNET_MODE: true
+          NUXT_PUBLIC_API_BASE_URL: ${{ secrets.NUXT_PUBLIC_API_BASE_URL || 'https://circularprotocol.io/buy/api/v1' }}
         run: |
           npm ci
           npm run build
