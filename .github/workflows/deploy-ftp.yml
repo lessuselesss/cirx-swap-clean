@@ -259,19 +259,36 @@ jobs:
     #   url: ${{ secrets.SITE_URL }}
     
     steps:
-      # Download backend artifact
-      - name: 📥 Download backend build
-        uses: actions/download-artifact@v3
-        with:
-          name: backend-build
-          path: ./backend-deploy
+      # Checkout code for direct build (since we're not using artifacts)
+      - name: 🔄 Checkout Repository
+        uses: actions/checkout@v4
       
-      # Download frontend artifact
-      - name: 📥 Download frontend build
-        uses: actions/download-artifact@v3
+      # Setup PHP for backend build
+      - name: 🐘 Setup PHP
+        uses: shivammathur/setup-php@v2
         with:
-          name: frontend-build
-          path: ./frontend-deploy
+          php-version: '8.2'
+          extensions: mbstring, xml, pdo, sqlite, pdo_sqlite, bcmath, json
+      
+      # Setup Node.js for frontend build  
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: ui/package-lock.json
+      
+      # Build backend directly
+      - name: 🔨 Build Backend
+        working-directory: backend
+        run: composer install --no-dev --optimize-autoloader
+      
+      # Build frontend directly
+      - name: 🔨 Build Frontend  
+        working-directory: ui
+        run: |
+          npm ci
+          npm run build
       
       # Deploy Backend via FTP
       - name: 🚀 Deploy Backend to FTP
@@ -289,7 +306,7 @@ jobs:
           protocol: ${{ secrets.FTP_PROTOCOL || 'ftp' }}  # Options: ftp, ftps, ftps-legacy
           
           # Local directory to upload from
-          local-dir: ./backend-deploy/
+          local-dir: ./backend/
           
           # Remote directory to upload to
           server-dir: ${{ env.BACKEND_REMOTE_DIR }}/
@@ -339,7 +356,7 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           port: ${{ secrets.FTP_PORT || 21 }}
           protocol: ${{ secrets.FTP_PROTOCOL || 'ftp' }}
-          local-dir: ./frontend-deploy/
+          local-dir: ./ui/.output/public/
           server-dir: ${{ env.FRONTEND_REMOTE_DIR }}/
           dry-run: ${{ github.event.inputs.dry_run || false }}
           exclude: |
