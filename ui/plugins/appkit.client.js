@@ -11,9 +11,10 @@ export default defineNuxtPlugin((nuxtApp) => {
   const projectId = config.public.reownProjectId
   
   // Validate project ID
-  if (!projectId || projectId === 'your_reown_project_id') {
-    console.error('❌ AppKit Project ID is missing!')
+  if (!projectId || projectId === 'your_reown_project_id' || projectId === '2585d3b6fd8a214ece0e26b344957169') {
+    console.error('❌ AppKit Project ID is missing or using default fallback!')
     console.error('Please set NUXT_PUBLIC_REOWN_PROJECT_ID in your .env file')
+    console.error('Current projectId:', projectId)
     return {
       provide: {
         appkit: {
