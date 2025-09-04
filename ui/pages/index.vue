@@ -31,7 +31,10 @@
               <template #fallback>
                 <div class="w-32 h-10 bg-gray-800 rounded-lg animate-pulse"></div>
               </template>
-              <AppKitButton v-if="$appkit" />
+              <AppKitButton v-if="$appkit && typeof $appkit === 'object' && !$appkit.disabled" />
+              <div v-else-if="$appkit?.disabled" class="px-4 py-2 bg-gray-600 text-gray-300 rounded-lg text-sm">
+                Wallet Configuration Error
+              </div>
               <div v-else class="px-4 py-2 bg-gray-600 text-gray-300 rounded-lg text-sm">
                 Wallet Unavailable
               </div>

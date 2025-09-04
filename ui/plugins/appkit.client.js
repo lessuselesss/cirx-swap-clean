@@ -16,7 +16,10 @@ export default defineNuxtPlugin((nuxtApp) => {
     console.error('Please set NUXT_PUBLIC_REOWN_PROJECT_ID in your .env file')
     return {
       provide: {
-        appkit: null
+        appkit: {
+          disabled: true,
+          error: 'Missing or invalid project ID'
+        }
       }
     }
   }
@@ -150,7 +153,11 @@ export default defineNuxtPlugin((nuxtApp) => {
     console.error('Error details:', error)
     return {
       provide: {
-        appkit: null
+        appkit: {
+          disabled: true,
+          error: 'AppKit initialization failed',
+          details: error.message
+        }
       }
     }
   }
