@@ -125,11 +125,17 @@ $app->get('/', function (Request $request, Response $response) {
     return $response->withHeader('Content-Type', 'application/json');
 });
 
-// Test route (direct, no group)
+// Test route (direct, no group) - NO external dependencies
 $app->get('/test', function (Request $request, Response $response) {
     $data = ['status' => 'working', 'message' => 'Direct route test successful'];
     $response->getBody()->write(json_encode($data));
     return $response->withHeader('Content-Type', 'application/json');
+});
+
+// Simple hello route - absolutely minimal
+$app->get('/hello', function (Request $request, Response $response) {
+    $response->getBody()->write('Hello World');
+    return $response;
 });
 
 // Debug route registration
@@ -664,15 +670,34 @@ $app->options('/{routes:.+}', function (Request $request, Response $response) {
     return $response;
 });
 
-// Catch-all route (404)
+// Enhanced catch-all route with full diagnostics
 $app->map(['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], '/{routes:.+}', function (Request $request, Response $response) {
     $data = [
         'status' => 'error',
         'message' => 'Route not found',
         'method' => $request->getMethod(),
-        'uri' => (string) $request->getUri()
+        'uri' => (string) $request->getUri(),
+        'debug_info' => [
+            'path' => $request->getUri()->getPath(),
+            'query' => $request->getUri()->getQuery(),
+            'headers' => $request->getHeaders(),
+            'server_vars' => [
+                'REQUEST_URI' => $_SERVER['REQUEST_URI'] ?? 'not_set',
+                'SCRIPT_NAME' => $_SERVER['SCRIPT_NAME'] ?? 'not_set',
+                'PATH_INFO' => $_SERVER['PATH_INFO'] ?? 'not_set',
+                'QUERY_STRING' => $_SERVER['QUERY_STRING'] ?? 'not_set',
+                'HTTP_HOST' => $_SERVER['HTTP_HOST'] ?? 'not_set'
+            ],
+            'route_patterns' => [
+                'expected_test' => '/test',
+                'expected_hello' => '/hello', 
+                'expected_debug' => '/debug-routes',
+                'expected_v1_health' => '/v1/health',
+                'expected_root' => '/'
+            ]
+        ]
     ];
-    $response->getBody()->write(json_encode($data));
+    $response->getBody()->write(json_encode($data, JSON_PRETTY_PRINT));
     return $response->withStatus(404)->withHeader('Content-Type', 'application/json');
 });
 
