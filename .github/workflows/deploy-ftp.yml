@@ -257,12 +257,11 @@ jobs:
           DB_DATABASE: ${{ secrets.DB_DATABASE || './storage/database.sqlite' }}
         run: |
           composer install --no-dev --optimize-autoloader
-          # Create storage directory and SQLite database for production
+          # Create storage directory and empty SQLite database for production
           mkdir -p storage
           touch storage/database.sqlite
           chmod 664 storage/database.sqlite
-          # Run database migrations with environment variables
-          php database/migrate.php
+          echo "✅ SQLite database file created - tables will be auto-created by backend"
       
       # Build frontend directly
       - name: 🔨 Build Frontend  
