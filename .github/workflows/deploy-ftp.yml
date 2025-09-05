@@ -249,6 +249,39 @@ jobs:
           cache: 'npm'
           cache-dependency-path: ui/package-lock.json
       
+      # Create .env file for backend (needed before build)
+      - name: 🔐 Create backend .env file for deploy
+        working-directory: backend
+        run: |
+          cat > .env << EOF
+          # Application Settings
+          APP_NAME="${{ secrets.APP_NAME || 'CIRX_OTC' }}"
+          APP_ENV="${{ secrets.APP_ENV || 'production' }}"
+          APP_DEBUG="${{ secrets.APP_DEBUG || 'false' }}"
+          APP_URL="${{ secrets.APP_URL || 'https://circularprotocol.io/buy' }}"
+          
+          # Database Configuration - Use SQLite by default (same as development)
+          DB_CONNECTION="${{ secrets.DB_CONNECTION || 'sqlite' }}"
+          DB_DATABASE="${{ secrets.DB_DATABASE || './storage/database.sqlite' }}"
+          # MySQL options (only used if DB_CONNECTION is set to mysql in secrets)
+          DB_HOST="${{ secrets.DB_HOST }}"
+          DB_PORT="${{ secrets.DB_PORT || '3306' }}"
+          DB_USERNAME="${{ secrets.DB_USERNAME }}"
+          DB_PASSWORD="${{ secrets.DB_PASSWORD }}"
+          
+          # API Keys
+          API_KEY="${{ secrets.API_KEY }}"
+          CIRCULAR_API_KEY="${{ secrets.CIRCULAR_API_KEY }}"
+          CIRCULAR_API_URL="${{ secrets.CIRCULAR_API_URL }}"
+          
+          # Network Configuration
+          TESTNET_MODE="${{ secrets.TESTNET_MODE || 'true' }}"
+          
+          # Additional Secrets
+          TELEGRAM_BOT_TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          TELEGRAM_CHAT_ID="${{ secrets.TELEGRAM_CHAT_ID }}"
+          EOF
+      
       # Build backend directly
       - name: 🔨 Build Backend
         working-directory: backend
