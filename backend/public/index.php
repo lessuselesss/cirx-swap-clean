@@ -243,14 +243,6 @@ $app->group('/v1', function ($group) {
         }
     });
 
-    // Comprehensive health check
-    $group->get('/health/detailed', function (Request $request, Response $response) {
-        $healthService = new HealthCheckService();
-        $healthStatus = $healthService->runAllChecks();
-        
-        $response->getBody()->write(json_encode($healthStatus));
-        return $response->withHeader('Content-Type', 'application/json');
-    });
 
     // Transaction readiness check - validates ALL systems for transaction processing
     $group->get('/health/transaction-ready', function (Request $request, Response $response) {
@@ -385,15 +377,6 @@ $app->group('/v1', function ($group) {
         return $controller->debugEnv($request, $response);
     });
 
-    $group->post('/debug/set-cirx-recipient', function (Request $request, Response $response) {
-        $controller = new DebugController();
-        return $controller->setCirxRecipientOverride($request, $response);
-    });
-
-    $group->get('/debug/cirx-recipient-override', function (Request $request, Response $response) {
-        $controller = new DebugController();
-        return $controller->getCirxRecipientOverride($request, $response);
-    });
 
     // Proxy endpoints for Circular Labs APIs (to avoid CORS issues)
     $group->get('/proxy/circulating-supply', function (Request $request, Response $response) {
@@ -537,72 +520,6 @@ $app->group('/v1', function ($group) {
                 ->withHeader('Content-Type', 'application/json')
                 ->withStatus(502);
         }
-    });
-
-    // Production debug endpoints for troubleshooting HTTP 500 errors
-    $group->get('/debug/circular-config', function (Request $request, Response $response) {
-        try {
-            $controller = new \App\Controllers\ConfigController();
-            $method = new ReflectionMethod($controller, 'getCircularConfiguration');
-            $method->setAccessible(true);
-            $config = $method->invoke($controller);
-            
-            $data = [
-                'testnet_mode_env' => $_ENV['TESTNET_MODE'] ?? 'NOT_SET',
-                'app_env' => $_ENV['APP_ENV'] ?? 'NOT_SET',
-                'config_result' => $config,
-                'whitelist' => [
-                    'GetCirculatingSupply.php',
-                    'CProxy.php', 
-                    'Circular_CheckWallet_',
-                    'Circular_GetWalletBalance_'
-                ],
-                'php_version' => PHP_VERSION,
-                'timestamp' => date('c')
-            ];
-            
-            $response->getBody()->write(json_encode($data, JSON_PRETTY_PRINT));
-            return $response->withHeader('Content-Type', 'application/json');
-        } catch (Exception $e) {
-            $response->getBody()->write(json_encode(['error' => $e->getMessage()]));
-            return $response->withHeader('Content-Type', 'application/json')->withStatus(500);
-        }
-    });
-
-    $group->get('/debug/nag-direct', function (Request $request, Response $response) {
-        try {
-            $url = 'https://nag.circularlabs.io/NAG.php?cep=Circular_CheckWallet_';
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-            curl_setopt($ch, CURLOPT_USERAGENT, 'CIRX-OTC-Backend/1.0');
-            
-            $data = curl_exec($ch);
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            $error = curl_error($ch);
-            $info = curl_getinfo($ch);
-            curl_close($ch);
-            
-            $result = [
-                'success' => $httpCode === 200 && !$error,
-                'http_code' => $httpCode,
-                'curl_error' => $error ?: 'none',
-                'response' => $data,
-                'url' => $url,
-                'curl_info' => [
-                    'total_time' => $info['total_time'],
-                    'namelookup_time' => $info['namelookup_time'],
-                    'connect_time' => $info['connect_time']
-                ]
-            ];
-        } catch (Exception $e) {
-            $result = ['error' => $e->getMessage()];
-        }
-        
-        $response->getBody()->write(json_encode($result, JSON_PRETTY_PRINT));
-        return $response->withHeader('Content-Type', 'application/json');
     });
 
     // Demo/Testing endpoints (only in development)
