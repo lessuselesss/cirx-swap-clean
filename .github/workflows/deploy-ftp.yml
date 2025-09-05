@@ -69,44 +69,39 @@ env:
 # ====================================
 jobs:
   # ====================================
-  # JOB 1: Build Backend
+  # SINGLE JOB: Build and Deploy Everything
   # ====================================
-  build-backend:
-    name: Build Backend API
+  build-and-deploy:
+    name: Build and Deploy to FTP Server
     runs-on: ubuntu-latest
     
+    # Environment protection rules (optional)
+    # environment:
+    #   name: production
+    #   url: ${{ secrets.SITE_URL }}
+    
     steps:
-      # Checkout repository code
-      - name: 📥 Checkout repository
+      # Step 1: Checkout code
+      - name: 📥 Checkout Repository
         uses: actions/checkout@v4
       
-      # Setup PHP environment
+      # Step 2: Setup PHP for backend
       - name: 🐘 Setup PHP ${{ env.PHP_VERSION }}
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ env.PHP_VERSION }}
-          extensions: mbstring, xml, ctype, iconv, intl, pdo, pdo_mysql, dom, filter, gd, json, mbstring, pdo
+          extensions: mbstring, xml, pdo, sqlite, pdo_sqlite, bcmath, json
           tools: composer:v2
-          coverage: none         # Set to 'xdebug' or 'pcov' if needed
-          # ini-values: post_max_size=256M, upload_max_filesize=256M
       
-      # Cache Composer dependencies
-      - name: 📦 Cache Composer dependencies
-        uses: actions/cache@v4
+      # Step 3: Setup Node.js for frontend
+      - name: 🟢 Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
         with:
-          path: ${{ env.BACKEND_LOCAL_DIR }}/vendor
-          key: composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            composer-
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ${{ env.FRONTEND_LOCAL_DIR }}/package-lock.json
       
-      # Install backend dependencies
-      - name: 📚 Install backend dependencies
-        working-directory: ${{ env.BACKEND_LOCAL_DIR }}
-        run: |
-          composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
-          # composer install --no-interaction --prefer-dist --optimize-autoloader  # Use this to include dev dependencies
-      
-      # Create .env file from secrets
+      # Step 4: Create .env file from secrets (BEFORE any builds)
       - name: 🔐 Create backend .env file
         working-directory: ${{ env.BACKEND_LOCAL_DIR }}
         run: |
@@ -115,7 +110,7 @@ jobs:
           APP_NAME="${{ secrets.APP_NAME || 'CIRX_OTC' }}"
           APP_ENV="${{ secrets.APP_ENV || 'production' }}"
           APP_DEBUG="${{ secrets.APP_DEBUG || 'false' }}"
-          APP_URL="${{ secrets.APP_URL || 'https://yoursite.com' }}"
+          APP_URL="${{ secrets.APP_URL || 'https://circularprotocol.io/buy' }}"
           
           # Database Configuration - Use SQLite by default (same as development)
           DB_CONNECTION="${{ secrets.DB_CONNECTION || 'sqlite' }}"
@@ -139,140 +134,31 @@ jobs:
           TELEGRAM_CHAT_ID="${{ secrets.TELEGRAM_CHAT_ID }}"
           EOF
       
-      # Run database migrations (optional)
-      # - name: 🗄️ Run database migrations
-      #   working-directory: ${{ env.BACKEND_LOCAL_DIR }}
-      #   run: php migrate.php
-      
-      # Run tests (optional but recommended)
-      # - name: 🧪 Run backend tests
-      #   working-directory: ${{ env.BACKEND_LOCAL_DIR }}
-      #   run: vendor/bin/phpunit --no-coverage
-      
-      # Optimize backend for production
-      - name: ⚡ Optimize backend for production
+      # Step 5: Build backend
+      - name: 🔨 Build Backend
         working-directory: ${{ env.BACKEND_LOCAL_DIR }}
         run: |
-          # Clear and optimize caches if using Laravel/Symfony
-          # php artisan config:cache
-          # php artisan route:cache
-          # php artisan view:cache
-          
-          # Remove development files
-          rm -rf tests/ phpunit.xml .phpunit.result.cache
-          
-          # Set production permissions
-          find . -type f -name "*.php" -exec chmod 644 {} \;
-          find . -type d -exec chmod 755 {} \;
-      
-      # Upload backend artifact (for deployment job)
-      - name: 📤 Upload backend artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: backend-build
-          path: ${{ env.BACKEND_LOCAL_DIR }}
-          retention-days: 1
-
-  # ====================================
-  # JOB 2: Build Frontend
-  # ====================================
-  build-frontend:
-    name: Build Frontend (Nuxt)
-    runs-on: ubuntu-latest
-    
-    steps:
-      # Checkout repository
-      - name: 📥 Checkout repository
-        uses: actions/checkout@v4
-      
-      # Setup Node.js
-      - name: 📗 Setup Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: ${{ env.FRONTEND_LOCAL_DIR }}/package-lock.json
-      
-      # Install frontend dependencies
-      - name: 📚 Install frontend dependencies
-        working-directory: ${{ env.FRONTEND_LOCAL_DIR }}
-        run: |
-          npm ci --prefer-offline --no-audit
-          # npm install  # Use this instead if you don't have package-lock.json
-      
-      # Environment variables are now set directly in build step below
-      
-      # Run frontend tests (optional)
-      # - name: 🧪 Run frontend tests
-      #   working-directory: ${{ env.FRONTEND_LOCAL_DIR }}
-      #   run: npm run test
-      
-      # Upload frontend artifact
-      - name: 📤 Upload frontend artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: frontend-build
-          path: ${{ env.FRONTEND_BUILD_DIR }}
-          retention-days: 1
-
-  # ====================================
-  # JOB 3: Deploy to FTP
-  # ====================================
-  deploy-ftp:
-    name: Deploy to FTP Server
-    runs-on: ubuntu-latest
-    # Temporarily disabled test dependency to allow deployment
-    # needs: [build-backend, build-frontend]
-    
-    # Environment protection rules (optional)
-    # environment:
-    #   name: production
-    #   url: ${{ secrets.SITE_URL }}
-    
-    steps:
-      # Checkout code for direct build (since we're not using artifacts)
-      - name: 🔄 Checkout Repository
-        uses: actions/checkout@v4
-      
-      # Setup PHP for backend build
-      - name: 🐘 Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2'
-          extensions: mbstring, xml, pdo, sqlite, pdo_sqlite, bcmath, json
-      
-      # Setup Node.js for frontend build  
-      - name: 🟢 Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: ui/package-lock.json
-      
-      # Build backend directly
-      - name: 🔨 Build Backend
-        working-directory: backend
-        env:
-          DB_CONNECTION: ${{ secrets.DB_CONNECTION || 'sqlite' }}
-          DB_DATABASE: ${{ secrets.DB_DATABASE || './storage/database.sqlite' }}
-        run: |
           composer install --no-dev --optimize-autoloader
-          # Create storage directory and empty SQLite database for production
+          # Create storage directory and SQLite database
           mkdir -p storage
           touch storage/database.sqlite
           chmod 664 storage/database.sqlite
-          echo "✅ SQLite database file created - tables will be auto-created by backend"
+          # Set production permissions
+          find . -type f -name "*.php" -exec chmod 644 {} \;
+          find . -type d -exec chmod 755 {} \;
+          echo "✅ Backend built successfully"
       
-      # Build frontend directly
-      - name: 🔨 Build Frontend  
-        working-directory: ui
+      # Step 6: Build frontend
+      - name: 🔨 Build Frontend
+        working-directory: ${{ env.FRONTEND_LOCAL_DIR }}
         env:
           NUXT_PUBLIC_REOWN_PROJECT_ID: ${{ secrets.NUXT_PUBLIC_REOWN_PROJECT_ID }}
           NUXT_PUBLIC_TESTNET_MODE: true
           NUXT_PUBLIC_API_BASE_URL: ${{ secrets.NUXT_PUBLIC_API_BASE_URL || 'https://circularprotocol.io/buy/api/v1' }}
         run: |
-          npm ci
+          npm ci --prefer-offline --no-audit
           npm run build
+          echo "✅ Frontend built successfully"
       
       # Deploy Backend via FTP
       - name: 🚀 Deploy Backend to FTP
