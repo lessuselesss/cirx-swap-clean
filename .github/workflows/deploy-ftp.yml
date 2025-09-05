@@ -101,37 +101,122 @@ jobs:
           cache: 'npm'
           cache-dependency-path: ${{ env.FRONTEND_LOCAL_DIR }}/package-lock.json
       
-      # Step 4: Create .env file from secrets (BEFORE any builds)
+      # Step 4: Create .env file from secrets and environment variables (BEFORE any builds)
       - name: 🔐 Create backend .env file
         working-directory: ${{ env.BACKEND_LOCAL_DIR }}
+        env:
+          # Secrets
+          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+          CIRX_WALLET_ADDRESS: ${{ secrets.CIRX_WALLET_ADDRESS }}
+          CIRX_WALLET_PRIVATE_KEY: ${{ secrets.CIRX_WALLET_PRIVATE_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          ETHEREUM_RPC_URL: ${{ secrets.ETHEREUM_RPC_URL }}
+          ETHEREUM_RPC_URL_BACKUP: ${{ secrets.ETHEREUM_RPC_URL_BACKUP }}
+          ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
+          INFURA_PROJECT_ID: ${{ secrets.INFURA_PROJECT_ID }}
+          PLATFORM_FEE_WALLET: ${{ secrets.PLATFORM_FEE_WALLET }}
+          SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL }}
+          SEPOLIA_RPC_URL_BACKUP: ${{ secrets.SEPOLIA_RPC_URL_BACKUP }}
+          CIRX_BALANCE_ALERT_THRESHOLD: ${{ secrets.CIRX_BALANCE_ALERT_THRESHOLD }}
+          CORS_ALLOW_CREDENTIALS: ${{ secrets.CORS_ALLOW_CREDENTIALS }}
+          CORS_MAX_AGE: ${{ secrets.CORS_MAX_AGE }}
+          # Variables
+          ADMIN_TOKEN_REQUIRED: ${{ vars.ADMIN_TOKEN_REQUIRED }}
+          API_LOGGING_ENABLED: ${{ vars.API_LOGGING_ENABLED }}
+          APP_DEBUG: ${{ vars.APP_DEBUG }}
+          APP_ENV: ${{ vars.APP_ENV }}
+          APP_TIMEZONE: ${{ vars.APP_TIMEZONE }}
+          APP_URL: ${{ vars.APP_URL }}
+          CIRX_NAG_URL: ${{ vars.CIRX_NAG_URL }}
+          CIRX_NAG_URL_BACKUP: ${{ vars.CIRX_NAG_URL_BACKUP }}
+          CORS_ALLOWED_ORIGINS: ${{ vars.CORS_ALLOWED_ORIGINS }}
+          ETHEREUM_CHAIN_ID: ${{ vars.ETHEREUM_CHAIN_ID }}
+          ETHEREUM_NETWORK: ${{ vars.ETHEREUM_NETWORK }}
+          IROH_BRIDGE_URL: ${{ vars.IROH_BRIDGE_URL }}
+          LOG_CHANNEL: ${{ vars.LOG_CHANNEL }}
+          LOG_FILE_PATH: ${{ vars.LOG_FILE_PATH }}
+          LOG_LEVEL: ${{ vars.LOG_LEVEL }}
+          LOG_MAX_FILES: ${{ vars.LOG_MAX_FILES }}
+          LOG_REQUEST_BODY: ${{ vars.LOG_REQUEST_BODY }}
+          LOG_RESPONSE_BODY: ${{ vars.LOG_RESPONSE_BODY }}
+          WORKER_BATCH_SIZE: ${{ vars.WORKER_BATCH_SIZE }}
+          WORKER_PROCESS_INTERVAL: ${{ vars.WORKER_PROCESS_INTERVAL }}
+          SEPOLIA_CHAIN_ID: ${{ vars.SEPOLIA_CHAIN_ID }}
         run: |
           cat > .env << EOF
           # Application Settings
-          APP_NAME="${{ secrets.APP_NAME || 'CIRX_OTC' }}"
-          APP_ENV="${{ secrets.APP_ENV || 'production' }}"
-          APP_DEBUG="${{ secrets.APP_DEBUG || 'false' }}"
-          APP_URL="${{ secrets.APP_URL || 'https://circularprotocol.io/buy' }}"
+          APP_NAME=CIRX_OTC
+          APP_ENV=${APP_ENV}
+          APP_DEBUG=${APP_DEBUG}
+          APP_URL=${APP_URL}
+          APP_TIMEZONE=${APP_TIMEZONE}
           
-          # Database Configuration - Use SQLite by default (same as development)
-          DB_CONNECTION="${{ secrets.DB_CONNECTION || 'sqlite' }}"
-          DB_DATABASE="${{ secrets.DB_DATABASE || './storage/database.sqlite' }}"
-          # MySQL options (only used if DB_CONNECTION is set to mysql in secrets)
-          DB_HOST="${{ secrets.DB_HOST }}"
-          DB_PORT="${{ secrets.DB_PORT || '3306' }}"
-          DB_USERNAME="${{ secrets.DB_USERNAME }}"
-          DB_PASSWORD="${{ secrets.DB_PASSWORD }}"
+          # Admin Security Configuration  
+          ADMIN_TOKEN_REQUIRED=${ADMIN_TOKEN_REQUIRED}
+          ADMIN_TOKEN=${ADMIN_TOKEN}
           
-          # API Keys
-          API_KEY="${{ secrets.API_KEY }}"
-          CIRCULAR_API_KEY="${{ secrets.CIRCULAR_API_KEY }}"
-          CIRCULAR_API_URL="${{ secrets.CIRCULAR_API_URL }}"
+          # Database Configuration - Use SQLite for production
+          DB_CONNECTION=sqlite
+          DB_DATABASE=./storage/database.sqlite
           
-          # Network Configuration
-          TESTNET_MODE="${{ secrets.TESTNET_MODE || 'true' }}"
+          # Blockchain Configuration
+          ETHEREUM_RPC_URL=${ETHEREUM_RPC_URL}
+          ETHEREUM_RPC_URL_BACKUP=${ETHEREUM_RPC_URL_BACKUP}
+          ETHEREUM_CHAIN_ID=${ETHEREUM_CHAIN_ID}
+          ETHEREUM_NETWORK=${ETHEREUM_NETWORK}
+          ETHERSCAN_API_KEY=${ETHERSCAN_API_KEY}
           
-          # Additional Secrets
-          TELEGRAM_BOT_TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
-          TELEGRAM_CHAT_ID="${{ secrets.TELEGRAM_CHAT_ID }}"
+          # Sepolia Testnet Configuration
+          SEPOLIA_RPC_URL=${SEPOLIA_RPC_URL}
+          SEPOLIA_RPC_URL_BACKUP=${SEPOLIA_RPC_URL_BACKUP}
+          SEPOLIA_CHAIN_ID=${SEPOLIA_CHAIN_ID}
+          
+          # CIRX Blockchain Configuration
+          CIRX_NAG_URL=${CIRX_NAG_URL}
+          CIRX_NAG_URL_BACKUP=${CIRX_NAG_URL_BACKUP}
+          CIRX_WALLET_PRIVATE_KEY=${CIRX_WALLET_PRIVATE_KEY}
+          CIRX_WALLET_ADDRESS=${CIRX_WALLET_ADDRESS}
+          CIRX_DECIMALS=18
+          
+          # Testing Configuration
+          TESTNET_MODE=true
+          
+          # CORS Configuration
+          CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
+          CORS_ALLOW_CREDENTIALS=${CORS_ALLOW_CREDENTIALS}
+          CORS_MAX_AGE=${CORS_MAX_AGE}
+          
+          # Worker Configuration
+          WORKER_BATCH_SIZE=${WORKER_BATCH_SIZE}
+          WORKER_PROCESS_INTERVAL=${WORKER_PROCESS_INTERVAL}
+          
+          # Logging Configuration
+          LOG_LEVEL=${LOG_LEVEL}
+          LOG_CHANNEL=${LOG_CHANNEL}
+          LOG_FILE_PATH=${LOG_FILE_PATH}
+          LOG_MAX_FILES=${LOG_MAX_FILES}
+          API_LOGGING_ENABLED=${API_LOGGING_ENABLED}
+          LOG_REQUEST_BODY=${LOG_REQUEST_BODY}
+          LOG_RESPONSE_BODY=${LOG_RESPONSE_BODY}
+          
+          # Platform Configuration
+          PLATFORM_FEE_WALLET=${PLATFORM_FEE_WALLET}
+          
+          # Feature Flags
+          FEATURE_BATCH_TRANSFERS=false
+          FEATURE_AUTOMATIC_RETRIES=true
+          FEATURE_SLACK_NOTIFICATIONS=false
+          FEATURE_ADVANCED_MONITORING=false
+          
+          # Telegram Bot Configuration
+          TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+          TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+          CIRX_BALANCE_ALERT_THRESHOLD=${CIRX_BALANCE_ALERT_THRESHOLD}
+          
+          # IROH Distributed Networking Configuration
+          IROH_ENABLED=false
+          IROH_BRIDGE_URL=${IROH_BRIDGE_URL}
           EOF
       
       # Step 5: Build backend
