@@ -132,6 +132,23 @@ $app->get('/test', function (Request $request, Response $response) {
     return $response->withHeader('Content-Type', 'application/json');
 });
 
+// Debug route registration
+$app->get('/debug-routes', function (Request $request, Response $response) {
+    $data = [
+        'message' => 'Route registration is working',
+        'timestamp' => date('c'),
+        'server_info' => [
+            'php_version' => phpversion(),
+            'slim_version' => '4.x',
+            'request_uri' => $_SERVER['REQUEST_URI'] ?? 'not_set',
+            'script_name' => $_SERVER['SCRIPT_NAME'] ?? 'not_set',
+            'path_info' => $_SERVER['PATH_INFO'] ?? 'not_set'
+        ]
+    ];
+    $response->getBody()->write(json_encode($data, JSON_PRETTY_PRINT));
+    return $response->withHeader('Content-Type', 'application/json');
+});
+
 // Routes
 $app->group('/v1', function ($group) {
     // Comprehensive health check with transaction readiness
