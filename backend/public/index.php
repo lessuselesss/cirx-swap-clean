@@ -126,7 +126,7 @@ $app->get('/', function (Request $request, Response $response) {
 });
 
 // Routes
-$app->group('/api/v1', function ($group) {
+$app->group('/v1', function ($group) {
     // Comprehensive health check with transaction readiness
     $group->get('/health', function (Request $request, Response $response) {
         try {
