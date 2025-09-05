@@ -252,13 +252,16 @@ jobs:
       # Build backend directly
       - name: 🔨 Build Backend
         working-directory: backend
+        env:
+          DB_CONNECTION: ${{ secrets.DB_CONNECTION || 'sqlite' }}
+          DB_DATABASE: ${{ secrets.DB_DATABASE || './storage/database.sqlite' }}
         run: |
           composer install --no-dev --optimize-autoloader
           # Create storage directory and SQLite database for production
           mkdir -p storage
           touch storage/database.sqlite
           chmod 664 storage/database.sqlite
-          # Run database migrations to create tables
+          # Run database migrations with environment variables
           php database/migrate.php
       
       # Build frontend directly
