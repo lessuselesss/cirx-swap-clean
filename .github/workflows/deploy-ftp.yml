@@ -140,7 +140,7 @@ jobs:
           LOG_MAX_FILES: ${{ vars.LOG_MAX_FILES }}
           LOG_REQUEST_BODY: ${{ vars.LOG_REQUEST_BODY }}
           LOG_RESPONSE_BODY: ${{ vars.LOG_RESPONSE_BODY }}
-          TESTNET_MODE: ${{ vars.TESTNET_MODE }}
+          TESTNET_MODE: ${{ secrets.TESTNET_MODE }}
           WORKER_BATCH_SIZE: ${{ vars.WORKER_BATCH_SIZE }}
           WORKER_PROCESS_INTERVAL: ${{ vars.WORKER_PROCESS_INTERVAL }}
           SEPOLIA_CHAIN_ID: ${{ vars.SEPOLIA_CHAIN_ID }}
