@@ -75,10 +75,10 @@ jobs:
     name: Build and Deploy to FTP Server
     runs-on: ubuntu-latest
     
-    # Environment protection rules (optional)
-    # environment:
-    #   name: production
-    #   url: ${{ secrets.SITE_URL }}
+    # Use production environment to access environment secrets and variables
+    environment:
+      name: production
+      url: ${{ vars.SITE_URL }}
     
     steps:
       # Step 1: Checkout code
