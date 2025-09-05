@@ -138,7 +138,8 @@ $app->group('/api/v1', function ($group) {
             
             // Merge with basic health metadata
             $data = array_merge($transactionData, [
-                'version' => '1.0.0',
+                'version' => '1.0.1', // Incremented to verify deployment
+                'deployment_timestamp' => '2025-09-05T00:15:00Z',
                 'environment' => $_ENV['APP_ENV'] ?? 'development',
                 'security' => [
                     'api_key_required' => (bool) ($_ENV['API_KEY_REQUIRED'] ?? true),
