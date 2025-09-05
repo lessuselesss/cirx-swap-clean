@@ -130,6 +130,9 @@ jobs:
           CIRCULAR_API_KEY="${{ secrets.CIRCULAR_API_KEY }}"
           CIRCULAR_API_URL="${{ secrets.CIRCULAR_API_URL }}"
           
+          # Network Configuration
+          TESTNET_MODE="${{ secrets.TESTNET_MODE || 'true' }}"
+          
           # Additional Secrets
           TELEGRAM_BOT_TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
           TELEGRAM_CHAT_ID="${{ secrets.TELEGRAM_CHAT_ID }}"
