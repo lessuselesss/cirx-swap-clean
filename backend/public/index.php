@@ -457,8 +457,10 @@ $app->group('/v1', function ($group) {
                 throw new Exception('Invalid method');
             }
             
-            // Build NAG URL with cep parameter
-            $url = 'https://nag.circularlabs.io/NAG.php?cep=' . urlencode($cep);
+            // Build NAG URL with cep parameter - use environment-appropriate endpoint
+            $testnetMode = ($_ENV['TESTNET_MODE'] ?? 'true') === 'true';
+            $nagEndpoint = $testnetMode ? 'NAG.php' : 'NAG_Mainnet.php';
+            $url = 'https://nag.circularlabs.io/' . $nagEndpoint . '?cep=' . urlencode($cep);
             
             // Add any additional query parameters except 'cep'
             $params = $request->getQueryParams();

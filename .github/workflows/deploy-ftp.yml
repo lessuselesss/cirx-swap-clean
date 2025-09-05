@@ -140,6 +140,7 @@ jobs:
           LOG_MAX_FILES: ${{ vars.LOG_MAX_FILES }}
           LOG_REQUEST_BODY: ${{ vars.LOG_REQUEST_BODY }}
           LOG_RESPONSE_BODY: ${{ vars.LOG_RESPONSE_BODY }}
+          TESTNET_MODE: ${{ vars.TESTNET_MODE }}
           WORKER_BATCH_SIZE: ${{ vars.WORKER_BATCH_SIZE }}
           WORKER_PROCESS_INTERVAL: ${{ vars.WORKER_PROCESS_INTERVAL }}
           SEPOLIA_CHAIN_ID: ${{ vars.SEPOLIA_CHAIN_ID }}
@@ -179,8 +180,8 @@ jobs:
           CIRX_WALLET_ADDRESS=${CIRX_WALLET_ADDRESS}
           CIRX_DECIMALS=18
           
-          # Testing Configuration
-          TESTNET_MODE=true
+          # Blockchain Network Configuration (controlled via GitHub Environment Variables)
+          TESTNET_MODE=${TESTNET_MODE}
           
           # CORS Configuration
           CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
