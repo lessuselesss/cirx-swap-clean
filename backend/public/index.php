@@ -125,6 +125,13 @@ $app->get('/', function (Request $request, Response $response) {
     return $response->withHeader('Content-Type', 'application/json');
 });
 
+// Test route (direct, no group)
+$app->get('/test', function (Request $request, Response $response) {
+    $data = ['status' => 'working', 'message' => 'Direct route test successful'];
+    $response->getBody()->write(json_encode($data));
+    return $response->withHeader('Content-Type', 'application/json');
+});
+
 // Routes
 $app->group('/v1', function ($group) {
     // Comprehensive health check with transaction readiness
