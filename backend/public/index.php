@@ -55,6 +55,12 @@ $capsule->bootEloquent();
 // Create Slim app
 $app = AppFactory::create();
 
+// Set base path for production deployment (only if not running on localhost)
+$isProduction = !str_contains($_SERVER['HTTP_HOST'] ?? '', 'localhost');
+if ($isProduction) {
+    $app->setBasePath('/buy/api');
+}
+
 // Add JSON parsing middleware
 $app->addBodyParsingMiddleware();
 
