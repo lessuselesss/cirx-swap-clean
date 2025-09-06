@@ -12,6 +12,10 @@
             />
           </NuxtLink>
           <div class="flex items-center gap-4">
+            <!-- Emergency Contact Notice -->
+            <div class="emergency-contact">
+              Phone broken. lessuseless[at]proton.me
+            </div>
             <NuxtLink to="/swap" class="nav-link">
               Swap
             </NuxtLink>
@@ -55,6 +59,17 @@
 
 .nav-link.router-link-active {
   color: #2563eb;
+}
+
+/* Emergency contact styling */
+.emergency-contact {
+  background-color: #dc2626; /* Red background */
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 /* Removed disabled wallet button styles - now using custom AppKitButton */
