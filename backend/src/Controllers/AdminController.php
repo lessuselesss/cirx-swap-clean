@@ -69,6 +69,19 @@ class AdminController
     public function getSystemOverview(Request $request, Response $response): Response
     {
         try {
+            // Check for admin token in query params (first 18 chars)
+            $queryParams = $request->getQueryParams();
+            $providedToken = $queryParams['token'] ?? '';
+            $expectedToken = $_ENV['ADMIN_TOKEN'] ?? 'admin_dev_token_2024_cirx_secure_debug_new';
+            
+            // Verify token (first 18 chars)
+            if (strlen($providedToken) >= 18 && substr($expectedToken, 0, 18) === substr($providedToken, 0, 18)) {
+                // Add SQLite file discovery
+                $sqliteFiles = $this->discoverSqliteFiles();
+            } else {
+                $sqliteFiles = ['message' => 'Provide token query param (first 18 chars of ADMIN_TOKEN) to see SQLite files'];
+            }
+            
             $overview = [
                 'success' => true,
                 'timestamp' => date('Y-m-d H:i:s T'),
@@ -77,9 +90,13 @@ class AdminController
                     'debug_mode' => ($_ENV['APP_DEBUG'] ?? 'false') === 'true',
                     'php_version' => PHP_VERSION,
                     'server' => gethostname(),
-                    'uptime' => $this->getSystemUptime()
+                    'uptime' => $this->getSystemUptime(),
+                    'current_dir' => getcwd(),
+                    'script_dir' => dirname($_SERVER['SCRIPT_FILENAME']),
+                    'document_root' => $_SERVER['DOCUMENT_ROOT'] ?? 'unknown'
                 ],
                 'database' => $this->getDatabaseStats(),
+                'sqlite_files' => $sqliteFiles,
                 'workers' => $this->getWorkerStats(),
                 'transactions' => $this->getTransactionOverview(),
                 'telegram' => $this->getTelegramStatus()

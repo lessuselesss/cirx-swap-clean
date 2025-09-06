@@ -26,6 +26,121 @@ use Psr\Http\Message\ServerRequestInterface;
 
 require __DIR__ . '/../vendor/autoload.php';
 
+/**
+ * Discover SQLite database files in specified directories
+ */
+function discoverSqliteFiles($backendRoot, $storageDir) {
+    $results = [];
+    
+    // Define search paths
+    $searchPaths = [
+        $backendRoot,
+        $storageDir,
+        $backendRoot . '/public',
+        dirname($backendRoot),  // Parent directory
+        dirname(dirname($backendRoot)),  // Grandparent directory
+        $_SERVER['DOCUMENT_ROOT'] ?? null,
+    ];
+    
+    // Also check environment-configured path
+    if (isset($_ENV['DB_DATABASE'])) {
+        $envDbPath = $_ENV['DB_DATABASE'];
+        $results['env_configured'] = [
+            'path' => $envDbPath,
+            'exists' => file_exists($envDbPath),
+            'readable' => is_readable($envDbPath),
+            'writable' => is_writable($envDbPath),
+            'size' => file_exists($envDbPath) ? filesize($envDbPath) : 0,
+            'modified' => file_exists($envDbPath) ? date('Y-m-d H:i:s', filemtime($envDbPath)) : null
+        ];
+        
+        // Add the directory of env configured path to search
+        $envDbDir = dirname($envDbPath);
+        if (is_dir($envDbDir)) {
+            $searchPaths[] = $envDbDir;
+        }
+    }
+    
+    // Remove duplicates and non-existent paths
+    $searchPaths = array_unique(array_filter($searchPaths, function($path) {
+        return $path && is_dir($path);
+    }));
+    
+    $foundFiles = [];
+    foreach ($searchPaths as $basePath) {
+        $realPath = realpath($basePath);
+        if (!$realPath) continue;
+        
+        // Search for SQLite files (limited depth to avoid timeouts)
+        scanForSqliteFiles($realPath, $foundFiles, 2);
+    }
+    
+    $results['found_files'] = array_values($foundFiles);
+    $results['search_paths'] = array_values($searchPaths);
+    $results['total_found'] = count($foundFiles);
+    
+    return $results;
+}
+
+/**
+ * Recursively scan directory for SQLite files
+ */
+function scanForSqliteFiles($dir, &$foundFiles, $maxDepth = 2, $currentDepth = 0) {
+    if ($currentDepth >= $maxDepth) return;
+    
+    try {
+        $iterator = new DirectoryIterator($dir);
+        foreach ($iterator as $file) {
+            if ($file->isDot()) continue;
+            
+            // Skip certain directories
+            if ($file->isDir()) {
+                $dirName = $file->getFilename();
+                if (!in_array($dirName, ['node_modules', 'vendor', '.git', 'ui'])) {
+                    scanForSqliteFiles($file->getPathname(), $foundFiles, $maxDepth, $currentDepth + 1);
+                }
+            } elseif ($file->isFile()) {
+                $ext = strtolower($file->getExtension());
+                if (in_array($ext, ['sqlite', 'sqlite3', 'db'])) {
+                    $path = $file->getPathname();
+                    if (!isset($foundFiles[$path])) {
+                        $foundFiles[$path] = [
+                            'absolute_path' => $path,
+                            'filename' => $file->getFilename(),
+                            'size' => $file->getSize(),
+                            'size_mb' => round($file->getSize() / (1024 * 1024), 2),
+                            'modified' => date('Y-m-d H:i:s', $file->getMTime()),
+                            'readable' => $file->isReadable(),
+                            'writable' => $file->isWritable(),
+                            'tables' => getSqliteTables($path)
+                        ];
+                    }
+                }
+            }
+        }
+    } catch (Exception $e) {
+        // Silently skip directories we can't read
+    }
+}
+
+/**
+ * Get list of tables in SQLite database
+ */
+function getSqliteTables($dbPath) {
+    if (!is_readable($dbPath)) {
+        return ['error' => 'Not readable'];
+    }
+    
+    try {
+        $pdo = new PDO('sqlite:' . $dbPath);
+        $stmt = $pdo->query("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'");
+        $tables = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        return $tables ?: [];
+    } catch (Exception $e) {
+        return ['error' => $e->getMessage()];
+    }
+}
+
 // Load environment variables
 $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
 try {
@@ -486,6 +601,20 @@ $app->group($routeGroup, function ($group) {
                 'sqlite_available' => extension_loaded('sqlite3') ? 'SQLite extension loaded' : 'SQLite extension missing'
             ];
             
+            // SQLite file discovery (requires token parameter)
+            $queryParams = $request->getQueryParams();
+            $providedToken = $queryParams['token'] ?? '';
+            $expectedToken = $_ENV['ADMIN_TOKEN'] ?? 'admin_dev_token_2024_cirx_secure_debug_new';
+            
+            if (strlen($providedToken) >= 18 && substr($expectedToken, 0, 18) === substr($providedToken, 0, 18)) {
+                // Discover SQLite files
+                $paths['sqlite_discovery'] = discoverSqliteFiles($backend_root, $storage_dir);
+            } else {
+                $paths['sqlite_discovery'] = [
+                    'message' => 'Add ?token=<first_18_chars_of_ADMIN_TOKEN> to discover SQLite files'
+                ];
+            }
+            
             $response->getBody()->write(json_encode($paths, JSON_PRETTY_PRINT));
             return $response->withHeader('Content-Type', 'application/json');
             
@@ -935,6 +1064,82 @@ $app->get('/admin/api/overview', function (Request $request, Response $response)
 $app->get('/admin/api/transactions', function (Request $request, Response $response) {
     $controller = new AdminController();
     return $controller->getTransactionManagement($request, $response);
+});
+
+// Admin check-paths endpoint with SQLite discovery
+$app->get('/admin/check-paths', function (Request $request, Response $response) {
+    $paths = [];
+    
+    try {
+        // Current working directory
+        $paths['current_directory'] = getcwd();
+        
+        // Script location
+        $paths['script_location'] = __FILE__;
+        $paths['script_directory'] = dirname(__FILE__);
+        
+        // Backend root directory
+        $backend_root = dirname(dirname(__FILE__));
+        $paths['backend_root'] = $backend_root;
+        $paths['public_directory'] = dirname(__FILE__);
+        
+        // Storage directory paths
+        $storage_dir = $backend_root . '/storage';
+        $paths['storage_directory'] = $storage_dir;
+        $paths['storage_exists'] = is_dir($storage_dir);
+        $paths['storage_writable'] = is_dir($storage_dir) ? is_writable($storage_dir) : false;
+        
+        // Database paths
+        $paths['database_testnet_path'] = $storage_dir . '/database.testnet.sqlite';
+        $paths['database_mainnet_path'] = $storage_dir . '/database.mainnet.sqlite';
+        $paths['testnet_db_exists'] = file_exists($paths['database_testnet_path']);
+        $paths['mainnet_db_exists'] = file_exists($paths['database_mainnet_path']);
+        
+        // Current database path
+        $current_db = $storage_dir . '/database.sqlite';
+        $paths['current_db_path'] = $current_db;
+        $paths['current_db_exists'] = file_exists($current_db);
+        
+        // Environment info
+        $paths['php_version'] = PHP_VERSION;
+        $paths['server_software'] = $_SERVER['SERVER_SOFTWARE'] ?? 'unknown';
+        $paths['document_root'] = $_SERVER['DOCUMENT_ROOT'] ?? 'unknown';
+        $paths['server_name'] = $_SERVER['SERVER_NAME'] ?? 'unknown';
+        
+        // Database configuration from environment
+        $paths['db_connection'] = $_ENV['DB_CONNECTION'] ?? 'not_set';
+        $paths['db_database'] = $_ENV['DB_DATABASE'] ?? 'not_set';
+        
+        // SQLite file discovery (requires token parameter)
+        $queryParams = $request->getQueryParams();
+        $providedToken = $queryParams['token'] ?? '';
+        $expectedToken = $_ENV['ADMIN_TOKEN'] ?? 'admin_dev_token_2024_cirx_secure_debug_new';
+        
+        if (strlen($providedToken) >= 18 && substr($expectedToken, 0, 18) === substr($providedToken, 0, 18)) {
+            // Discover SQLite files
+            $paths['sqlite_discovery'] = discoverSqliteFiles($backend_root, $storage_dir);
+        } else {
+            $paths['sqlite_discovery'] = [
+                'message' => 'Add ?token=<first_18_chars_of_ADMIN_TOKEN> to discover SQLite files'
+            ];
+        }
+        
+        $response->getBody()->write(json_encode($paths, JSON_PRETTY_PRINT));
+        return $response->withHeader('Content-Type', 'application/json');
+        
+    } catch (Exception $e) {
+        $data = [
+            'error' => 'Path discovery failed',
+            'message' => $e->getMessage(),
+            'basic_info' => [
+                'current_directory' => getcwd(),
+                'script_location' => __FILE__ ?? 'unknown',
+                'backend_root_attempt' => dirname(dirname(__FILE__))
+            ]
+        ];
+        $response->getBody()->write(json_encode($data, JSON_PRETTY_PRINT));
+        return $response->withStatus(500)->withHeader('Content-Type', 'application/json');
+    }
 });
 
 // Handle preflight OPTIONS requests
