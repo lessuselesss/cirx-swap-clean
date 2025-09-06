@@ -55,7 +55,7 @@ $capsule->bootEloquent();
 // Create Slim app
 $app = AppFactory::create();
 
-// Set base path for production deployment (only if not running on localhost)
+// Set base path for production deployment (only if not running on localhost)  
 $isProduction = !str_contains($_SERVER['HTTP_HOST'] ?? '', 'localhost');
 if ($isProduction) {
     $app->setBasePath('/buy/api');
@@ -161,8 +161,10 @@ $app->get('/debug-routes', function (Request $request, Response $response) {
     return $response->withHeader('Content-Type', 'application/json');
 });
 
-// Routes
-$app->group('/v1', function ($group) {
+// Routes - API v1 endpoints
+// Route group: /v1 in production (with /buy/api base = /buy/api/v1), /api/v1 in development  
+$routeGroup = $isProduction ? '/v1' : '/api/v1';
+$app->group($routeGroup, function ($group) {
     // Comprehensive health check with transaction readiness
     $group->get('/health', function (Request $request, Response $response) {
         try {
@@ -422,7 +424,7 @@ $app->group('/v1', function ($group) {
         }
     });
     
-    $group->map(['GET', 'POST'], '/proxy/circular-labs', function (Request $request, Response $response) {
+    $group->map(['GET', 'POST'], '/proxy/circular-protocol-validators', function (Request $request, Response $response) {
         try {
             // Get the target method from query parameters
             $cep = $request->getQueryParams()['cep'] ?? '';
