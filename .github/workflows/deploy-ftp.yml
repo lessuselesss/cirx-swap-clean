@@ -226,10 +226,10 @@ jobs:
         working-directory: ${{ env.BACKEND_LOCAL_DIR }}
         run: |
           composer install --no-dev --optimize-autoloader
-          # Create storage directory and SQLite database
+          # Create storage directory and SQLite database (testnet)
           mkdir -p storage
-          touch storage/database.sqlite
-          chmod 664 storage/database.sqlite
+          touch storage/database.testnet.sqlite
+          chmod 664 storage/database.testnet.sqlite
           # Set production permissions
           find . -type f -name "*.php" -exec chmod 644 {} \;
           find . -type d -exec chmod 755 {} \;
