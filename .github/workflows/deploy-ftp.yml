@@ -107,6 +107,7 @@ jobs:
         env:
           # Secrets
           ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+          DB_DATABASE: ${{ secrets.DB_DATABASE }}
           CIRX_WALLET_ADDRESS: ${{ secrets.CIRX_WALLET_ADDRESS }}
           CIRX_WALLET_PRIVATE_KEY: ${{ secrets.CIRX_WALLET_PRIVATE_KEY }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
@@ -159,7 +160,7 @@ jobs:
           
           # Database Configuration - Use SQLite for production
           DB_CONNECTION=sqlite
-          DB_DATABASE=./storage/database.sqlite
+          DB_DATABASE=${DB_DATABASE}
           
           # Blockchain Configuration
           ETHEREUM_RPC_URL=${ETHEREUM_RPC_URL}
