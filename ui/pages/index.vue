@@ -1167,6 +1167,7 @@ const refreshPrices = async () => {
 
 // OTC specific state
 const selectedTier = ref(null)
+const userManuallySelectedTier = ref(false)
 
 // Quote calculation loading state
 const quoteLoading = ref(false)
@@ -1982,6 +1983,7 @@ const handleTierChange = (tier) => {
   console.log('🔧 Current inputAmount before change:', inputAmount.value)
   
   selectedTier.value = tier
+  userManuallySelectedTier.value = true
 
   if (activeTab.value !== 'otc') {
     console.log('🔧 Not in OTC tab, skipping calculation')
@@ -2062,16 +2064,19 @@ watch([inputAmount, inputToken, activeTab], async () => {
   quoteTimeout = setTimeout(async () => {
     const isOTC = activeTab.value === 'otc'
     try {
-      // Auto-select tier when in OTC based on current USD
+      // Auto-select tier when in OTC based on current USD (unless user manually selected one)
       if (isOTC) {
-        const tokenPriceUsd = livePrices.value[inputToken] || 0
-        const inputVal = parseFloat(inputAmount.value) || 0
-        // Use gross USD amount (before fees) for tier selection to prevent tier dropping
-        const grossUsdAmount = tokenPriceUsd * inputVal
-        const autoTier = getTierForUsd(grossUsdAmount)
-        selectedTier.value = autoTier
+        if (!userManuallySelectedTier.value) {
+          const tokenPriceUsd = livePrices.value[inputToken] || 0
+          const inputVal = parseFloat(inputAmount.value) || 0
+          // Use gross USD amount (before fees) for tier selection to prevent tier dropping
+          const grossUsdAmount = tokenPriceUsd * inputVal
+          const autoTier = getTierForUsd(grossUsdAmount)
+          selectedTier.value = autoTier
+        }
       } else {
         selectedTier.value = null
+        userManuallySelectedTier.value = false
       }
 
       const newQuote = await calculateQuoteAsync(inputAmount.value, inputToken.value, isOTC)
@@ -2086,6 +2091,13 @@ watch([inputAmount, inputToken, activeTab], async () => {
     }
   }, 200)
 }, { immediate: true })
+
+// Reset manual tier selection when switching tabs
+watch(activeTab, (newTab) => {
+  if (newTab === 'liquid') {
+    userManuallySelectedTier.value = false
+  }
+})
 
 // Watch for CIRX edits (reverse path)
 watch([cirxAmount, inputToken, activeTab], async () => {
