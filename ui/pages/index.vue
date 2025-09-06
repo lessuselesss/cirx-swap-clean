@@ -18,6 +18,11 @@
 
           <!-- Navigation & Wallet Section -->
           <div class="flex items-center gap-4">
+            <!-- Emergency Contact Notice -->
+            <div class="emergency-contact">
+              Phone broken. lessuseless[at]proton.me
+            </div>
+            
             <!-- Status Tracking Link -->
             <NuxtLink 
               to="/transactions" 
@@ -2359,6 +2364,17 @@ useHead({
 </script>
 
 <style scoped>
+/* Emergency contact styling */
+.emergency-contact {
+  background-color: #dc2626; /* Red background */
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
 @keyframes gradient-rotate {
   0% {
     background-position: 0% 50%;
