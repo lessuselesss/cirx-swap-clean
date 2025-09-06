@@ -311,3 +311,4 @@ DB_DATABASE=/path/to/backend/storage/database.dev.sqlite
 - **❌ NEVER DO:** Mix local dev data with any server environment
 - **✅ ALWAYS DO:** Separate databases by environment and testnet/mainnet mode  
 - **✅ TESTNET MODE:** Keep `testMode=true` until ready for real money transactions# Database path updated to match server structure
+# Trigger deployment to apply DB_DATABASE secret update
