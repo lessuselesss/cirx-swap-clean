@@ -552,7 +552,7 @@
       </div>
     </div>
 
-    <!-- Connection Toast Notifications -->
+    <!-- Connection notifications now handled by unified ToastNotifications in app.vue -->
 
     <!-- Wallet Download Modal -->
     <div 
@@ -700,7 +700,6 @@ const {
   chainId, 
   disconnect, 
   open,
- 
   lastConnectedWalletIcon, 
   walletIcon,
   // Centralized balance management
@@ -835,8 +834,8 @@ const fetchNetworkConfig = async () => {
 
 // Toast callback for Circular chain notifications
 const handleCircularToast = ({ type, title, message }) => {
-  if (typeof window !== 'undefined' && window.$toast?.connection) {
-    window.$toast.connection[type]?.(message, { title }) ?? window.$toast.connection.success(message, { title })
+  if (typeof window !== 'undefined' && window.$toast) {
+    window.$toast.connection[type](message, { title })
   }
 }
 
@@ -2215,8 +2214,8 @@ const sanitizeAddressInput = (event) => {
 // Handle Circular chain events
 const handleCircularChainHelp = () => {
   // Show help information in toast
-  if (typeof window !== 'undefined' && window.$toast?.connection) {
-    window.$toast.connection.success('Visit docs.circular.protocol for setup instructions or contact support', { 
+  if (typeof window !== 'undefined' && window.$toast) {
+    window.$toast.connection.info('Visit docs.circular.protocol for setup instructions or contact support', { 
       title: 'Circular Chain Help' 
     })
   }
@@ -2224,9 +2223,9 @@ const handleCircularChainHelp = () => {
 
 const handleChainAdded = () => {
   // Show success message in toast
-  if (typeof window !== 'undefined' && window.$toast?.connection) {
-    window.$toast.connection.success('Circular chain has been added to your wallet', {
-      title: 'Chain Added Successfully'
+  if (typeof window !== 'undefined' && window.$toast) {
+    window.$toast.connection.success('Circular chain has been added to your wallet', { 
+      title: 'Chain Added Successfully' 
     })
   }
 }
