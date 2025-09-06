@@ -10,4 +10,5 @@
 - [ ] Center the spinner on Recent Transactions on the transaction page, and move it below the "Loading Transactions ..."
 - [ ] Fix "check status" section on transaction page
 - [ ] Move status meaning legend to be a tooltip onhover 
+- [ ] Have call to action display "Sending <amount> <asset> ..." after selecting "Buy Liquid CIRX" 
 # Trigger deployment with updated REOWN_PROJECT_ID secret
