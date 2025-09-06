@@ -247,10 +247,10 @@ a.group:hover .wallet-text {
 /* Animation keyframes */
 @keyframes starsMove {
   0% {
-    transform: translateX(0px) translateY(0px) rotate(0deg);
+    transform: translateX(0px) translateY(0px);
   }
   100% {
-    transform: translateX(-400px) translateY(-200px) rotate(90deg);
+    transform: translateX(-400px) translateY(-200px);
   }
 }
 
