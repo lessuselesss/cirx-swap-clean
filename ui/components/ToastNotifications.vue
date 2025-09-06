@@ -104,75 +104,42 @@
       aria-label="Connection Notifications"
     >
       <TransitionGroup
-        name="toast"
+        name="toast-connection"
         tag="div"
         class="space-y-3"
       >
         <div
-          v-for="notification in notifications"
+          v-for="notification in connectionNotifications"
           :key="notification.id"
           :class="[
-            'relative p-4 rounded-xl border shadow-lg backdrop-blur-sm transition-all duration-300',
-            getNotificationClasses(notification.type)
+            'relative p-4 rounded-xl border shadow-lg backdrop-blur-xl transition-all duration-300',
+            getNotificationClasses(notification.type, notification.zone)
           ]"
           :role="notification.type === 'error' ? 'alert' : 'status'"
           :aria-live="notification.type === 'error' ? 'assertive' : 'polite'"
         >
-          <div class="flex items-start gap-3">
+          <!-- Connection Zone Content (simpler layout) -->
+          <div class="flex items-start">
             <!-- Icon -->
-            <div class="flex-shrink-0 mt-0.5">
-              <img 
-                v-if="notification.customIcon" 
-                :src="notification.customIcon" 
-                :alt="notification.title || 'Notification'" 
-                :class="[
-                  'w-6 h-6 rounded border-2',
-                  notification.type === 'error' ? 'border-red-500' : 'border-transparent'
-                ]"
-                @error="$event.target.style.display='none'"
-              />
+            <div class="flex-shrink-0">
               <component 
-                v-else
-                :is="getIconComponent(notification.type)" 
-                :class="getIconClasses(notification.type)" 
+                :is="getIconComponent(notification.type, notification.zone)" 
+                :class="getIconClasses(notification.type, notification.zone)" 
               />
             </div>
-
+            
             <!-- Content -->
-            <div class="flex-1 min-w-0">
-              <h4 
-                v-if="notification.title" 
-                :class="getTitleClasses(notification.type)"
-              >
-                {{ notification.title }}
-              </h4>
-              
-              <p :class="getMessageClasses(notification.type)">
-                {{ notification.message }}
-              </p>
-
-              <!-- Action buttons -->
-              <div v-if="notification.actions && notification.actions.length > 0" class="mt-2 flex gap-2">
-                <button
-                  v-for="action in notification.actions"
-                  :key="action.label"
-                  @click="handleAction(notification.id, action)"
-                  :class="[
-                    'px-2 py-1 text-xs font-medium rounded transition-colors',
-                    action.primary ? getPrimaryActionClass(notification.type) : getSecondaryActionClass(notification.type)
-                  ]"
-                >
-                  {{ action.label }}
-                </button>
-              </div>
+            <div class="ml-3 flex-1">
+              <p :class="getTitleClasses(notification.type, notification.zone)">{{ notification.title || notification.message }}</p>
+              <p v-if="notification.title && notification.message" :class="getMessageClasses(notification.type, notification.zone)">{{ notification.message }}</p>
             </div>
-
+            
             <!-- Close button -->
             <button
               @click="removeNotification(notification.id)"
               :class="[
-                'flex-shrink-0 p-1 rounded transition-colors',
-                getCloseButtonClass(notification.type)
+                'ml-4 flex-shrink-0 p-1 rounded transition-colors',
+                getCloseButtonClass(notification.type, notification.zone)
               ]"
               aria-label="Dismiss notification"
             >
@@ -181,13 +148,6 @@
               </svg>
             </button>
           </div>
-
-          <!-- Progress bar for auto-dismiss -->
-          <div
-            v-if="notification.autoTimeoutMs && notification.showProgress !== false"
-            class="absolute bottom-0 left-0 h-1 bg-current opacity-30 transition-all duration-100"
-            :style="{ width: notification.progress + '%' }"
-          ></div>
         </div>
       </TransitionGroup>
     </div>
@@ -195,19 +155,37 @@
 </template>
 
 <script setup>
-import { ref, onMounted, provide, h } from 'vue'
+import { ref, computed, onMounted, provide, h } from 'vue'
 
 // Notification store
 const notifications = ref([])
 
+// Zone-based computed properties
+const generalNotifications = computed(() => 
+  notifications.value.filter(n => !n.zone || n.zone === 'general')
+)
+
+const connectionNotifications = computed(() => 
+  notifications.value.filter(n => n.zone === 'connection')
+)
+
 // Notification methods
 const addNotification = (notification) => {
   const id = Date.now() + Math.random()
+  const defaultTimeouts = {
+    general: { success: 5000, error: 8000, warning: 5000, info: 5000 },
+    connection: { success: 4000, error: 4000, loading: 0 }
+  }
+  
+  const zone = notification.zone || 'general'
+  const defaultTimeout = defaultTimeouts[zone][notification.type] ?? defaultTimeouts.general[notification.type] ?? 5000
+  
   const newNotification = {
     id,
     type: 'info',
-    autoTimeoutMs: 5000,
-    showProgress: true,
+    zone,
+    autoTimeoutMs: defaultTimeout,
+    showProgress: zone === 'general',
     progress: 100,
     ...notification
   }
@@ -264,7 +242,11 @@ const setupAutoTimeoutForNotification = (notification) => {
 }
 
 // Style helper methods
-const getNotificationClasses = (type) => {
+const getNotificationClasses = (type, zone = 'general') => {
+  if (zone === 'connection') {
+    return 'bg-gray-800/95 border-gray-700/50 text-white'
+  }
+  
   const classes = {
     error: 'bg-red-900/90 border-red-500/50 text-red-100',
     warning: 'bg-yellow-900/90 border-yellow-500/50 text-yellow-100',
@@ -274,7 +256,16 @@ const getNotificationClasses = (type) => {
   return classes[type] || classes.info
 }
 
-const getIconClasses = (type) => {
+const getIconClasses = (type, zone = 'general') => {
+  if (zone === 'connection') {
+    const connectionClasses = {
+      success: 'w-6 h-6 text-green-400',
+      error: 'w-6 h-6 text-red-400',
+      loading: 'w-6 h-6 text-blue-400'
+    }
+    return connectionClasses[type] || 'w-6 h-6 text-gray-400'
+  }
+  
   const classes = {
     error: 'w-5 h-5 text-red-400',
     warning: 'w-5 h-5 text-yellow-400',
@@ -284,7 +275,11 @@ const getIconClasses = (type) => {
   return classes[type] || classes.info
 }
 
-const getTitleClasses = (type) => {
+const getTitleClasses = (type, zone = 'general') => {
+  if (zone === 'connection') {
+    return 'text-sm font-medium text-white'
+  }
+  
   const classes = {
     error: 'text-red-200 font-semibold text-sm mb-1',
     warning: 'text-yellow-200 font-semibold text-sm mb-1',
@@ -294,11 +289,18 @@ const getTitleClasses = (type) => {
   return classes[type] || classes.info
 }
 
-const getMessageClasses = () => {
+const getMessageClasses = (type, zone = 'general') => {
+  if (zone === 'connection') {
+    return 'mt-1 text-sm text-gray-300'
+  }
   return 'text-sm leading-relaxed'
 }
 
-const getPrimaryActionClass = (type) => {
+const getPrimaryActionClass = (type, zone = 'general') => {
+  if (zone === 'connection') {
+    return 'bg-gray-600 text-white hover:bg-gray-700'
+  }
+  
   const classes = {
     error: 'bg-red-600 text-white hover:bg-red-700',
     warning: 'bg-yellow-600 text-white hover:bg-yellow-700',
@@ -308,7 +310,11 @@ const getPrimaryActionClass = (type) => {
   return classes[type] || classes.info
 }
 
-const getSecondaryActionClass = (type) => {
+const getSecondaryActionClass = (type, zone = 'general') => {
+  if (zone === 'connection') {
+    return 'bg-gray-600/20 text-gray-200 hover:bg-gray-600/30'
+  }
+  
   const classes = {
     error: 'bg-red-600/20 text-red-200 hover:bg-red-600/30',
     warning: 'bg-yellow-600/20 text-yellow-200 hover:bg-yellow-600/30',
@@ -318,7 +324,11 @@ const getSecondaryActionClass = (type) => {
   return classes[type] || classes.info
 }
 
-const getCloseButtonClass = (type) => {
+const getCloseButtonClass = (type, zone = 'general') => {
+  if (zone === 'connection') {
+    return 'text-gray-400 hover:text-white hover:bg-gray-700/50'
+  }
+  
   const classes = {
     error: 'text-red-400 hover:text-red-300 hover:bg-red-800/30',
     warning: 'text-yellow-400 hover:text-yellow-300 hover:bg-yellow-800/30',
@@ -328,7 +338,28 @@ const getCloseButtonClass = (type) => {
   return classes[type] || classes.info
 }
 
-const getIconComponent = (type) => {
+const getIconComponent = (type, zone = 'general') => {
+  // Connection zone icons (simpler, more focused)
+  if (zone === 'connection') {
+    const connectionIcons = {
+      success: () => h('div', { class: 'w-6 h-6 bg-green-500/20 rounded-full flex items-center justify-center' }, [
+        h('svg', { class: 'w-4 h-4 text-green-400', fill: 'currentColor', viewBox: '0 0 20 20' }, [
+          h('path', { 'fill-rule': 'evenodd', d: 'M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z', 'clip-rule': 'evenodd' })
+        ])
+      ]),
+      error: () => h('div', { class: 'w-6 h-6 bg-red-500/20 rounded-full flex items-center justify-center' }, [
+        h('svg', { class: 'w-4 h-4 text-red-400', fill: 'currentColor', viewBox: '0 0 20 20' }, [
+          h('path', { 'fill-rule': 'evenodd', d: 'M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z', 'clip-rule': 'evenodd' })
+        ])
+      ]),
+      loading: () => h('div', { class: 'w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center' }, [
+        h('div', { class: 'w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin' })
+      ])
+    }
+    return connectionIcons[type] || connectionIcons.success
+  }
+  
+  // General zone icons (detailed)
   const icons = {
     error: () => h('svg', { class: 'w-5 h-5', viewBox: '0 0 24 24', fill: 'none' }, [
       h('circle', { cx: '12', cy: '12', r: '10', stroke: 'currentColor', 'stroke-width': '2' }),
@@ -355,10 +386,20 @@ const getIconComponent = (type) => {
 
 // Expose methods globally
 const notificationManager = {
-  success: (message, options = {}) => addNotification({ ...options, type: 'success', message }),
-  error: (message, options = {}) => addNotification({ ...options, type: 'error', message, autoTimeoutMs: 8000 }),
-  warning: (message, options = {}) => addNotification({ ...options, type: 'warning', message }),
-  info: (message, options = {}) => addNotification({ ...options, type: 'info', message }),
+  // General zone methods (backward compatible)
+  success: (message, options = {}) => addNotification({ ...options, type: 'success', message, zone: 'general' }),
+  error: (message, options = {}) => addNotification({ ...options, type: 'error', message, zone: 'general' }),
+  warning: (message, options = {}) => addNotification({ ...options, type: 'warning', message, zone: 'general' }),
+  info: (message, options = {}) => addNotification({ ...options, type: 'info', message, zone: 'general' }),
+  
+  // Connection zone methods
+  connection: {
+    success: (message, options = {}) => addNotification({ ...options, type: 'success', message, zone: 'connection' }),
+    loading: (message, options = {}) => addNotification({ ...options, type: 'loading', message, zone: 'connection', autoTimeoutMs: 0 }),
+    error: (message, options = {}) => addNotification({ ...options, type: 'error', message, zone: 'connection' })
+  },
+  
+  // Utility methods
   add: addNotification,
   remove: removeNotification,
   clear: clearAll
@@ -379,7 +420,7 @@ defineExpose(notificationManager)
 </script>
 
 <style scoped>
-/* Toast animations */
+/* General zone toast animations (slide from right) */
 .toast-enter-active,
 .toast-leave-active {
   transition: all 0.3s ease;
@@ -396,6 +437,26 @@ defineExpose(notificationManager)
 }
 
 .toast-move {
+  transition: transform 0.3s ease;
+}
+
+/* Connection zone toast animations (fade + slide from top) */
+.toast-connection-enter-active,
+.toast-connection-leave-active {
+  transition: all 0.3s ease;
+}
+
+.toast-connection-enter-from {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+.toast-connection-leave-to {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+.toast-connection-move {
   transition: transform 0.3s ease;
 }
 </style>
