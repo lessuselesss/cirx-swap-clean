@@ -312,3 +312,4 @@ DB_DATABASE=/path/to/backend/storage/database.dev.sqlite
 - **✅ ALWAYS DO:** Separate databases by environment and testnet/mainnet mode  
 - **✅ TESTNET MODE:** Keep `testMode=true` until ready for real money transactions# Database path updated to match server structure
 # Trigger deployment to apply DB_DATABASE secret update
+# Database confirmed at: /home/gdenovi75/public_html/circularprotocol.io/buy/api/storage/database.testnet.sqlite
