@@ -1243,9 +1243,9 @@ const fees = computed(() => swapFees.value || otcConfig.value.fees)
 // Dynamic OTC configuration from hosted JSON
 const otcConfig = ref({
   discountTiers: [
-    { minAmount: 50000, discount: 12, vestingMonths: 6 },  // $50K+: 12%
-    { minAmount: 10000, discount: 8, vestingMonths: 6 },   // $10K+: 8%  
-    { minAmount: 1000, discount: 5, vestingMonths: 6 }     // $1K+: 5%
+    { minAmount: 50000, discount: 12, vestingMonths: 24 },  // $50K+: 12%
+    { minAmount: 10000, discount: 8, vestingMonths: 12 },   // $10K+: 8%  
+    { minAmount: 1000, discount: 5, vestingMonths: 6 }      // $1K+: 5%
   ],
   vestingPeriod: {
     months: 6,
@@ -1291,7 +1291,11 @@ const fetchOtcConfig = async () => {
 }
 
 // Use composable discount tiers with local fallback
-const discountTiers = computed(() => swapDiscountTiers.value || otcConfig.value.discountTiers)
+const discountTiers = computed(() => {
+  console.log('🔧 discountTiers computed - swapDiscountTiers:', swapDiscountTiers.value)
+  console.log('🔧 discountTiers computed - otcConfig.discountTiers:', otcConfig.value.discountTiers)
+  return swapDiscountTiers.value || otcConfig.value.discountTiers
+})
 
 // Helpers for tier UI
 const currentUsd = computed(() => {

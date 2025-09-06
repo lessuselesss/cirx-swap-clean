@@ -11,4 +11,6 @@
 - [ ] Fix "check status" section on transaction page
 - [ ] Move status meaning legend to be a tooltip onhover 
 - [ ] Have call to action display "Sending <amount> <asset> ..." after selecting "Buy Liquid CIRX" 
+- [ ] Move the discount tier selection to a component and out of index.vue.
+
 # Trigger deployment with updated REOWN_PROJECT_ID secret

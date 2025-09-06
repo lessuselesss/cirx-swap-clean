@@ -3,12 +3,12 @@
     {
       "minAmount": 50000,
       "discount": 12,
-      "vestingMonths": 6
+      "vestingMonths": 24
     },
     {
       "minAmount": 10000,
       "discount": 8,
-      "vestingMonths": 6
+      "vestingMonths": 12
     },
     {
       "minAmount": 1000,
