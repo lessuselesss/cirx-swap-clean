@@ -15,14 +15,15 @@
         <div
           v-for="notification in generalNotifications"
           :key="notification.id"
-          :class="[
-            'relative p-4 rounded-xl border shadow-lg backdrop-blur-sm transition-all duration-300',
-            getNotificationClasses(notification.type, notification.zone)
-          ]"
+          class="space-toast relative py-5 px-4 rounded-xl transition-all duration-300 pointer-events-auto overflow-hidden"
           :role="notification.type === 'error' ? 'alert' : 'status'"
           :aria-live="notification.type === 'error' ? 'assertive' : 'polite'"
         >
-          <div class="flex items-start gap-3">
+          <!-- Toast-specific starfield background -->
+          <div class="toast-starfield-layer toast-starfield-layer-1"></div>
+          <div class="toast-starfield-layer toast-starfield-layer-2"></div>
+          <div class="toast-starfield-layer toast-starfield-layer-3"></div>
+          <div class="flex items-start gap-3 relative z-10">
             <!-- Icon -->
             <div class="flex-shrink-0 mt-0.5">
               <img 
@@ -86,12 +87,12 @@
             </button>
           </div>
 
-          <!-- Progress bar for auto-dismiss -->
-          <div
+          <!-- Progress bar for auto-dismiss (HIDDEN) -->
+          <!-- <div
             v-if="notification.autoTimeoutMs && notification.showProgress !== false"
-            class="absolute bottom-0 left-0 h-1 bg-current opacity-30 transition-all duration-100"
+            class="absolute bottom-0 left-0 h-1 bg-current opacity-30 transition-all duration-100 z-10"
             :style="{ width: notification.progress + '%' }"
-          ></div>
+          ></div> -->
         </div>
       </TransitionGroup>
     </div>
@@ -111,15 +112,16 @@
         <div
           v-for="notification in connectionNotifications"
           :key="notification.id"
-          :class="[
-            'relative p-4 rounded-xl border shadow-lg backdrop-blur-xl transition-all duration-300',
-            getNotificationClasses(notification.type, notification.zone)
-          ]"
+          class="space-toast relative py-5 px-4 rounded-xl transition-all duration-300 pointer-events-auto overflow-hidden"
           :role="notification.type === 'error' ? 'alert' : 'status'"
           :aria-live="notification.type === 'error' ? 'assertive' : 'polite'"
         >
+          <!-- Toast-specific starfield background -->
+          <div class="toast-starfield-layer toast-starfield-layer-1"></div>
+          <div class="toast-starfield-layer toast-starfield-layer-2"></div>
+          <div class="toast-starfield-layer toast-starfield-layer-3"></div>
           <!-- Connection Zone Content (simpler layout) -->
-          <div class="flex items-start">
+          <div class="flex items-start relative z-10">
             <!-- Icon -->
             <div class="flex-shrink-0">
               <component 
@@ -458,5 +460,122 @@ defineExpose(notificationManager)
 
 .toast-connection-move {
   transition: transform 0.3s ease;
+}
+
+/* Toast-specific Starfield Background */
+.toast-starfield-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  border-radius: 0.75rem;
+  opacity: 1;
+  overflow: hidden;
+}
+
+.toast-starfield-layer-1 {
+  background-image: 
+    radial-gradient(2px 2px at 20px 30px, rgba(255, 255, 255, 0.8), transparent),
+    radial-gradient(2px 2px at 40px 70px, rgba(200, 200, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 90px 40px, rgba(255, 255, 255, 0.9), transparent),
+    radial-gradient(1px 1px at 130px 80px, rgba(255, 200, 200, 0.5), transparent),
+    radial-gradient(2px 2px at 160px 30px, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(1px 1px at 200px 90px, rgba(200, 255, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 240px 50px, rgba(255, 255, 255, 0.8), transparent),
+    radial-gradient(2px 2px at 280px 10px, rgba(255, 255, 255, 0.9), transparent),
+    radial-gradient(1px 1px at 320px 70px, rgba(255, 255, 200, 0.4), transparent),
+    radial-gradient(1px 1px at 360px 20px, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(3px 3px at 80px 120px, rgba(255, 255, 255, 0.8), transparent),
+    radial-gradient(1px 1px at 220px 140px, rgba(200, 200, 255, 0.5), transparent),
+    radial-gradient(2px 2px at 300px 100px, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 180px 60px, rgba(255, 200, 255, 0.3), transparent);
+  background-repeat: repeat;
+  background-size: 400px 200px;
+  animation: starsMove 40s linear infinite;
+}
+
+.toast-starfield-layer-2 {
+  background-image: 
+    radial-gradient(2px 2px at 45px 85px, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.9) 50%, transparent),
+    radial-gradient(1px 1px at 125px 45px, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.7) 50%, transparent),
+    radial-gradient(2px 2px at 245px 125px, rgba(200, 200, 255, 0), rgba(200, 200, 255, 0.8) 50%, transparent),
+    radial-gradient(1px 1px at 315px 65px, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.6) 50%, transparent),
+    radial-gradient(3px 3px at 185px 25px, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.9) 50%, transparent);
+  background-repeat: repeat;
+  background-size: 400px 200px;
+  animation: starsMove 40s linear infinite, randomBlink1 8s ease-in-out infinite;
+}
+
+.toast-starfield-layer-3 {
+  background-image: 
+    radial-gradient(1px 1px at 60px 110px, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.8) 50%, transparent),
+    radial-gradient(2px 2px at 340px 45px, rgba(200, 255, 200, 0), rgba(200, 255, 200, 0.7) 50%, transparent),
+    radial-gradient(1px 1px at 150px 180px, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.6) 50%, transparent),
+    radial-gradient(1px 1px at 275px 155px, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.9) 50%, transparent),
+    radial-gradient(2px 2px at 95px 75px, rgba(255, 200, 255, 0), rgba(255, 200, 255, 0.6) 50%, transparent),
+    radial-gradient(1px 1px at 385px 135px, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.7) 50%, transparent);
+  background-repeat: repeat;
+  background-size: 400px 200px;
+  animation: starsMove 40s linear infinite, randomBlink2 12s ease-in-out infinite;
+}
+
+/* Space Toast Styling */
+.space-toast {
+  background: rgba(0, 0, 0, 1.0) !important;
+  color: white !important;
+  position: relative;
+  border: 1px solid #00ff88 !important;
+  border-radius: 1rem !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 
+    0 8px 32px 0 rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 0 20px rgba(0, 255, 136, 0.3) !important;
+  animation: border-color-cycle 75s ease infinite;
+}
+
+/* Animated border color cycle */
+@keyframes border-color-cycle {
+  0% { border-color: #00ff88; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 0 20px rgba(0, 255, 136, 0.3); }
+  25% { border-color: #00d9ff; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 0 20px rgba(0, 217, 255, 0.3); }
+  50% { border-color: #8b5cf6; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 0 20px rgba(139, 92, 246, 0.3); }
+  75% { border-color: #a855f7; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 0 20px rgba(168, 85, 247, 0.3); }
+  100% { border-color: #00ff88; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 0 20px rgba(0, 255, 136, 0.3); }
+}
+
+/* Star animation keyframes */
+@keyframes starsMove {
+  0% {
+    transform: translateX(0px) translateY(0px);
+  }
+  100% {
+    transform: translateX(-400px) translateY(-200px);
+  }
+}
+
+@keyframes randomBlink1 {
+  0% { opacity: 0.3; }
+  15% { opacity: 0.8; }
+  20% { opacity: 0.3; }
+  45% { opacity: 0.3; }
+  50% { opacity: 1; }
+  55% { opacity: 0.3; }
+  80% { opacity: 0.3; }
+  85% { opacity: 0.9; }
+  90% { opacity: 0.3; }
+  100% { opacity: 0.3; }
+}
+
+@keyframes randomBlink2 {
+  0% { opacity: 0.2; }
+  10% { opacity: 0.7; }
+  15% { opacity: 0.2; }
+  40% { opacity: 0.2; }
+  60% { opacity: 0.2; }
+  65% { opacity: 0.8; }
+  70% { opacity: 0.2; }
+  90% { opacity: 0.2; }
+  95% { opacity: 0.6; }
+  100% { opacity: 0.2; }
 }
 </style>
