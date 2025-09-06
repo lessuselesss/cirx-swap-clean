@@ -553,13 +553,6 @@
     </div>
 
     <!-- Connection Toast Notifications -->
-    <ConnectionToast 
-      :show="connectionToast.show"
-      :type="connectionToast.type"
-      :title="connectionToast.title"
-      :message="connectionToast.message"
-      @close="connectionToast.show = false"
-    />
 
     <!-- Wallet Download Modal -->
     <div 
@@ -655,7 +648,6 @@ import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { parseEther, parseUnits } from 'viem'
 // Import components
 // AppKit wallet integration now handles all wallet functionality
-import ConnectionToast from '~/components/ConnectionToast.vue'
 import OtcDiscountDropdown from '~/components/OtcDiscountDropdown.vue'
 import CirxPriceChart from '~/components/CirxPriceChart.vue'
 import CirxStakingPanel from '~/components/CirxStakingPanel.vue'
@@ -708,7 +700,7 @@ const {
   chainId, 
   disconnect, 
   open,
-  connectionToast, 
+ 
   lastConnectedWalletIcon, 
   walletIcon,
   // Centralized balance management
@@ -843,12 +835,8 @@ const fetchNetworkConfig = async () => {
 
 // Toast callback for Circular chain notifications
 const handleCircularToast = ({ type, title, message }) => {
-  connectionToast.value = {
-    show: true,
-    type,
-    title,
-    message,
-    walletIcon: null
+  if (typeof window !== 'undefined' && window.$toast?.connection) {
+    window.$toast.connection[type]?.(message, { title }) ?? window.$toast.connection.success(message, { title })
   }
 }
 
@@ -2227,23 +2215,19 @@ const sanitizeAddressInput = (event) => {
 // Handle Circular chain events
 const handleCircularChainHelp = () => {
   // Show help information in toast
-  connectionToast.value = {
-    show: true,
-    type: 'info',
-    title: 'Circular Chain Help',
-    message: 'Visit docs.circular.protocol for setup instructions or contact support',
-    walletIcon: null
+  if (typeof window !== 'undefined' && window.$toast?.connection) {
+    window.$toast.connection.success('Visit docs.circular.protocol for setup instructions or contact support', { 
+      title: 'Circular Chain Help' 
+    })
   }
 }
 
 const handleChainAdded = () => {
   // Show success message in toast
-  connectionToast.value = {
-    show: true,
-    type: 'success', 
-    title: 'Chain Added Successfully',
-    message: 'Circular chain has been added to your wallet',
-    walletIcon: null
+  if (typeof window !== 'undefined' && window.$toast?.connection) {
+    window.$toast.connection.success('Circular chain has been added to your wallet', {
+      title: 'Chain Added Successfully'
+    })
   }
 }
 
