@@ -176,7 +176,7 @@ $app->group($routeGroup, function ($group) {
             
             // Merge with basic health metadata
             $data = array_merge($transactionData, [
-                'version' => '1.0.1', // Incremented to verify deployment
+                'version' => '1.0.2', // Incremented to trigger deployment with updated ADMIN_TOKEN
                 'deployment_timestamp' => '2025-09-05T00:15:00Z',
                 'environment' => $_ENV['APP_ENV'] ?? 'development',
                 'security' => [
