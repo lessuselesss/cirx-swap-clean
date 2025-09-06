@@ -515,7 +515,15 @@ $app->group($routeGroup, function ($group) {
             $data = [
                 'success' => false,
                 'error' => 'Admin token required',
-                'message' => 'This endpoint requires valid admin authentication'
+                'message' => 'This endpoint requires valid admin authentication',
+                'debug' => [
+                    'provided_length' => strlen($providedToken),
+                    'expected_length' => strlen($expectedToken),
+                    'provided_first_5' => substr($providedToken, 0, 5),
+                    'expected_first_5' => substr($expectedToken, 0, 5),
+                    'tokens_match' => ($providedToken === $expectedToken),
+                    'env_admin_token_set' => !empty($_ENV['ADMIN_TOKEN'])
+                ]
             ];
             $response->getBody()->write(json_encode($data));
             return $response->withStatus(401)->withHeader('Content-Type', 'application/json');
