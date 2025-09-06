@@ -3,7 +3,7 @@
     "description": "CIRX OTC Trading Backend API",
     "type": "project",
     "require": {
-        "php": "^8.2",
+        "php": "^8.1",
         "circular-protocol/circular-protocol-api": "^1.0",
         "simplito/elliptic-php": "^1.0.12",
         "firebase/php-jwt": "^6.0",

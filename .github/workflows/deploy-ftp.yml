@@ -69,197 +69,182 @@ env:
 # ====================================
 jobs:
   # ====================================
-  # JOB 1: Build Backend
+  # SINGLE JOB: Build and Deploy Everything
   # ====================================
-  build-backend:
-    name: Build Backend API
+  build-and-deploy:
+    name: Build and Deploy to FTP Server
     runs-on: ubuntu-latest
     
+    # Use production environment to access environment secrets and variables
+    environment:
+      name: production
+      url: ${{ vars.SITE_URL }}
+    
     steps:
-      # Checkout repository code
-      - name: 📥 Checkout repository
+      # Step 1: Checkout code
+      - name: 📥 Checkout Repository
         uses: actions/checkout@v4
       
-      # Setup PHP environment
+      # Step 2: Setup PHP for backend
       - name: 🐘 Setup PHP ${{ env.PHP_VERSION }}
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ env.PHP_VERSION }}
-          extensions: mbstring, xml, ctype, iconv, intl, pdo, pdo_mysql, dom, filter, gd, json, mbstring, pdo
+          extensions: mbstring, xml, pdo, sqlite, pdo_sqlite, bcmath, json
           tools: composer:v2
-          coverage: none         # Set to 'xdebug' or 'pcov' if needed
-          # ini-values: post_max_size=256M, upload_max_filesize=256M
       
-      # Cache Composer dependencies
-      - name: 📦 Cache Composer dependencies
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.BACKEND_LOCAL_DIR }}/vendor
-          key: composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            composer-
-      
-      # Install backend dependencies
-      - name: 📚 Install backend dependencies
-        working-directory: ${{ env.BACKEND_LOCAL_DIR }}
-        run: |
-          composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
-          # composer install --no-interaction --prefer-dist --optimize-autoloader  # Use this to include dev dependencies
-      
-      # Create .env file from secrets
-      - name: 🔐 Create backend .env file
-        working-directory: ${{ env.BACKEND_LOCAL_DIR }}
-        run: |
-          cat > .env << EOF
-          # Application Settings
-          APP_NAME="${{ secrets.APP_NAME || 'CIRX_OTC' }}"
-          APP_ENV="${{ secrets.APP_ENV || 'production' }}"
-          APP_DEBUG="${{ secrets.APP_DEBUG || 'false' }}"
-          APP_URL="${{ secrets.APP_URL || 'https://yoursite.com' }}"
-          
-          # Database Configuration
-          DB_CONNECTION="${{ secrets.DB_CONNECTION || 'mysql' }}"
-          DB_HOST="${{ secrets.DB_HOST }}"
-          DB_PORT="${{ secrets.DB_PORT || '3306' }}"
-          DB_DATABASE="${{ secrets.DB_DATABASE }}"
-          DB_USERNAME="${{ secrets.DB_USERNAME }}"
-          DB_PASSWORD="${{ secrets.DB_PASSWORD }}"
-          
-          # API Keys
-          API_KEY="${{ secrets.API_KEY }}"
-          CIRCULAR_API_KEY="${{ secrets.CIRCULAR_API_KEY }}"
-          CIRCULAR_API_URL="${{ secrets.CIRCULAR_API_URL }}"
-          
-          # Additional Secrets
-          TELEGRAM_BOT_TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
-          TELEGRAM_CHAT_ID="${{ secrets.TELEGRAM_CHAT_ID }}"
-          EOF
-      
-      # Run database migrations (optional)
-      # - name: 🗄️ Run database migrations
-      #   working-directory: ${{ env.BACKEND_LOCAL_DIR }}
-      #   run: php migrate.php
-      
-      # Run tests (optional but recommended)
-      # - name: 🧪 Run backend tests
-      #   working-directory: ${{ env.BACKEND_LOCAL_DIR }}
-      #   run: vendor/bin/phpunit --no-coverage
-      
-      # Optimize backend for production
-      - name: ⚡ Optimize backend for production
-        working-directory: ${{ env.BACKEND_LOCAL_DIR }}
-        run: |
-          # Clear and optimize caches if using Laravel/Symfony
-          # php artisan config:cache
-          # php artisan route:cache
-          # php artisan view:cache
-          
-          # Remove development files
-          rm -rf tests/ phpunit.xml .phpunit.result.cache
-          
-          # Set production permissions
-          find . -type f -name "*.php" -exec chmod 644 {} \;
-          find . -type d -exec chmod 755 {} \;
-      
-      # Upload backend artifact (for deployment job)
-      - name: 📤 Upload backend artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: backend-build
-          path: ${{ env.BACKEND_LOCAL_DIR }}
-          retention-days: 1
-
-  # ====================================
-  # JOB 2: Build Frontend
-  # ====================================
-  build-frontend:
-    name: Build Frontend (Nuxt)
-    runs-on: ubuntu-latest
-    
-    steps:
-      # Checkout repository
-      - name: 📥 Checkout repository
-        uses: actions/checkout@v4
-      
-      # Setup Node.js
-      - name: 📗 Setup Node.js ${{ env.NODE_VERSION }}
+      # Step 3: Setup Node.js for frontend
+      - name: 🟢 Setup Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: ${{ env.FRONTEND_LOCAL_DIR }}/package-lock.json
       
-      # Install frontend dependencies
-      - name: 📚 Install frontend dependencies
-        working-directory: ${{ env.FRONTEND_LOCAL_DIR }}
+      # Step 4: Create .env file from secrets and environment variables (BEFORE any builds)
+      - name: 🔐 Create backend .env file
+        working-directory: ${{ env.BACKEND_LOCAL_DIR }}
+        env:
+          # Secrets
+          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+          CIRX_WALLET_ADDRESS: ${{ secrets.CIRX_WALLET_ADDRESS }}
+          CIRX_WALLET_PRIVATE_KEY: ${{ secrets.CIRX_WALLET_PRIVATE_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          ETHEREUM_RPC_URL: ${{ secrets.ETHEREUM_RPC_URL }}
+          ETHEREUM_RPC_URL_BACKUP: ${{ secrets.ETHEREUM_RPC_URL_BACKUP }}
+          ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
+          INFURA_PROJECT_ID: ${{ secrets.INFURA_PROJECT_ID }}
+          PLATFORM_FEE_WALLET: ${{ secrets.PLATFORM_FEE_WALLET }}
+          SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL }}
+          SEPOLIA_RPC_URL_BACKUP: ${{ secrets.SEPOLIA_RPC_URL_BACKUP }}
+          CIRX_BALANCE_ALERT_THRESHOLD: ${{ secrets.CIRX_BALANCE_ALERT_THRESHOLD }}
+          CORS_ALLOW_CREDENTIALS: ${{ secrets.CORS_ALLOW_CREDENTIALS }}
+          CORS_MAX_AGE: ${{ secrets.CORS_MAX_AGE }}
+          # Variables
+          ADMIN_TOKEN_REQUIRED: ${{ vars.ADMIN_TOKEN_REQUIRED }}
+          API_LOGGING_ENABLED: ${{ vars.API_LOGGING_ENABLED }}
+          APP_DEBUG: ${{ vars.APP_DEBUG }}
+          APP_ENV: ${{ vars.APP_ENV }}
+          APP_TIMEZONE: ${{ vars.APP_TIMEZONE }}
+          APP_URL: ${{ vars.APP_URL }}
+          CIRX_NAG_URL: ${{ vars.CIRX_NAG_URL }}
+          CIRX_NAG_URL_BACKUP: ${{ vars.CIRX_NAG_URL_BACKUP }}
+          CORS_ALLOWED_ORIGINS: ${{ vars.CORS_ALLOWED_ORIGINS }}
+          ETHEREUM_CHAIN_ID: ${{ vars.ETHEREUM_CHAIN_ID }}
+          ETHEREUM_NETWORK: ${{ vars.ETHEREUM_NETWORK }}
+          IROH_BRIDGE_URL: ${{ vars.IROH_BRIDGE_URL }}
+          LOG_CHANNEL: ${{ vars.LOG_CHANNEL }}
+          LOG_FILE_PATH: ${{ vars.LOG_FILE_PATH }}
+          LOG_LEVEL: ${{ vars.LOG_LEVEL }}
+          LOG_MAX_FILES: ${{ vars.LOG_MAX_FILES }}
+          LOG_REQUEST_BODY: ${{ vars.LOG_REQUEST_BODY }}
+          LOG_RESPONSE_BODY: ${{ vars.LOG_RESPONSE_BODY }}
+          TESTNET_MODE: ${{ secrets.TESTNET_MODE }}
+          WORKER_BATCH_SIZE: ${{ vars.WORKER_BATCH_SIZE }}
+          WORKER_PROCESS_INTERVAL: ${{ vars.WORKER_PROCESS_INTERVAL }}
+          SEPOLIA_CHAIN_ID: ${{ vars.SEPOLIA_CHAIN_ID }}
         run: |
-          npm ci --prefer-offline --no-audit
-          # npm install  # Use this instead if you don't have package-lock.json
+          cat > .env << EOF
+          # Application Settings
+          APP_NAME=CIRX_OTC
+          APP_ENV=${APP_ENV}
+          APP_DEBUG=${APP_DEBUG}
+          APP_URL=${APP_URL}
+          APP_TIMEZONE=${APP_TIMEZONE}
+          
+          # Admin Security Configuration  
+          ADMIN_TOKEN_REQUIRED=${ADMIN_TOKEN_REQUIRED}
+          ADMIN_TOKEN=${ADMIN_TOKEN}
+          
+          # Database Configuration - Use SQLite for production
+          DB_CONNECTION=sqlite
+          DB_DATABASE=./storage/database.sqlite
+          
+          # Blockchain Configuration
+          ETHEREUM_RPC_URL=${ETHEREUM_RPC_URL}
+          ETHEREUM_RPC_URL_BACKUP=${ETHEREUM_RPC_URL_BACKUP}
+          ETHEREUM_CHAIN_ID=${ETHEREUM_CHAIN_ID}
+          ETHEREUM_NETWORK=${ETHEREUM_NETWORK}
+          ETHERSCAN_API_KEY=${ETHERSCAN_API_KEY}
+          
+          # Sepolia Testnet Configuration
+          SEPOLIA_RPC_URL=${SEPOLIA_RPC_URL}
+          SEPOLIA_RPC_URL_BACKUP=${SEPOLIA_RPC_URL_BACKUP}
+          SEPOLIA_CHAIN_ID=${SEPOLIA_CHAIN_ID}
+          
+          # CIRX Blockchain Configuration
+          CIRX_NAG_URL=${CIRX_NAG_URL}
+          CIRX_NAG_URL_BACKUP=${CIRX_NAG_URL_BACKUP}
+          CIRX_WALLET_PRIVATE_KEY=${CIRX_WALLET_PRIVATE_KEY}
+          CIRX_WALLET_ADDRESS=${CIRX_WALLET_ADDRESS}
+          CIRX_DECIMALS=18
+          
+          # Blockchain Network Configuration (controlled via GitHub Environment Variables)
+          TESTNET_MODE=${TESTNET_MODE}
+          
+          # CORS Configuration
+          CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
+          CORS_ALLOW_CREDENTIALS=${CORS_ALLOW_CREDENTIALS}
+          CORS_MAX_AGE=${CORS_MAX_AGE}
+          
+          # Worker Configuration
+          WORKER_BATCH_SIZE=${WORKER_BATCH_SIZE}
+          WORKER_PROCESS_INTERVAL=${WORKER_PROCESS_INTERVAL}
+          
+          # Logging Configuration
+          LOG_LEVEL=${LOG_LEVEL}
+          LOG_CHANNEL=${LOG_CHANNEL}
+          LOG_FILE_PATH=${LOG_FILE_PATH}
+          LOG_MAX_FILES=${LOG_MAX_FILES}
+          API_LOGGING_ENABLED=${API_LOGGING_ENABLED}
+          LOG_REQUEST_BODY=${LOG_REQUEST_BODY}
+          LOG_RESPONSE_BODY=${LOG_RESPONSE_BODY}
+          
+          # Platform Configuration
+          PLATFORM_FEE_WALLET=${PLATFORM_FEE_WALLET}
+          
+          # Feature Flags
+          FEATURE_BATCH_TRANSFERS=false
+          FEATURE_AUTOMATIC_RETRIES=true
+          FEATURE_SLACK_NOTIFICATIONS=false
+          FEATURE_ADVANCED_MONITORING=false
+          
+          # Telegram Bot Configuration
+          TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+          TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+          CIRX_BALANCE_ALERT_THRESHOLD=${CIRX_BALANCE_ALERT_THRESHOLD}
+          
+          # IROH Distributed Networking Configuration
+          IROH_ENABLED=false
+          IROH_BRIDGE_URL=${IROH_BRIDGE_URL}
+          EOF
       
-      # Environment variables are now set directly in build step below
-      
-      # Run frontend tests (optional)
-      # - name: 🧪 Run frontend tests
-      #   working-directory: ${{ env.FRONTEND_LOCAL_DIR }}
-      #   run: npm run test
-      
-      # Upload frontend artifact
-      - name: 📤 Upload frontend artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: frontend-build
-          path: ${{ env.FRONTEND_BUILD_DIR }}
-          retention-days: 1
-
-  # ====================================
-  # JOB 3: Deploy to FTP
-  # ====================================
-  deploy-ftp:
-    name: Deploy to FTP Server
-    runs-on: ubuntu-latest
-    # Temporarily disabled test dependency to allow deployment
-    # needs: [build-backend, build-frontend]
-    
-    # Environment protection rules (optional)
-    # environment:
-    #   name: production
-    #   url: ${{ secrets.SITE_URL }}
-    
-    steps:
-      # Checkout code for direct build (since we're not using artifacts)
-      - name: 🔄 Checkout Repository
-        uses: actions/checkout@v4
-      
-      # Setup PHP for backend build
-      - name: 🐘 Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2'
-          extensions: mbstring, xml, pdo, sqlite, pdo_sqlite, bcmath, json
-      
-      # Setup Node.js for frontend build  
-      - name: 🟢 Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: ui/package-lock.json
-      
-      # Build backend directly
+      # Step 5: Build backend
       - name: 🔨 Build Backend
-        working-directory: backend
-        run: composer install --no-dev --optimize-autoloader
+        working-directory: ${{ env.BACKEND_LOCAL_DIR }}
+        run: |
+          composer install --no-dev --optimize-autoloader
+          # Create storage directory and SQLite database
+          mkdir -p storage
+          touch storage/database.sqlite
+          chmod 664 storage/database.sqlite
+          # Set production permissions
+          find . -type f -name "*.php" -exec chmod 644 {} \;
+          find . -type d -exec chmod 755 {} \;
+          echo "✅ Backend built successfully"
       
-      # Build frontend directly
-      - name: 🔨 Build Frontend  
-        working-directory: ui
+      # Step 6: Build frontend
+      - name: 🔨 Build Frontend
+        working-directory: ${{ env.FRONTEND_LOCAL_DIR }}
         env:
           NUXT_PUBLIC_REOWN_PROJECT_ID: ${{ secrets.NUXT_PUBLIC_REOWN_PROJECT_ID }}
           NUXT_PUBLIC_TESTNET_MODE: true
           NUXT_PUBLIC_API_BASE_URL: ${{ secrets.NUXT_PUBLIC_API_BASE_URL || 'https://circularprotocol.io/buy/api/v1' }}
         run: |
-          npm ci
+          npm ci --prefer-offline --no-audit
           npm run build
+          echo "✅ Frontend built successfully"
       
       # Deploy Backend via FTP
       - name: 🚀 Deploy Backend to FTP

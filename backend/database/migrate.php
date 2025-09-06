@@ -8,13 +8,22 @@ use Dotenv\Dotenv;
 echo "🗄️  Running Database Migrations\n";
 echo "==============================\n\n";
 
-// Load environment variables
-$dotenv = Dotenv::createImmutable(__DIR__);
+// Load environment variables - try .env file first, fallback to environment
 try {
+    // Try to load .env from parent directory (backend/)
+    $dotenv = Dotenv::createImmutable(dirname(__DIR__));
     $dotenv->load();
+    echo "✅  Loaded environment from .env file\n";
 } catch (Exception $e) {
+    // Fallback to environment variables (for GitHub Actions)
     echo "⚠️  Could not load .env file: " . $e->getMessage() . "\n";
-    exit(1);
+    echo "✅  Using environment variables instead\n";
+    
+    // Verify required environment variables exist
+    if (!getenv('DB_CONNECTION')) {
+        echo "❌  Error: DB_CONNECTION environment variable not set\n";
+        exit(1);
+    }
 }
 
 // Set up database connection

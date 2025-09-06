@@ -249,17 +249,23 @@ export const useCircularAddressValidation = () => {
       }
 
       // Step 1: Check wallet existence first
-      const walletResponse = await fetch(nagUrl + 'Circular_CheckWallet_', {
+      const checkUrl = nagUrl + 'Circular_CheckWallet_'
+      const requestBody = {
+        Blockchain: config.blockchain_id,
+        Address: address.replace('0x', ''), // Strip 0x prefix as required by NAG API
+        Version: config.version || '1.0.8'
+      }
+      
+      console.log('🔍 NAG API Request URL:', checkUrl)
+      console.log('🔍 NAG API Request Body:', requestBody)
+      
+      const walletResponse = await fetch(checkUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
-        body: JSON.stringify({
-          Blockchain: config.blockchain_id,
-          Address: address.replace('0x', ''), // Strip 0x prefix as required by NAG API
-          Version: config.version || '1.0.8'
-        })
+        body: JSON.stringify(requestBody)
       })
 
       if (!walletResponse.ok) {

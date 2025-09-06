@@ -2,17 +2,19 @@
   <div class="transaction-list-container">
     <h2 class="text-xl font-semibold mb-4 text-white text-center" style="background: transparent;">Status</h2>
     
-    <div class="space-y-4">
-      <div 
-        v-for="tx in transactions" 
-        :key="tx.id" 
-        :class="[
-          'transaction-card rounded-lg p-4 hover:bg-gray-700 transition-colors',
-          tx.is_test_transaction 
-            ? 'bg-gray-800 border border-dashed border-yellow-600 relative' 
-            : 'bg-gray-800 border border-gray-700'
-        ]"
-      >
+    <div class="relative min-h-[300px]">
+      <!-- Transactions container -->
+      <div class="space-y-4">
+        <div 
+          v-for="tx in transactions" 
+          :key="tx.id" 
+          :class="[
+            'transaction-card rounded-lg p-4 hover:bg-gray-700 transition-colors',
+            tx.is_test_transaction 
+              ? 'bg-gray-800 border border-dashed border-yellow-600 relative' 
+              : 'bg-gray-800 border border-gray-700'
+          ]"
+        >
         <!-- Test Transaction Badge -->
         <div v-if="tx.is_test_transaction" class="absolute top-2 right-2">
           <span class="inline-flex items-center px-2 py-1 text-xs font-bold text-yellow-800 bg-yellow-200 rounded-full">
@@ -103,20 +105,27 @@
             </div>
           </div>
         </div>
+        </div>
       </div>
-    </div>
-
-    <div v-if="loading" class="text-center py-4">
-      <div class="text-white mb-12">Loading transactions...</div>
-      <div class="flex justify-center mb-3">
-        <svg class="animate-spin w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-        </svg>
+      
+      <!-- Empty state (shown when not loading and no transactions) -->
+      <div v-if="!loading && transactions.length === 0" class="absolute inset-0 flex items-center justify-center">
+        <div class="text-center text-gray-400">
+          No transactions found
+        </div>
       </div>
-    </div>
 
-    <div v-if="!loading && transactions.length === 0" class="text-center py-8 text-gray-400">
-      No transactions found
+      <!-- Loading spinner as overlay -->
+      <div v-if="loading" class="absolute inset-0 flex items-center justify-center bg-gray-800/20 rounded-lg">
+        <div class="text-center">
+          <div class="flex justify-center mb-3">
+            <svg class="animate-spin w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+          </div>
+          <div class="text-white">Loading transactions...</div>
+        </div>
+      </div>
     </div>
 
     <div v-if="pagination && pagination.hasMore" class="mt-4 flex justify-center">

@@ -61,15 +61,9 @@ class ConfigController
         
         // Override environment based on testnet mode
         if ($testnetMode) {
-            switch ($environment) {
-                case 'production':
-                    $environment = 'staging'; // Use staging config for production + testnet
-                    break;
-                case 'development':
-                default:
-                    $environment = 'development';
-                    break;
-            }
+            // Always use development (Sandbox) config when in testnet mode
+            // This ensures we use the Circular SandBox blockchain for testing
+            $environment = 'development';
         }
         
         switch ($environment) {

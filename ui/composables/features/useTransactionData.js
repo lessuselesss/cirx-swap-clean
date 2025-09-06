@@ -333,7 +333,9 @@ export function useTransactionStatus() {
 
 // Transaction History API Integration
 export const useTransactionData = () => {
-  const INDEXER_API_BASE = 'http://localhost:3001/api';
+  // Use same environment configuration as useApiClient
+  const runtimeConfig = useRuntimeConfig()
+  const INDEXER_API_BASE = runtimeConfig.public.apiBaseUrl || 'http://localhost:18423/api';
   
   // Reactive state
   const isLoading = ref(false);

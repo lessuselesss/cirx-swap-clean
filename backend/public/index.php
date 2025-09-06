@@ -55,6 +55,12 @@ $capsule->bootEloquent();
 // Create Slim app
 $app = AppFactory::create();
 
+// Set base path for production deployment (only if not running on localhost)
+$isProduction = !str_contains($_SERVER['HTTP_HOST'] ?? '', 'localhost');
+if ($isProduction) {
+    $app->setBasePath('/buy/api');
+}
+
 // Add JSON parsing middleware
 $app->addBodyParsingMiddleware();
 
@@ -125,8 +131,38 @@ $app->get('/', function (Request $request, Response $response) {
     return $response->withHeader('Content-Type', 'application/json');
 });
 
+// Test route (direct, no group) - NO external dependencies
+$app->get('/test', function (Request $request, Response $response) {
+    $data = ['status' => 'working', 'message' => 'Direct route test successful'];
+    $response->getBody()->write(json_encode($data));
+    return $response->withHeader('Content-Type', 'application/json');
+});
+
+// Simple hello route - absolutely minimal
+$app->get('/hello', function (Request $request, Response $response) {
+    $response->getBody()->write('Hello World');
+    return $response;
+});
+
+// Debug route registration
+$app->get('/debug-routes', function (Request $request, Response $response) {
+    $data = [
+        'message' => 'Route registration is working',
+        'timestamp' => date('c'),
+        'server_info' => [
+            'php_version' => phpversion(),
+            'slim_version' => '4.x',
+            'request_uri' => $_SERVER['REQUEST_URI'] ?? 'not_set',
+            'script_name' => $_SERVER['SCRIPT_NAME'] ?? 'not_set',
+            'path_info' => $_SERVER['PATH_INFO'] ?? 'not_set'
+        ]
+    ];
+    $response->getBody()->write(json_encode($data, JSON_PRETTY_PRINT));
+    return $response->withHeader('Content-Type', 'application/json');
+});
+
 // Routes
-$app->group('/api/v1', function ($group) {
+$app->group('/v1', function ($group) {
     // Comprehensive health check with transaction readiness
     $group->get('/health', function (Request $request, Response $response) {
         try {
@@ -138,7 +174,8 @@ $app->group('/api/v1', function ($group) {
             
             // Merge with basic health metadata
             $data = array_merge($transactionData, [
-                'version' => '1.0.0',
+                'version' => '1.0.1', // Incremented to verify deployment
+                'deployment_timestamp' => '2025-09-05T00:15:00Z',
                 'environment' => $_ENV['APP_ENV'] ?? 'development',
                 'security' => [
                     'api_key_required' => (bool) ($_ENV['API_KEY_REQUIRED'] ?? true),
@@ -206,14 +243,6 @@ $app->group('/api/v1', function ($group) {
         }
     });
 
-    // Comprehensive health check
-    $group->get('/health/detailed', function (Request $request, Response $response) {
-        $healthService = new HealthCheckService();
-        $healthStatus = $healthService->runAllChecks();
-        
-        $response->getBody()->write(json_encode($healthStatus));
-        return $response->withHeader('Content-Type', 'application/json');
-    });
 
     // Transaction readiness check - validates ALL systems for transaction processing
     $group->get('/health/transaction-ready', function (Request $request, Response $response) {
@@ -348,15 +377,6 @@ $app->group('/api/v1', function ($group) {
         return $controller->debugEnv($request, $response);
     });
 
-    $group->post('/debug/set-cirx-recipient', function (Request $request, Response $response) {
-        $controller = new DebugController();
-        return $controller->setCirxRecipientOverride($request, $response);
-    });
-
-    $group->get('/debug/cirx-recipient-override', function (Request $request, Response $response) {
-        $controller = new DebugController();
-        return $controller->getCirxRecipientOverride($request, $response);
-    });
 
     // Proxy endpoints for Circular Labs APIs (to avoid CORS issues)
     $group->get('/proxy/circulating-supply', function (Request $request, Response $response) {
@@ -420,8 +440,10 @@ $app->group('/api/v1', function ($group) {
                 throw new Exception('Invalid method');
             }
             
-            // Build NAG URL with cep parameter
-            $url = 'https://nag.circularlabs.io/NAG.php?cep=' . urlencode($cep);
+            // Build NAG URL with cep parameter - use environment-appropriate endpoint
+            $testnetMode = ($_ENV['TESTNET_MODE'] ?? 'true') === 'true';
+            $nagEndpoint = $testnetMode ? 'NAG.php' : 'NAG_Mainnet.php';
+            $url = 'https://nag.circularlabs.io/' . $nagEndpoint . '?cep=' . urlencode($cep);
             
             // Add any additional query parameters except 'cep'
             $params = $request->getQueryParams();
@@ -477,9 +499,20 @@ $app->group('/api/v1', function ($group) {
                 ->withStatus(200);
                 
         } catch (Exception $e) {
+            // Enhanced error logging for production debugging
+            error_log("Circular proxy error: " . $e->getMessage() . " | CEP: " . ($cep ?? 'none') . " | Method: " . $request->getMethod());
+            
             $errorData = [
                 'success' => false,
                 'error' => 'Proxy request failed: ' . $e->getMessage(),
+                'debug' => [
+                    'cep' => $cep ?? 'not_provided',
+                    'method' => $request->getMethod(),
+                    'whitelist_check' => in_array($cep ?? '', $allowedMethods),
+                    'post_body_size' => strlen((string)$request->getBody()),
+                    'php_version' => PHP_VERSION,
+                    'testnet_mode' => $_ENV['TESTNET_MODE'] ?? 'NOT_SET'
+                ],
                 'timestamp' => date('c')
             ];
             $response->getBody()->write(json_encode($errorData));
@@ -562,15 +595,34 @@ $app->options('/{routes:.+}', function (Request $request, Response $response) {
     return $response;
 });
 
-// Catch-all route (404)
+// Enhanced catch-all route with full diagnostics
 $app->map(['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], '/{routes:.+}', function (Request $request, Response $response) {
     $data = [
         'status' => 'error',
         'message' => 'Route not found',
         'method' => $request->getMethod(),
-        'uri' => (string) $request->getUri()
+        'uri' => (string) $request->getUri(),
+        'debug_info' => [
+            'path' => $request->getUri()->getPath(),
+            'query' => $request->getUri()->getQuery(),
+            'headers' => $request->getHeaders(),
+            'server_vars' => [
+                'REQUEST_URI' => $_SERVER['REQUEST_URI'] ?? 'not_set',
+                'SCRIPT_NAME' => $_SERVER['SCRIPT_NAME'] ?? 'not_set',
+                'PATH_INFO' => $_SERVER['PATH_INFO'] ?? 'not_set',
+                'QUERY_STRING' => $_SERVER['QUERY_STRING'] ?? 'not_set',
+                'HTTP_HOST' => $_SERVER['HTTP_HOST'] ?? 'not_set'
+            ],
+            'route_patterns' => [
+                'expected_test' => '/test',
+                'expected_hello' => '/hello', 
+                'expected_debug' => '/debug-routes',
+                'expected_v1_health' => '/v1/health',
+                'expected_root' => '/'
+            ]
+        ]
     ];
-    $response->getBody()->write(json_encode($data));
+    $response->getBody()->write(json_encode($data, JSON_PRETTY_PRINT));
     return $response->withStatus(404)->withHeader('Content-Type', 'application/json');
 });
 

@@ -36,9 +36,9 @@
       <div class="w-full max-w-2xl mx-auto">
         
         <!-- Status Check Card -->
-        <div class="bg-gray-900/95 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-8 mb-6">
-          <h1 class="text-2xl font-bold text-white mb-4">
-            Transaction Status
+        <div class="bg-[#000305]/90 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-8 mb-6">
+          <h1 class="text-2xl font-bold text-white mb-4 text-center">
+            Query Transaction Status
           </h1>
           
           <!-- Timing Notice -->
@@ -58,28 +58,28 @@
 
           <!-- Swap ID Input -->
           <div class="mb-6">
-            <label class="block text-sm font-medium text-gray-300 mb-3">
+            <label class="block text-sm font-medium text-gray-300 mb-3 text-center">
               Enter your Swap ID to check status:
             </label>
-            <div class="flex gap-3">
+            <div class="flex flex-col items-center gap-4">
               <input
                 v-model="swapId"
                 type="text"
                 placeholder="e.g., 123e4567-e89b-12d3-a456-426614174000"
-                class="flex-1 px-4 py-3 bg-gray-800/70 border border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-circular-primary focus:border-transparent"
+                class="w-full max-w-md px-4 py-3 bg-gray-800/70 border border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-circular-primary focus:border-transparent text-center"
               />
               <button
                 @click="console.log('🔘 Check Status button clicked'); handleCheckStatus()"
                 :disabled="!swapId || loading || isRateLimited"
-                class="px-6 py-3 bg-circular-primary hover:bg-circular-primary/80 disabled:bg-gray-600 disabled:opacity-50 text-white font-medium rounded-xl transition-colors"
+                class="px-8 py-3 bg-circular-primary hover:bg-circular-primary/80 disabled:bg-gray-600 disabled:opacity-50 text-white font-medium rounded-xl transition-colors"
               >
-                {{ getCheckButtonText() }}
+                {{ getQueryButtonText() }}
               </button>
             </div>
           </div>
 
           <!-- Last Swap ID -->
-          <div v-if="lastSwapId && !swapId" class="mb-4">
+          <div v-if="lastSwapId && !swapId" class="mb-4 text-center">
             <button
               @click="swapId = lastSwapId; handleCheckStatus()"
               :disabled="isRateLimited"
@@ -164,42 +164,6 @@
         </div>
 
 
-        <!-- Help Card -->
-        <div class="bg-gray-900/95 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-6">
-          <h2 class="text-lg font-semibold text-white mb-4">
-            Status Meanings
-          </h2>
-          <div class="space-y-3 text-sm">
-            <div class="flex items-start gap-3">
-              <span class="inline-block w-3 h-3 bg-yellow-500 rounded-full mt-1"></span>
-              <div>
-                <div class="text-white font-medium">Payment Verification Pending</div>
-                <div class="text-gray-400">We're verifying your blockchain payment</div>
-              </div>
-            </div>
-            <div class="flex items-start gap-3">
-              <span class="inline-block w-3 h-3 bg-blue-500 rounded-full mt-1"></span>
-              <div>
-                <div class="text-white font-medium">CIRX Transfer Pending</div>
-                <div class="text-gray-400">Payment verified, preparing CIRX transfer</div>
-              </div>
-            </div>
-            <div class="flex items-start gap-3">
-              <span class="inline-block w-3 h-3 bg-green-500 rounded-full mt-1"></span>
-              <div>
-                <div class="text-white font-medium">Completed</div>
-                <div class="text-gray-400">CIRX tokens sent to your address</div>
-              </div>
-            </div>
-            <div class="flex items-start gap-3">
-              <span class="inline-block w-3 h-3 bg-red-500 rounded-full mt-1"></span>
-              <div>
-                <div class="text-white font-medium">Failed</div>
-                <div class="text-gray-400">Something went wrong, contact support</div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </div>
@@ -291,10 +255,10 @@ const handleRefreshStatus = () => {
 }
 
 // Button text helpers
-const getCheckButtonText = () => {
+const getQueryButtonText = () => {
   if (loading.value) return 'Checking...'
   if (isRateLimited.value && rateLimitCooldown.value > 0) return `Wait ${rateLimitCooldown.value}s`
-  return 'Check Status'
+  return 'Check'
 }
 
 const getRefreshButtonText = () => {
@@ -527,10 +491,10 @@ const getStatusText = (status) => {
 /* Animation keyframes */
 @keyframes starsMove {
   0% {
-    transform: translateX(0px) translateY(0px) rotate(0deg);
+    transform: translateX(0px) translateY(0px);
   }
   100% {
-    transform: translateX(-400px) translateY(-200px) rotate(90deg);
+    transform: translateX(-400px) translateY(-200px);
   }
 }
 

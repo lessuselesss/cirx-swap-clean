@@ -61,13 +61,10 @@
           (showChart || showStaking) ? 'flex-col lg:flex-row' : 'justify-center'
         ]">
           
-          <div v-if="showChart && !showStaking" class="w-full lg:w-3/5 xl:w-2/3 h-[80vh]">
-            <CirxPriceChart @close="showChart = false" />
-          </div>
-          
-          
-          <div v-if="showStaking && !showChart" class="w-full lg:w-3/5 xl:w-2/3 h-[80vh]">
-            <CirxStakingPanel @close="showStaking = false" />
+          <!-- Chart or Staking Panel (mutually exclusive) -->
+          <div v-if="showChart || showStaking" class="w-full lg:w-3/5 xl:w-2/3 h-[80vh]">
+            <CirxPriceChart v-if="showChart" @close="showChart = false" />
+            <CirxStakingPanel v-else-if="showStaking" @close="showStaking = false" />
           </div>
           
           
@@ -509,9 +506,10 @@
         </div>
           
           <!-- Floating Action Pills -->
-          <div v-if="!showChart && !showStaking" class="mt-4 flex justify-start gap-3">
+          <div class="mt-4 flex justify-start gap-3">
             <button
-              @click="showChart = true"
+              v-if="!showChart"
+              @click="showChart = true; showStaking = false"
               class="inline-flex items-center gap-2 px-3 py-2 text-white border border-gray-600/30 hover:border-gray-400/60 transition-all text-sm font-medium rounded-full shadow-lg hover:scale-105 transform gradient-border"
               style="background-color: #1B2E33;"
             >
@@ -526,7 +524,8 @@
               Expand Chart
             </button>
             <button
-              @click="showStaking = true"
+              v-if="!showStaking"
+              @click="showStaking = true; showChart = false"
               class="inline-flex items-center gap-2 px-3 py-2 text-white border border-gray-600/30 hover:border-gray-400/60 transition-all text-sm font-medium rounded-full shadow-lg hover:scale-105 transform gradient-border"
               style="background-color: #1B2E33;"
             >
