@@ -1,10 +1,107 @@
 <template>
   <Teleport to="body">
+    <!-- General Zone (top-right) -->
     <div
-      v-if="notifications.length > 0"
+      v-if="generalNotifications.length > 0"
       class="fixed top-4 right-4 z-50 space-y-3 max-w-sm w-full"
       role="region"
-      aria-label="Notifications"
+      aria-label="General Notifications"
+    >
+      <TransitionGroup
+        name="toast"
+        tag="div"
+        class="space-y-3"
+      >
+        <div
+          v-for="notification in generalNotifications"
+          :key="notification.id"
+          :class="[
+            'relative p-4 rounded-xl border shadow-lg backdrop-blur-sm transition-all duration-300',
+            getNotificationClasses(notification.type, notification.zone)
+          ]"
+          :role="notification.type === 'error' ? 'alert' : 'status'"
+          :aria-live="notification.type === 'error' ? 'assertive' : 'polite'"
+        >
+          <div class="flex items-start gap-3">
+            <!-- Icon -->
+            <div class="flex-shrink-0 mt-0.5">
+              <img 
+                v-if="notification.customIcon" 
+                :src="notification.customIcon" 
+                :alt="notification.title || 'Notification'" 
+                :class="[
+                  'w-6 h-6 rounded border-2',
+                  notification.type === 'error' ? 'border-red-500' : 'border-transparent'
+                ]"
+                @error="$event.target.style.display='none'"
+              />
+              <component 
+                v-else
+                :is="getIconComponent(notification.type, notification.zone)" 
+                :class="getIconClasses(notification.type, notification.zone)" 
+              />
+            </div>
+
+            <!-- Content -->
+            <div class="flex-1 min-w-0">
+              <h4 
+                v-if="notification.title" 
+                :class="getTitleClasses(notification.type, notification.zone)"
+              >
+                {{ notification.title }}
+              </h4>
+              
+              <p :class="getMessageClasses(notification.type, notification.zone)">
+                {{ notification.message }}
+              </p>
+
+              <!-- Action buttons -->
+              <div v-if="notification.actions && notification.actions.length > 0" class="mt-2 flex gap-2">
+                <button
+                  v-for="action in notification.actions"
+                  :key="action.label"
+                  @click="handleAction(notification.id, action)"
+                  :class="[
+                    'px-2 py-1 text-xs font-medium rounded transition-colors',
+                    action.primary ? getPrimaryActionClass(notification.type, notification.zone) : getSecondaryActionClass(notification.type, notification.zone)
+                  ]"
+                >
+                  {{ action.label }}
+                </button>
+              </div>
+            </div>
+
+            <!-- Close button -->
+            <button
+              @click="removeNotification(notification.id)"
+              :class="[
+                'flex-shrink-0 p-1 rounded transition-colors',
+                getCloseButtonClass(notification.type, notification.zone)
+              ]"
+              aria-label="Dismiss notification"
+            >
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none">
+                <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Progress bar for auto-dismiss -->
+          <div
+            v-if="notification.autoTimeoutMs && notification.showProgress !== false"
+            class="absolute bottom-0 left-0 h-1 bg-current opacity-30 transition-all duration-100"
+            :style="{ width: notification.progress + '%' }"
+          ></div>
+        </div>
+      </TransitionGroup>
+    </div>
+
+    <!-- Connection Zone (top-center) -->
+    <div
+      v-if="connectionNotifications.length > 0"
+      class="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 space-y-3 max-w-sm w-full"
+      role="region"
+      aria-label="Connection Notifications"
     >
       <TransitionGroup
         name="toast"
