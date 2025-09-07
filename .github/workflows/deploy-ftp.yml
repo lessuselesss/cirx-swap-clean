@@ -131,7 +131,7 @@ jobs:
           APP_URL: ${{ vars.APP_URL }}
           CIRX_NAG_URL: ${{ vars.CIRX_NAG_URL }}
           CIRX_NAG_URL_BACKUP: ${{ vars.CIRX_NAG_URL_BACKUP }}
-          CORS_ALLOWED_ORIGINS: ${{ vars.CORS_ALLOWED_ORIGINS }}
+          CORS_ALLOWED_ORIGINS: ${{ vars.CORS_ALLOWED_ORIGINS || 'http://localhost:3000,http://127.0.0.1:3000,https://*.pages.dev,https://circularprotocol.io' }}
           ETHEREUM_CHAIN_ID: ${{ vars.ETHEREUM_CHAIN_ID }}
           ETHEREUM_NETWORK: ${{ vars.ETHEREUM_NETWORK }}
           IROH_BRIDGE_URL: ${{ vars.IROH_BRIDGE_URL }}
