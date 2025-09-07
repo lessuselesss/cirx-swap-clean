@@ -159,7 +159,7 @@ jobs:
           ADMIN_TOKEN_REQUIRED=${ADMIN_TOKEN_REQUIRED}
           ADMIN_TOKEN=${ADMIN_TOKEN}
           
-          # Database Configuration - Use SQLite for production
+          # Database Configuration - Use testnet SQLite for production
           DB_CONNECTION=sqlite
           DB_DATABASE=${DB_DATABASE}
           
