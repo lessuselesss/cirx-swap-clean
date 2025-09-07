@@ -440,6 +440,28 @@ $app->group('/api/v1', function ($group) {
         return $controller->getCircularNetworkConfig($request, $response);
     });
 
+    // Temporary diagnostic endpoint to debug deployment paths
+    $group->get('/debug/deployment-info', function (Request $request, Response $response) {
+        $data = [
+            'current_file' => __FILE__,
+            'document_root' => $_SERVER['DOCUMENT_ROOT'] ?? 'not_set',
+            'script_filename' => $_SERVER['SCRIPT_FILENAME'] ?? 'not_set',
+            'script_name' => $_SERVER['SCRIPT_NAME'] ?? 'not_set',
+            'request_uri' => $_SERVER['REQUEST_URI'] ?? 'not_set',
+            'pwd' => getcwd(),
+            'file_exists' => [
+                'this_file' => file_exists(__FILE__),
+                'config_controller' => file_exists(__DIR__ . '/../src/Controllers/ConfigController.php')
+            ],
+            'file_modification_time' => date('c', filemtime(__FILE__)),
+            'git_info' => 'Path fix deployment - server directory analysis',
+            'timestamp' => date('c')
+        ];
+        
+        $response->getBody()->write(json_encode($data, JSON_PRETTY_PRINT));
+        return $response->withHeader('Content-Type', 'application/json');
+    });
+
     // Worker endpoints (for FTP deployments without cron/systemd)
     $group->post('/workers/process', function (Request $request, Response $response) {
         $controller = new WorkerController();
