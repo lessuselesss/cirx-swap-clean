@@ -177,7 +177,7 @@ export const useCircularAddressValidation = () => {
         network: 'testnet',
         environment: 'development',
         blockchain_id: '8a20baa40c45dc5055aeb26197c203e576ef389d9acb171bd62da11dc5ad72b2',
-        nag_url: '/v1/proxy/circular-labs?cep=',
+        nag_url: '/v1/proxy/circular-protocol-validators?cep=',
         chain_name: 'Circular SandBox'
       }
     }
