@@ -271,8 +271,8 @@ jobs:
           # Dry run mode (test without uploading)
           dry-run: ${{ github.event.inputs.dry_run || false }}
           
-          # Security options
-          # dangerous-clean-slate: false  # WARNING: Deletes ALL files on server before upload
+          # Security options - TEMPORARILY ENABLE to clear stale files
+          dangerous-clean-slate: true  # WARNING: Deletes ALL files on server before upload
           
           # Exclude files/folders from upload
           exclude: |
