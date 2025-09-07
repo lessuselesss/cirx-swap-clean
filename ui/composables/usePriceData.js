@@ -650,6 +650,10 @@ export function createSingleExchangeDatafeed(exchange) {
 async function fetchSingleExchangeData(exchange, symbol, pair) {
   const timeoutMs = 5000
   
+  // Get API base URL from runtime config, fallback to development default
+  const config = useRuntimeConfig()
+  const apiBaseUrl = config.public.apiBaseUrl || 'http://localhost:18423/api/v1'
+  
   const fetchWithTimeout = (url) => {
     return Promise.race([
       fetch(url),
@@ -664,7 +668,7 @@ async function fetchSingleExchangeData(exchange, symbol, pair) {
     
     switch (exchange.toLowerCase()) {
       case 'bitmart':
-        url = `http://localhost:18423/api/v1/proxy/circular-labs?endpoint=CProxy.php&url=${encodeURIComponent(`https://api-cloud.bitmart.com/spot/quotation/v3/ticker?symbol=${symbol.toUpperCase()}_${pair.toUpperCase()}`)}`
+        url = `${apiBaseUrl}/proxy/circular-labs?endpoint=CProxy.php&url=${encodeURIComponent(`https://api-cloud.bitmart.com/spot/quotation/v3/ticker?symbol=${symbol.toUpperCase()}_${pair.toUpperCase()}`)}`
         response = await fetchWithTimeout(url)
         if (response.ok) {
           data = await response.json()
@@ -679,7 +683,7 @@ async function fetchSingleExchangeData(exchange, symbol, pair) {
         break
         
       case 'xt':
-        url = `http://localhost:18423/api/v1/proxy/circular-labs?endpoint=CProxy.php&url=${encodeURIComponent(`https://sapi.xt.com/v4/public/ticker/24h?symbol=${symbol.toLowerCase()}_${pair.toLowerCase()}`)}`
+        url = `${apiBaseUrl}/proxy/circular-labs?endpoint=CProxy.php&url=${encodeURIComponent(`https://sapi.xt.com/v4/public/ticker/24h?symbol=${symbol.toLowerCase()}_${pair.toLowerCase()}`)}`
         response = await fetchWithTimeout(url)
         if (response.ok) {
           data = await response.json()
@@ -694,7 +698,7 @@ async function fetchSingleExchangeData(exchange, symbol, pair) {
         break
         
       case 'lbank':
-        url = `http://localhost:18423/api/v1/proxy/circular-labs?endpoint=CProxy.php&url=${encodeURIComponent(`https://api.lbkex.com/v2/ticker.do?symbol=${symbol.toLowerCase()}_${pair.toLowerCase()}`)}`
+        url = `${apiBaseUrl}/proxy/circular-labs?endpoint=CProxy.php&url=${encodeURIComponent(`https://api.lbkex.com/v2/ticker.do?symbol=${symbol.toLowerCase()}_${pair.toLowerCase()}`)}`
         response = await fetchWithTimeout(url)
         if (response.ok) {
           data = await response.json()

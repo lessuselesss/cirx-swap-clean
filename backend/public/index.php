@@ -236,9 +236,9 @@ $app->get('/', function (Request $request, Response $response) {
         'version' => '1.0.0',
         'status' => 'running',
         'endpoints' => [
-            'health' => '/v1/health',
-            'transactions' => '/v1/transactions/*',
-            'debug' => '/v1/debug/*'
+            'health' => '/api/v1/health',
+            'transactions' => '/api/v1/transactions/*',
+            'debug' => '/api/v1/debug/*'
         ],
         'timestamp' => date('c')
     ];
