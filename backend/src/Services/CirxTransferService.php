@@ -115,6 +115,8 @@ class CirxTransferService
             if ($transferResult['success']) {
                 // Update transaction with transfer details - follow proper status flow
                 $transaction->markCirxTransferInitiated($transferResult['txHash']);
+                // Refresh transaction from database to get updated status
+                $transaction = $transaction->fresh();
                 $transaction->markCompleted();
                 
                 // Broadcast completion via IROH network
