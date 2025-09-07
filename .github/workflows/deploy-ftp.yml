@@ -301,8 +301,8 @@ jobs:
           # Logging level (options: minimal, standard, verbose)
           log-level: standard
           
-          # Timeout settings (in milliseconds)
-          timeout: 120000  # 2 minutes
+          # Timeout settings (in milliseconds) - increased for clean slate deployments
+          timeout: 600000  # 10 minutes
       
       # Deploy Frontend via FTP
       - name: 🚀 Deploy Frontend to FTP
