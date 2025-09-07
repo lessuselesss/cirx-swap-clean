@@ -155,7 +155,10 @@ export const useCircularAddressValidation = () => {
       const config = useRuntimeConfig()
       const apiBaseUrl = config.public.apiBaseUrl || 'http://localhost:18423/api/v1'
       
-      const response = await fetch(`${apiBaseUrl}/config/circular-network`)
+      const configUrl = `${apiBaseUrl}/config/circular-network`
+      console.log('🔧 Fetching backend config from:', configUrl)
+      
+      const response = await fetch(configUrl)
       if (!response.ok) {
         throw new Error(`Config API error: ${response.status}`)
       }
@@ -238,18 +241,29 @@ export const useCircularAddressValidation = () => {
       
       // Build the full URL - handle different prefix patterns
       let nagUrl
+      console.log('🔧 URL Construction Debug:', {
+        apiBaseUrl,
+        'config.nag_url': config.nag_url,
+        'nag_url starts with /v1/': config.nag_url.startsWith('/v1/'),
+        'nag_url starts with /api/v1/': config.nag_url.startsWith('/api/v1/')
+      })
+      
       if (config.nag_url.startsWith('/v1/')) {
         // For /v1/ paths, append directly since apiBaseUrl already ends with /v1
         nagUrl = apiBaseUrl + config.nag_url.substring(3) // Remove '/v1' (3 chars)
+        console.log('🔧 Using /v1/ logic:', { nagUrl })
       } else if (config.nag_url.startsWith('/api/v1/')) {
         // Legacy /api/v1/ paths - strip and append
         nagUrl = apiBaseUrl + config.nag_url.substring(7) // Remove '/api/v1' (7 chars)
+        console.log('🔧 Using /api/v1/ logic:', { nagUrl })
       } else if (config.nag_url.startsWith('/')) {
         // Other absolute paths - append to base
         nagUrl = apiBaseUrl + config.nag_url
+        console.log('🔧 Using absolute path logic:', { nagUrl })
       } else {
         // Full URL provided
         nagUrl = config.nag_url
+        console.log('🔧 Using full URL logic:', { nagUrl })
       }
 
       // Step 1: Check wallet existence first
@@ -260,7 +274,8 @@ export const useCircularAddressValidation = () => {
         Version: config.version || '1.0.8'
       }
       
-      console.log('🔍 NAG API Request URL:', checkUrl)
+      console.log('🔍 Final constructed NAG API URL:', checkUrl)
+      console.log('🔍 Expected URL should be:', 'https://circularprotocol.io/buy/api/v1/proxy/circular-protocol-validators?cep=Circular_CheckWallet_')
       console.log('🔍 NAG API Request Body:', requestBody)
       
       const walletResponse = await fetch(checkUrl, {
@@ -269,6 +284,7 @@ export const useCircularAddressValidation = () => {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
+        mode: 'cors', // Explicitly enable CORS
         body: JSON.stringify(requestBody)
       })
 
@@ -301,6 +317,7 @@ export const useCircularAddressValidation = () => {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
+        mode: 'cors', // Explicitly enable CORS
         body: JSON.stringify({
           Blockchain: config.blockchain_id,
           Address: address.replace('0x', ''), // Strip 0x prefix as required by NAG API
