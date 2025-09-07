@@ -271,8 +271,8 @@ jobs:
           # Dry run mode (test without uploading)
           dry-run: ${{ github.event.inputs.dry_run || false }}
           
-          # Security options - TEMPORARILY ENABLE to clear stale files
-          dangerous-clean-slate: true  # WARNING: Deletes ALL files on server before upload
+          # Security options - Disabled clean slate due to FTP timeout issues
+          dangerous-clean-slate: false  # Clean slate causes timeout with large uploads
           
           # Exclude files/folders from upload
           exclude: |
