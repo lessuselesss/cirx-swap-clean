@@ -177,7 +177,7 @@ export const useCircularAddressValidation = () => {
         network: 'testnet',
         environment: 'development',
         blockchain_id: '8a20baa40c45dc5055aeb26197c203e576ef389d9acb171bd62da11dc5ad72b2',
-        nag_url: '/api/v1/proxy/circular-labs?cep=',
+        nag_url: '/v1/proxy/circular-labs?cep=',
         chain_name: 'Circular SandBox'
       }
     }
@@ -236,15 +236,19 @@ export const useCircularAddressValidation = () => {
       const runtimeConfig = useRuntimeConfig()
       const apiBaseUrl = runtimeConfig.public.apiBaseUrl || 'http://localhost:18423/api/v1'
       
-      // Build the full URL - if nag_url starts with /api/v1, replace with base URL
-      // Otherwise if it starts with /, prepend the base URL
+      // Build the full URL - handle different prefix patterns
       let nagUrl
-      if (config.nag_url.startsWith('/api/v1')) {
-        // Replace /api/v1 prefix with the actual base URL
+      if (config.nag_url.startsWith('/v1/')) {
+        // For /v1/ paths, append directly since apiBaseUrl already ends with /v1
+        nagUrl = apiBaseUrl + config.nag_url.substring(3) // Remove '/v1' (3 chars)
+      } else if (config.nag_url.startsWith('/api/v1/')) {
+        // Legacy /api/v1/ paths - strip and append
         nagUrl = apiBaseUrl + config.nag_url.substring(7) // Remove '/api/v1' (7 chars)
       } else if (config.nag_url.startsWith('/')) {
+        // Other absolute paths - append to base
         nagUrl = apiBaseUrl + config.nag_url
       } else {
+        // Full URL provided
         nagUrl = config.nag_url
       }
 

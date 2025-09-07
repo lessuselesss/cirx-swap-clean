@@ -277,8 +277,8 @@ $app->get('/debug-routes', function (Request $request, Response $response) {
 });
 
 // Routes - API v1 endpoints
-// Standardized to always use /api/v1 for consistency
-$app->group('/api/v1', function ($group) {
+// Using /v1 since we're deployed under /buy/api/ directory
+$app->group('/v1', function ($group) {
     // Comprehensive health check with transaction readiness
     $group->get('/health', function (Request $request, Response $response) {
         try {
