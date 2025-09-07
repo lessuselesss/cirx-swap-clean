@@ -433,7 +433,8 @@ $app->group('/api/v1', function ($group) {
         return $controller->getTransactionStatusWithUpdates($request, $response, $args);
     });
 
-    // Configuration endpoint (frontend/backend synchronization)
+    // Configuration endpoint (frontend/backend synchronization) 
+    // Force deployment refresh - production validation fix
     $group->get('/config/circular-network', function (Request $request, Response $response) {
         $controller = new ConfigController();
         return $controller->getCircularNetworkConfig($request, $response);
