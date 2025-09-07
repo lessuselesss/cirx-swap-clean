@@ -59,8 +59,9 @@ class WorkerController
             $stuckResults = $cirxWorker->processStuckTransactions();
             $results['cirx_transfers']['stuck'] = $stuckResults;
 
-            // Run comprehensive stuck transaction recovery (every 5th call for better responsiveness)
-            if (rand(1, 5) === 1) {
+            // Run comprehensive stuck transaction recovery (every 3rd call for balance)
+            // Increased from rand(1,5) to every 3rd call for better recovery of failed transactions
+            if (rand(1, 3) === 1) {
                 $recoveryWorker = new StuckTransactionRecoveryWorker();
                 $recoveryResults = $recoveryWorker->recoverStuckTransactions();
                 $results['stuck_transaction_recovery'] = $recoveryResults;

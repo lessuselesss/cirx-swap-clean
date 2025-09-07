@@ -113,8 +113,8 @@ class CirxTransferService
             );
 
             if ($transferResult['success']) {
-                // Update transaction with transfer details
-                $transaction->cirx_transfer_tx_id = $transferResult['txHash'];
+                // Update transaction with transfer details - follow proper status flow
+                $transaction->markCirxTransferInitiated($transferResult['txHash']);
                 $transaction->markCompleted();
                 
                 // Broadcast completion via IROH network
@@ -414,38 +414,19 @@ class CirxTransferService
             // Execute the CIRX transfer
             $txHash = $cirxClient->sendCirxTransfer($recipientAddress, $amount);
 
-            // Wait for transaction confirmation (simplified version)
-            // In production, this might be handled by a background worker
-            $confirmations = 0;
-            $maxWaitTime = 30; // 30 seconds timeout
-            $waitTime = 0;
-
-            while ($confirmations < 1 && $waitTime < $maxWaitTime) {
-                sleep(2); // Wait 2 seconds
-                $waitTime += 2;
-                
-                try {
-                    $confirmations = $cirxClient->getTransactionConfirmations($txHash);
-                } catch (BlockchainException $e) {
-                    // Transaction might still be pending
-                    continue;
-                }
-            }
-
-            // Get final transaction details
-            $transaction = $cirxClient->getTransaction($txHash);
-            $blockNumber = 0;
+            // IMPORTANT: Do NOT wait for confirmation here - it blocks HTTP requests for 30+ seconds
+            // Transaction confirmation will be handled by background workers (StuckTransactionRecoveryWorker)
+            // This allows the API to return immediately while transfers process asynchronously
             
-            if ($transaction && isset($transaction['blockNumber'])) {
-                $blockNumber = (int)\App\Utils\HashUtils::hexToDec($transaction['blockNumber']);
-            }
+            // Transaction is submitted successfully - return immediately
+            $blockNumber = 0; // Will be filled by background confirmation worker
 
             return [
                 'success' => true,
                 'txHash' => $txHash,
                 'gasUsed' => 75000, // Estimated gas for CIRX transfer
                 'blockNumber' => $blockNumber,
-                'confirmations' => $confirmations
+                'confirmations' => 0 // Will be confirmed by background worker
             ];
 
         } catch (BlockchainException $e) {
