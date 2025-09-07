@@ -10,8 +10,8 @@ export function useApiClient() {
   // Get runtime configuration
   const runtimeConfig = useRuntimeConfig()
   
-  // API Configuration
-  const API_BASE_URL = runtimeConfig.public.apiBaseUrl || 'http://localhost:18423/api'
+  // API Configuration - Standardized to /api/v1
+  const API_BASE_URL = runtimeConfig.public.apiBaseUrl || 'http://localhost:18423/api/v1'
   const API_KEY = runtimeConfig.public.apiKey || null
   
   // Global state management

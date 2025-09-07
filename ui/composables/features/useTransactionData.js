@@ -335,7 +335,7 @@ export function useTransactionStatus() {
 export const useTransactionData = () => {
   // Use same environment configuration as useApiClient
   const runtimeConfig = useRuntimeConfig()
-  const INDEXER_API_BASE = runtimeConfig.public.apiBaseUrl || 'http://localhost:18423/api';
+  const INDEXER_API_BASE = runtimeConfig.public.apiBaseUrl || 'http://localhost:18423/api/v1';
   
   // Reactive state
   const isLoading = ref(false);
@@ -746,7 +746,7 @@ export const useTransactionData = () => {
   // Check if indexer is available
   const checkIndexerHealth = async () => {
     try {
-      const response = await fetch(`${INDEXER_API_BASE.replace('/api', '')}/health`, {
+      const response = await fetch(`${INDEXER_API_BASE}/health`, {
         timeout: 5000 // 5 second timeout for health check
       });
       return response.ok;

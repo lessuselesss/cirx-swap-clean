@@ -277,9 +277,8 @@ $app->get('/debug-routes', function (Request $request, Response $response) {
 });
 
 // Routes - API v1 endpoints
-// Route group: /v1 in production (with /buy/api base = /buy/api/v1), /api/v1 in development  
-$routeGroup = $isProduction ? '/v1' : '/api/v1';
-$app->group($routeGroup, function ($group) {
+// Standardized to always use /api/v1 for consistency
+$app->group('/api/v1', function ($group) {
     // Comprehensive health check with transaction readiness
     $group->get('/health', function (Request $request, Response $response) {
         try {
