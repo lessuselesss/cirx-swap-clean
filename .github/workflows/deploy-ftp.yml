@@ -144,6 +144,7 @@ jobs:
           TESTNET_MODE: ${{ secrets.TESTNET_MODE }}
           WORKER_BATCH_SIZE: ${{ vars.WORKER_BATCH_SIZE }}
           WORKER_PROCESS_INTERVAL: ${{ vars.WORKER_PROCESS_INTERVAL }}
+          WORKER_API_KEY: ${{ secrets.WORKER_API_KEY }}
           SEPOLIA_CHAIN_ID: ${{ vars.SEPOLIA_CHAIN_ID }}
         run: |
           cat > .env << EOF
@@ -192,6 +193,7 @@ jobs:
           # Worker Configuration
           WORKER_BATCH_SIZE=${WORKER_BATCH_SIZE}
           WORKER_PROCESS_INTERVAL=${WORKER_PROCESS_INTERVAL}
+          WORKER_API_KEY=${WORKER_API_KEY}
           
           # Logging Configuration
           LOG_LEVEL=${LOG_LEVEL}
