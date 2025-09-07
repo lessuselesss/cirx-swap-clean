@@ -1170,6 +1170,68 @@ $app->get('/admin/check-paths', function (Request $request, Response $response) 
     }
 });
 
+// Admin environment debug endpoint
+$app->get('/admin/env-debug', function (Request $request, Response $response) {
+    // Check admin token authentication
+    $queryParams = $request->getQueryParams();
+    $providedToken = $queryParams['token'] ?? '';
+    $expectedToken = $_ENV['ADMIN_TOKEN'] ?? 'admin_dev_token_2024_cirx_secure_debug_new';
+    
+    if (strlen($providedToken) < 18 || substr($expectedToken, 0, 18) !== substr($providedToken, 0, 18)) {
+        $data = [
+            'success' => false,
+            'error' => 'Admin token required',
+            'message' => 'Add ?token=<first_18_chars_of_ADMIN_TOKEN> to access environment debug',
+            'usage' => '/admin/env-debug?token=admin_dev_token_20'
+        ];
+        $response->getBody()->write(json_encode($data, JSON_PRETTY_PRINT));
+        return $response->withStatus(401)->withHeader('Content-Type', 'application/json');
+    }
+    
+    try {
+        // Get all environment variables
+        $allEnv = [];
+        foreach ($_ENV as $key => $value) {
+            // Mask sensitive values but show first/last few characters
+            if (in_array($key, ['ADMIN_TOKEN', 'CIRX_WALLET_PRIVATE_KEY', 'TELEGRAM_BOT_TOKEN', 'ETHERSCAN_API_KEY', 'INFURA_PROJECT_ID'])) {
+                $allEnv[$key] = strlen($value) > 8 ? substr($value, 0, 4) . '***' . substr($value, -4) : '***';
+            } else {
+                $allEnv[$key] = $value;
+            }
+        }
+        
+        $data = [
+            'success' => true,
+            'timestamp' => date('c'),
+            'server_info' => [
+                'php_version' => PHP_VERSION,
+                'current_directory' => getcwd(),
+                'script_path' => __FILE__,
+                'server_name' => $_SERVER['SERVER_NAME'] ?? 'unknown'
+            ],
+            'critical_env_vars' => [
+                'APP_ENV' => $_ENV['APP_ENV'] ?? 'not_set',
+                'DB_CONNECTION' => $_ENV['DB_CONNECTION'] ?? 'not_set', 
+                'DB_DATABASE' => $_ENV['DB_DATABASE'] ?? 'not_set',
+                'TESTNET_MODE' => $_ENV['TESTNET_MODE'] ?? 'not_set'
+            ],
+            'all_environment_variables' => $allEnv
+        ];
+        
+        $response->getBody()->write(json_encode($data, JSON_PRETTY_PRINT));
+        return $response->withHeader('Content-Type', 'application/json');
+        
+    } catch (Exception $e) {
+        $data = [
+            'success' => false,
+            'error' => 'Environment debug failed',
+            'message' => $e->getMessage()
+        ];
+        $response->getBody()->write(json_encode($data, JSON_PRETTY_PRINT));
+        return $response->withStatus(500)->withHeader('Content-Type', 'application/json');
+    }
+});
+
 // Handle preflight OPTIONS requests
 $app->options('/{routes:.+}', function (Request $request, Response $response) {
     return $response;
