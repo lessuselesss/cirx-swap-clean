@@ -271,10 +271,12 @@ class PaymentVerificationService
     private function getRequiredConfirmations(string $chain): int
     {
         return match (strtolower($chain)) {
-            'ethereum' => 12,
-            'polygon' => 20,
-            'binance-smart-chain' => 15,
-            default => 12
+            'ethereum' => (int)($_ENV['ETHEREUM_MIN_CONFIRMATIONS'] ?? 12),
+            'sepolia' => (int)($_ENV['SEPOLIA_MIN_CONFIRMATIONS'] ?? 3),
+            'goerli' => (int)($_ENV['GOERLI_MIN_CONFIRMATIONS'] ?? 3),
+            'polygon' => (int)($_ENV['POLYGON_MIN_CONFIRMATIONS'] ?? 20),
+            'binance-smart-chain', 'bsc' => (int)($_ENV['BSC_MIN_CONFIRMATIONS'] ?? 15),
+            default => (int)($_ENV['ETHEREUM_MIN_CONFIRMATIONS'] ?? 12)
         };
     }
 

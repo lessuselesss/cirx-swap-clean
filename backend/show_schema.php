@@ -2,7 +2,7 @@
 
 require_once 'vendor/autoload.php';
 
-$dbPath = __DIR__ . '/storage/database.sqlite';
+$dbPath = __DIR__ . '/storage/database.dev.sqlite';
 
 if (!file_exists($dbPath)) {
     die("Database not found at: $dbPath\n");

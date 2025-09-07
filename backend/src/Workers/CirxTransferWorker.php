@@ -52,25 +52,46 @@ class CirxTransferWorker
                 ->get();
 
             foreach ($readyTransactions as $transaction) {
-                $result = $this->processTransaction($transaction);
-                $results['processed']++;
-                
-                switch ($result['status']) {
-                    case 'completed':
-                        $results['completed']++;
-                        break;
-                    case 'failed':
-                        $results['failed']++;
-                        break;
-                    case 'retried':
-                        $results['retried']++;
-                        break;
+                // Try to lock transaction for exclusive processing
+                $lockedTransaction = Transaction::lockForProcessing($transaction->id);
+                if (!$lockedTransaction) {
+                    // Transaction is being processed by another worker, skip it
+                    $this->logger->debug("Transaction {$transaction->id} already locked by another worker");
+                    continue;
                 }
-                
-                if (isset($result['error'])) {
+
+                try {
+                    $result = $this->processTransactionLocked($lockedTransaction);
+                    $results['processed']++;
+                    
+                    switch ($result['status']) {
+                        case 'completed':
+                            $results['completed']++;
+                            break;
+                        case 'failed':
+                            $results['failed']++;
+                            break;
+                        case 'retried':
+                            $results['retried']++;
+                            break;
+                    }
+                    
+                    if (isset($result['error'])) {
+                        $results['errors'][] = [
+                            'transaction_id' => $transaction->id,
+                            'error' => $result['error']
+                        ];
+                    }
+                    
+                    // Commit the transaction
+                    $lockedTransaction->unlockAfterProcessing();
+                    
+                } catch (Exception $e) {
+                    // Release lock on error
+                    $lockedTransaction->releaseLock();
                     $results['errors'][] = [
                         'transaction_id' => $transaction->id,
-                        'error' => $result['error']
+                        'error' => $e->getMessage()
                     ];
                 }
             }
@@ -116,8 +137,7 @@ class CirxTransferWorker
             }
             
             // Update status to indicate transfer is in progress
-            $transaction->swap_status = Transaction::STATUS_CIRX_TRANSFER_PENDING;
-            $transaction->save();
+            $transaction->markCirxTransferPending();
             
             $this->logTransactionEvent($transaction, 'transfer_started', 'CIRX transfer initiated');
             
@@ -144,6 +164,136 @@ class CirxTransferWorker
     }
 
     /**
+     * Process a transaction that is already locked for exclusive access
+     * Uses atomic status updates to prevent race conditions
+     */
+    public function processTransactionLocked(Transaction $lockedTransaction): array
+    {
+        try {
+            // Check if transaction is already completed - don't interfere with completed transactions
+            if ($lockedTransaction->swap_status === Transaction::STATUS_COMPLETED) {
+                return [
+                    'status' => 'completed',
+                    'message' => 'Transaction already completed',
+                ];
+            }
+            
+            // Validate transaction is ready for transfer BEFORE changing status
+            if ($lockedTransaction->swap_status !== Transaction::STATUS_PAYMENT_VERIFIED) {
+                return [
+                    'status' => 'failed',
+                    'message' => 'Transaction not in valid state for transfer',
+                    'error' => 'Expected payment_verified status, got: ' . $lockedTransaction->swap_status
+                ];
+            }
+            
+            // Update status to indicate transfer is in progress using atomic update
+            $lockedTransaction->atomicStatusUpdate(Transaction::STATUS_CIRX_TRANSFER_PENDING);
+            
+            $this->logTransactionEvent($lockedTransaction, 'transfer_started', 'CIRX transfer initiated');
+            
+            // Perform the CIRX transfer
+            $transferResult = $this->cirxTransferService->transferCirxToUser($lockedTransaction);
+            
+            if ($transferResult->isSuccess()) {
+                // Transfer completed successfully
+                $this->logTransactionEvent($lockedTransaction, 'transfer_completed', "CIRX transfer successful, TX: {$transferResult->getTransactionHash()}");
+                
+                return [
+                    'status' => 'completed',
+                    'message' => 'CIRX transfer completed successfully',
+                    'transaction_hash' => $transferResult->getTransactionHash()
+                ];
+            } else {
+                // Transfer failed
+                return $this->handleTransferFailureLocked($lockedTransaction, $transferResult->getErrorMessage());
+            }
+
+        } catch (Exception $e) {
+            return $this->handleExceptionLocked($lockedTransaction, $e);
+        }
+    }
+
+    /**
+     * Handle CIRX transfer failure with retry logic for locked transactions
+     */
+    private function handleTransferFailureLocked(Transaction $lockedTransaction, string $error): array
+    {
+        $retryCount = $lockedTransaction->retry_count ?? 0;
+        
+        // Check if this is a permanent failure that shouldn't be retried
+        if ($this->isPermanentFailure($error)) {
+            $lockedTransaction->atomicStatusUpdate(
+                Transaction::STATUS_FAILED_CIRX_TRANSFER,
+                ['failure_reason' => "CIRX transfer failed permanently: {$error}"]
+            );
+            $this->logTransactionEvent($lockedTransaction, 'transfer_failed_permanent', "Permanent failure: {$error}");
+
+            return [
+                'status' => 'failed',
+                'message' => 'CIRX transfer failed permanently',
+                'error' => $error,
+                'retry_count' => $retryCount
+            ];
+        }
+
+        // Handle retries
+        if ($retryCount < $this->maxRetries) {
+            // Reset to verified status for retry
+            $lockedTransaction->atomicStatusUpdate(
+                Transaction::STATUS_PAYMENT_VERIFIED,
+                [
+                    'retry_count' => $retryCount + 1,
+                    'last_retry_at' => (new \DateTime())->format('Y-m-d H:i:s')
+                ]
+            );
+            
+            $this->logTransactionEvent($lockedTransaction, 'transfer_retry_scheduled', "Transfer failed, scheduled for retry " . ($retryCount + 1) . ": {$error}");
+            
+            return [
+                'status' => 'retried',
+                'message' => 'Transfer failed, scheduled for retry',
+                'error' => $error,
+                'retry_count' => $retryCount + 1
+            ];
+        } else {
+            // Max retries exceeded
+            $lockedTransaction->atomicStatusUpdate(
+                Transaction::STATUS_FAILED_CIRX_TRANSFER,
+                ['failure_reason' => "CIRX transfer failed after {$this->maxRetries} retries: {$error}"]
+            );
+            $this->logTransactionEvent($lockedTransaction, 'transfer_failed_max_retries', "Failed after {$this->maxRetries} retries: {$error}");
+            
+            return [
+                'status' => 'failed',
+                'message' => 'CIRX transfer failed after maximum retries',
+                'error' => $error,
+                'retry_count' => $retryCount
+            ];
+        }
+    }
+
+    /**
+     * Handle exceptions during locked transaction processing
+     */
+    private function handleExceptionLocked(Transaction $lockedTransaction, Exception $e): array
+    {
+        $errorMessage = "Exception during CIRX transfer: " . $e->getMessage();
+        $lockedTransaction->atomicStatusUpdate(
+            Transaction::STATUS_FAILED_CIRX_TRANSFER,
+            ['failure_reason' => $errorMessage]
+        );
+        
+        $this->logTransactionEvent($lockedTransaction, 'transfer_exception', $errorMessage);
+        
+        return [
+            'status' => 'failed',
+            'message' => 'CIRX transfer failed due to exception',
+            'error' => $e->getMessage()
+        ];
+    }
+
+    /**
      * Handle CIRX transfer failure with retry logic
      */
     private function handleTransferFailure(Transaction $transaction, string $error): array
@@ -166,8 +316,7 @@ class CirxTransferWorker
             // Increment retry count and schedule for retry
             $transaction->retry_count = $retryCount + 1;
             $transaction->last_retry_at = (new \DateTime())->format('Y-m-d H:i:s');
-            $transaction->swap_status = Transaction::STATUS_PAYMENT_VERIFIED; // Reset to verified for retry
-            $transaction->save();
+            $transaction->markPaymentVerified(); // Reset to verified for retry
             
             $retryNumber = $retryCount + 1;
             $this->logTransactionEvent($transaction, 'transfer_retry', "CIRX transfer failed, retry {$retryNumber}/{$this->maxRetries}: {$error}");
@@ -202,8 +351,7 @@ class CirxTransferWorker
             // Increment retry count for exceptions too
             $transaction->retry_count = $retryCount + 1;
             $transaction->last_retry_at = (new \DateTime())->format('Y-m-d H:i:s');
-            $transaction->swap_status = Transaction::STATUS_PAYMENT_VERIFIED; // Reset for retry
-            $transaction->save();
+            $transaction->markPaymentVerified(); // Reset for retry
             
             $retryNumber = $retryCount + 1;
             $this->logTransactionEvent($transaction, 'worker_exception', "Worker exception, retry {$retryNumber}: {$e->getMessage()}");
@@ -312,7 +460,7 @@ class CirxTransferWorker
                 
                 if ($retryCount < $this->maxRetries) {
                     // Reset to verified status for retry
-                    $transaction->swap_status = Transaction::STATUS_PAYMENT_VERIFIED;
+                    $transaction->markPaymentVerified();
                     $transaction->retry_count = $retryCount + 1;
                     $transaction->last_retry_at = (new \DateTime())->format('Y-m-d H:i:s');
                     $transaction->save();
@@ -515,7 +663,7 @@ class CirxTransferWorker
                     // If we haven't exceeded max retries, clean up and retry
                     if ($retryCount < $this->maxRetries) {
                         // Clean up the inconsistent state
-                        $transaction->swap_status = Transaction::STATUS_PAYMENT_VERIFIED;
+                        $transaction->markPaymentVerified();
                         $transaction->failure_reason = null;
                         $transaction->last_retry_at = null;
                         $transaction->retry_count = 0; // Reset retry count for fresh start

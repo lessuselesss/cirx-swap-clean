@@ -7,15 +7,12 @@ class SwapRequestValidator
     private array $supportedChains = [
         'ethereum',
         'polygon',
-        'binance-smart-chain'
     ];
 
     private array $supportedTokens = [
         'ETH',
         'USDC',
         'USDT',
-        'BNB',
-        'MATIC'
     ];
 
     /**

@@ -59,17 +59,21 @@ class WorkerController
             $stuckResults = $cirxWorker->processStuckTransactions();
             $results['cirx_transfers']['stuck'] = $stuckResults;
 
-            // Run stuck transaction recovery periodically (every 10th call to reduce overhead)
-            if (rand(1, 10) === 1) {
+            // Run comprehensive stuck transaction recovery (every 5th call for better responsiveness)
+            if (rand(1, 5) === 1) {
                 $recoveryWorker = new StuckTransactionRecoveryWorker();
-                $recoveryResults = $recoveryWorker->processStuckTransactions();
+                $recoveryResults = $recoveryWorker->recoverStuckTransactions();
                 $results['stuck_transaction_recovery'] = $recoveryResults;
                 
-                if ($recoveryResults['recovered'] > 0) {
-                    $this->logger->info('Stuck transaction recovery completed', [
-                        'scanned' => $recoveryResults['scanned'],
-                        'recovered' => $recoveryResults['recovered'],
-                        'permanently_failed' => $recoveryResults['permanently_failed']
+                $totalRecovered = $recoveryResults['phase1_recovered'] + $recoveryResults['phase2_recovered'] + $recoveryResults['phase3_recovered'];
+                if ($totalRecovered > 0 || $recoveryResults['marked_for_topup'] > 0) {
+                    $this->logger->info('Comprehensive stuck transaction recovery completed', [
+                        'total_processed' => $recoveryResults['total_processed'],
+                        'phase1_recovered' => $recoveryResults['phase1_recovered'],
+                        'phase2_recovered' => $recoveryResults['phase2_recovered'],
+                        'phase3_recovered' => $recoveryResults['phase3_recovered'],
+                        'marked_for_topup' => $recoveryResults['marked_for_topup'],
+                        'errors' => $recoveryResults['errors']
                     ]);
                 }
             }
@@ -243,6 +247,62 @@ class WorkerController
             return $this->jsonResponse($response, [
                 'success' => false,
                 'error' => 'Manual retry execution failed',
+                'message' => $e->getMessage(),
+                'timestamp' => date('Y-m-d H:i:s')
+            ], 500);
+        }
+    }
+
+    /**
+     * Manual stuck transaction recovery endpoint (admin only)
+     */
+    public function manualRecovery(Request $request, Response $response): Response
+    {
+        try {
+            // Simple authentication check
+            $queryParams = $request->getQueryParams();
+            $adminToken = $queryParams['admin_token'] ?? '';
+            $expectedToken = $_ENV['ADMIN_TOKEN'] ?? 'admin_dev_token_2024_cirx_secure_debug_new';
+            
+            if ($adminToken !== $expectedToken) {
+                return $this->jsonResponse($response, [
+                    'success' => false,
+                    'error' => 'Unauthorized - admin token required'
+                ], 401);
+            }
+
+            $this->logger->info('Manual stuck transaction recovery triggered by admin');
+            
+            // Run comprehensive recovery
+            $recoveryWorker = new StuckTransactionRecoveryWorker();
+            $recoveryResults = $recoveryWorker->recoverStuckTransactions();
+            
+            $results = [
+                'success' => true,
+                'timestamp' => date('Y-m-d H:i:s'),
+                'recovery_stats' => $recoveryResults
+            ];
+
+            $totalRecovered = $recoveryResults['phase1_recovered'] + $recoveryResults['phase2_recovered'] + $recoveryResults['phase3_recovered'];
+            
+            $this->logger->info('Manual stuck transaction recovery completed', [
+                'total_processed' => $recoveryResults['total_processed'],
+                'total_recovered' => $totalRecovered,
+                'marked_for_topup' => $recoveryResults['marked_for_topup'],
+                'errors' => $recoveryResults['errors']
+            ]);
+
+            return $this->jsonResponse($response, $results);
+
+        } catch (\Exception $e) {
+            $this->logger->error('Manual stuck transaction recovery failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return $this->jsonResponse($response, [
+                'success' => false,
+                'error' => 'Manual recovery execution failed',
                 'message' => $e->getMessage(),
                 'timestamp' => date('Y-m-d H:i:s')
             ], 500);

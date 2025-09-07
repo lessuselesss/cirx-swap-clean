@@ -131,7 +131,14 @@ class CirxTransferService
                     ]
                 );
             } else {
-                $transaction->markFailed($transferResult['error'], Transaction::STATUS_FAILED_CIRX_TRANSFER);
+                // Don't automatically mark as failed - let the caller decide
+                // This prevents race conditions where the recovery worker has already updated the status
+                // Only mark as failed for non-recoverable errors
+                if (strpos(strtolower($transferResult['error']), 'insufficient') === false) {
+                    // Non-insufficient balance errors should mark the transaction as failed
+                    $transaction->markFailed($transferResult['error'], Transaction::STATUS_FAILED_CIRX_TRANSFER);
+                }
+                // For insufficient balance, just return the failure without changing status
                 return CirxTransferResult::failure(
                     $recipientAddress,
                     $cirxAmount,
@@ -285,7 +292,12 @@ class CirxTransferService
      */
     public function isTransactionReadyForTransfer(Transaction $transaction): bool
     {
-        return $transaction->swap_status === Transaction::STATUS_CIRX_TRANSFER_PENDING;
+        return in_array($transaction->swap_status, [
+            Transaction::STATUS_PAYMENT_VERIFIED,
+            Transaction::STATUS_CIRX_TRANSFER_PENDING,
+            Transaction::STATUS_FAILED_CIRX_TRANSFER,
+            'failed_cirx_transfer' // Legacy status from old database entries
+        ]);
     }
 
     /**
@@ -378,7 +390,9 @@ class CirxTransferService
             $minThreshold = floatval($_ENV['CIRX_BALANCE_ALERT_THRESHOLD'] ?? 50);
             
             // Check if balance is insufficient for the transfer
-            if (EthereumMathUtils::compareAmounts($walletBalance, $amount, 'ETH') < 0) {
+            // NOTE: CIRX balance is returned in human-readable format (e.g., "203.1")
+            // Use bccomp directly, not EthereumMathUtils which is for ERC-20 tokens
+            if (bccomp($walletBalance, $amount, 6) < 0) {
                 // Send critical Telegram alert about insufficient balance
                 $this->sendCirxBalanceAlert($amount, $walletBalance, $recipientAddress);
                 
@@ -455,8 +469,9 @@ class CirxTransferService
 
     /**
      * Get CIRX blockchain client (lazy initialization)
+     * Made public for recovery worker access
      */
-    private function getCirxClient(): CircularProtocolClient
+    public function getCirxClient(): CircularProtocolClient
     {
         if ($this->cirxClient === null) {
             $this->cirxClient = $this->blockchainFactory->getCirxClient();
@@ -579,6 +594,37 @@ class CirxTransferService
             // Don't fail the transfer if Telegram alert fails
             error_log("Failed to send CIRX balance Telegram alert: " . $e->getMessage());
         }
+    }
+
+    /**
+     * Get current CIRX wallet balance for monitoring and recovery
+     */
+    public function getCirxWalletBalance(): string
+    {
+        try {
+            // In test mode, return a mock balance
+            if ($this->testMode) {
+                return '100.5'; // Mock balance for testing
+            }
+
+            $cirxClient = $this->getCirxClient();
+            $walletAddress = $cirxClient->getCirxWalletAddress();
+            
+            return $cirxClient->getCirxBalance($walletAddress);
+            
+        } catch (\Exception $e) {
+            error_log("Failed to get CIRX wallet balance: " . $e->getMessage());
+            return '0.0';
+        }
+    }
+
+    /**
+     * Get Circular Protocol client for hash validation
+     * Alias for getCirxClient() for recovery worker compatibility
+     */
+    public function getCircularProtocolClient(): CircularProtocolClient
+    {
+        return $this->getCirxClient();
     }
 
     /**

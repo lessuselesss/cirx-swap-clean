@@ -45,8 +45,11 @@ class PaymentVerificationWorker
         ];
 
         try {
-            // Get transactions pending payment verification
-            $pendingTransactions = Transaction::where('swap_status', Transaction::STATUS_PENDING_PAYMENT_VERIFICATION)
+            // Get transactions pending payment verification (0 confirmations and under threshold)
+            $pendingTransactions = Transaction::whereIn('swap_status', [
+                Transaction::STATUS_PAYMENT_PENDING_ZERO_CONFIRMATIONS,
+                Transaction::STATUS_PAYMENT_PENDING_UNDER_THRESHOLD
+            ])
                 ->orderBy('created_at', 'asc')
                 ->take(50) // Process in batches
                 ->get();
@@ -200,7 +203,10 @@ class PaymentVerificationWorker
 
         try {
             // Get transactions that are due for retry (waiting period has passed)
-            $retryTransactions = Transaction::where('swap_status', Transaction::STATUS_PENDING_PAYMENT_VERIFICATION)
+            $retryTransactions = Transaction::whereIn('swap_status', [
+                Transaction::STATUS_PAYMENT_PENDING_ZERO_CONFIRMATIONS,
+                Transaction::STATUS_PAYMENT_PENDING_UNDER_THRESHOLD
+            ])
                 ->where('retry_count', '>', 0)
                 ->where(function($query) {
                     $query->whereNull('last_retry_at')
@@ -250,8 +256,14 @@ class PaymentVerificationWorker
     public function getStatistics(): array
     {
         return [
-            'pending_verification' => Transaction::where('swap_status', Transaction::STATUS_PENDING_PAYMENT_VERIFICATION)->count(),
-            'pending_retries' => Transaction::where('swap_status', Transaction::STATUS_PENDING_PAYMENT_VERIFICATION)
+            'pending_verification' => Transaction::whereIn('swap_status', [
+                Transaction::STATUS_PAYMENT_PENDING_ZERO_CONFIRMATIONS,
+                Transaction::STATUS_PAYMENT_PENDING_UNDER_THRESHOLD
+            ])->count(),
+            'pending_retries' => Transaction::whereIn('swap_status', [
+                Transaction::STATUS_PAYMENT_PENDING_ZERO_CONFIRMATIONS,
+                Transaction::STATUS_PAYMENT_PENDING_UNDER_THRESHOLD
+            ])
                 ->where('retry_count', '>', 0)->count(),
             'failed_verification' => Transaction::where('swap_status', Transaction::STATUS_FAILED_PAYMENT_VERIFICATION)->count(),
             'payment_verified' => Transaction::where('swap_status', Transaction::STATUS_PAYMENT_VERIFIED)->count(),

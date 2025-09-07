@@ -461,6 +461,12 @@ $app->group('/api/v1', function ($group) {
         return $controller->manualRetry($request, $response);
     });
 
+    // Manual stuck transaction recovery endpoint (admin only)
+    $group->post('/workers/recovery', function (Request $request, Response $response) {
+        $controller = new WorkerController();
+        return $controller->manualRecovery($request, $response);
+    });
+
     // Auto-processing endpoint (for external cron services)
     $group->get('/workers/auto', function (Request $request, Response $response) {
         $controller = new WorkerController();

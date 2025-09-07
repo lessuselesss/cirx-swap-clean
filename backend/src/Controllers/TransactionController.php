@@ -51,7 +51,7 @@ class TransactionController
                 'cirx_recipient_address' => $data['cirxRecipientAddress'],
                 'amount_paid' => $data['amountPaid'],
                 'payment_token' => $data['paymentToken'],
-                'swap_status' => Transaction::STATUS_PENDING_PAYMENT_VERIFICATION,
+                'swap_status' => Transaction::STATUS_PAYMENT_PENDING_ZERO_CONFIRMATIONS,
             ];
 
             $transaction = Transaction::create($transactionData);
@@ -147,7 +147,7 @@ class TransactionController
     private function getStatusMessage(string $status): string
     {
         return match ($status) {
-            Transaction::STATUS_PENDING_PAYMENT_VERIFICATION => 'Your payment is being verified.',
+            Transaction::STATUS_PAYMENT_PENDING_UNDER_THRESHOLD => 'Your payment is being verified.',
             Transaction::STATUS_PAYMENT_VERIFIED => 'Payment verified. CIRX transfer is being prepared.',
             Transaction::STATUS_CIRX_TRANSFER_PENDING => 'CIRX transfer is pending.',
             Transaction::STATUS_CIRX_TRANSFER_INITIATED => 'CIRX transfer has been initiated.',

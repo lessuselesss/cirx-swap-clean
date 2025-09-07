@@ -164,9 +164,10 @@ class TransactionStatusController
     {
         return match ($status) {
             Transaction::STATUS_INITIATED => 'initiated',
-            Transaction::STATUS_PAYMENT_PENDING => 'awaiting_payment',
-            Transaction::STATUS_PENDING_PAYMENT_VERIFICATION => 'verifying_payment',
+            Transaction::STATUS_PAYMENT_PENDING_ZERO_CONFIRMATIONS => 'awaiting_payment',
+            Transaction::STATUS_PAYMENT_PENDING_UNDER_THRESHOLD => 'verifying_payment',
             Transaction::STATUS_PAYMENT_VERIFIED => 'payment_confirmed',
+            Transaction::STATUS_NEED_CIRX_WALLET_TOP_UP => 'waiting_for_funding',
             Transaction::STATUS_TRANSFER_PENDING,
             Transaction::STATUS_CIRX_TRANSFER_PENDING => 'preparing_transfer',
             Transaction::STATUS_CIRX_TRANSFER_INITIATED,
@@ -185,9 +186,10 @@ class TransactionStatusController
     {
         return match ($status) {
             Transaction::STATUS_INITIATED => 10,
-            Transaction::STATUS_PAYMENT_PENDING => 20,
-            Transaction::STATUS_PENDING_PAYMENT_VERIFICATION => 40,
+            Transaction::STATUS_PAYMENT_PENDING_ZERO_CONFIRMATIONS => 20,
+            Transaction::STATUS_PAYMENT_PENDING_UNDER_THRESHOLD => 40,
             Transaction::STATUS_PAYMENT_VERIFIED => 60,
+            Transaction::STATUS_NEED_CIRX_WALLET_TOP_UP => 65,
             Transaction::STATUS_TRANSFER_PENDING,
             Transaction::STATUS_CIRX_TRANSFER_PENDING => 70,
             Transaction::STATUS_CIRX_TRANSFER_INITIATED,
@@ -206,9 +208,10 @@ class TransactionStatusController
     {
         return match ($status) {
             Transaction::STATUS_INITIATED => 'Transaction initiated. Please complete your payment.',
-            Transaction::STATUS_PAYMENT_PENDING => 'Waiting for your payment to be sent.',
-            Transaction::STATUS_PENDING_PAYMENT_VERIFICATION => 'Verifying your payment on the blockchain...',
+            Transaction::STATUS_PAYMENT_PENDING_ZERO_CONFIRMATIONS => 'Waiting for your payment to be sent.',
+            Transaction::STATUS_PAYMENT_PENDING_UNDER_THRESHOLD => 'Verifying your payment on the blockchain...',
             Transaction::STATUS_PAYMENT_VERIFIED => 'Payment confirmed! Preparing CIRX transfer...',
+            Transaction::STATUS_NEED_CIRX_WALLET_TOP_UP => 'Payment confirmed! Waiting for CIRX wallet to be funded...',
             Transaction::STATUS_TRANSFER_PENDING,
             Transaction::STATUS_CIRX_TRANSFER_PENDING => 'Preparing to send CIRX tokens to your address...',
             Transaction::STATUS_CIRX_TRANSFER_INITIATED,
@@ -227,9 +230,10 @@ class TransactionStatusController
     {
         return match ($status) {
             Transaction::STATUS_INITIATED,
-            Transaction::STATUS_PAYMENT_PENDING => null, // Depends on user action
-            Transaction::STATUS_PENDING_PAYMENT_VERIFICATION => 5,
+            Transaction::STATUS_PAYMENT_PENDING_ZERO_CONFIRMATIONS => null, // Depends on user action
+            Transaction::STATUS_PAYMENT_PENDING_UNDER_THRESHOLD => 5,
             Transaction::STATUS_PAYMENT_VERIFIED,
+            Transaction::STATUS_NEED_CIRX_WALLET_TOP_UP => null, // Depends on funding
             Transaction::STATUS_TRANSFER_PENDING,
             Transaction::STATUS_CIRX_TRANSFER_PENDING => 3,
             Transaction::STATUS_CIRX_TRANSFER_INITIATED,
@@ -300,9 +304,10 @@ class TransactionStatusController
     {
         return match ($status) {
             Transaction::STATUS_INITIATED => 'Initiated',
-            Transaction::STATUS_PAYMENT_PENDING => 'Awaiting Payment',
-            Transaction::STATUS_PENDING_PAYMENT_VERIFICATION => 'Verifying Payment',
+            Transaction::STATUS_PAYMENT_PENDING_ZERO_CONFIRMATIONS => 'Awaiting Payment',
+            Transaction::STATUS_PAYMENT_PENDING_UNDER_THRESHOLD => 'Verifying Payment',
             Transaction::STATUS_PAYMENT_VERIFIED => 'Payment Confirmed',
+            Transaction::STATUS_NEED_CIRX_WALLET_TOP_UP => 'Waiting for CIRX Wallet Funding',
             Transaction::STATUS_TRANSFER_PENDING,
             Transaction::STATUS_CIRX_TRANSFER_PENDING => 'Preparing Transfer',
             Transaction::STATUS_CIRX_TRANSFER_INITIATED,
