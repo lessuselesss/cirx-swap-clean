@@ -18,11 +18,6 @@
 
           <!-- Navigation & Wallet Section -->
           <div class="flex items-center gap-4">
-            <!-- Emergency Contact Notice -->
-            <div class="emergency-contact">
-              Phone broken. lessuseless[at]proton.me
-            </div>
-            
             <!-- Status Tracking Link -->
             <NuxtLink 
               to="/transactions" 
@@ -813,7 +808,7 @@ const dynamicPlaceholder = computed(() => {
 const fetchNetworkConfig = async () => {
   try {
     const config = useRuntimeConfig()
-    const apiBaseUrl = config.public.apiBaseUrl || 'http://localhost:18423/api/v1'
+    const apiBaseUrl = config.public.apiBaseUrl || 'http://localhost:18423/v1'
     
     const response = await fetch(`${apiBaseUrl}/config/circular-network`)
     if (response.ok) {
@@ -1668,7 +1663,7 @@ const checkBackendHealth = async () => {
   
   try {
     const config = useRuntimeConfig()
-    const apiBaseUrl = config.public.apiBaseUrl || 'http://localhost:18423/api/v1'
+    const apiBaseUrl = config.public.apiBaseUrl || 'http://localhost:18423/v1'
     
     controller = new AbortController()
     timeoutId = setTimeout(() => {
