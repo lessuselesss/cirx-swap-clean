@@ -90,7 +90,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ env.PHP_VERSION }}
-          extensions: mbstring, xml, pdo, sqlite, pdo_sqlite, bcmath, json
+          extensions: mbstring, xml, pdo, pgsql, pdo_pgsql, bcmath, json
           tools: composer:v2
       
       # Step 3: Setup Node.js for frontend
@@ -107,7 +107,7 @@ jobs:
         env:
           # Secrets
           ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
-          DB_DATABASE: ${{ secrets.DB_DATABASE }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
           CIRX_WALLET_ADDRESS: ${{ secrets.CIRX_WALLET_ADDRESS }}
           CIRX_WALLET_PRIVATE_KEY: ${{ secrets.CIRX_WALLET_PRIVATE_KEY }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
@@ -159,9 +159,9 @@ jobs:
           ADMIN_TOKEN_REQUIRED=${ADMIN_TOKEN_REQUIRED}
           ADMIN_TOKEN=${ADMIN_TOKEN}
           
-          # Database Configuration - Use testnet SQLite database for production
-          DB_CONNECTION=sqlite
-          DB_DATABASE=${DB_DATABASE}
+          # Database Configuration - Supabase PostgreSQL (Testnet)
+          DB_CONNECTION=pgsql
+          DATABASE_URL=${DATABASE_URL}
           
           # Blockchain Configuration
           ETHEREUM_RPC_URL=${ETHEREUM_RPC_URL}
@@ -228,10 +228,9 @@ jobs:
         working-directory: ${{ env.BACKEND_LOCAL_DIR }}
         run: |
           composer install --no-dev --optimize-autoloader
-          # Create storage directory and SQLite database (testnet)
+          # Create storage directory (for logs, cache, etc.)
           mkdir -p storage
-          touch storage/database.testnet.sqlite
-          chmod 664 storage/database.testnet.sqlite
+          chmod 755 storage
           # Set production permissions
           find . -type f -name "*.php" -exec chmod 644 {} \;
           find . -type d -exec chmod 755 {} \;

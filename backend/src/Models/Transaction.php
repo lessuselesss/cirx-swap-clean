@@ -4,7 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
+/**
+ * Transaction Model for PostgreSQL/Supabase
+ * 
+ * This model is optimized for PostgreSQL with proper row-level locking
+ * using FOR UPDATE NOWAIT for concurrent worker processing.
+ */
 class Transaction extends Model
 {
     protected $table = 'transactions';
@@ -25,467 +32,318 @@ class Transaction extends Model
         'failure_reason',
         'retry_count',
         'last_retry_at',
+        'recovery_attempts',
+        'last_recovery_at',
         'is_test_transaction',
     ];
 
     protected $casts = [
         'amount_paid' => 'decimal:18',
         'retry_count' => 'integer',
+        'recovery_attempts' => 'integer',
         'is_test_transaction' => 'boolean',
         'last_retry_at' => 'datetime',
+        'last_recovery_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
 
     // Status constants
-    const STATUS_INITIATED = 'initiated';
-    const STATUS_PAYMENT_PENDING_ZERO_CONFIRMATIONS = 'payment_pending_zero_confirmations';
-    const STATUS_PAYMENT_PENDING_UNDER_THRESHOLD = 'payment_pending_under_threshold';
-    const STATUS_PAYMENT_VERIFIED = 'payment_verified';
-    const STATUS_NEED_CIRX_WALLET_TOP_UP = 'need_cirx_wallet_top_up';
-    const STATUS_TRANSFER_PENDING = 'transfer_pending';
-    const STATUS_CIRX_TRANSFER_PENDING = 'cirx_transfer_pending';
-    const STATUS_CIRX_TRANSFER_INITIATED = 'cirx_transfer_initiated';
-    const STATUS_TRANSFER_INITIATED = 'transfer_initiated';
-    const STATUS_COMPLETED = 'completed';
-    const STATUS_FAILED_PAYMENT_VERIFICATION = 'failed_payment_verification';
-    const STATUS_FAILED_CIRX_TRANSFER = 'failed_cirx_transfer';
-
-    // Validation rules
-    protected static $rules = [
-        'id' => 'required|string|max:36',
-        'payment_tx_id' => 'required|string|max:255|unique:transactions',
-        'payment_chain' => 'required|string|max:50',
-        'sender_address' => 'nullable|string|max:255',
-        'cirx_recipient_address' => 'required|string|max:255',
-        'amount_paid' => 'required|numeric|min:0',
-        'payment_token' => 'required|string|max:10',
-        'swap_status' => 'required|in:' . self::STATUS_PAYMENT_PENDING_ZERO_CONFIRMATIONS . ',' .
-                        self::STATUS_PAYMENT_PENDING_UNDER_THRESHOLD . ',' .
-                        self::STATUS_PAYMENT_VERIFIED . ',' .
-                        self::STATUS_NEED_CIRX_WALLET_TOP_UP . ',' .
-                        self::STATUS_CIRX_TRANSFER_PENDING . ',' .
-                        self::STATUS_CIRX_TRANSFER_INITIATED . ',' .
-                        self::STATUS_COMPLETED . ',' .
-                        self::STATUS_FAILED_PAYMENT_VERIFICATION . ',' .
-                        self::STATUS_FAILED_CIRX_TRANSFER,
-    ];
+    public const STATUS_PENDING_PAYMENT_VERIFICATION = 'pending_payment_verification';
+    public const STATUS_PAYMENT_VERIFIED = 'payment_verified';
+    public const STATUS_CIRX_TRANSFER_PENDING = 'cirx_transfer_pending';
+    public const STATUS_CIRX_TRANSFER_INITIATED = 'cirx_transfer_initiated';
+    public const STATUS_COMPLETED = 'completed';
+    public const STATUS_FAILED_PAYMENT_VERIFICATION = 'failed_payment_verification';
+    public const STATUS_FAILED_CIRX_TRANSFER = 'failed_cirx_transfer';
 
     /**
-     * Scope queries to specific status
-     */
-    public function scopeWhereStatus(Builder $query, string $status): Builder
-    {
-        return $query->where('swap_status', $status);
-    }
-
-    /**
-     * Scope queries to payment pending (zero confirmations)
-     */
-    public function scopePaymentPendingZeroConfirmations(Builder $query): Builder
-    {
-        return $query->where('swap_status', self::STATUS_PAYMENT_PENDING_ZERO_CONFIRMATIONS);
-    }
-
-    /**
-     * Scope queries to payment pending (under confirmation threshold)
-     */
-    public function scopePaymentPendingUnderThreshold(Builder $query): Builder
-    {
-        return $query->where('swap_status', self::STATUS_PAYMENT_PENDING_UNDER_THRESHOLD);
-    }
-
-    /**
-     * Scope queries to needing CIRX wallet top up
-     */
-    public function scopeNeedCirxWalletTopUp(Builder $query): Builder
-    {
-        return $query->where('swap_status', self::STATUS_NEED_CIRX_WALLET_TOP_UP);
-    }
-
-    /**
-     * Scope queries to payment verified
-     */
-    public function scopePaymentVerified(Builder $query): Builder
-    {
-        return $query->where('swap_status', self::STATUS_PAYMENT_VERIFIED);
-    }
-
-    /**
-     * Scope queries to CIRX transfer pending
-     */
-    public function scopeCirxTransferPending(Builder $query): Builder
-    {
-        return $query->where('swap_status', self::STATUS_CIRX_TRANSFER_PENDING);
-    }
-
-    /**
-     * Scope queries to completed transactions
-     */
-    public function scopeCompleted(Builder $query): Builder
-    {
-        return $query->where('swap_status', self::STATUS_COMPLETED);
-    }
-
-    /**
-     * Scope queries to failed transactions
-     */
-    public function scopeFailed(Builder $query): Builder
-    {
-        return $query->whereIn('swap_status', [
-            self::STATUS_FAILED_PAYMENT_VERIFICATION,
-            self::STATUS_FAILED_CIRX_TRANSFER,
-        ]);
-    }
-
-    /**
-     * Check if transaction is completed
-     */
-    public function isCompleted(): bool
-    {
-        return $this->swap_status === self::STATUS_COMPLETED;
-    }
-
-    /**
-     * Check if transaction failed
-     */
-    public function isFailed(): bool
-    {
-        return in_array($this->swap_status, [
-            self::STATUS_FAILED_PAYMENT_VERIFICATION,
-            self::STATUS_FAILED_CIRX_TRANSFER,
-        ]);
-    }
-
-    /**
-     * Check if transaction is pending
-     */
-    public function isPending(): bool
-    {
-        return in_array($this->swap_status, [
-            self::STATUS_PAYMENT_PENDING_ZERO_CONFIRMATIONS,
-            self::STATUS_PAYMENT_PENDING_UNDER_THRESHOLD,
-            self::STATUS_PAYMENT_VERIFIED,
-            self::STATUS_NEED_CIRX_WALLET_TOP_UP,
-            self::STATUS_CIRX_TRANSFER_PENDING,
-            self::STATUS_CIRX_TRANSFER_INITIATED,
-        ]);
-    }
-
-    /**
-     * Mark transaction as payment verified
-     */
-    public function markPaymentVerified(): bool
-    {
-        return $this->update(['swap_status' => self::STATUS_PAYMENT_VERIFIED]);
-    }
-
-    /**
-     * Mark transaction as needing CIRX wallet top up
-     * Only allowed from payment_verified or cirx_transfer_pending states
-     */
-    public function markNeedCirxWalletTopUp(string $reason = 'Insufficient CIRX wallet balance'): bool
-    {
-        $allowedFrom = [
-            self::STATUS_PAYMENT_VERIFIED,
-            self::STATUS_CIRX_TRANSFER_PENDING
-        ];
-        
-        if (!in_array($this->swap_status, $allowedFrom)) {
-            throw new \InvalidArgumentException(
-                "Cannot mark as needing wallet top up from status: {$this->swap_status}. Allowed from: " . implode(', ', $allowedFrom)
-            );
-        }
-        
-        if (empty($reason)) {
-            throw new \InvalidArgumentException("Reason cannot be empty when marking as needing wallet top up");
-        }
-        
-        return $this->update([
-            'swap_status' => self::STATUS_NEED_CIRX_WALLET_TOP_UP,
-            'failure_reason' => $reason,
-        ]);
-    }
-
-    /**
-     * Mark transaction as CIRX transfer pending
-     */
-    public function markCirxTransferPending(): bool
-    {
-        return $this->update(['swap_status' => self::STATUS_CIRX_TRANSFER_PENDING]);
-    }
-
-    /**
-     * Mark transaction as CIRX transfer initiated
-     */
-    public function markCirxTransferInitiated(string $txId): bool
-    {
-        return $this->update([
-            'swap_status' => self::STATUS_CIRX_TRANSFER_INITIATED,
-            'cirx_transfer_tx_id' => $txId,
-        ]);
-    }
-
-    /**
-     * Mark transaction as completed
-     * Only allowed from cirx_transfer_initiated state
-     * Idempotent - can be called multiple times safely
-     */
-    public function markCompleted(): bool
-    {
-        // If already completed, this is a no-op (idempotent)
-        if ($this->swap_status === self::STATUS_COMPLETED) {
-            return true;
-        }
-        
-        $allowedFrom = [
-            self::STATUS_CIRX_TRANSFER_INITIATED,
-            self::STATUS_FAILED_CIRX_TRANSFER // Allow recovery from failed state
-        ];
-        
-        if (!in_array($this->swap_status, $allowedFrom)) {
-            throw new \InvalidArgumentException(
-                "Cannot mark completed from status: {$this->swap_status}. Allowed from: " . implode(', ', $allowedFrom)
-            );
-        }
-        
-        return $this->update(['swap_status' => self::STATUS_COMPLETED]);
-    }
-
-    /**
-     * Mark transaction as failed
-     */
-    public function markFailed(string $reason, string $status = self::STATUS_FAILED_PAYMENT_VERIFICATION): bool
-    {
-        return $this->update([
-            'swap_status' => $status,
-            'failure_reason' => $reason,
-        ]);
-    }
-
-    /**
-     * Emergency status update for recovery operations
-     * Bypasses validation - use only for stuck transaction recovery
-     */
-    public function forceStatusUpdate(string $status, array $additionalFields = []): bool
-    {
-        $validStatuses = [
-            self::STATUS_INITIATED,
-            self::STATUS_PAYMENT_PENDING_ZERO_CONFIRMATIONS,
-            self::STATUS_PAYMENT_PENDING_UNDER_THRESHOLD,
-            self::STATUS_PAYMENT_VERIFIED,
-            self::STATUS_NEED_CIRX_WALLET_TOP_UP,
-            self::STATUS_CIRX_TRANSFER_PENDING,
-            self::STATUS_CIRX_TRANSFER_INITIATED,
-            self::STATUS_COMPLETED,
-            self::STATUS_FAILED_PAYMENT_VERIFICATION,
-            self::STATUS_FAILED_CIRX_TRANSFER
-        ];
-        
-        if (!in_array($status, $validStatuses)) {
-            throw new \InvalidArgumentException("Invalid status: {$status}");
-        }
-        
-        $updateData = array_merge(['swap_status' => $status], $additionalFields);
-        return $this->update($updateData);
-    }
-
-    /**
-     * Lock transaction for exclusive processing to prevent race conditions
-     * Returns locked transaction or null if already locked
+     * Lock a transaction for exclusive processing using PostgreSQL FOR UPDATE NOWAIT
+     * 
+     * @param string $transactionId The transaction ID to lock
+     * @return Transaction|null Returns locked transaction or null if already locked
      */
     public static function lockForProcessing(string $transactionId): ?Transaction
     {
-        $pdo = self::getPDO();
-        
         try {
-            // Start transaction
-            $pdo->beginTransaction();
+            $connection = self::getConnectionResolver()->connection();
+            return $connection->transaction(function () use ($transactionId) {
+                // Use PostgreSQL FOR UPDATE NOWAIT for immediate lock acquisition
+                $transaction = self::where('id', $transactionId)
+                    ->lockForUpdate('nowait')
+                    ->first();
+                
+                if (!$transaction) {
+                    return null;
+                }
+                
+                // Mark that this transaction is locked
+                $transaction->_isLocked = true;
+                return $transaction;
+            });
             
-            // SQLite doesn't support FOR UPDATE, so we'll use a different approach
-            // First select and check the row exists and is in correct status
-            $stmt = $pdo->prepare("
-                SELECT * FROM transactions 
-                WHERE id = :id 
-            ");
-            $stmt->execute(['id' => $transactionId]);
-            $row = $stmt->fetch(\PDO::FETCH_ASSOC);
-            
-            if (!$row) {
-                $pdo->rollback();
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Handle PostgreSQL lock conflicts
+            if (str_contains($e->getMessage(), 'could not obtain lock') ||
+                str_contains($e->getMessage(), 'lock not available') ||
+                $e->getCode() === '55P03') {
+                // Lock acquisition failed - another process is working on this transaction
                 return null;
             }
             
-            // Create Transaction instance from row data
-            $transaction = new self();
-            foreach ($row as $key => $value) {
-                $transaction->$key = $value;
-            }
-            
-            // Store the PDO connection for later commit/rollback
-            $transaction->_lockedConnection = $pdo;
-            
-            return $transaction;
-            
-        } catch (\PDOException $e) {
-            $pdo->rollback();
-            // If lock acquisition failed, return null (transaction is being processed by another worker)
-            if (strpos($e->getMessage(), 'resource busy') !== false || 
-                strpos($e->getMessage(), 'NOWAIT') !== false) {
-                return null;
-            }
             throw $e;
         }
     }
 
     /**
-     * Unlock transaction after processing (commit the transaction)
+     * Lock multiple transactions for batch processing
+     * 
+     * @param array $transactionIds Array of transaction IDs
+     * @return array Array of successfully locked transactions
      */
-    public function unlockAfterProcessing(): void
+    public static function lockMultipleForProcessing(array $transactionIds): array
     {
-        if (isset($this->_lockedConnection)) {
+        if (empty($transactionIds)) {
+            return [];
+        }
+
+        try {
+            $connection = self::getConnectionResolver()->connection();
+            return $connection->transaction(function () use ($transactionIds) {
+                $transactions = self::whereIn('id', $transactionIds)
+                    ->orderBy('id') // Consistent ordering to prevent deadlocks
+                    ->lockForUpdate('nowait')
+                    ->get();
+                
+                // Mark all as locked
+                foreach ($transactions as $transaction) {
+                    $transaction->_isLocked = true;
+                }
+                
+                return $transactions->toArray();
+            });
+            
+        } catch (\Illuminate\Database\QueryException $e) {
+            if (str_contains($e->getMessage(), 'could not obtain lock') ||
+                $e->getCode() === '55P03') {
+                // Return empty array if any lock failed
+                return [];
+            }
+            
+            throw $e;
+        }
+    }
+
+    /**
+     * Lock with timeout (PostgreSQL only)
+     * 
+     * @param string $transactionId Transaction ID to lock
+     * @param int $timeoutMs Timeout in milliseconds (default 5 seconds)
+     * @return Transaction|null
+     */
+    public static function lockForProcessingWithTimeout(string $transactionId, int $timeoutMs = 5000): ?Transaction
+    {
+        try {
+            $connection = self::getConnectionResolver()->connection();
+            return $connection->transaction(function () use ($transactionId, $timeoutMs, $connection) {
+                // Set lock timeout for this transaction
+                $connection->statement("SET lock_timeout = '{$timeoutMs}ms'");
+                
+                $transaction = self::where('id', $transactionId)
+                    ->lockForUpdate() // Use timeout instead of nowait
+                    ->first();
+                
+                if ($transaction) {
+                    $transaction->_isLocked = true;
+                }
+                
+                return $transaction;
+            });
+            
+        } catch (\Illuminate\Database\QueryException $e) {
+            if (str_contains($e->getMessage(), 'timeout') ||
+                str_contains($e->getMessage(), 'lock not available')) {
+                return null;
+            }
+            
+            throw $e;
+        } finally {
+            // Reset lock timeout to default
             try {
-                $this->_lockedConnection->commit();
-            } catch (\PDOException $e) {
-                $this->_lockedConnection->rollback();
-                throw $e;
-            } finally {
-                unset($this->_lockedConnection);
+                $connection = self::getConnectionResolver()->connection();
+                $connection->statement("SET lock_timeout = DEFAULT");
+            } catch (\Exception $e) {
+                // Ignore errors when resetting timeout
             }
         }
     }
 
-    /**
-     * Release lock without committing changes (rollback)
-     */
-    public function releaseLock(): void
+    // Status management methods
+    public function markPending(): void
     {
-        if (isset($this->_lockedConnection)) {
-            $this->_lockedConnection->rollback();
-            unset($this->_lockedConnection);
-        }
+        $this->update(['swap_status' => self::STATUS_PENDING_PAYMENT_VERIFICATION]);
     }
 
-    /**
-     * Update transaction status with atomic lock
-     * Prevents race conditions by locking row during update
-     */
-    public function atomicStatusUpdate(string $status, array $additionalFields = []): bool
+    public function markPaymentVerified(): void
     {
-        if (isset($this->_lockedConnection)) {
-            // Already locked, just update
-            $updateData = array_merge(['swap_status' => $status], $additionalFields);
-            $updateData['updated_at'] = (new \DateTime())->format('Y-m-d H:i:s');
-            
-            $setClause = [];
-            $params = ['id' => $this->id];
-            
-            foreach ($updateData as $field => $value) {
-                $setClause[] = "{$field} = :{$field}";
-                $params[$field] = $value;
-                $this->$field = $value; // Update local instance
-            }
-            
-            $sql = "UPDATE transactions SET " . implode(', ', $setClause) . " WHERE id = :id";
-            $stmt = $this->_lockedConnection->prepare($sql);
-            return $stmt->execute($params);
-        } else {
-            // Use regular update
-            return $this->forceStatusUpdate($status, $additionalFields);
-        }
+        $this->update(['swap_status' => self::STATUS_PAYMENT_VERIFIED]);
     }
 
-    /**
-     * Get PDO connection for locking operations
-     */
-    private static function getPDO(): \PDO
+    public function markCirxTransferPending(): void
     {
-        // Get database configuration
-        $databasePath = $_ENV['DB_DATABASE'] ?? 'database/database.sqlite';
-        
-        // Create SQLite connection
-        $pdo = new \PDO("sqlite:{$databasePath}");
-        $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-        
-        // Enable WAL mode for better concurrent access
-        $pdo->exec('PRAGMA journal_mode=WAL;');
-        $pdo->exec('PRAGMA synchronous=NORMAL;');
-        $pdo->exec('PRAGMA busy_timeout=5000;'); // 5 second timeout
-        
-        return $pdo;
+        $this->update(['swap_status' => self::STATUS_CIRX_TRANSFER_PENDING]);
     }
 
-    /**
-     * Get human-readable status
-     */
-    public function getStatusDisplayAttribute(): string
+    public function markCirxTransferInitiated(string $transferTxId): void
     {
-        return match ($this->swap_status) {
-            self::STATUS_PAYMENT_PENDING_ZERO_CONFIRMATIONS => 'Payment Submitted (0 Confirmations)',
-            self::STATUS_PAYMENT_PENDING_UNDER_THRESHOLD => 'Payment Confirming (Under Threshold)',
-            self::STATUS_PAYMENT_VERIFIED => 'Payment Verified',
-            self::STATUS_NEED_CIRX_WALLET_TOP_UP => 'Waiting for CIRX Wallet Top Up',
-            self::STATUS_CIRX_TRANSFER_PENDING => 'CIRX Transfer Pending',
-            self::STATUS_CIRX_TRANSFER_INITIATED => 'CIRX Transfer Initiated',
-            self::STATUS_COMPLETED => 'Completed',
-            self::STATUS_FAILED_PAYMENT_VERIFICATION => 'Payment Verification Failed',
-            self::STATUS_FAILED_CIRX_TRANSFER => 'CIRX Transfer Failed',
-            default => 'Unknown Status',
-        };
+        $this->update([
+            'swap_status' => self::STATUS_CIRX_TRANSFER_INITIATED,
+            'cirx_transfer_tx_id' => $transferTxId
+        ]);
     }
 
-    /**
-     * Get validation rules
-     */
-    public static function getRules(): array
+    public function markCompleted(string $transferTxId): void
     {
-        return self::$rules;
+        $this->update([
+            'swap_status' => self::STATUS_COMPLETED,
+            'cirx_transfer_tx_id' => $transferTxId
+        ]);
     }
 
-    /**
-     * Create Transaction object from array data
-     * Handles mapping between integration test schema and model properties
-     */
-    public static function fromArray(array $data): self
+    public function markFailed(string $reason, string $status = self::STATUS_FAILED_PAYMENT_VERIFICATION): void
     {
-        $transaction = new self();
-        
-        // Handle property mapping between schemas
-        $propertyMap = [
-            'transaction_id' => 'id',
-            'payment_amount' => 'amount_paid'
+        $this->update([
+            'swap_status' => $status,
+            'failure_reason' => $reason
+        ]);
+    }
+
+    // Query scopes for common filters
+    public function scopePending(Builder $query): Builder
+    {
+        return $query->where('swap_status', self::STATUS_PENDING_PAYMENT_VERIFICATION);
+    }
+
+    public function scopePaymentVerified(Builder $query): Builder
+    {
+        return $query->where('swap_status', self::STATUS_PAYMENT_VERIFIED);
+    }
+
+    public function scopeCompleted(Builder $query): Builder
+    {
+        return $query->where('swap_status', self::STATUS_COMPLETED);
+    }
+
+    public function scopeFailed(Builder $query): Builder
+    {
+        return $query->whereIn('swap_status', [
+            self::STATUS_FAILED_PAYMENT_VERIFICATION,
+            self::STATUS_FAILED_CIRX_TRANSFER
+        ]);
+    }
+
+    public function scopeReadyForRetry(Builder $query): Builder
+    {
+        $fifteenMinutesAgo = date('Y-m-d H:i:s', strtotime('-15 minutes'));
+        return $query->where('swap_status', self::STATUS_PAYMENT_VERIFIED)
+            ->where(function ($q) use ($fifteenMinutesAgo) {
+                $q->whereNull('last_retry_at')
+                  ->orWhere('last_retry_at', '<', $fifteenMinutesAgo);
+            });
+    }
+
+    public function scopeStuckTransactions(Builder $query): Builder
+    {
+        $tenMinutesAgo = date('Y-m-d H:i:s', strtotime('-10 minutes'));
+        return $query->where('swap_status', self::STATUS_CIRX_TRANSFER_PENDING)
+            ->where('updated_at', '<', $tenMinutesAgo);
+    }
+
+    // Statistics and monitoring
+    public static function getStatistics(): array
+    {
+        return [
+            'total' => self::count(),
+            'pending' => self::pending()->count(),
+            'payment_verified' => self::paymentVerified()->count(),
+            'completed' => self::completed()->count(),
+            'failed' => self::failed()->count(),
+            'ready_for_retry' => self::readyForRetry()->count(),
+            'stuck' => self::stuckTransactions()->count(),
         ];
-        
-        foreach ($data as $key => $value) {
-            // Use mapped property name if exists, otherwise use original
-            $propertyName = $propertyMap[$key] ?? $key;
+    }
+
+    /**
+     * Get PostgreSQL lock statistics for monitoring
+     */
+    public static function getLockStatistics(): array
+    {
+        try {
+            // Use Eloquent's connection directly instead of DB facade
+            $connection = self::getConnectionResolver()->connection();
             
-            if (in_array($propertyName, $transaction->fillable) || $propertyName === 'id') {
-                $transaction->$propertyName = $value;
-            }
-            
-            // Also set the original property for integration test compatibility
-            $transaction->$key = $value;
+            $lockStats = $connection->select("
+                SELECT 
+                    mode,
+                    COUNT(*) as lock_count,
+                    COUNT(DISTINCT pid) as process_count
+                FROM pg_locks 
+                WHERE relation = (
+                    SELECT oid FROM pg_class WHERE relname = 'transactions'
+                )
+                GROUP BY mode
+                ORDER BY lock_count DESC
+            ");
+
+            $blockedStats = $connection->select("
+                SELECT 
+                    COUNT(*) as blocked_count,
+                    COUNT(DISTINCT pid) as blocked_processes
+                FROM pg_stat_activity 
+                WHERE wait_event_type = 'Lock' 
+                AND query LIKE '%transactions%'
+            ");
+
+            return [
+                'database_type' => 'postgresql',
+                'lock_modes' => $lockStats ?: [],
+                'blocked_queries' => isset($blockedStats[0]) ? $blockedStats[0]->blocked_count : 0,
+                'blocked_processes' => isset($blockedStats[0]) ? $blockedStats[0]->blocked_processes : 0,
+                'timestamp' => date('c')
+            ];
+
+        } catch (\Exception $e) {
+            return [
+                'database_type' => 'postgresql',
+                'error' => 'Could not retrieve lock statistics: ' . $e->getMessage(),
+                'timestamp' => date('c')
+            ];
         }
-        
-        return $transaction;
     }
 
-    /**
-     * Override save method to match Eloquent signature
-     */
-    public function save(array $options = []): bool
+    // Helper methods
+    public function isCompleted(): bool
     {
-        // Use parent save method to actually persist to database
-        return parent::save($options);
+        return $this->swap_status === self::STATUS_COMPLETED;
     }
 
-    /**
-     * Override update method to match Eloquent signature
-     */
-    public function update(array $attributes = [], array $options = []): bool
+    public function isFailed(): bool
     {
-        // Use parent update method to actually persist to database
-        return parent::update($attributes, $options);
+        return in_array($this->swap_status, [
+            self::STATUS_FAILED_PAYMENT_VERIFICATION,
+            self::STATUS_FAILED_CIRX_TRANSFER
+        ]);
+    }
+
+    public function isReadyForProcessing(): bool
+    {
+        return $this->swap_status === self::STATUS_PAYMENT_VERIFIED;
+    }
+
+    public function shouldRetry(): bool
+    {
+        return $this->isReadyForProcessing() && 
+               ($this->retry_count ?? 0) < 3 &&
+               (!$this->last_retry_at || $this->last_retry_at->addMinutes(15)->isPast());
     }
 }

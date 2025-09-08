@@ -152,17 +152,26 @@ try {
 }
 
 // Set up database connection
+use App\Config\SupabaseConfig;
+
 $capsule = new Capsule();
-$capsule->addConnection([
-    'driver' => $_ENV['DB_CONNECTION'] ?? 'mysql',
-    'host' => $_ENV['DB_HOST'] ?? 'localhost',
-    'database' => $_ENV['DB_DATABASE'] ?? 'cirx_otc',
-    'username' => $_ENV['DB_USERNAME'] ?? 'root',
-    'password' => $_ENV['DB_PASSWORD'] ?? '',
-    'charset' => 'utf8',
-    'collation' => 'utf8_unicode_ci',
-    'prefix' => '',
-]);
+
+// Use Supabase configuration helper
+try {
+    $dbConfig = SupabaseConfig::getDatabaseConfig();
+    $capsule->addConnection($dbConfig);
+    
+    // Log connection info for debugging
+    error_log("Database connection configured: " . $dbConfig['driver'] . " at " . ($dbConfig['host'] ?? 'local'));
+} catch (Exception $e) {
+    error_log("Database configuration error: " . $e->getMessage());
+    // Fallback to original configuration
+    $capsule->addConnection([
+        'driver' => $_ENV['DB_CONNECTION'] ?? 'sqlite',
+        'database' => $_ENV['DB_DATABASE'] ?? dirname(__DIR__) . '/storage/database.sqlite',
+        'prefix' => '',
+    ]);
+}
 
 $capsule->setAsGlobal();
 $capsule->bootEloquent();
