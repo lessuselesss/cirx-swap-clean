@@ -49,10 +49,16 @@ class Transaction extends Model
     ];
 
     // Status constants
+    public const STATUS_INITIATED = 'initiated';
     public const STATUS_PENDING_PAYMENT_VERIFICATION = 'pending_payment_verification';
+    public const STATUS_PAYMENT_PENDING_ZERO_CONFIRMATIONS = 'payment_pending_zero_confirmations';
+    public const STATUS_PAYMENT_PENDING_UNDER_THRESHOLD = 'payment_pending_under_threshold';
     public const STATUS_PAYMENT_VERIFIED = 'payment_verified';
+    public const STATUS_NEED_CIRX_WALLET_TOP_UP = 'need_cirx_wallet_top_up';
     public const STATUS_CIRX_TRANSFER_PENDING = 'cirx_transfer_pending';
+    public const STATUS_TRANSFER_PENDING = 'transfer_pending';
     public const STATUS_CIRX_TRANSFER_INITIATED = 'cirx_transfer_initiated';
+    public const STATUS_TRANSFER_INITIATED = 'transfer_initiated';
     public const STATUS_COMPLETED = 'completed';
     public const STATUS_FAILED_PAYMENT_VERIFICATION = 'failed_payment_verification';
     public const STATUS_FAILED_CIRX_TRANSFER = 'failed_cirx_transfer';
