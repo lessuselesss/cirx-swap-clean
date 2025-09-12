@@ -1,52 +1,5 @@
 <template>
-  <div class="min-h-screen relative overflow-hidden bg-figma-base">
-    <!-- Space Background -->
-    <div key="static-background" class="absolute inset-0 bg-cover bg-center bg-no-repeat bg-fixed z-0 space-background"></div>
-    <!-- Gradient overlay -->
-    <div key="static-gradient" class="absolute inset-0 z-10 gradient-overlay"></div>
-    <header class="sticky top-0 z-50 relative">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-20">
-          <!-- Logo Section -->
-          <div class="flex items-center gap-4">
-            <img 
-              src="/images/logo/SVG/color-logo-white-svg.svg" 
-              alt="Circular Protocol" 
-              class="h-8 w-auto drop-shadow-lg"
-            />
-          </div>
-
-          <!-- Navigation & Wallet Section -->
-          <div class="flex items-center gap-4">
-            <!-- Status Tracking Link -->
-            <NuxtLink 
-              to="/transactions" 
-              class="px-3 py-2 text-sm text-gray-300 hover:text-white transition-colors rounded-lg hover:bg-gray-800/50"
-            >
-              Transactions
-            </NuxtLink>
-            
-            
-            <!-- AppKit Wallet Connection -->
-            <ClientOnly>
-              <template #fallback>
-                <div class="w-32 h-10 bg-gray-800 rounded-lg animate-pulse"></div>
-              </template>
-              <AppKitButton v-if="$appkit && typeof $appkit === 'object' && !$appkit.disabled" />
-              <div v-else-if="$appkit?.disabled" class="px-4 py-2 bg-gray-600 text-gray-300 rounded-lg text-sm">
-                Wallet Configuration Error
-              </div>
-              <div v-else class="px-4 py-2 bg-gray-600 text-gray-300 rounded-lg text-sm">
-                Wallet Unavailable
-              </div>
-            </ClientOnly>
-          </div>
-        </div>
-      </div>
-    </header>
-
-    
-    <div class="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4 md:p-8 relative z-10">
+  <div class="min-h-[calc(100vh-5rem)] flex items-center justify-center p-6 md:p-12 lg:p-16 relative z-20">
       <div :class="[
         'w-full mx-auto transition-all duration-500',
         (showChart || showStaking) ? 'max-w-none px-4' : 'max-w-lg'
@@ -70,9 +23,9 @@
         
         <div class="relative">
           
-          <div class="relative p-6 sm:p-8 rounded-2xl border border-cyan-500/30 shadow-2xl shadow-cyan-500/10 transition-all duration-300 gradient-border min-h-[600px] swap-container">
+          <div class="relative pt-1 px-8 pb-8 sm:pt-1 sm:px-12 sm:pb-12 lg:pt-1 lg:px-16 lg:pb-16 rounded-2xl border border-cyan-500/30 shadow-2xl shadow-cyan-500/10 transition-all duration-300 gradient-border min-h-[600px] swap-container">
           
-          <div class="flex mb-6 rounded-xl p-1 gap-1 overflow-hidden tab-container">
+          <div class="flex mb-8 rounded-xl p-1 gap-1 overflow-hidden tab-container">
             <button
               @click="activeTab = 'liquid'"
               :class="[
@@ -85,9 +38,8 @@
               <div class="flex items-center gap-1 sm:gap-2">
                 <!-- Liquid Swap Icon -->
                 <img src="/buy_liquid.svg" alt="Liquid" class="w-3 h-2.5 flex-shrink-0" />
-                <span class="text-xs sm:text-sm text-center leading-tight">
-                  <span class="block md:inline">Buy</span>
-                  <span class="block md:inline"> Liquid</span>
+                <span class="text-xs sm:text-sm text-center leading-tight whitespace-nowrap">
+                  Buy Liquid
                 </span>
               </div>
             </button>
@@ -103,9 +55,8 @@
               <div class="flex items-center gap-1 sm:gap-2">
                 <!-- OTC Contract Icon -->
                 <img src="/buy_otc_purple.svg" alt="OTC" class="w-3 h-3.5 flex-shrink-0" />
-                <span class="text-xs sm:text-sm text-center leading-tight">
-                  <span class="block md:inline">Vested</span>
-                  <span class="block md:inline"> OTC</span>
+                <span class="text-xs sm:text-sm text-center leading-tight whitespace-nowrap">
+                  Vested OTC
                 </span>
               </div>
             </button>
@@ -115,7 +66,7 @@
           <form @submit.prevent novalidate>
             
             <!-- CIRX OTC Connected Swap Fields -->
-            <div class="mb-6 relative">
+            <div class="mb-12 relative">
               <div class="swap-container" :data-tab="activeTab">
                 <!-- Sell Field (Top) -->
                 <div class="input-section input-section-top">
@@ -158,28 +109,25 @@
                           v-if="inputToken"
                           :src="getTokenLogo(inputToken)" 
                           :alt="inputToken"
-                          class="rounded-full"
-                          style="width: 16px; height: 16px;"
+                          class="rounded-full w-4 h-4"
                         />
                         <svg 
                           v-else
-                          class="text-gray-400"
-                          style="width: 16px; height: 16px;"
+                          class="text-gray-400 w-4 h-4"
                           fill="none" 
                           stroke="currentColor" 
                           viewBox="0 0 24 24"
                         >
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
                         </svg>
-                        <span v-if="inputToken" class="font-semibold text-white" style="font-size: 0.8rem; letter-spacing: -0.01em;">
+                        <span v-if="inputToken" class="font-semibold text-white text-sm tracking-tight">
                           {{ getTokenSymbol(inputToken) }}
                         </span>
-                        <span v-else class="font-semibold" style="color: #00e3a3; font-size: 0.8rem; letter-spacing: -0.01em;">
+                        <span v-else class="font-semibold text-circular-primary text-sm tracking-tight">
                           Select
                         </span>
                         <svg 
-                          :class="['text-gray-400 transition-transform', showTokenDropdown && 'rotate-180']" 
-                          style="width: 12px; height: 12px;"
+                          :class="['text-gray-400 transition-transform w-3 h-3', showTokenDropdown && 'rotate-180']" 
                           fill="none" 
                           stroke="currentColor" 
                           viewBox="0 0 24 24"
@@ -296,18 +244,16 @@
                     <!-- Liquid Mode: Standard CIRX Display -->
                     <div 
                       v-else
-                      class="token-display token-display-right flex items-center gap-2 rounded-full bg-gray-700/50 hover:bg-gray-700/70 transition-colors"
-                      style="width: 110px; min-width: 110px; max-width: 110px; padding: 8px 12px;"
+                      class="token-display token-display-right flex items-center gap-2 rounded-full bg-gray-700/50 hover:bg-gray-700/70 transition-colors w-28 min-w-[7rem] max-w-[7rem] px-3 py-2"
                       ref="cirxButton"
                     >
                       <img 
                         :src="getTokenLogo('CIRX')" 
                         alt="CIRX"
-                        class="rounded-full"
-                        style="width: 16px; height: 16px;"
+                        class="rounded-full w-4 h-4"
                         @error="$event.target.src = 'https://cdn.prod.website-files.com/65e472c0cd2f1bebcd7fcf73/65e483ab69e2314b250ed7dc_imageedit_1_8961069084.png'"
                       />
-                      <span class="font-semibold text-white" style="font-size: 0.8rem; letter-spacing: -0.01em;">CIRX</span>
+                      <span class="font-semibold text-white text-sm tracking-tight">CIRX</span>
                     </div>
                   </div>
                   <div class="usd-value">
@@ -383,7 +329,7 @@
             </div>
 
             
-            <div class="mb-6">
+            <div class="mb-12">
               <div class="flex justify-between items-center mb-3">
                 <div class="flex items-center gap-3">
                   <label class="text-sm font-medium text-white">Circular Chain Address</label>
@@ -470,11 +416,13 @@
               
               <!-- Help text when no address is entered -->
               <div v-else-if="!recipientAddress" class="mt-2 text-xs text-gray-500">
+                Enter wallet address to receive CIRX
               </div>
             </div>
 
             <!-- Unified CTA Button -->
-            <CallToAction
+            <div class="mt-12 mb-8">
+              <CallToAction
               :wallet-connected="isConnected?.value"
               :recipient-address="recipientAddress"
               :recipient-address-error="recipientAddressError"
@@ -497,11 +445,12 @@
               @get-cirx-wallet="handleGetCirxWallet"
               @click="handleSwapFromCTA"
             />
+            </div>
           </form>
         </div>
           
           <!-- Floating Action Pills -->
-          <div class="mt-4 flex justify-start gap-3">
+          <div class="mt-8 flex justify-start gap-4">
             <button
               v-if="!showChart"
               @click="showChart = true; showStaking = false"
@@ -536,7 +485,7 @@
         </div>
         
         <!-- White Circular Logo centered at bottom -->
-        <div class="mt-8 flex justify-center">
+        <div class="mt-12 flex justify-center">
           <img 
             src="/images/logo/PNG/abstract-icon-white-png.png" 
             alt="Circular Protocol" 
@@ -628,12 +577,11 @@
           </p>
         </div>
       </div>
-    </div>
 
-    <!-- State 6 Confirmation Modal -->
-    <!-- Get Circular Wallet Modal -->
-    <GetCircularWalletModal v-model="showConfirmationModal" />
-  </div>
+      <!-- State 6 Confirmation Modal -->
+      <!-- Get Circular Wallet Modal -->
+      <GetCircularWalletModal v-model="showConfirmationModal" />
+    </div>
 </template>
 
 <script setup>
@@ -1830,7 +1778,7 @@ useHead({
   position: relative;
   background: #000306;
   border-radius: 16px;
-  padding: 4px;
+  padding: 16px;
   transition: all 0.3s ease;
   overflow: visible;
 }
@@ -2155,15 +2103,7 @@ input[type="number"] {
   }
 }
 
-/* Extracted inline styles following Nuxt conventions */
-.space-background {
-  background-image: url('/buy/background.png');
-}
-
-.gradient-overlay {
-  background: linear-gradient(to bottom, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.70) 50%, transparent 100%);
-}
-
+/* Component-specific styles */
 .swap-container {
   background-color: rgba(0, 3, 6, 0.9);
 }

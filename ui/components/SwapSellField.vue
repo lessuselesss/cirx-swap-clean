@@ -1,6 +1,5 @@
 <template>
   <div>
-    <div class="bg-red-500 p-4 text-white font-bold text-2xl mb-4">🚨 SELL FIELD COMPONENT IS HERE 🚨</div>
     <div class="flex justify-between items-center mb-3">
       <label class="text-sm font-medium text-white">Sell</label>
       <span 

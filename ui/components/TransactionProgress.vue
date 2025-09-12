@@ -134,34 +134,28 @@
 
     <!-- Action Buttons -->
     <div v-if="showActions" class="mt-4 flex space-x-3">
-      <UButton 
+      <button 
         v-if="canRetry"
-        color="blue"
-        variant="outline"
-        size="sm"
         @click="$emit('retry')"
+        class="px-4 py-2 text-sm font-medium text-blue-400 border border-blue-400 rounded-lg hover:bg-blue-400/10 transition-colors"
       >
         Retry Transaction
-      </UButton>
+      </button>
       
-      <UButton 
+      <button 
         v-if="isComplete"
-        color="green"
-        variant="outline"
-        size="sm"
         @click="$emit('view-transaction')"
+        class="px-4 py-2 text-sm font-medium text-green-400 border border-green-400 rounded-lg hover:bg-green-400/10 transition-colors"
       >
         View on Explorer
-      </UButton>
+      </button>
       
-      <UButton 
-        color="gray"
-        variant="ghost"
-        size="sm"
+      <button 
         @click="$emit('close')"
+        class="px-4 py-2 text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-700/50 rounded-lg transition-colors"
       >
         {{ isComplete ? 'Close' : 'Minimize' }}
-      </UButton>
+      </button>
     </div>
   </div>
 </template>

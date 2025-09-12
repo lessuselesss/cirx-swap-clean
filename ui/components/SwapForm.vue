@@ -130,17 +130,18 @@
     </div>
 
     <!-- Transaction Progress Modal -->
-    <UModal v-model="showTransactionProgress" :ui="{ width: 'sm:max-w-2xl' }">
-      <div class="p-6">
+    <div v-if="showTransactionProgress" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="bg-gray-900 border border-gray-700 rounded-2xl max-w-2xl w-full p-6 relative">
         <div class="flex items-center justify-between mb-4">
           <h3 class="text-lg font-semibold text-white">Transaction Progress</h3>
-          <UButton
-            color="gray"
-            variant="ghost"
-            size="sm"
-            icon="i-heroicons-x-mark-20-solid"
+          <button
             @click="showTransactionProgress = false"
-          />
+            class="text-gray-400 hover:text-white transition-colors p-1 rounded"
+          >
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
         </div>
         
         <TransactionProgress
@@ -150,7 +151,7 @@
           @close="showTransactionProgress = false"
         />
       </div>
-    </UModal>
+    </div>
   </div>
 </template>
 

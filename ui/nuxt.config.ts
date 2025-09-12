@@ -49,7 +49,7 @@ export default defineNuxtConfig({
   modules: [
     '@nuxtjs/tailwindcss', 
     '@pinia/nuxt',
-    // '@nuxt/ui' // Temporarily disabled - causing build issues
+    // '@nuxt/ui', // Disabled - not installed, causes build issues
     'nuxt-icon',
     'unplugin-icons/nuxt',
     'floating-vue/nuxt',
