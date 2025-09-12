@@ -58,7 +58,7 @@
           
           <!-- Chart or Staking Panel (mutually exclusive) -->
           <div v-if="showChart || showStaking" class="w-full lg:w-3/5 xl:w-2/3 h-[80vh]">
-            <CirxPriceChart v-if="showChart" @close="showChart = false" />
+            <PriceChart v-if="showChart" @close="showChart = false" />
             <CirxStakingPanel v-else-if="showStaking" @close="showStaking = false" />
           </div>
           
@@ -643,7 +643,7 @@ import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 // Import components
 // AppKit wallet integration now handles all wallet functionality
 import DiscountDropdown from '~/components/DiscountDropdown.vue'
-import CirxPriceChart from '~/components/CirxPriceChart.vue'
+import PriceChart from '~/components/PriceChart.vue'
 import CirxStakingPanel from '~/components/CirxStakingPanel.vue'
 import CallToAction from '~/components/CallToAction.vue'
 import GetCircularWalletModal from '~/components/GetCircularWalletModal.vue'
