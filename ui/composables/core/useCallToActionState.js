@@ -171,14 +171,14 @@ export function useCTAState({
 
   // Button styling based on variant - always use circular-primary to match "Buy Liquid" button
   const buttonClasses = computed(() => {
-    const baseClasses = 'w-full py-3 px-6 rounded-xl font-medium text-base transition-all duration-300 border-2 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-circular-primary focus:ring-offset-2 active:scale-95'
+    const baseClasses = 'w-full py-3 px-6 rounded-xl font-medium text-base transition-all duration-300 border-2 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-circular-primary/40 focus:ring-offset-2 active:scale-95'
     
     const variantValue = variant?.value || variant || 'primary'
     console.log('🎨 CTA buttonClasses computed - variant:', variantValue)
     
     if (variantValue === 'primary') {
-      // Always use circular-primary with better contrast and hover effects
-      return `${baseClasses} bg-circular-primary text-white border-circular-primary hover:bg-circular-primary/90 hover:shadow-lg hover:scale-[1.02]`
+      // Always use circular-primary with better contrast and hover effects  
+      return `${baseClasses} bg-circular-primary/30 text-circular-primary border-transparent hover:bg-circular-primary/30 hover:shadow-lg hover:scale-[1.02]`
     }
     
     console.log('🎨 CTA buttonClasses - fallback classes:', baseClasses)
