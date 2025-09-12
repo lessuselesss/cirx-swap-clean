@@ -57,13 +57,7 @@
         <!-- Standard CIRX Token Display (always visible when dropdown is not shown) -->
         <div 
           v-else
-          class="flex items-center gap-2 px-3 py-2 rounded-full bg-gray-700/50 hover:bg-gray-700/70 transition-colors cursor-pointer"
-          role="button"
-          tabindex="0"
-          aria-label="CIRX token selector"
-          @click="handleTokenClick"
-          @keydown.enter="handleTokenClick"
-          @keydown.space.prevent="handleTokenClick"
+          class="flex items-center gap-2 px-3 py-2 rounded-full bg-gray-700/50"
         >
           <img 
             src="/cirx-icon.svg" 
@@ -155,7 +149,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['update:cirxAmount', 'cirx-changed', 'tier-changed', 'token-click'])
+const emit = defineEmits(['update:cirxAmount', 'cirx-changed', 'tier-changed'])
 
 // Use the number input composable with comma formatting for CIRX amounts
 const {
@@ -231,11 +225,6 @@ const handleTierChange = (tier) => {
   emit('tier-changed', tier)
 }
 
-// Handle token click (for future token selection)
-const handleTokenClick = () => {
-  console.log('CIRX token clicked - token selector could be implemented here')
-  emit('token-click', 'CIRX')
-}
 </script>
 
 <style scoped>
