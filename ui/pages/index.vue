@@ -1,9 +1,9 @@
 <template>
   <div class="min-h-screen relative overflow-hidden bg-figma-base">
     <!-- Space Background -->
-    <div key="static-background" class="absolute inset-0 bg-cover bg-center bg-no-repeat bg-fixed z-0" style="background-image: url('/buy/background.png')"></div>
+    <div key="static-background" class="absolute inset-0 bg-cover bg-center bg-no-repeat bg-fixed z-0 space-background"></div>
     <!-- Gradient overlay -->
-    <div key="static-gradient" class="absolute inset-0 z-10" style="background: linear-gradient(to bottom, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.70) 50%, transparent 100%);"></div>
+    <div key="static-gradient" class="absolute inset-0 z-10 gradient-overlay"></div>
     <header class="sticky top-0 z-50 relative">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-20">
@@ -70,9 +70,9 @@
         
         <div class="relative">
           
-          <div class="relative p-6 sm:p-8 rounded-2xl border border-cyan-500/30 shadow-2xl shadow-cyan-500/10 transition-all duration-300 gradient-border min-h-[600px]" style="background-color: rgba(0, 3, 6, 0.9);">
+          <div class="relative p-6 sm:p-8 rounded-2xl border border-cyan-500/30 shadow-2xl shadow-cyan-500/10 transition-all duration-300 gradient-border min-h-[600px] swap-container">
           
-          <div class="flex mb-6 rounded-xl p-1 gap-1 overflow-hidden" style="background-color: #11161f;">
+          <div class="flex mb-6 rounded-xl p-1 gap-1 overflow-hidden tab-container">
             <button
               @click="activeTab = 'liquid'"
               :class="[
@@ -640,21 +640,13 @@
 // Import Vue composables
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 // AppKit handled by web components - no direct imports needed
-// Import components
-// AppKit wallet integration now handles all wallet functionality
-import DiscountDropdown from '~/components/DiscountDropdown.vue'
-import PriceChart from '~/components/PriceChart.vue'
-import CirxStakingPanel from '~/components/CirxStakingPanel.vue'
-import CallToAction from '~/components/CallToAction.vue'
-import GetCircularWalletModal from '~/components/GetCircularWalletModal.vue'
-import { useCTAState } from '~/composables/core/useCallToActionState.js'
+// Components auto-imported by Nuxt from ~/components/
+import { useCTAState } from '~/composables/core/useCallToActionState'
 // Import unified price data composable
 import { usePriceData } from '~/composables/usePriceData'
-// AggregateMarket consolidated into unified price service
-// Address validation functions can be added here if needed
 // Import unified API client and CIRX utilities
-import { useApiClient } from '~/composables/core/useApiClient.js'
-import { useCirxUtils } from '~/composables/useCirxUtils.js'
+import { useApiClient } from '~/composables/core/useApiClient'
+import { useCirxUtils } from '~/composables/useCirxUtils'
 // Import real-time transaction updates via IROH
 import { useRealTimeTransactions } from '~/composables/useIrohNetwork'
 // Import Circular address validation
@@ -663,38 +655,59 @@ import { useCircularAddressValidation } from '~/composables/utils/validators'
 import { safeToast } from '~/composables/useToast'
 
 // Import new iuse composables
-import { iuseGasPrice } from '~/composables/iuseGasPrice.js'
-import { iusePriceCountdown } from '~/composables/iusePriceCountdown.js'
-import { iuseTokenHelpers } from '~/composables/iuseTokenHelpers.js'
-import { iuseNetworkConfig } from '~/composables/iuseNetworkConfig.js'
-import { iuseOtcConfig } from '~/composables/iuseOtcConfig.js'
-import { iuseBackendHealth } from '~/composables/iuseBackendHealth.js'
-import { iuseTokenSelection } from '~/composables/iuseTokenSelection.js'
-import { iuseAmountHandlers } from '~/composables/iuseAmountHandlers.js'
-import { iuseQuoteCalculations } from '~/composables/iuseQuoteCalculations.js'
-import { iuseWalletDetection } from '~/composables/iuseWalletDetection.js'
-import { iuseNetworkFees } from '~/composables/iuseNetworkFees.js'
-import { iusePriceManager } from '~/composables/iusePriceManager.js'
-import { iuseUIState } from '~/composables/iuseUIState.js'
+import { iuseGasPrice } from '~/composables/iuseGasPrice'
+import { iusePriceCountdown } from '~/composables/iusePriceCountdown'
+import { iuseTokenHelpers } from '~/composables/iuseTokenHelpers'
+import { iuseNetworkConfig } from '~/composables/iuseNetworkConfig'
+import { iuseOtcConfig } from '~/composables/iuseOtcConfig'
+import { iuseBackendHealth } from '~/composables/iuseBackendHealth'
+import { iuseTokenSelection } from '~/composables/iuseTokenSelection'
+import { iuseAmountHandlers } from '~/composables/iuseAmountHandlers'
+import { iuseQuoteCalculations } from '~/composables/iuseQuoteCalculations'
+import { iuseWalletDetection } from '~/composables/iuseWalletDetection'
+import { iuseNetworkFees } from '~/composables/iuseNetworkFees'
+import { iusePriceManager } from '~/composables/iusePriceManager'
+import { iuseUIState } from '~/composables/iuseUIState'
 
 // Page metadata
 definePageMeta({
-  title: 'Circular Swap',
   layout: false  // Don't use default layout - this page has its own header
 })
 
+// SEO Meta
+useSeoMeta({
+  title: 'Buy CIRX Tokens - Circular Protocol OTC Trading',
+  ogTitle: 'Buy CIRX Tokens - Circular Protocol OTC Trading',
+  description: 'Trade ETH, USDC, USDT for CIRX tokens on Circular Protocol. Get discounted CIRX with OTC vesting options. Secure, fast, decentralized trading.',
+  ogDescription: 'Trade ETH, USDC, USDT for CIRX tokens on Circular Protocol. Get discounted CIRX with OTC vesting options.',
+  ogImage: '/images/og-buy-cirx.png',
+  twitterCard: 'summary_large_image',
+  twitterImage: '/images/og-buy-cirx.png'
+})
+
+useHead({
+  meta: [
+    { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+    { name: 'theme-color', content: '#00e3a3' },
+    { name: 'robots', content: 'index, follow' }
+  ],
+  link: [
+    { rel: 'canonical', href: 'https://circularprotocol.io/buy' }
+  ]
+})
+
 // Use AppKit hooks directly for state
-import { useFormattedNumbers } from '~/composables/useFormattedNumbers.js'
+import { useFormattedNumbers } from '~/composables/useFormattedNumbers'
 // Import enhanced wallet composable with centralized balance management
-import { useAppKitWallet } from '~/composables/useAppKitWallet.js'
+import { useAppKitWallet } from '~/composables/useAppKitWallet'
 // Import swap logic composable to replace duplicate implementations
-import { useSwapLogic } from '~/composables/useSwapHandler.js'
+import { useSwapLogic } from '~/composables/useSwapHandler'
 // Import formatting utilities
-import { useSwapFormatting } from '~/composables/features/useSwapFormatting.js'
+import { useSwapFormatting } from '~/composables/features/useSwapFormatting'
 // Import validation logic composable  
-import { useSwapValidation } from '~/composables/features/useSwapValidation.js'
+import { useSwapValidation } from '~/composables/features/useSwapValidation'
 // Import unified swap transaction handler
-import { useSwapTransaction } from '~/composables/useSwapTransaction.js'
+import { useSwapTransaction } from '~/composables/useSwapTransaction'
 
 // Initialize formatted numbers composable
 const { isValidEthereumAddress, isValidSolanaAddress, getAddressType } = useFormattedNumbers()
@@ -2140,6 +2153,23 @@ input[type="number"] {
   100% {
     opacity: 1;
   }
+}
+
+/* Extracted inline styles following Nuxt conventions */
+.space-background {
+  background-image: url('/buy/background.png');
+}
+
+.gradient-overlay {
+  background: linear-gradient(to bottom, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.70) 50%, transparent 100%);
+}
+
+.swap-container {
+  background-color: rgba(0, 3, 6, 0.9);
+}
+
+.tab-container {
+  background-color: #11161f;
 }
 
 </style>
