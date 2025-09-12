@@ -347,17 +347,25 @@ export function usePriceService() {
   /**
    * Initialize prices with reactive state management
    * Consolidated from useQuoteCalculator.js and useSwapHandler.js (100% similarity)
+   * Fixed: Removed circular dependency with usePriceData.js
    */
   const initializePrices = async (tokenPrices, priceSource) => {
     try {
-      const { getTokenPrices } = await import('~/composables/usePriceData')
-      const { getTokenPrices: priceGetter } = getTokenPrices()
-      const livePrices = await priceGetter()
+      // Use our own getCurrentPrices instead of circular import
+      const livePrices = await getCurrentPrices()
       tokenPrices.value = { ...livePrices }
       priceSource.value = 'live'
     } catch (error) {
       const errorInfo = classifyError(error, error.response, 'Price Loader')
       logError({ ...errorInfo, message: `${errorInfo.message} - using fallback prices` })
+      // Use fallback prices
+      tokenPrices.value = {
+        ETH: 2500,
+        USDC: 1,
+        USDT: 1,
+        SOL: 100,
+        CIRX: 1
+      }
       priceSource.value = 'fallback'
     }
   }

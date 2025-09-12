@@ -355,7 +355,7 @@
               </div>
               <div class="flex justify-between items-center mb-2">
                 <span class="text-xs text-gray-500" :class="isPriceRefreshing ? 'text-cyan-400' : ''">
-                  {{ isPriceRefreshing ? 'Updating prices...' : `Next price update in ${priceCountdownValue}s` }}
+                  {{ isPriceRefreshing ? 'Updating prices...' : `Next price update in ${priceCountdown}s` }}
                 </span>
               </div>
               <div class="flex justify-between items-center mb-2">
@@ -662,21 +662,9 @@ import { useRealTimeTransactions } from '~/composables/useIrohNetwork'
 import { useCircularAddressValidation } from '~/composables/utils/validators'
 // Import safe toast utility
 import { safeToast } from '~/composables/useToast'
-
-// Import new iuse composables
-import { iuseGasPrice } from '~/composables/iuseGasPrice.js'
-import { iusePriceCountdown } from '~/composables/iusePriceCountdown.js'
-import { iuseTokenHelpers } from '~/composables/iuseTokenHelpers.js'
-import { iuseNetworkConfig } from '~/composables/iuseNetworkConfig.js'
-import { iuseOtcConfig } from '~/composables/iuseOtcConfig.js'
-import { iuseBackendHealth } from '~/composables/iuseBackendHealth.js'
-import { iuseTokenSelection } from '~/composables/iuseTokenSelection.js'
-import { iuseAmountHandlers } from '~/composables/iuseAmountHandlers.js'
-import { iuseQuoteCalculations } from '~/composables/iuseQuoteCalculations.js'
-import { iuseWalletDetection } from '~/composables/iuseWalletDetection.js'
-import { iuseNetworkFees } from '~/composables/iuseNetworkFees.js'
-import { iusePriceManager } from '~/composables/iusePriceManager.js'
-import { iuseUIState } from '~/composables/iuseUIState.js'
+// Extension detection disabled
+// import { detectAllExtensions } from '~/utils/comprehensiveExtensionDetection.js'
+// AppKit handles all wallet detection and connection
 
 // Page metadata
 definePageMeta({
@@ -741,24 +729,6 @@ const tokenAddresses = {
 
 // Balance fetching will be handled using provider when needed
 
-// Computed network fee property
-const networkFee = computed(() => {
-  const estimatedGas = getEstimatedGasUnits(activeTab.value, inputToken.value)
-  return calculateNetworkFee(gasPriceWeiHex.value, estimatedGas, livePrices.value)
-})
-
-// Computed discount tiers property
-const discountTiers = computed(() => {
-  return otcConfig.value?.discountTiers || []
-})
-
-// Computed current USD value
-const currentUsd = computed(() => {
-  const amt = parseFloat(inputAmount.value) || 0
-  const px = livePrices.value?.[inputToken.value] || 0
-  return +(amt * px).toFixed(2)
-})
-
 // AppKit modal opening is handled by the open function from useAppKit() above
 
 // Backend API integration
@@ -818,16 +788,72 @@ const {
 // Circular address validation
 const { checkAddressExists } = useCircularAddressValidation()
 
-// Network configuration and dynamic placeholder moved to iuseNetworkConfig composable
+// Network configuration for dynamic placeholder
+const networkConfig = ref({
+  network: 'testnet',
+  chain_name: 'Circular SandBox',
+  environment: 'development'
+})
+const dynamicPlaceholder = computed(() => {
+  const network = networkConfig.value?.network || 'testnet'
+  const chainName = networkConfig.value?.chain_name || 'Circular SandBox'
+  
+  // Capitalize network names: mainnet -> Mainnet, testnet -> Testnet, devnet -> Devnet
+  const capitalizedNetwork = network.charAt(0).toUpperCase() + network.slice(1).toLowerCase()
+  
+  return `Enter a ${capitalizedNetwork} (${chainName}) Wallet Address`
+})
 
 // Fetch network configuration from backend
-// fetchNetworkConfig function moved to iuseNetworkConfig composable
+const fetchNetworkConfig = async () => {
+  try {
+    const config = useRuntimeConfig()
+    const apiBaseUrl = config.public.apiBaseUrl || 'http://localhost:18423/v1'
+    
+    const response = await fetch(`${apiBaseUrl}/config/circular-network`)
+    if (response.ok) {
+      const data = await response.json()
+      networkConfig.value = data
+      console.log('🔗 Network config loaded for placeholder:', {
+        network: data.network,
+        chain: data.chain_name
+      })
+    } else {
+      console.warn('Failed to fetch network config, using fallback placeholder')
+    }
+  } catch (error) {
+    console.warn('Network config fetch error:', error.message)
+    // networkConfig.value remains null, so fallback placeholder will be used
+  }
+}
 
-// handleCircularToast function moved to iuseWalletDetection composable
+// Toast callback for Circular chain notifications
+const handleCircularToast = ({ type, title, message }) => {
+  if (typeof window !== 'undefined' && window.$toast) {
+    window.$toast.connection[type](message, { title })
+  }
+}
 
-// isCircularChain computed values moved to iuseWalletDetection composable
+// Using AppKit for wallet balances - static values for development
+const isCircularChainAvailable = computed(() => false)
+const isCircularChainConnected = computed(() => false)
 
-// isButtonShowingDots computed moved to iuseUIState composable
+// Check if button should be disabled (either showing "..." or processing)
+const isButtonShowingDots = computed(() => {
+  // Disable during loading states (transaction processing)
+  if (loading.value || quoteLoading.value || reverseQuoteLoading.value) return true
+  
+  // Don't disable if not connected or no address - these are actionable states
+  if (!isConnected?.value) return false
+  if (isConnected?.value && (!recipientAddress.value || recipientAddress.value.trim() === '')) return false
+  
+  // Disable for the specific "..." conditions (address validation states)
+  return (
+    addressValidationState.value === 'validating' ||
+    (recipientAddress.value && (recipientAddress.value === '0' || (recipientAddress.value.startsWith('0x') && recipientAddress.value.length < 66))) ||
+    (recipientAddress.value && recipientAddress.value.length === 66 && recipientAddress.value.startsWith('0x') && addressValidationState.value === 'idle')
+  )
+})
 
 // Format ETH balance using wallet store balance
 const formattedEthBalance = computed(() => {
@@ -841,35 +867,15 @@ const formattedEthBalance = computed(() => {
 
 // Connection state management and watchers are now handled by useAppKitWallet composable
 
-// Initialize new composables
-const gasPrice = iuseGasPrice()
-const priceCountdown = iusePriceCountdown()
-const tokenHelpers = iuseTokenHelpers()
-const networkConfig = iuseNetworkConfig()
-const otcConfig = iuseOtcConfig()
-const backendHealth = iuseBackendHealth()
-const tokenSelection = iuseTokenSelection()
-const amountHandlers = iuseAmountHandlers()
-const quoteCalculations = iuseQuoteCalculations()
-const walletDetection = iuseWalletDetection()
-const networkFees = iuseNetworkFees()
-const priceManager = iusePriceManager()
-const uiState = iuseUIState()
-
-// Destructure commonly used items for backward compatibility
-const { activeTab, inputAmount, cirxAmount, loading, loadingText, quote, showChart, showStaking, showWalletModal, showConfirmationModal, recipientAddress, recipientAddressError, recipientAddressType, isFetchingRecipientBalance, hasClickedEnterAddress, addressValidationState, addressInputRef, amountInputRef, selectedTier, userManuallySelectedTier, chartDataLoading, chartDataError, mockTokenBalances, displayCirxBalance, isButtonShowingDots } = uiState
-const { inputToken, showTokenDropdown } = tokenSelection
-const { gasPriceWeiHex, isGasRefreshing, fetchGasPrice } = gasPrice
-const { priceCountdown: priceCountdownValue, timerProgress, startPriceCountdown, stopPriceCountdown } = priceCountdown
-const { getTokenLogo, getTokenSymbol } = tokenHelpers
-const { dynamicPlaceholder, fetchNetworkConfig } = networkConfig
-const { fetchOtcConfig, getTierForUsd, lowestTierMin } = otcConfig
-const { isBackendConnected, checkBackendHealth, startHealthChecks, stopHealthChecks, backendHealthCheckInterval } = backendHealth
-const { lastEditedField, handleInputAmountChange, handleCirxAmountChange, setMaxAmount, reverseSwap } = amountHandlers
-const { quoteLoading, reverseQuoteLoading, calculateQuoteAsync, calculateReverseQuoteAsync, forceUnblockLoadingStates } = quoteCalculations
-const { isSaturnWalletPresent, isSaturnWalletDetected, handleCircularToast, isCircularChainAvailable, isCircularChainConnected } = walletDetection
-const { getEstimatedGasUnits, calculateNetworkFee } = networkFees
-const { livePrices, isPriceRefreshing, refreshPrices, startChartPreloading } = priceManager
+// Reactive state
+const activeTab = ref('liquid')
+const inputAmount = ref('')
+// Mock token balances for testing (since wallet is disabled)
+const mockTokenBalances = ref({
+  ETH: '5.123456',   // Mock ETH balance
+  USDC: '10000.50',  // Mock USDC balance  
+  USDT: '7500.25'    // Mock USDT balance
+})
 
 // Token balance for selected input token - computed based on inputToken selection
 const inputBalance = computed(() => {
@@ -890,7 +896,23 @@ const inputBalance = computed(() => {
       return '0'
   }
 })
-// Duplicate declarations removed - now handled by composables
+const showWalletModal = ref(false)
+const cirxAmount = ref('')
+// Input token selection - default to ETH
+const inputToken = ref('ETH')
+// Address is always required - no toggle needed
+const loading = ref(false)
+
+// Initialize loading state
+const loadingText = ref('')
+const quote = ref(null)
+const showChart = ref(false)
+const showStaking = ref(false)
+
+// Chart data preloading variables (will be initialized after page load)
+let chartPreloadStarted = false
+const chartDataLoading = ref(false)
+const chartDataError = ref(null)
 // Price feed composable - accessible at component level for lifecycle management
 const { 
   currentPrice: cirxPrice, 
@@ -900,16 +922,52 @@ const {
   stopPriceUpdates
 } = usePriceData()
 
-// Chart preloading function now handled by iusePriceManager composable
+// Chart preloading function - called after swap page loads
+const startChartPreloading = async () => {
+  if (chartPreloadStarted) return
+  chartPreloadStarted = true
+  
+  console.log('🚀 Starting background chart data preload after swap page loaded...')
+  
+  try {
+    // Chart data preloading now handled by unified price service in usePriceData composable
+    // Start background price updates which will also warm up the chart data cache
+    startPriceUpdates()
+    
+    // Additional TradingView chart preloading (if needed) - 1 second delay to ensure swap page is fully rendered
+    setTimeout(() => {
+      console.log('📊 Chart data cache warmed up via unified price service')
+      chartDataLoading.value = false
+    }, 1000)
+    
+  } catch (error) {
+    console.warn('Chart preloading initialization failed:', error)
+    chartDataError.value = error.message
+  }
+}
 
 
-// Address input and UI state now handled by composables
-// hasClickedEnterAddress moved to iuseUIState composable
+// Focus handler for address input
+const addressInputRef = ref(null)
+const amountInputRef = ref(null)
+const recipientAddress = ref('')
+const recipientAddressError = ref('')
+const recipientAddressType = ref('')
+const isFetchingRecipientBalance = ref(false)
+const showTokenDropdown = ref(false)
+// Track whether user has clicked "Enter Address" button
+const hasClickedEnterAddress = ref(false)
 
-// Backend connectivity state moved to iuseBackendHealth composable
-// addressValidationState moved to iuseUIState composable
+// Backend connectivity state
+const isBackendConnected = ref(true)
+const backendHealthCheckInterval = ref(null)
+// Track address validation state
+const addressValidationState = ref('idle') // 'idle', 'validating', 'valid', 'invalid'
 
-// Debug watcher for validation state changes now handled in composables
+// Debug watcher for validation state changes
+watch(addressValidationState, (newState, oldState) => {
+  console.log('🔄 addressValidationState changed:', oldState, '->', newState)
+})
 
 // Initialize swap validation composable with validation state
 const swapValidation = useSwapValidation({
@@ -1010,13 +1068,121 @@ const handleSwapFromCTA = () => {
   ctaHandleSwap(handleSwap)
 }
 
-// Duplicate price and gas state removed - now handled by composables
+// Modal state for State 6
+const showConfirmationModal = ref(false)
+
+// Price refresh state (30s countdown)
+const livePrices = ref({ ETH: 2500, USDC: 1, USDT: 1, CIRX: 1 })
+const isPriceRefreshing = ref(false)
+const priceCountdown = ref(30)
+let countdownTimer = null
+
+// Gas price state
+const gasPriceWeiHex = ref('0x0')
+const isGasRefreshing = ref(false)
+
+// Timer progress for SVG animation
+const timerProgress = computed(() => {
+  const circumference = 2 * Math.PI * 20 // radius = 20
+  const progress = (30 - priceCountdown.value) / 30
+  const offset = circumference * (1 - progress)
+  console.log('🎯 Timer progress:', priceCountdown.value, 'offset:', offset)
+  return offset
+})
 
 // hexToBigInt function moved to useSwapFormatting composable
 
-// Gas price fetching, price countdown, and price refresh functions moved to composables
+const fetchGasPrice = async () => {
+  try {
+    isGasRefreshing.value = true
+    // Prefer wallet provider if available
+    if (typeof window !== 'undefined' && window.ethereum?.request) {
+      const gp = await window.ethereum.request({ method: 'eth_gasPrice' })
+      if (gp) gasPriceWeiHex.value = gp
+    } else {
+      // Fallback to public RPC
+      const res = await fetch('https://ethereum.publicnode.com', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_gasPrice', params: [] })
+      })
+      const json = await res.json()
+      if (json?.result) gasPriceWeiHex.value = json.result
+    }
+  } catch (e) {
+    console.warn('Gas price fetch failed', e)
+  } finally {
+    isGasRefreshing.value = false
+  }
+}
 
-// OTC state and quote loading state moved to composables
+const startPriceCountdown = () => {
+  if (countdownTimer) clearInterval(countdownTimer)
+  priceCountdown.value = 30
+  console.log('🕐 Starting price countdown from:', priceCountdown.value)
+  countdownTimer = setInterval(async () => {
+    if (priceCountdown.value > 0) {
+      priceCountdown.value -= 1
+      // console.log('⏰ Countdown:', priceCountdown.value, 'Progress offset:', 125.6 * ((30 - priceCountdown.value) / 30))
+    } else {
+      console.log('🔄 Refreshing prices and resetting countdown')
+      await Promise.all([refreshPrices(), fetchGasPrice()])
+    }
+  }, 1000)
+}
+
+const refreshPrices = async () => {
+  try {
+    isPriceRefreshing.value = true
+    const { getTokenPrices } = usePriceData()
+    const prices = await getTokenPrices()
+    // Update tracked tokens if present
+    livePrices.value = {
+      ETH: prices.ETH ?? livePrices.value.ETH,
+      USDC: prices.USDC ?? livePrices.value.USDC,
+      USDT: prices.USDT ?? livePrices.value.USDT,
+      CIRX: prices.CIRX ?? livePrices.value.CIRX
+    }
+    // Recalculate quote if there is an input
+    if (inputAmount.value && parseFloat(inputAmount.value) > 0 && lastEditedField.value === 'input') {
+      const isOTC = activeTab.value === 'otc'
+      const newQuote = await calculateQuoteAsync(inputAmount.value, inputToken.value, isOTC)
+      if (newQuote) {
+        quote.value = newQuote
+        // keep cirxAmount consistent and numeric for the input field
+        const cirxRaw = parseFloat(String(newQuote.cirxAmount).replace(/,/g, ''))
+        if (isFinite(cirxRaw) && cirxRaw > 0) {
+          cirxAmount.value = formatWithCommas(cirxRaw.toString())
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('Price refresh failed, keeping previous prices', e)
+  } finally {
+    isPriceRefreshing.value = false
+    // Restart the countdown timer
+    startPriceCountdown()
+  }
+}
+
+// OTC specific state
+const selectedTier = ref(null)
+const userManuallySelectedTier = ref(false)
+
+// Quote calculation loading state
+const quoteLoading = ref(false)
+const lastQuoteRequestId = ref(0)
+
+// Bidirectional field tracking
+const lastEditedField = ref('input') // 'input' or 'output'
+const reverseQuoteLoading = ref(false)
+const lastReverseQuoteRequestId = ref(0)
+
+// FORCE LOADING STATES TO FALSE TO UNBLOCK BUTTON
+setInterval(() => {
+  quoteLoading.value = false
+  reverseQuoteLoading.value = false
+}, 1000)
 
 // Helper function to format token balance
 // formatTokenBalance function moved to useSwapFormatting composable
@@ -1031,7 +1197,13 @@ const awaitedEthBalance = computed(() => {
   return '0.000000000000000000'
 })
 
-// displayCirxBalance computed moved to iuseUIState composable
+const displayCirxBalance = computed(() => {
+  // Only show balance if we have a valid recipient address and fetched balance
+  if (recipientAddress.value && !recipientAddressError.value) {
+    return '0'
+  }
+  return null // No address or no balance fetched, show "Balance: -"
+})
 
 // fullPrecisionInputBalance removed - using wallet store's selectedTokenBalance directly
 
@@ -1048,7 +1220,13 @@ const connectedWallet = computed(() => {
 
 // Wallet icon logic is now handled by the useAppKitWallet composable
 
-// shouldPositionLeft computed moved to iuseUIState composable
+// Check if dropdown should be positioned to the left to prevent overflow
+const shouldPositionLeft = computed(() => {
+  // Position dropdowns to prevent overflow outside form boundaries
+  // Since token selectors are on the right side of input fields,
+  // we need to position dropdowns leftward to stay within bounds
+  return false // Let's try right-aligned first, adjust if needed
+})
 
 // Remove unused formatSliderAmount - not referenced in template
 
@@ -1062,14 +1240,74 @@ const connectedWallet = computed(() => {
 // Use composable fee structure with local fallback
 const fees = computed(() => swapFees.value || otcConfig.value.fees)
 
-// OTC configuration moved to iuseOtcConfig composable
+// Dynamic OTC configuration from hosted JSON
+const otcConfig = ref({
+  discountTiers: [
+    { minAmount: 50000, discount: 12, vestingMonths: 24 },  // $50K+: 12%
+    { minAmount: 10000, discount: 8, vestingMonths: 12 },   // $10K+: 8%  
+    { minAmount: 1000, discount: 5, vestingMonths: 6 }      // $1K+: 5%
+  ],
+  vestingPeriod: {
+    months: 6,
+    type: 'linear'
+  },
+  fees: {
+    otc: 0.15,
+    liquid: 0.3
+  },
+  displayRange: '5-12%',
+  enabled: true
+})
 
-// fetchOtcConfig function moved to iuseOtcConfig composable
+// Fetch OTC configuration from hosted JSON
+const fetchOtcConfig = async () => {
+  try {
+    // Fetch from local JSON file
+    const configUrl = '/swap/discount.json'
+    
+    const response = await fetch(configUrl, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Cache-Control': 'no-cache'
+      }
+    })
+    
+    if (response.ok) {
+      const config = await response.json()
+      
+      // Validate and merge config
+      if (config.discountTiers && Array.isArray(config.discountTiers)) {
+        otcConfig.value = { ...otcConfig.value, ...config }
+        console.log('OTC config updated from hosted JSON:', config)
+      }
+    } else {
+      console.warn('Failed to fetch OTC config, using defaults')
+    }
+  } catch (error) {
+    console.warn('Error fetching OTC config:', error.message)
+    // Continue with default config
+  }
+}
 
-// discountTiers computed moved to composables
+// Use composable discount tiers with local fallback
+const discountTiers = computed(() => {
+  console.log('🔧 discountTiers computed - swapDiscountTiers:', swapDiscountTiers.value)
+  console.log('🔧 discountTiers computed - otcConfig.discountTiers:', otcConfig.value.discountTiers)
+  return swapDiscountTiers.value || otcConfig.value.discountTiers
+})
 
 // Helpers for tier UI
-// currentUsd and lowestTierMin computeds moved to composables
+const currentUsd = computed(() => {
+  const amt = parseFloat(inputAmount.value) || 0
+  const px = livePrices.value[inputToken.value] || 0
+  return +(amt * px).toFixed(2)
+})
+const lowestTierMin = computed(() => {
+  const tiers = discountTiers.value || []
+  if (!tiers.length) return 0
+  return Math.min(...tiers.map(t => t.minAmount))
+})
 
 // Computed properties  
 // Use validation composable for canPurchase logic
@@ -1089,20 +1327,168 @@ const canPurchase = createCanPurchaseValidator({
   isOtcMode: computed(() => false) // Not in OTC mode for now
 })
 
-// getTierForUsd function moved to iuseOtcConfig composable
+// Calculate discount based on USD amount and return both percent and tier
+const getTierForUsd = (usdAmount) => {
+  // Tiers are defined as minAmount thresholds (e.g., 1000, 10000, 50000)
+  // Choose the highest tier that the amount qualifies for
+  const tiers = [...discountTiers.value].sort((a, b) => b.minAmount - a.minAmount)
+  for (const t of tiers) {
+    if (usdAmount >= t.minAmount) return t
+  }
+  return null
+}
 
-// calculateDiscount reference moved to composable
+// Use composable implementation
+const calculateDiscount = swapCalculateDiscount
 
-// calculateQuote function moved to composables
+// Calculate quote for purchase (forward: input token -> CIRX)
+const calculateQuote = (amount, token, isOTC = false) => {
+  if (!amount || parseFloat(amount) <= 0) return null
+  
+  // Use backend pricing logic
+  try {
+    const quoteResult = calculateCirxQuote(amount, token, isOTC)
+    
+    const cirxAmountFloat = parseFloat(quoteResult.cirxAmount)
+    const inputAmountFloat = parseFloat(amount)
+    const rate = cirxAmountFloat / inputAmountFloat
+    
+    return {
+      cirxAmount: quoteResult.cirxAmount,
+      usdValue: quoteResult.usdValue,
+      rate: rate.toFixed(6),
+      inverseRate: (1 / rate).toFixed(8),
+      discount: parseFloat(quoteResult.discountPercentage),
+      fee: isOTC ? 0.15 : 0.3, // Backend handles fees internally
+      platformFee: quoteResult.platformFee,
+      totalPaymentRequired: quoteResult.totalPaymentRequired
+    }
+  } catch (error) {
+    console.error('Backend quote calculation failed, using composable fallback:', error)
+    
+    // Fallback to composable implementation
+    const composableQuote = swapCalculateQuote(amount, token, isOTC)
+    if (composableQuote) {
+      return {
+        cirxAmount: composableQuote.cirxAmountFormatted || composableQuote.cirxAmount,
+        usdValue: composableQuote.inputUsdValue,
+        rate: (composableQuote.cirxAmount / parseFloat(amount)).toFixed(6),
+        inverseRate: (parseFloat(amount) / composableQuote.cirxAmount).toFixed(8),
+        discount: composableQuote.discount || 0,
+        fee: composableQuote.feeRate || (isOTC ? 0.15 : 0.3),
+        platformFee: composableQuote.feeUsd || 0,
+        totalPaymentRequired: amount // Simplified for fallback
+      }
+    }
+    
+    return null
+  }
+}
 
-// calculateQuoteAsync function moved to iuseQuoteCalculations composable
+// Async quote calculation with loading states
+const calculateQuoteAsync = async (amount, token, isOTC = false) => {
+  if (!amount || parseFloat(amount) <= 0) return null
+  const requestId = ++lastQuoteRequestId.value
+  quoteLoading.value = true
+  try {
+    await new Promise(resolve => setTimeout(resolve, 300))
+    if (requestId !== lastQuoteRequestId.value) return null
+    return calculateQuote(amount, token, isOTC)
+  } finally {
+    if (requestId === lastQuoteRequestId.value) {
+      quoteLoading.value = false
+    }
+  }
+}
 
-// Reverse quote functions moved to iuseQuoteCalculations composable
+// Reverse quote (output CIRX -> required input token amount)
+// Use composable implementation with fallback to local logic for UI consistency
+const calculateReverseQuote = (cirxAmt, token, isOTC = false) => {
+  const composableQuote = swapCalculateReverseQuote(cirxAmt, token, isOTC)
+  if (composableQuote) {
+    // Build forward quote for UI consistency
+    const forward = calculateQuote(composableQuote.inputAmount.toString(), token, isOTC)
+    
+    return {
+      inputAmount: composableQuote.inputAmount,
+      forwardQuote: forward
+    }
+  }
+  
+  return null
+}
 
-// Network fee estimation moved to iuseNetworkFees composable
+const calculateReverseQuoteAsync = async (cirxAmt, token, isOTC = false) => {
+  if (!cirxAmt || parseFloat(cirxAmt) <= 0) return null
+  const requestId = ++lastReverseQuoteRequestId.value
+  reverseQuoteLoading.value = true
+  try {
+    await new Promise(resolve => setTimeout(resolve, 300))
+    if (requestId !== lastReverseQuoteRequestId.value) return null
+    return calculateReverseQuote(cirxAmt, token, isOTC)
+  } finally {
+    if (requestId === lastReverseQuoteRequestId.value) {
+      reverseQuoteLoading.value = false
+    }
+  }
+}
+
+// Computed network fee estimation
+const GAS_ESTIMATES = {
+  approval: 50000,       // conservative ERC-20 approve
+  liquid: 180000,        // liquid swap placeholder
+  otc: 220000            // otc (mint + vesting) placeholder
+}
+
+const estimatedGasUnits = computed(() => {
+  const base = activeTab.value === 'otc' ? GAS_ESTIMATES.otc : GAS_ESTIMATES.liquid
+  // If paying with ERC-20 (non-ETH), add approval buffer
+  const needsApproval = ['USDC', 'USDT'].includes(inputToken.value)
+  return base + (needsApproval ? GAS_ESTIMATES.approval : 0)
+})
+
+const networkFee = computed(() => {
+  const gasPriceWei = hexToBigInt(gasPriceWeiHex.value)
+  if (gasPriceWei === 0n || !estimatedGasUnits.value) return { eth: '0.0000', usd: '0.00' }
+  const feeWei = gasPriceWei * BigInt(estimatedGasUnits.value)
+  // Convert wei to ETH: divide by 1e18 using number math safely for display
+  const feeEth = Number(feeWei) / 1e18
+  const feeEthSafe = isFinite(feeEth) ? feeEth : 0
+  const ethUsd = livePrices.value.ETH || 0
+  const feeUsd = feeEthSafe * ethUsd
+  return {
+    eth: feeEthSafe.toFixed(5),
+    usd: feeUsd.toFixed(2)
+  }
+})
 
 
-// Token utility functions moved to iuseTokenHelpers composable
+// Token utility functions
+const getTokenLogo = (token) => {
+  const logoMap = {
+    'ETH': 'https://assets.coingecko.com/coins/images/279/small/ethereum.png',
+    'USDC': 'https://assets.coingecko.com/coins/images/6319/small/USD_Coin_icon.png',
+    'USDT': 'https://assets.coingecko.com/coins/images/325/small/Tether.png',
+    'SOL': 'https://assets.coingecko.com/coins/images/4128/small/solana.png',
+    'USDC_SOL': 'https://assets.coingecko.com/coins/images/6319/small/USD_Coin_icon.png',
+    'CIRX': '/buy/cirx-icon.svg'
+  }
+  
+  return logoMap[token] || 'https://assets.coingecko.com/coins/images/279/small/ethereum.png'
+}
+
+const getTokenSymbol = (token) => {
+  const symbolMap = {
+    'ETH': 'ETH',
+    'USDC': 'USDC',
+    'USDT': 'USDT',
+    'SOL': 'SOL',
+    'USDC_SOL': 'USDC',
+    'CIRX': 'CIRX'
+  }
+  
+  return symbolMap[token] || token
+}
 
 // Validation composable initialized after validation state declarations
 
@@ -1120,9 +1506,21 @@ const getNewCirxBalanceLocal = () => getNewCirxBalance({
 
 
 // Saturn wallet detection
-// isSaturnWalletPresent computed moved to iuseWalletDetection composable
+const isSaturnWalletPresent = computed(() => {
+  if (typeof window === 'undefined') return false
+  
+  // Check for Saturn wallet provider
+  return !!(window.saturn || 
+           (window.ethereum && window.ethereum.isSaturn) ||
+           (window.ethereum && window.ethereum.providers && 
+            window.ethereum.providers.some(p => p.isSaturn)))
+})
 
-// isSaturnWalletDetected computed moved to iuseWalletDetection composable
+// Enhanced Saturn wallet detection based on our comprehensive detection
+const isSaturnWalletDetected = computed(() => {
+  // Saturn wallet detection disabled
+  return false
+})
 
 // Saturn wallet watch disabled
 // watch([isSaturnWalletDetected, isConnected], () => {
@@ -1139,28 +1537,197 @@ const getNewCirxBalanceLocal = () => getNewCirxBalance({
 // Helper function to format numbers with commas
 // formatWithCommas function moved to useSwapFormatting composable
 
-// handleInputAmountChange function moved to iuseAmountHandlers composable
+// Handle input amount changes with comma formatting
+const handleInputAmountChange = (value) => {
+  // Auto-select native token if none selected and user starts typing
+  if (!inputToken.value && value && parseFloat(value) > 0) {
+    autoSelectNativeToken()
+  }
+  
+  // Set the formatted value
+  inputAmount.value = formatWithCommas(value)
+  
+  lastEditedField.value = 'input'
+}
 
-// handleCirxAmountChange function moved to iuseAmountHandlers composable
+// Handle CIRX amount changes with comma formatting
+const handleCirxAmountChange = (value) => {
+  // Auto-select native token if none selected and user starts typing in CIRX field
+  if (!inputToken.value && value && parseFloat(value) > 0) {
+    autoSelectNativeToken()
+  }
+  
+  // Set the formatted value
+  cirxAmount.value = formatWithCommas(value)
+  
+  lastEditedField.value = 'output'
+}
 
-// setMaxAmount function moved to iuseAmountHandlers composable
+const setMaxAmount = () => {
+  console.log('🔧 setMaxAmount called for token:', inputToken.value)
+  console.log('🔧 Current inputBalance:', inputBalance.value)
+  
+  // Can't set max if no wallet connected or no balance available
+  if (!isConnected?.value || inputBalance.value === null) {
+    console.log('🔧 No wallet connected or no balance available')
+    return
+  }
+  
+  // Get the current balance for the selected token
+  const balance = parseFloat(inputBalance.value || '0')
+  
+  if (balance > 0) {
+    // Reserve different amounts based on token type
+    let maxAmount = 0
+    
+    if (inputToken.value === 'ETH') {
+      // Reserve more ETH for gas fees (5% reserve)
+      maxAmount = balance * 0.95
+    } else {
+      // For ERC-20 tokens (USDC/USDT), reserve less (1% for micro gas)
+      maxAmount = balance * 0.99
+    }
+    
+    console.log('🔧 Setting max amount:', {
+      token: inputToken.value,
+      balance,
+      maxAmount,
+      formatted: maxAmount.toFixed(6)
+    })
+    
+    inputAmount.value = maxAmount.toFixed(6)
+  } else {
+    inputAmount.value = '1.0' // Fallback for demo
+  }
 
-// forceRefreshBalance function moved to iuseTokenSelection composable
+  // Set edit state to input when using max amount
+  lastEditedField.value = 'input'
+}
 
-// selectToken function moved to iuseTokenSelection composable
+const forceRefreshBalance = async () => {
+  console.log('🔄 Force refreshing balance...')
+  // With Wagmi, balance refreshes automatically
+  console.log('✅ Balance refresh not needed with Wagmi - auto-refreshes')
+}
 
-// autoSelectNativeToken function moved to iuseTokenSelection composable
+const selectToken = (token) => {
+  console.log('🔧 selectToken called with:', token)
+  console.log('🔧 Current inputToken before change:', inputToken.value)
+  
+  // Update the selected token
+  inputToken.value = token
+  showTokenDropdown.value = false
+  
+  console.log('🔧 inputToken updated to:', inputToken.value)
+  console.log('🔧 New balance for token:', inputBalance.value)
+  
+  // Test: Force reactivity update
+  nextTick(() => {
+    console.log('🔧 After nextTick - inputToken:', inputToken.value)
+    console.log('🔧 DOM should now reflect new token')
+  })
+  
+  // Reset input when token changes (optional - user can decide)
+  // inputAmount.value = ''
+  lastEditedField.value = 'input'
+}
+
+// Auto-select native token based on connected wallet
+const autoSelectNativeToken = () => {
+  if (connectedWallet.value === 'phantom') {
+    // Phantom wallet - select SOL
+    // Token selection functionality removed('SOL')
+    console.log('🪙 Auto-selected SOL for Phantom wallet')
+  } else {
+    // Ethereum wallets (MetaMask, Coinbase, etc.) - select ETH
+    // Token selection functionality removed('ETH')
+    console.log('🪙 Auto-selected ETH for Ethereum wallet')
+  }
+}
 
 
 // validateNumberInput function moved to useSwapValidation composable
 
-// reverseSwap function moved to iuseAmountHandlers composable
+const reverseSwap = () => {
+  console.log('Reverse swap not supported yet')
+}
 
 // Format amount for display (e.g., "$1K", "$50K", "$1M")
 // formatAmount function moved to useSwapFormatting composable
 
 
-// checkBackendHealth function moved to iuseBackendHealth composable
+// Backend health check
+const checkBackendHealth = async () => {
+  let controller = null
+  let timeoutId = null
+  
+  try {
+    const config = useRuntimeConfig()
+    const apiBaseUrl = config.public.apiBaseUrl || 'http://localhost:18423/v1'
+    
+    controller = new AbortController()
+    timeoutId = setTimeout(() => {
+      controller.abort()
+    }, 8000) // Increased to 8 seconds for better reliability
+    
+    const response = await fetch(`${apiBaseUrl}/ping`, {
+      signal: controller.signal,
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    
+    // Clear timeout on successful response
+    if (timeoutId) {
+      clearTimeout(timeoutId)
+      timeoutId = null
+    }
+    
+    if (response.ok) {
+      const data = await response.json()
+      // Use comprehensive transaction_ready check instead of basic status
+      const wasConnected = isBackendConnected.value
+      isBackendConnected.value = data.transaction_ready === true
+      
+      // Log health check details for debugging
+      console.log('🏥 Backend health check:', {
+        status: data.status,
+        transaction_ready: data.transaction_ready,
+        health_score: data.health_score,
+        was_connected: wasConnected,
+        now_connected: isBackendConnected.value
+      })
+      
+      // Log any failed health checks for troubleshooting
+      if (!data.transaction_ready && data.checks) {
+        const failedChecks = Object.entries(data.checks)
+          .filter(([key, check]) => check.status === 'error')
+          .map(([key, check]) => `${key}: ${check.error || 'unknown error'}`)
+        
+        if (failedChecks.length > 0) {
+          console.warn('⚠️ Backend not transaction-ready. Failed checks:', failedChecks)
+        }
+      }
+    } else {
+      console.error(`❌ Backend health endpoint returned ${response.status}`)
+      isBackendConnected.value = false
+    }
+  } catch (error) {
+    // Handle AbortError differently from other errors
+    if (error.name === 'AbortError') {
+      console.warn('⏱️ Backend health check timed out (8s) - backend may be slow')
+    } else {
+      console.error('Backend health check failed:', error)
+    }
+    isBackendConnected.value = false
+  } finally {
+    // Always clean up timeout
+    if (timeoutId) {
+      clearTimeout(timeoutId)
+    }
+  }
+}
 
 // CTA Button Event Handlers - Now using centralized handlers from useCallToActionState.js
 // Old duplicate handlers removed - now handled by CTA composable
@@ -1676,8 +2243,13 @@ const handleChainAdded = () => {
 
 // Close dropdown and slider when clicking outside
 onMounted(async () => {
-  // Start backend health checks with 10 second interval
-  startHealthChecks(10000)
+  // Start backend health check immediately
+  await checkBackendHealth()
+  
+  // Set up periodic health check every 10 seconds
+  backendHealthCheckInterval.value = setInterval(() => {
+    checkBackendHealth()
+  }, 10000)
   
   // Fetch OTC configuration on component mount
   await fetchOtcConfig()
@@ -1768,8 +2340,8 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-  stopHealthChecks()
-  stopPriceCountdown()
+  if (countdownTimer) clearInterval(countdownTimer)
+  if (backendHealthCheckInterval.value) clearInterval(backendHealthCheckInterval.value)
   // Stop price updates when component unmounts
   stopPriceUpdates()
 })

@@ -18,7 +18,7 @@ export function useSwapLogic() {
   const { safeDiv, safeMul, safePercentage, validateNumber, calculateDiscount } = useMathUtils()
   const { formatNumber } = useFormattingUtils()
   const { initializePrices: sharedInitializePrices } = usePriceService()
-  const { calculateReverseQuote: sharedCalculateReverseQuote, getLiquidQuote: sharedGetLiquidQuote, getOTCQuote: sharedGetOTCQuote } = useQuoteCalculator()
+  const { calculateQuote: sharedCalculateQuote, calculateReverseQuote: sharedCalculateReverseQuote, getLiquidQuote: sharedGetLiquidQuote, getOTCQuote: sharedGetOTCQuote } = useQuoteCalculator()
 
   // Use enhanced AppKit wallet composable for connection state and clients
   const { address, isConnected, publicClient } = useAppKitWallet()

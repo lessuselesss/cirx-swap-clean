@@ -355,7 +355,7 @@
               </div>
               <div class="flex justify-between items-center mb-2">
                 <span class="text-xs text-gray-500" :class="isPriceRefreshing ? 'text-cyan-400' : ''">
-                  {{ isPriceRefreshing ? 'Updating prices...' : `Next price update in ${priceCountdownValue}s` }}
+                  {{ isPriceRefreshing ? 'Updating prices...' : `Next price update in ${priceCountdown}s` }}
                 </span>
               </div>
               <div class="flex justify-between items-center mb-2">
@@ -741,24 +741,6 @@ const tokenAddresses = {
 
 // Balance fetching will be handled using provider when needed
 
-// Computed network fee property
-const networkFee = computed(() => {
-  const estimatedGas = getEstimatedGasUnits(activeTab.value, inputToken.value)
-  return calculateNetworkFee(gasPriceWeiHex.value, estimatedGas, livePrices.value)
-})
-
-// Computed discount tiers property
-const discountTiers = computed(() => {
-  return otcConfig.value?.discountTiers || []
-})
-
-// Computed current USD value
-const currentUsd = computed(() => {
-  const amt = parseFloat(inputAmount.value) || 0
-  const px = livePrices.value?.[inputToken.value] || 0
-  return +(amt * px).toFixed(2)
-})
-
 // AppKit modal opening is handled by the open function from useAppKit() above
 
 // Backend API integration
@@ -857,14 +839,14 @@ const priceManager = iusePriceManager()
 const uiState = iuseUIState()
 
 // Destructure commonly used items for backward compatibility
-const { activeTab, inputAmount, cirxAmount, loading, loadingText, quote, showChart, showStaking, showWalletModal, showConfirmationModal, recipientAddress, recipientAddressError, recipientAddressType, isFetchingRecipientBalance, hasClickedEnterAddress, addressValidationState, addressInputRef, amountInputRef, selectedTier, userManuallySelectedTier, chartDataLoading, chartDataError, mockTokenBalances, displayCirxBalance, isButtonShowingDots } = uiState
+const { activeTab, inputAmount, cirxAmount, loading, loadingText, quote, showChart, showStaking, showWalletModal, showConfirmationModal, recipientAddress, recipientAddressError, recipientAddressType, isFetchingRecipientBalance, hasClickedEnterAddress, addressValidationState, addressInputRef, amountInputRef, selectedTier, userManuallySelectedTier, chartDataLoading, chartDataError, mockTokenBalances, displayCirxBalance } = uiState
 const { inputToken, showTokenDropdown } = tokenSelection
 const { gasPriceWeiHex, isGasRefreshing, fetchGasPrice } = gasPrice
 const { priceCountdown: priceCountdownValue, timerProgress, startPriceCountdown, stopPriceCountdown } = priceCountdown
 const { getTokenLogo, getTokenSymbol } = tokenHelpers
 const { dynamicPlaceholder, fetchNetworkConfig } = networkConfig
 const { fetchOtcConfig, getTierForUsd, lowestTierMin } = otcConfig
-const { isBackendConnected, checkBackendHealth, startHealthChecks, stopHealthChecks, backendHealthCheckInterval } = backendHealth
+const { isBackendConnected, checkBackendHealth } = backendHealth
 const { lastEditedField, handleInputAmountChange, handleCirxAmountChange, setMaxAmount, reverseSwap } = amountHandlers
 const { quoteLoading, reverseQuoteLoading, calculateQuoteAsync, calculateReverseQuoteAsync, forceUnblockLoadingStates } = quoteCalculations
 const { isSaturnWalletPresent, isSaturnWalletDetected, handleCircularToast, isCircularChainAvailable, isCircularChainConnected } = walletDetection
@@ -1676,8 +1658,13 @@ const handleChainAdded = () => {
 
 // Close dropdown and slider when clicking outside
 onMounted(async () => {
-  // Start backend health checks with 10 second interval
-  startHealthChecks(10000)
+  // Start backend health check immediately
+  await checkBackendHealth()
+  
+  // Set up periodic health check every 10 seconds
+  backendHealthCheckInterval.value = setInterval(() => {
+    checkBackendHealth()
+  }, 10000)
   
   // Fetch OTC configuration on component mount
   await fetchOtcConfig()
@@ -1768,8 +1755,8 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-  stopHealthChecks()
-  stopPriceCountdown()
+  if (countdownTimer) clearInterval(countdownTimer)
+  if (backendHealthCheckInterval.value) clearInterval(backendHealthCheckInterval.value)
   // Stop price updates when component unmounts
   stopPriceUpdates()
 })
