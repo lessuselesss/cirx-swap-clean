@@ -285,7 +285,7 @@
                       :class="['amount-input', (quoteLoading || reverseQuoteLoading) && 'opacity-50']"
                     />
                     <!-- OTC Mode: Discount Tier Dropdown -->
-                    <OtcDiscountDropdown
+                    <DiscountDropdown
                       v-if="activeTab === 'otc' && discountTiers && discountTiers.length > 0"
                       :discount-tiers="discountTiers"
                       :selected-tier="selectedTier"
@@ -642,7 +642,7 @@ import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 // AppKit handled by web components - no direct imports needed
 // Import components
 // AppKit wallet integration now handles all wallet functionality
-import OtcDiscountDropdown from '~/components/OtcDiscountDropdown.vue'
+import DiscountDropdown from '~/components/DiscountDropdown.vue'
 import CirxPriceChart from '~/components/CirxPriceChart.vue'
 import CirxStakingPanel from '~/components/CirxStakingPanel.vue'
 import CallToAction from '~/components/CallToAction.vue'

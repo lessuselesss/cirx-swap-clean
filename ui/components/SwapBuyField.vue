@@ -46,7 +46,7 @@
         
 
         <!-- OTC Mode: Discount Tier Dropdown (if available) -->
-        <OtcDiscountDropdown
+        <DiscountDropdown
           v-if="activeTab === 'otc' && discountTiers && discountTiers.length > 0"
           :discount-tiers="discountTiers"
           :selected-tier="selectedTier"
@@ -121,7 +121,7 @@
 
 <script setup>
 import { computed, watch } from 'vue'
-import OtcDiscountDropdown from './OtcDiscountDropdown.vue'
+import DiscountDropdown from './DiscountDropdown.vue'
 import { useNumberInput } from '~/composables/useFormattedNumbers'
 
 const props = defineProps({
