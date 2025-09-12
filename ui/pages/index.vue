@@ -640,7 +640,6 @@
 // Import Vue composables
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 // AppKit handled by web components - no direct imports needed
-import { parseEther, parseUnits } from 'viem'
 // Import components
 // AppKit wallet integration now handles all wallet functionality
 import OtcDiscountDropdown from '~/components/OtcDiscountDropdown.vue'
@@ -1124,15 +1123,6 @@ const getNewCirxBalanceLocal = () => getNewCirxBalance({
 
 // isSaturnWalletDetected computed moved to iuseWalletDetection composable
 
-// Saturn wallet watch disabled
-// watch([isSaturnWalletDetected, isConnected], () => {
-//   if (isSaturnWalletDetected.value && isConnected) {
-//     // Saturn wallet detected and connected - turn toggle off, clear address for safety
-//     customAddressEnabled.value = false
-//     // DON'T auto-fill address - different chain/account model could cause fund loss
-//     recipientAddress.value = ''
-//   }
-// }, { immediate: true })
 
 // Methods
 
@@ -1749,22 +1739,7 @@ onMounted(async () => {
   await Promise.all([refreshPrices(), fetchGasPrice()])
   startPriceCountdown()
 
-  // alignTokenSelector() // Removed - using CSS-only positioning
 
-  // Extension detection disabled
-  // setTimeout(() => {
-  //   console.log('🔍 Running extension detection from swap page...')
-  //   detectAllExtensions()
-  //   
-  //   // Debug Saturn wallet detection for UI
-  //     'window.saturn': !!window.saturn,
-  //     'window.extension': !!window.extension,
-  //     'window.ethereum?.isSaturn': !!(window.ethereum?.isSaturn),
-  //     'providers check': !!(window.ethereum?.providers?.some?.(p => p.isSaturn)),
-  //     'DOM elements': !!document.querySelector('[data-saturn], [class*="saturn"], [id*="saturn"]'),
-  //     'isSaturnWalletDetected': isSaturnWalletDetected.value
-  //   })
-  // }, 3000)
 })
 
 onUnmounted(() => {
