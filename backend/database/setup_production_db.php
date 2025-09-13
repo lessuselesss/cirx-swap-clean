@@ -16,17 +16,17 @@ if (php_sapi_name() !== 'cli') {
 echo "🔐 CIRX OTC Production Database Setup\n";
 echo "=====================================\n\n";
 
-// Get the backend root directory
-$backendRoot = __DIR__;
+// Get the backend root directory (parent of database directory)
+$backendRoot = dirname(__DIR__);
 $storageDir = $backendRoot . '/storage';
 
 echo "📍 Backend Root: {$backendRoot}\n";
 echo "📂 Storage Directory: {$storageDir}\n\n";
 
 // Check if we're in the right directory
-$migrateScript = $backendRoot . '/migrate.php';
+$migrateScript = __DIR__ . '/migrate.php';
 if (!file_exists($migrateScript)) {
-    die("❌ Error: migrate.php not found. Please run this script from the backend root directory.\n");
+    die("❌ Error: migrate.php not found in database directory.\n");
 }
 
 echo "✅ Found migrate.php - we're in the correct directory\n\n";
@@ -72,7 +72,7 @@ if (!file_exists($testnetDb)) {
     // Run migrations to create fresh database
     $output = [];
     $returnCode = 0;
-    exec("cd {$backendRoot} && php migrate.php 2>&1", $output, $returnCode);
+    exec("cd " . dirname(__FILE__) . " && php migrate.php 2>&1", $output, $returnCode);
     
     if ($returnCode === 0) {
         echo "✅ Migration completed successfully\n";
